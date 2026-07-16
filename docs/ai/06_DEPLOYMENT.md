@@ -153,7 +153,7 @@ Trusted runtime workflow: `.github/workflows/runtime-integration.yml`.
 - configuration: GitHub environment variables `INFISICAL_IDENTITY_ID` and `INFISICAL_PROJECT_SLUG` identify the Infisical machine identity and project; both are non-secret identifiers.
 - execution: validate required variables and the non-sensitive GitHub OIDC issuer/audience/subject claims without logging the JWT, obtain a short-lived Auth0 `inventory:write` M2M token, restore the local EF tool, apply all migrations, build/start the application Compose graph, wait for health, and execute the selected saga scenario.
 - cleanup: print bounded container diagnostics only on failure and always remove containers and local volumes.
-- Infisical OIDC trust should be restricted to the exact repository and GitHub environment subject `repo:<owner>/<repository>:environment:runtime-integration`.
+- Infisical OIDC trust is restricted to GitHub's immutable owner/repository identity plus the exact environment. For this repository the subject is `repo:deniz1976@96434352/ecommerce-microservices@1302913896:environment:runtime-integration`; the numeric IDs remain stable if either display name changes.
 
 # TODO
 

@@ -343,7 +343,9 @@ INFISICAL_PROJECT_SLUG
 In Infisical, grant the machine identity least-privilege read access to the required non-production environment and restrict its OIDC subject to:
 
 ```text
-repo:<owner>/<repository>:environment:runtime-integration
+repo:deniz1976@96434352/ecommerce-microservices@1302913896:environment:runtime-integration
 ```
+
+GitHub repositories created with immutable OIDC subjects include both the owner ID and repository ID after `@`. These IDs are intentional and remain stable if the owner or repository display name changes. Copy the exact `OIDC subject` printed by the diagnostic step when configuring a different repository.
 
 The workflow is deliberately manual and serialized because it applies migrations and writes test records to the configured databases. It always tears down local runner containers; managed test records remain subject to the environment's retention policy.

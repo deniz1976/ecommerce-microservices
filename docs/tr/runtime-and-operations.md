@@ -135,8 +135,10 @@ INFISICAL_PROJECT_SLUG
 Infisical machine identity sadece gereken non-production environment secret'larini okuyabilmeli ve OIDC subject su kesin degerle sinirlanmalidir:
 
 ```text
-repo:<owner>/<repository>:environment:runtime-integration
+repo:deniz1976@96434352/ecommerce-microservices@1302913896:environment:runtime-integration
 ```
+
+GitHub'in immutable OIDC subject kullandigi repolarda sahip ID'si ve repository ID'si `@` isaretinden sonra yer alir. Bu ID'ler bilerek kullanilir ve sahip ya da repository gorunen adi degisse bile sabit kalir. Farkli bir repository kurulurken diagnostic adiminin yazdigi kesin `OIDC subject` degeri kopyalanmalidir.
 
 Workflow migration uygulayip test kaydi yazdigi icin bilerek manuel ve tekil calisir. Runner container'lari her durumda kaldirilir; managed veritabanlarindaki test kayitlari environment retention politikasina tabidir.
 
