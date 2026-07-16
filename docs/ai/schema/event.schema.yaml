@@ -1,0 +1,24 @@
+id: schema-event
+type: schema
+version: 1
+graph_ready: true
+required_front_matter:
+  - id
+  - type
+  - version
+  - status
+  - tags
+  - related
+  - owners
+  - graph_ready
+required_sections:
+  - Purpose
+  - Producers
+  - Consumers
+  - Payload
+  - Routing
+  - Reliability
+  - Versioning
+edges:
+  produced_by: "Producers"
+  consumed_by: "Consumers"

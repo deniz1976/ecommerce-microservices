@@ -1,0 +1,109 @@
+name: Runtime integration
+
+on:
+  workflow_dispatch:
+    inputs:
+      infisical_environment:
+        description: Infisical environment slug
+        required: true
+        default: dev
+        type: string
+      scenario:
+        description: Runtime workflow scenario
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - success
+          - inventory-failure
+          - payment-failure
+          - shipping-failure
+      timeout_seconds:
+        description: Per-scenario workflow timeout
+        required: true
+        default: "120"
+        type: choice
+        options:
+          - "60"
+          - "120"
+          - "180"
+          - "300"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: runtime-integration
+  cancel-in-progress: false
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+  DOCKER_BUILDKIT: "1"
+  COMPOSE_DOCKER_CLI_BUILD: "1"
+
+jobs:
+  runtime-integration:
+    name: Managed runtime workflow
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: runtime-integration
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Validate Infisical OIDC configuration
+        env:
+          INFISICAL_IDENTITY_ID: ${{ vars.INFISICAL_IDENTITY_ID }}
+          INFISICAL_PROJECT_SLUG: ${{ vars.INFISICAL_PROJECT_SLUG }}
+        run: |
+          test -n "$INFISICAL_IDENTITY_ID" || { echo "Missing runtime-integration variable INFISICAL_IDENTITY_ID"; exit 1; }
+          test -n "$INFISICAL_PROJECT_SLUG" || { echo "Missing runtime-integration variable INFISICAL_PROJECT_SLUG"; exit 1; }
+
+      - name: Fetch runtime secrets from Infisical
+        uses: Infisical/secrets-action@v1.0.9
+        with:
+          method: oidc
+          identity-id: ${{ vars.INFISICAL_IDENTITY_ID }}
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          env-slug: ${{ inputs.infisical_environment }}
+
+      - name: Validate runtime environment
+        shell: pwsh
+        run: ./scripts/check-runtime-env.ps1
+
+      - name: Restore local .NET tools
+        run: dotnet tool restore
+
+      - name: Apply database migrations
+        shell: pwsh
+        run: ./scripts/run-migrations.ps1
+
+      - name: Start application runtime
+        run: docker compose up --build --detach api-gateway ordering-saga-worker
+
+      - name: Wait for runtime readiness
+        shell: pwsh
+        run: ./scripts/wait-for-runtime.ps1 -TimeoutSeconds 240
+
+      - name: Verify order workflow
+        shell: pwsh
+        run: ./scripts/workflow-check.ps1 -Scenario "${{ inputs.scenario }}" -TimeoutSeconds ${{ inputs.timeout_seconds }}
+
+      - name: Show container state after failure
+        if: failure()
+        run: |
+          docker compose ps --all
+          docker compose logs --no-color --tail 200
+
+      - name: Stop application runtime
+        if: always()
+        run: docker compose down --volumes --remove-orphans

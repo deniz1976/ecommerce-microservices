@@ -1,0 +1,29 @@
+using ECommerce.BuildingBlocks.Localization;
+using ECommerce.BuildingBlocks.Observability;
+using ECommerce.BuildingBlocks.Security;
+using ECommerce.Identity.Api.Auth;
+using ECommerce.Identity.Api.Users;
+using ECommerce.Identity.Application;
+using ECommerce.Identity.Infrastructure;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddProblemDetails();
+builder.Services.AddECommerceLocalization();
+builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.Identity.Api");
+builder.Services.AddOidcReadySecurity(builder.Configuration);
+builder.Services.AddIdentityApplication();
+builder.Services.AddIdentityInfrastructure(builder.Configuration);
+builder.Services.AddHealthChecks();
+
+WebApplication app = builder.Build();
+
+app.UseExceptionHandler();
+app.UseECommerceSecurity();
+
+app.MapHealthChecks("/health/live");
+app.MapHealthChecks("/health/ready");
+app.MapAuthEndpoints();
+app.MapUserEndpoints();
+
+app.Run();

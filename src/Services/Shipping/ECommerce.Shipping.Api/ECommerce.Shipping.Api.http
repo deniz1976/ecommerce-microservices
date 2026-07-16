@@ -1,0 +1,4 @@
+@ECommerce.Shipping.Api_HostAddress = http://localhost:5068
+
+GET {{ECommerce.Shipping.Api_HostAddress}}/health/live
+Accept: application/json

@@ -1,0 +1,38 @@
+@ECommerce.Identity.Api_HostAddress = http://localhost:5090
+
+GET {{ECommerce.Identity.Api_HostAddress}}/health/live
+Accept: application/json
+
+###
+
+POST {{ECommerce.Identity.Api_HostAddress}}/api/v1/users
+Content-Type: application/json
+
+{
+  "email": "customer@example.com",
+  "displayName": "Example Customer",
+  "password": "Password123!",
+  "role": "Customer"
+}
+
+###
+
+POST {{ECommerce.Identity.Api_HostAddress}}/api/v1/users
+Content-Type: application/json
+
+{
+  "email": "seller@example.com",
+  "displayName": "Example Seller",
+  "password": "Password123!",
+  "role": "Seller"
+}
+
+###
+
+PUT {{ECommerce.Identity.Api_HostAddress}}/api/v1/auth/me/role
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+  "role": "Seller"
+}

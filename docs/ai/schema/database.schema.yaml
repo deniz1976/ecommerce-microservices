@@ -1,0 +1,24 @@
+id: schema-database
+type: schema
+version: 1
+graph_ready: true
+required_front_matter:
+  - id
+  - type
+  - version
+  - status
+  - tags
+  - related
+  - owners
+  - graph_ready
+required_sections:
+  - Purpose
+  - Owner
+  - Tables
+  - Migrations
+  - Configuration
+  - Relationships
+  - Operational Notes
+edges:
+  owned_by: "Owner"
+  contains_table: "Tables"

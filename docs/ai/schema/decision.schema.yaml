@@ -1,0 +1,21 @@
+id: schema-decision
+type: schema
+version: 1
+graph_ready: true
+required_front_matter:
+  - id
+  - type
+  - version
+  - status
+  - tags
+  - related
+  - owners
+  - graph_ready
+required_sections:
+  - Context
+  - Decision
+  - Consequences
+  - Alternatives
+  - Related Nodes
+edges:
+  relates_to: "Related Nodes"

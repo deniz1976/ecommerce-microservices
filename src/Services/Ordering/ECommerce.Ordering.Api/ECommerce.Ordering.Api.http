@@ -1,0 +1,30 @@
+@ECommerce.Ordering.Api_HostAddress = http://localhost:5183
+@CustomerId = 11111111-1111-1111-1111-111111111111
+@ProductId = 22222222-2222-2222-2222-222222222222
+
+POST {{ECommerce.Ordering.Api_HostAddress}}/api/v1/orders
+Content-Type: application/json
+Accept-Language: en
+X-Correlation-Id: 33333333-3333-3333-3333-333333333333
+
+{
+  "customerId": "{{CustomerId}}",
+  "currency": "TRY",
+  "items": [
+    {
+      "productId": "{{ProductId}}",
+      "productName": "Sample Product",
+      "quantity": 2,
+      "unitPrice": 100,
+      "currency": "TRY"
+    }
+  ]
+}
+
+###
+
+GET {{ECommerce.Ordering.Api_HostAddress}}/api/v1/orders/customer/{{CustomerId}}
+Accept: application/json
+Accept-Language: tr
+
+###
