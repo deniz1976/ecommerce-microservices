@@ -16,6 +16,7 @@ builder.Services.AddPaymentApplication();
 builder.Services.AddPaymentInfrastructure(builder.Configuration);
 builder.Services.AddECommerceMassTransit(
     builder.Configuration,
+    "payment",
     [typeof(ECommerce.Payment.Infrastructure.Messaging.AuthorizePaymentConsumer).Assembly],
     registration => registration.AddPostgresEntityFrameworkOutbox<PaymentDbContext>());
 builder.Services.AddHealthChecks();

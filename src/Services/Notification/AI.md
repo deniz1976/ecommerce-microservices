@@ -75,6 +75,7 @@ None.
 # Design Decisions
 
 Notification history is durable; live SignalR delivery is best-effort.
+MassTransit receive endpoints use the `notification-` service prefix, giving Notification its own event subscription instead of competing with same-named Saga consumers.
 
 # Future Improvements
 

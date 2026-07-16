@@ -77,6 +77,7 @@ See [[../../../docs/ai/05_APIS#Ordering API]].
 # Design Decisions
 
 Order workflow orchestration is delegated to [[../OrderingSaga/AI#Purpose]].
+MassTransit receive endpoints use the `ordering-` service prefix so their queues cannot collide with same-named consumers in another service.
 
 # Future Improvements
 

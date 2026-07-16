@@ -11,6 +11,7 @@ builder.Services.AddOrderingSagaApplication();
 builder.Services.AddOrderingSagaInfrastructure(builder.Configuration);
 builder.Services.AddECommerceMassTransit(
     builder.Configuration,
+    "ordering-saga",
     [typeof(ECommerce.OrderingSaga.Worker.Messaging.OrderSubmittedConsumer).Assembly],
     registration => registration.AddPostgresEntityFrameworkOutbox<OrderingSagaDbContext>());
 

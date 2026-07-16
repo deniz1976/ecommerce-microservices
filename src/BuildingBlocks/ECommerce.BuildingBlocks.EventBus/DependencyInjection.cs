@@ -10,15 +10,18 @@ public static class DependencyInjection
     public static IServiceCollection AddECommerceMassTransit(
         this IServiceCollection services,
         IConfiguration configuration,
+        string endpointNamePrefix,
         Assembly[] consumerAssemblies,
         Action<IBusRegistrationConfigurator>? configureRegistration = null,
         Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator>? configureBus = null)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(endpointNamePrefix);
         services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
 
         services.AddMassTransit(registration =>
         {
-            registration.SetKebabCaseEndpointNameFormatter();
+            registration.SetEndpointNameFormatter(
+                new KebabCaseEndpointNameFormatter(endpointNamePrefix, includeNamespace: false));
             registration.AddConsumers(consumerAssemblies);
             configureRegistration?.Invoke(registration);
 

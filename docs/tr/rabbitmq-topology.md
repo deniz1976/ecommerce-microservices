@@ -86,6 +86,8 @@ Notification API:
 
 Her consumer kendi queue'sundan okur. Boylece Notification ve Saga ayni event'i ayri ayri alabilir. Bir event birden fazla servisi ilgilendiriyorsa her servis kendi queue'su uzerinden o event'i isler.
 
+Queue adlari servis prefix'i ve kebab-case consumer adindan olusur. Ornegin Saga `ordering-saga-order-submitted`, Notification ise `notification-order-submitted` queue'sunu kullanir. Prefix olmadan ayni adli consumer'lar tek queue'yu paylasir ve event'i iki servisten yalnizca biri alir.
+
 ## Retry ve Hata Durumlari
 
 MassTransit retry ve error queue davranislarini yonetebilir. Production'da dead-letter queue ve error queue takibi cok onemlidir.

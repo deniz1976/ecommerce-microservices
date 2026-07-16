@@ -20,6 +20,7 @@ builder.Services.AddNotificationInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ILiveNotificationPublisher, SignalRLiveNotificationPublisher>();
 builder.Services.AddECommerceMassTransit(
     builder.Configuration,
+    "notification",
     [typeof(ECommerce.Notification.Api.Messaging.OrderSubmittedConsumer).Assembly],
     registration => registration.AddPostgresEntityFrameworkOutbox<NotificationDbContext>());
 builder.Services.AddHealthChecks();

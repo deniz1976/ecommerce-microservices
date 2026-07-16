@@ -16,6 +16,7 @@ builder.Services.AddShippingApplication();
 builder.Services.AddShippingInfrastructure(builder.Configuration);
 builder.Services.AddECommerceMassTransit(
     builder.Configuration,
+    "shipping",
     [typeof(ECommerce.Shipping.Infrastructure.Messaging.CreateShipmentConsumer).Assembly],
     registration => registration.AddPostgresEntityFrameworkOutbox<ShippingDbContext>());
 builder.Services.AddHealthChecks();

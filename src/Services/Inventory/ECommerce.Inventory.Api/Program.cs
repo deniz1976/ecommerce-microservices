@@ -17,6 +17,7 @@ builder.Services.AddInventoryApplication();
 builder.Services.AddInventoryInfrastructure(builder.Configuration);
 builder.Services.AddECommerceMassTransit(
     builder.Configuration,
+    "inventory",
     [typeof(ECommerce.Inventory.Infrastructure.Messaging.ReserveInventoryConsumer).Assembly],
     registration => registration.AddPostgresEntityFrameworkOutbox<InventoryDbContext>());
 builder.Services.AddHealthChecks();

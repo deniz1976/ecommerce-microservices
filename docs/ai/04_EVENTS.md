@@ -27,6 +27,7 @@ Catalog command and event contracts in `ECommerce.BuildingBlocks.Contracts`.
 - env: `RabbitMq__ConnectionString`
 - library: MassTransit 8.5.1
 - outbox: [[03_DATABASES#OrderingDb]], [[03_DATABASES#InventoryDb]], [[03_DATABASES#PaymentDb]], [[03_DATABASES#ShippingDb]], [[03_DATABASES#NotificationDb]], [[03_DATABASES#OrderingSagaDb]]
+- consumer queues: kebab-case names are prefixed by the owning service (`ordering`, `ordering-saga`, `inventory`, `payment`, `shipping`, or `notification`). Event consumers in different services therefore receive independent copies instead of competing on a shared queue.
 
 # Message Contracts
 

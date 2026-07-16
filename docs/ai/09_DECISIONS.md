@@ -49,6 +49,15 @@ Track architectural decisions as stable graph nodes.
 - tuning: `QueryDelay` is 5 seconds.
 - related: [[03_DATABASES#OrderingDb]], [[04_EVENTS#Broker]]
 
+## decision-service-owned-consumer-queues
+
+- id: `decision-service-owned-consumer-queues`
+- status: active
+- decision: every MassTransit receive endpoint uses a kebab-case queue name prefixed by its owning service.
+- reason: consumer class names such as `OrderSubmittedConsumer`, `PaymentAuthorizedConsumer`, and `ShipmentCreatedConsumer` exist in both OrderingSaga and Notification; unprefixed names would attach them to one competing-consumer queue instead of separate event subscriptions.
+- consequence: published events fan out to service-owned queues such as `ordering-saga-order-submitted` and `notification-order-submitted`; command queues are also service-prefixed for consistent ownership.
+- related: [[04_EVENTS#Broker]], [[02_SERVICES#OrderingSaga]], [[02_SERVICES#Notification]]
+
 ## decision-infisical-secrets
 
 - id: `decision-infisical-secrets`

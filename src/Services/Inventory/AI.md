@@ -79,6 +79,8 @@ Inventory item reads are public. Inventory item upsert requires the shared `Inve
 
 # Design Decisions
 
+MassTransit receive endpoints use the `inventory-` service prefix so queue ownership remains explicit and collision-free.
+
 Inventory does not read orders directly; it reacts to commands.
 
 # Future Improvements

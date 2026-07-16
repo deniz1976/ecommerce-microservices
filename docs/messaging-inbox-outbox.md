@@ -149,22 +149,24 @@ MassTransit usually creates message exchanges for published message types and re
 Endpoint naming:
 
 ```text
-registration.SetKebabCaseEndpointNameFormatter()
+KebabCaseEndpointNameFormatter(servicePrefix, includeNamespace: false)
 ```
 
-That means consumer endpoints use kebab-case names.
+That means consumer endpoints use kebab-case names prefixed by their owning service.
 
 Example:
 
 ```text
-OrderSubmittedConsumer
+OrderingSaga OrderSubmittedConsumer
 ```
 
 becomes a receive endpoint similar to:
 
 ```text
-order-submitted
+ordering-saga-order-submitted
 ```
+
+Notification's consumer for the same event uses `notification-order-submitted`. Separate queues are essential: a published event is copied to both service subscriptions instead of being delivered to only one competing consumer.
 
 Exact names may include MassTransit conventions, but the important idea is:
 
@@ -378,7 +380,7 @@ Current implementation is good for a first production-style foundation, but impr
 
 - Explicit retry policies per consumer.
 - Dead-letter queue strategy.
-- More visible queue naming documentation after runtime inspection.
+- Environment-specific queue prefixes if multiple deployments share one RabbitMQ virtual host.
 - More integration tests with RabbitMQ test container.
 - More explicit idempotency records for every command type.
 - Better saga timeout handling.

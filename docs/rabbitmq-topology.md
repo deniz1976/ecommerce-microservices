@@ -27,20 +27,21 @@ Consumers live in service infrastructure/API worker projects.
 MassTransit configuration uses:
 
 ```csharp
-registration.SetKebabCaseEndpointNameFormatter();
+registration.SetEndpointNameFormatter(
+    new KebabCaseEndpointNameFormatter(endpointNamePrefix, includeNamespace: false));
 ```
 
-So endpoint names are generated in kebab-case.
+Endpoint names are generated in kebab-case and prefixed by the owning service.
 
 Examples:
 
 ```text
-OrderSubmittedConsumer -> order-submitted
-ReserveInventoryConsumer -> reserve-inventory
-PaymentAuthorizedConsumer -> payment-authorized
+OrderingSaga OrderSubmittedConsumer -> ordering-saga-order-submitted
+Notification OrderSubmittedConsumer -> notification-order-submitted
+Inventory ReserveInventoryConsumer -> inventory-reserve-inventory
 ```
 
-The exact queue names can include MassTransit conventions, but this is the naming direction.
+The prefix is required for publish/subscribe fan-out. Without it, same-named consumers in Saga and Notification would share one queue and compete for each event instead of both receiving a copy.
 
 ## Event Contracts
 
@@ -206,6 +207,6 @@ Send command -> target command consumer receives the command.
 - Document actual CloudAMQP topology screenshots.
 - Add explicit retry policies.
 - Add dead-letter strategy.
-- Add queue naming conventions per environment.
+- Add an environment prefix if multiple deployments later share one RabbitMQ virtual host.
 - Add message TTL decisions.
 - Add monitoring for ready/unacked/dead-letter messages.

@@ -85,6 +85,8 @@ None. This is a worker process.
 
 # Design Decisions
 
+MassTransit receive endpoints use the `ordering-saga-` service prefix. This gives Saga an independent subscription when Notification consumes the same published event type.
+
 Saga orchestration is separated from Ordering API. See [[../../../docs/ai/09_DECISIONS#decision-event-driven-order-workflow]].
 
 `tools/ECommerce.RuntimeChecks` verifies the success path, inventory cancellation, payment cancellation with inventory release, and shipping cancellation with payment refund plus inventory release.

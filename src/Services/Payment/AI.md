@@ -74,6 +74,8 @@ No public payment HTTP API is currently documented. The service hosts health end
 
 # Design Decisions
 
+MassTransit receive endpoints use the `payment-` service prefix so queue ownership remains explicit and collision-free.
+
 Payment behavior is mock. See [[../../../docs/ai/10_ROADMAP#Service Features]].
 
 # Future Improvements

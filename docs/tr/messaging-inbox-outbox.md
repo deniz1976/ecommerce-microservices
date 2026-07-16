@@ -111,3 +111,5 @@ Mesaji RabbitMQ'ya gonderen taraftir.
 ## Bu Projede Neden MassTransit?
 
 MassTransit RabbitMQ ile calismayi kolaylastirir. Consumer registration, retry, outbox, inbox, serialization ve endpoint naming gibi konularda hazir altyapi saglar.
+
+Bu projede receive endpoint adlari servis prefix'i ile kebab-case uretilir. Ornegin ayni `OrderSubmitted` event'ini dinleyen Saga `ordering-saga-order-submitted`, Notification ise `notification-order-submitted` queue'suna sahiptir. Boylece event iki servise de ayri kopya olarak ulasir; consumer'lar tek queue uzerinde yarisa girmez.

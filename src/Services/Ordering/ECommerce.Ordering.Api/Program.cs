@@ -18,6 +18,7 @@ builder.Services.AddOrderingApplication();
 builder.Services.AddOrderingInfrastructure(builder.Configuration);
 builder.Services.AddECommerceMassTransit(
     builder.Configuration,
+    "ordering",
     [typeof(OrderConfirmedConsumer).Assembly],
     registration => registration.AddPostgresEntityFrameworkOutbox<OrderingDbContext>());
 builder.Services.AddHealthChecks();
