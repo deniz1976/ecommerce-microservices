@@ -268,6 +268,8 @@ Command:
 .\scripts\validate-local.ps1
 ```
 
+An `rg` exit code of `1` means that no secret-like match was found. The script normalizes that expected result to process exit code `0`, including under GitHub Actions PowerShell runners.
+
 Skip build:
 
 ```powershell

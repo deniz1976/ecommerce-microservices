@@ -33,4 +33,5 @@ if ($LASTEXITCODE -gt 1) {
     throw "Secret scan failed"
 }
 
+$global:LASTEXITCODE = 0
 Write-Host "Local validation completed"
