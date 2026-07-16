@@ -99,6 +99,8 @@ Describe database ownership, table groups, and runtime stores used by this repos
 
 Each service infrastructure project owns its EF Core migrations under `Persistence/Migrations`.
 
+The Ordering, OrderingSaga, Inventory, Payment, Shipping, and Notification migration chains include `RemoveObsoleteOutboxBusName`. It synchronizes their MassTransit 8.5.1 model snapshots by removing the obsolete nullable `OutboxState.BusName` column and its `BusName, Created` index; domain tables and business data are unchanged.
+
 # TODO
 
 - Add column-level graph metadata for each table.
