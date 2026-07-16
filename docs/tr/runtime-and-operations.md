@@ -121,6 +121,8 @@ Production ortamda migration adimi CI/CD pipeline icinde kontrollu calistirilmal
 
 `.github/workflows/runtime-integration.yml` yalnizca elle tetiklenen managed-environment testidir. Korumali `runtime-integration` GitHub environment'ini kullanir, GitHub OIDC ile Infisical'dan kisa omurlu secret erisimi alir, tum EF migration'larini uygular, application Compose graph'ini baslatir, servislerin hazir olmasini bekler ve secilen basari veya compensation senaryosunu calistirir.
 
+Job, Infisical'a baglanmadan once GitHub OIDC token'indan yalnizca gizli olmayan `iss`, `aud` ve `sub` claim'lerini cozer, bu uc degeri yazdirir ve kesin repository/environment guven sinirini dogrular. JWT'nin kendisi loglanmaz.
+
 Infisical injection sonrasinda workflow, `RuntimeChecks__Auth0ClientId` ve gizli `RuntimeChecks__Auth0ClientSecret` ile Auth0 Client Credentials akisini kullanir ve yalnizca `inventory:write` isteyen kisa omurlu token alir. Token maskelenir, sadece job boyunca yasar ve Catalog ya da Identity administrator erisimi vermez.
 
 GitHub `runtime-integration` environment'ina secret olmayan su iki variable eklenmelidir:

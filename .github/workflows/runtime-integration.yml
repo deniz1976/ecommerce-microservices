@@ -68,6 +68,30 @@ jobs:
           test -n "$INFISICAL_IDENTITY_ID" || { echo "Missing runtime-integration variable INFISICAL_IDENTITY_ID"; exit 1; }
           test -n "$INFISICAL_PROJECT_SLUG" || { echo "Missing runtime-integration variable INFISICAL_PROJECT_SLUG"; exit 1; }
 
+      - name: Verify GitHub OIDC identity claims
+        shell: pwsh
+        run: |
+          $expectedSubject = "repo:${{ github.repository }}:environment:runtime-integration"
+          $audience = "https://github.com/${{ github.repository_owner }}"
+          $requestUrl = "$env:ACTIONS_ID_TOKEN_REQUEST_URL&audience=$([Uri]::EscapeDataString($audience))"
+          $tokenResponse = Invoke-RestMethod -Headers @{ Authorization = "Bearer $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN" } -Uri $requestUrl
+          $payloadSegment = $tokenResponse.value.Split('.')[1].Replace('-', '+').Replace('_', '/')
+          $payloadSegment += '=' * ((4 - ($payloadSegment.Length % 4)) % 4)
+          $payloadJson = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($payloadSegment))
+          $claims = $payloadJson | ConvertFrom-Json
+
+          Write-Host "OIDC issuer: $($claims.iss)"
+          Write-Host "OIDC audience: $($claims.aud)"
+          Write-Host "OIDC subject: $($claims.sub)"
+
+          if ($claims.sub -cne $expectedSubject) {
+            throw "Unexpected GitHub OIDC subject. Expected '$expectedSubject'."
+          }
+
+          if ($claims.aud -cne $audience) {
+            throw "Unexpected GitHub OIDC audience. Expected '$audience'."
+          }
+
       - name: Fetch runtime secrets from Infisical
         uses: Infisical/secrets-action@v1.0.9
         with:

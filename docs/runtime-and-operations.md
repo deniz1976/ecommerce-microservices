@@ -329,6 +329,8 @@ Not recommended for production:
 
 `.github/workflows/runtime-integration.yml` is a manually triggered managed-environment test. It targets the protected GitHub environment `runtime-integration`, obtains short-lived access to Infisical through GitHub OIDC, applies all EF migrations, starts the application Compose graph, waits for downstream health, and runs the selected success or compensation scenario.
 
+Before contacting Infisical, the job decodes only the non-sensitive `iss`, `aud`, and `sub` claims from its GitHub OIDC token, prints those three values, and asserts the exact repository/environment trust boundary. The JWT itself is never logged.
+
 After Infisical injection, the workflow exchanges `RuntimeChecks__Auth0ClientId` and secret `RuntimeChecks__Auth0ClientSecret` through Auth0 Client Credentials for a short-lived token requesting only `inventory:write`. The token is masked, exists only for the job, and does not grant Catalog or Identity administrator access.
 
 Configure these non-secret variables on the GitHub `runtime-integration` environment:
