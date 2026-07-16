@@ -1,3 +1,4 @@
+using ECommerce.BuildingBlocks.Persistence;
 using Npgsql;
 
 namespace ECommerce.RuntimeChecks.Probes;
@@ -45,7 +46,8 @@ internal sealed class PostgresWorkflowProbe
         string connectionString = Environment.GetEnvironmentVariable(connectionName)
             ?? throw new InvalidOperationException($"{connectionName} is not set.");
 
-        await using NpgsqlConnection connection = new(connectionString);
+        string normalizedConnectionString = PostgresConnectionString.Normalize(connectionString);
+        await using NpgsqlConnection connection = new(normalizedConnectionString);
         await connection.OpenAsync(cancellationToken);
 
         await using NpgsqlCommand command = new(sql, connection);

@@ -49,7 +49,7 @@ Catalog project and package dependencies visible in this repository.
 - `ECommerce.Inventory.UnitTests`
 - `ECommerce.Ordering.UnitTests`
 - `ECommerce.Shipping.UnitTests`
-- `ECommerce.RuntimeChecks`
+- `ECommerce.RuntimeChecks`: executable runtime verifier; depends on `ECommerce.BuildingBlocks.Persistence` for the same Neon/Npgsql connection-string normalization used by service runtimes.
 
 ## Frontend
 

@@ -124,6 +124,7 @@ See [[07_SECURITY#Secrets]].
 
 - project: `tools/ECommerce.RuntimeChecks`
 - purpose: create orders and verify success plus deterministic compensation state across Ordering, Saga, Inventory, Payment, Shipping, and Notification.
+- database probes: reuse `ECommerce.BuildingBlocks.Persistence.PostgresConnectionString.Normalize`, so both Neon-style `postgresql://` URIs and native Npgsql connection strings are accepted without logging either value.
 - authorization: Inventory seeding accepts either an Auth0 user token with the `Admin` role or an M2M token with exact permission `inventory:write`. Trusted CI stores `RuntimeChecks__Auth0ClientId` and secret `RuntimeChecks__Auth0ClientSecret` in Infisical and generates `RuntimeChecks__AccessToken` at job runtime; local manual probes may still inject a valid access token directly.
 - CLI scenarios: `all` (default), `success`, `inventory-failure`, `payment-failure`, `shipping-failure`.
 - `success`: expects confirmed order, completed saga, authorized payment, created shipment, and notification persistence.
