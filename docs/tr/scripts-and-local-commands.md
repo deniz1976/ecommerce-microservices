@@ -160,7 +160,7 @@ Yaptiklari:
 - docker compose config kontrolu
 - secret benzeri deger taramasi
 
-`rg` icin exit code `1`, secret benzeri eslesme bulunmadigi anlamina gelir. Script bu beklenen sonucu GitHub Actions PowerShell runner'i dahil process exit code `0` olarak normalize eder.
+Secret taramasi once `rg` kullanir; bu komut yoksa Git tarafindan izlenen dosyalari PowerShell `Select-String` ile tarar. `rg` icin exit code `1`, eslesme bulunmadigi anlamina geldigi icin script bu beklenen sonucu process exit code `0` olarak normalize eder.
 
 Komut:
 

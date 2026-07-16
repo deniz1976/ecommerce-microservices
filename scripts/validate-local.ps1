@@ -22,15 +22,32 @@ Get-ChildItem scripts -Filter *.ps1 | ForEach-Object {
 docker compose config | Out-Null
 
 $patterns = "postgresql://[^\s]+:[^\s]+@|amqps://[^\s]+:[^\s]+@|npg_[A-Za-z0-9]{12,}|ep-[a-z0-9-]+-pooler"
-$matches = rg $patterns . -g "!**/bin/**" -g "!**/obj/**" -g "!.git/**" -g "!scripts/validate-local.ps1"
+$ripgrep = Get-Command rg -ErrorAction SilentlyContinue
 
-if ($LASTEXITCODE -eq 0) {
-    $matches
-    throw "Secret-like value found in repository files"
+if ($null -ne $ripgrep) {
+    $matches = rg $patterns . -g "!**/bin/**" -g "!**/obj/**" -g "!.git/**" -g "!scripts/validate-local.ps1"
+
+    if ($LASTEXITCODE -gt 1) {
+        throw "Secret scan failed"
+    }
+}
+else {
+    $trackedFiles = @(git ls-files)
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to enumerate tracked files for the secret scan"
+    }
+
+    $scanFiles = @($trackedFiles | Where-Object { $_ -ne "scripts/validate-local.ps1" })
+    $matches = @(
+        Select-String -LiteralPath $scanFiles -Pattern $patterns -List |
+            ForEach-Object { $_.Path }
+    )
 }
 
-if ($LASTEXITCODE -gt 1) {
-    throw "Secret scan failed"
+if ($matches) {
+    $matches
+    throw "Secret-like value found in repository files"
 }
 
 $global:LASTEXITCODE = 0
