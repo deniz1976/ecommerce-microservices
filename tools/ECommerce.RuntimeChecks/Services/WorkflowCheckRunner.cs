@@ -20,13 +20,17 @@ internal sealed class WorkflowCheckRunner
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
+        Console.WriteLine($"Starting runtime workflow scenario: {options.Scenario}");
+
         string suffix = Guid.NewGuid().ToString("N")[..12];
+        Console.WriteLine("Registering an isolated workflow-check user.");
         UserResponse user = await gatewayClient.RegisterUserAsync(
             new CreateUserRequest(
                 $"workflow-{suffix}@example.com",
                 $"Workflow Check {suffix}",
                 "WorkflowCheck123!"),
             cancellationToken);
+        Console.WriteLine($"Workflow-check user registered: {user.Id}");
 
         switch (options.Scenario)
         {
@@ -51,14 +55,18 @@ internal sealed class WorkflowCheckRunner
             default:
                 throw new ArgumentOutOfRangeException(nameof(options.Scenario), options.Scenario, "Unsupported workflow scenario.");
         }
+
+        Console.WriteLine($"Runtime workflow scenario completed: {options.Scenario}");
     }
 
     private async Task RunSuccessAsync(Guid customerId, CancellationToken cancellationToken)
     {
+        Console.WriteLine("Preparing success scenario inventory.");
         Guid productId = Guid.NewGuid();
         await gatewayClient.UpsertInventoryAsync(productId, new UpsertInventoryRequest(25), cancellationToken);
 
         OrderResponse order = await CreateOrderAsync(customerId, productId, 10.50m, "Success", "34000", cancellationToken);
+        Console.WriteLine($"Success scenario order created: {order.Id}");
         DateTimeOffset deadline = DateTimeOffset.UtcNow.Add(options.Timeout);
 
         await WaitForExpectedValueAsync(
@@ -106,8 +114,10 @@ internal sealed class WorkflowCheckRunner
 
     private async Task RunInventoryFailureAsync(Guid customerId, CancellationToken cancellationToken)
     {
+        Console.WriteLine("Preparing inventory-failure scenario.");
         Guid missingProductId = Guid.NewGuid();
         OrderResponse order = await CreateOrderAsync(customerId, missingProductId, 10.50m, "Inventory Failure", "34000", cancellationToken);
+        Console.WriteLine($"Inventory-failure scenario order created: {order.Id}");
         DateTimeOffset deadline = DateTimeOffset.UtcNow.Add(options.Timeout);
 
         await WaitForExpectedValueAsync(
@@ -138,10 +148,12 @@ internal sealed class WorkflowCheckRunner
 
     private async Task RunPaymentFailureAsync(Guid customerId, CancellationToken cancellationToken)
     {
+        Console.WriteLine("Preparing payment-failure scenario inventory.");
         Guid productId = Guid.NewGuid();
         await gatewayClient.UpsertInventoryAsync(productId, new UpsertInventoryRequest(25), cancellationToken);
 
         OrderResponse order = await CreateOrderAsync(customerId, productId, 0m, "Payment Failure", "34000", cancellationToken);
+        Console.WriteLine($"Payment-failure scenario order created: {order.Id}");
         DateTimeOffset deadline = DateTimeOffset.UtcNow.Add(options.Timeout);
 
         await WaitForExpectedValueAsync(
@@ -190,10 +202,12 @@ internal sealed class WorkflowCheckRunner
 
     private async Task RunShippingFailureAsync(Guid customerId, CancellationToken cancellationToken)
     {
+        Console.WriteLine("Preparing shipping-failure scenario inventory.");
         Guid productId = Guid.NewGuid();
         await gatewayClient.UpsertInventoryAsync(productId, new UpsertInventoryRequest(25), cancellationToken);
 
         OrderResponse order = await CreateOrderAsync(customerId, productId, 10.50m, "Shipping Failure", "00000", cancellationToken);
+        Console.WriteLine($"Shipping-failure scenario order created: {order.Id}");
         DateTimeOffset deadline = DateTimeOffset.UtcNow.Add(options.Timeout);
 
         await WaitForExpectedValueAsync(
@@ -296,10 +310,13 @@ internal sealed class WorkflowCheckRunner
         DateTimeOffset deadline,
         CancellationToken cancellationToken)
     {
+        Console.WriteLine($"Waiting for runtime probe: {probeName}");
+
         while (DateTimeOffset.UtcNow <= deadline)
         {
             if (await probe())
             {
+                Console.WriteLine($"Runtime probe passed: {probeName}");
                 return;
             }
 

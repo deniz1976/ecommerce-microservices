@@ -19,9 +19,18 @@ try
 }
 catch (OperationCanceledException) when (cancellationSource.IsCancellationRequested)
 {
+    Console.Error.WriteLine("Runtime workflow check was cancelled.");
     Environment.ExitCode = 1;
 }
-catch
+catch (Exception exception)
 {
+    Console.Error.WriteLine(
+        $"Runtime workflow check failed: {exception.GetType().Name}: {exception.Message}");
+
+    if (!string.IsNullOrWhiteSpace(exception.StackTrace))
+    {
+        Console.Error.WriteLine(exception.StackTrace);
+    }
+
     Environment.ExitCode = 1;
 }

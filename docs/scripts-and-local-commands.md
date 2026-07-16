@@ -219,6 +219,8 @@ The command fails after the bounded timeout and reports the last health error. `
 
 Requests a short-lived Auth0 Client Credentials token with `inventory:write` from `Auth__Authority` and `Auth__Audience`. It reads `RuntimeChecks__Auth0ClientId` and `RuntimeChecks__Auth0ClientSecret`, never prints the token, and exports it as `RuntimeChecks__AccessToken` for the current process or subsequent GitHub Actions steps.
 
+The workflow checker prints non-sensitive scenario and probe progress. On failure it prints the exception type and message, but never prints the access token or database connection strings.
+
 ## start-local.ps1
 
 Purpose:

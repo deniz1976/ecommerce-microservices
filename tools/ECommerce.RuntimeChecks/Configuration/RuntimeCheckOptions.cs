@@ -28,7 +28,7 @@ public sealed record RuntimeCheckOptions(
         if (string.IsNullOrWhiteSpace(accessToken))
         {
             throw new InvalidOperationException(
-                "RuntimeChecks__AccessToken must contain an Auth0 access token with the Admin role.");
+                "RuntimeChecks__AccessToken must contain an Auth0 access token authorized for the runtime workflow.");
         }
 
         return new RuntimeCheckOptions(
