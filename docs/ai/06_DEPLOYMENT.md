@@ -111,7 +111,7 @@ See [[07_SECURITY#Secrets]].
 # Scripts
 
 - `scripts/check-runtime-env.ps1`: validates required env vars.
-- `scripts/run-migrations.ps1`: applies EF Core migrations.
+- `scripts/run-migrations.ps1`: applies EF Core migrations and stops immediately when any service migration fails; callers on clean machines must restore `ECommerce.sln` dependencies first.
 - `scripts/smoke-test.ps1`: gateway health plus basic user/inventory/order probe; the full probe reads `RuntimeChecks__AccessToken`, while `-SkipWorkflowProbe` needs no token.
 - `scripts/wait-for-runtime.ps1`: retries the health-only smoke test until the gateway and all downstream APIs are reachable or a bounded timeout expires.
 - `scripts/request-runtime-access-token.ps1`: exchanges the Infisical-injected Auth0 M2M client ID/secret for a short-lived API token with requested scope `inventory:write`; masks and persists the token through `GITHUB_ENV` without printing it.
@@ -151,7 +151,7 @@ Trusted runtime workflow: `.github/workflows/runtime-integration.yml`.
 - protection boundary: the job targets the `runtime-integration` GitHub environment and never runs for pull requests.
 - secret injection: `Infisical/secrets-action` exchanges GitHub's short-lived OIDC token for environment-scoped secrets; no long-lived Infisical credential is stored in GitHub.
 - configuration: GitHub environment variables `INFISICAL_IDENTITY_ID` and `INFISICAL_PROJECT_SLUG` identify the Infisical machine identity and project; both are non-secret identifiers.
-- execution: validate required variables and the non-sensitive GitHub OIDC issuer/audience/subject claims without logging the JWT, obtain a short-lived Auth0 `inventory:write` M2M token, restore the local EF tool, apply all migrations, build/start the application Compose graph, wait for health, and execute the selected saga scenario.
+- execution: validate required variables and the non-sensitive GitHub OIDC issuer/audience/subject claims without logging the JWT, obtain a short-lived Auth0 `inventory:write` M2M token, restore solution dependencies and the local EF tool, apply all migrations with fail-fast exit-code handling, build/start the application Compose graph, wait for health, and execute the selected saga scenario.
 - cleanup: print bounded container diagnostics only on failure and always remove containers and local volumes.
 - Infisical OIDC trust is restricted to GitHub's immutable owner/repository identity plus the exact environment. For this repository the subject is `repo:deniz1976@96434352/ecommerce-microservices@1302913896:environment:runtime-integration`; the numeric IDs remain stable if either display name changes.
 

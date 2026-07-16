@@ -108,6 +108,9 @@ jobs:
         shell: pwsh
         run: ./scripts/request-runtime-access-token.ps1
 
+      - name: Restore .NET dependencies
+        run: dotnet restore ECommerce.sln
+
       - name: Restore local .NET tools
         run: dotnet tool restore
 

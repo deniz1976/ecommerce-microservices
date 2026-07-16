@@ -327,7 +327,7 @@ Not recommended for production:
 
 ## Trusted Runtime Integration
 
-`.github/workflows/runtime-integration.yml` is a manually triggered managed-environment test. It targets the protected GitHub environment `runtime-integration`, obtains short-lived access to Infisical through GitHub OIDC, applies all EF migrations, starts the application Compose graph, waits for downstream health, and runs the selected success or compensation scenario.
+`.github/workflows/runtime-integration.yml` is a manually triggered managed-environment test. It targets the protected GitHub environment `runtime-integration`, obtains short-lived access to Infisical through GitHub OIDC, restores the solution dependencies and local EF tool, applies all EF migrations, starts the application Compose graph, waits for downstream health, and runs the selected success or compensation scenario. The migration script stops at the first failed service instead of continuing with a partially migrated environment.
 
 Before contacting Infisical, the job decodes only the non-sensitive `iss`, `aud`, and `sub` claims from its GitHub OIDC token, prints those three values, and asserts the exact repository/environment trust boundary. The JWT itself is never logged.
 

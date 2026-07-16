@@ -98,6 +98,10 @@ foreach ($migration in $selected) {
 
     Write-Host "Applying $($migration.Name) migrations"
     dotnet ef database update --project $migration.Project --startup-project $migration.Startup
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Migration failed for $($migration.Name) with exit code $LASTEXITCODE"
+    }
 }
 
 Write-Host "Migrations completed"
