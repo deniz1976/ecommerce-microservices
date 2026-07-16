@@ -215,6 +215,10 @@ It repeatedly calls the health-only smoke test, making it safer than a fixed sta
 
 The command fails after the bounded timeout and reports the last health error. `-GatewayBaseUrl` and `-PollingIntervalSeconds` can be overridden when needed.
 
+## request-runtime-access-token.ps1
+
+Requests a short-lived Auth0 Client Credentials token with `inventory:write` from `Auth__Authority` and `Auth__Audience`. It reads `RuntimeChecks__Auth0ClientId` and `RuntimeChecks__Auth0ClientSecret`, never prints the token, and exports it as `RuntimeChecks__AccessToken` for the current process or subsequent GitHub Actions steps.
+
 ## start-local.ps1
 
 Purpose:

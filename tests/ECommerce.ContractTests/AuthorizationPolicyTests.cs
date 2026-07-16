@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
 
 namespace ECommerce.ContractTests;
 
@@ -59,6 +60,25 @@ public sealed class AuthorizationPolicyTests
             requirement.AllowedRoles);
     }
 
+    [Theory]
+    [InlineData(AuthOptions.DefaultRoleClaimType, ApplicationRoles.Admin)]
+    [InlineData("permissions", ApplicationPermissions.InventoryWrite)]
+    [InlineData("scope", "openid inventory:write")]
+    public async Task InventoryWritePolicyAcceptsAdminOrInventoryPermission(string claimType, string claimValue)
+    {
+        bool authorized = await AuthorizeInventoryWriteAsync(new Claim(claimType, claimValue));
+
+        Assert.True(authorized);
+    }
+
+    [Fact]
+    public async Task InventoryWritePolicyRejectsUnrelatedPermission()
+    {
+        bool authorized = await AuthorizeInventoryWriteAsync(new Claim("permissions", "catalog:write"));
+
+        Assert.False(authorized);
+    }
+
     [Fact]
     public async Task CustomerOrAdminPolicyAcceptsCustomerAndAdminRoles()
     {
@@ -83,5 +103,27 @@ public sealed class AuthorizationPolicyTests
 
         return options.GetPolicy(policyName)
             ?? throw new InvalidOperationException($"Authorization policy '{policyName}' is not registered.");
+    }
+
+    private static async Task<bool> AuthorizeInventoryWriteAsync(Claim claim)
+    {
+        ServiceCollection services = new();
+        services.AddLogging();
+        services.AddOidcReadySecurity(new ConfigurationBuilder().Build());
+
+        await using ServiceProvider provider = services.BuildServiceProvider();
+        IAuthorizationService authorizationService = provider.GetRequiredService<IAuthorizationService>();
+        ClaimsIdentity identity = new(
+            [claim],
+            "Test",
+            ClaimTypes.Name,
+            AuthOptions.DefaultRoleClaimType);
+
+        AuthorizationResult result = await authorizationService.AuthorizeAsync(
+            new ClaimsPrincipal(identity),
+            resource: null,
+            AuthorizationPolicies.InventoryWrite);
+
+        return result.Succeeded;
     }
 }

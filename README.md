@@ -104,7 +104,7 @@ Copy `.env.example` to `.env` for local Docker-based development and fill in man
 
 CloudAMQP can be configured with `RabbitMq__ConnectionString` as a single `amqps://` URI, or with the split `RabbitMq__Host`, `RabbitMq__Port`, `RabbitMq__Username`, `RabbitMq__Password`, `RabbitMq__VirtualHost`, and `RabbitMq__UseSsl` values.
 
-Auth0 access tokens use `Auth__RoleClaimType` (default `https://ecommerce.local/claims/roles`) for API roles. Catalog and Inventory mutations plus arbitrary Identity user lookup require `Admin`. Set `RuntimeChecks__AccessToken` to an admin token before running a full smoke or workflow probe; health-only smoke checks do not require it.
+Auth0 access tokens use `Auth__RoleClaimType` (default `https://ecommerce.local/claims/roles`) for API roles. Catalog mutations and arbitrary Identity user lookup require `Admin`; Inventory upsert accepts `Admin` or the narrow `inventory:write` permission. Trusted CI obtains a short-lived M2M token from Infisical-injected `RuntimeChecks__Auth0ClientId` and `RuntimeChecks__Auth0ClientSecret`; local probes may set `RuntimeChecks__AccessToken` directly. Health-only smoke checks need no token.
 
 Initial PostgreSQL databases:
 

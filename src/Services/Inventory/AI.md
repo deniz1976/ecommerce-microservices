@@ -42,7 +42,7 @@ See [[../../../docs/ai/03_DATABASES#InventoryDb]].
 
 See [[../../../docs/ai/05_APIS#Inventory API]].
 
-Inventory item reads are public. Inventory item upsert requires the shared `Admin` authorization policy.
+Inventory item reads are public. Inventory item upsert requires the shared `InventoryWrite` authorization policy, which accepts either the `Admin` role or the narrow Auth0 `inventory:write` M2M permission.
 
 # Events Published
 
@@ -75,6 +75,7 @@ Inventory item reads are public. Inventory item upsert requires the shared `Admi
 - `ConnectionStrings__InventoryDb`
 - `RabbitMq__ConnectionString`
 - `Auth__RoleClaimType`
+- Auth0 API permission: `inventory:write` for the trusted runtime-check M2M client only.
 
 # Design Decisions
 

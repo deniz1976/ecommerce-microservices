@@ -71,7 +71,7 @@ Track architectural decisions as stable graph nodes.
 - status: active
 - decision: JWT authentication uses shared named policies, while authorization remains endpoint-level opt-in.
 - reason: protect privileged mutations and user-directory reads without blocking health checks and explicitly public queries.
-- consequence: Catalog and Inventory privileged mutations plus arbitrary Identity user lookup require the namespaced Auth0 `Admin` role claim; full runtime probes require an admin access token.
+- consequence: Catalog mutations and arbitrary Identity user lookup require the namespaced Auth0 `Admin` role claim; Inventory upsert accepts `Admin` or the narrow `inventory:write` permission used by trusted runtime verification.
 - related: [[07_SECURITY#Authorization]]
 
 ## decision-auth0-centered-login
@@ -163,6 +163,15 @@ Track architectural decisions as stable graph nodes.
 - reason: database migrations and saga probes need trusted managed-service credentials, but pull requests and long-lived CI credentials must not receive them.
 - consequence: the Infisical machine identity must trust only the exact repository/environment subject and have least-privilege access to the selected secret environment; the workflow mutates test data in the configured managed databases and therefore remains serialized and manual.
 - related: [[06_DEPLOYMENT#CI/CD]], [[07_SECURITY#Secrets]], [[10_ROADMAP#Runtime Verification]]
+
+## decision-runtime-m2m-permission
+
+- id: `decision-runtime-m2m-permission`
+- status: active
+- decision: trusted runtime verification obtains a short-lived Auth0 Client Credentials token and grants it only `inventory:write`; the shared `Admin` policy remains role-only.
+- reason: storing expiring administrator user tokens is unreliable, while granting an M2M client the full administrator role would exceed the workflow's actual need to seed inventory.
+- consequence: Inventory upsert uses the `InventoryWrite` policy (`Admin` role or exact permission), Auth0 must define and grant `inventory:write` to the dedicated M2M application, and its client secret remains only in Infisical.
+- related: [[05_APIS#Inventory API]], [[06_DEPLOYMENT#Runtime Checks]], [[07_SECURITY#Authorization]]
 
 # TODO
 

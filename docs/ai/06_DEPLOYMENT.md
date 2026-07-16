@@ -112,9 +112,10 @@ See [[07_SECURITY#Secrets]].
 
 - `scripts/check-runtime-env.ps1`: validates required env vars.
 - `scripts/run-migrations.ps1`: applies EF Core migrations.
-- `scripts/smoke-test.ps1`: gateway health plus basic user/inventory/order probe; the full probe reads an admin Auth0 token from `RuntimeChecks__AccessToken`, while `-SkipWorkflowProbe` needs no token.
+- `scripts/smoke-test.ps1`: gateway health plus basic user/inventory/order probe; the full probe reads `RuntimeChecks__AccessToken`, while `-SkipWorkflowProbe` needs no token.
 - `scripts/wait-for-runtime.ps1`: retries the health-only smoke test until the gateway and all downstream APIs are reachable or a bounded timeout expires.
-- `scripts/workflow-check.ps1`: end-to-end order workflow verification; reads an admin Auth0 token from `RuntimeChecks__AccessToken`, accepts `-Scenario`, and reports success or failure through the process exit code.
+- `scripts/request-runtime-access-token.ps1`: exchanges the Infisical-injected Auth0 M2M client ID/secret for a short-lived API token with requested scope `inventory:write`; masks and persists the token through `GITHUB_ENV` without printing it.
+- `scripts/workflow-check.ps1`: end-to-end order workflow verification; reads `RuntimeChecks__AccessToken`, accepts `-Scenario`, and reports success or failure through the process exit code.
 - `scripts/start-local.ps1`: Docker local startup helper.
 - `scripts/validate-local.ps1`: repo validation.
 - `scripts/load-env.ps1`: private local `.env` loader retained for local-only experiments.
@@ -123,7 +124,7 @@ See [[07_SECURITY#Secrets]].
 
 - project: `tools/ECommerce.RuntimeChecks`
 - purpose: create orders and verify success plus deterministic compensation state across Ordering, Saga, Inventory, Payment, Shipping, and Notification.
-- authorization: `RuntimeChecks__AccessToken` must be a valid Auth0 API access token containing the `Admin` role claim required by privileged setup endpoints. Treat the token as a secret and inject it through Infisical or the process environment.
+- authorization: Inventory seeding accepts either an Auth0 user token with the `Admin` role or an M2M token with exact permission `inventory:write`. Trusted CI stores `RuntimeChecks__Auth0ClientId` and secret `RuntimeChecks__Auth0ClientSecret` in Infisical and generates `RuntimeChecks__AccessToken` at job runtime; local manual probes may still inject a valid access token directly.
 - CLI scenarios: `all` (default), `success`, `inventory-failure`, `payment-failure`, `shipping-failure`.
 - `success`: expects confirmed order, completed saga, authorized payment, created shipment, and notification persistence.
 - `inventory-failure`: orders a product without an inventory row and expects failed reservation plus cancelled saga/order.
@@ -150,7 +151,7 @@ Trusted runtime workflow: `.github/workflows/runtime-integration.yml`.
 - protection boundary: the job targets the `runtime-integration` GitHub environment and never runs for pull requests.
 - secret injection: `Infisical/secrets-action` exchanges GitHub's short-lived OIDC token for environment-scoped secrets; no long-lived Infisical credential is stored in GitHub.
 - configuration: GitHub environment variables `INFISICAL_IDENTITY_ID` and `INFISICAL_PROJECT_SLUG` identify the Infisical machine identity and project; both are non-secret identifiers.
-- execution: validate required variables, restore the local EF tool, apply all migrations, build/start the application Compose graph, wait for health, and execute the selected saga scenario.
+- execution: validate required variables, obtain a short-lived Auth0 `inventory:write` M2M token, restore the local EF tool, apply all migrations, build/start the application Compose graph, wait for health, and execute the selected saga scenario.
 - cleanup: print bounded container diagnostics only on failure and always remove containers and local volumes.
 - Infisical OIDC trust should be restricted to the exact repository and GitHub environment subject `repo:<owner>/<repository>:environment:runtime-integration`.
 

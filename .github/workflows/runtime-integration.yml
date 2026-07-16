@@ -80,6 +80,10 @@ jobs:
         shell: pwsh
         run: ./scripts/check-runtime-env.ps1
 
+      - name: Acquire runtime Auth0 access token
+        shell: pwsh
+        run: ./scripts/request-runtime-access-token.ps1
+
       - name: Restore local .NET tools
         run: dotnet tool restore
 

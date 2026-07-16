@@ -127,6 +127,10 @@ Gateway ve tum alt servis health route'lari basarili cevap verene kadar health-o
 
 Belirlenen sure dolarsa son health hatasiyla birlikte basarisiz olur. Gerektiginde `-GatewayBaseUrl` ve `-PollingIntervalSeconds` degistirilebilir.
 
+## request-runtime-access-token.ps1
+
+`Auth__Authority` ve `Auth__Audience` icin `inventory:write` isteyen kisa omurlu Auth0 Client Credentials token'i alir. `RuntimeChecks__Auth0ClientId` ve `RuntimeChecks__Auth0ClientSecret` degerlerini okur, token'i yazdirmaz ve mevcut process ya da sonraki GitHub Actions adimlari icin `RuntimeChecks__AccessToken` olarak aktarir.
+
 ## start-local.ps1
 
 Amac:

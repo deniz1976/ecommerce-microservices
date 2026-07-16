@@ -15,7 +15,7 @@ public static class InventoryEndpoints
 
         group.MapPut("/items/{productId:guid}", UpsertAsync)
             .WithName("UpsertInventoryItem")
-            .RequireAuthorization(AuthorizationPolicies.Admin);
+            .RequireAuthorization(AuthorizationPolicies.InventoryWrite);
 
         return endpoints;
     }

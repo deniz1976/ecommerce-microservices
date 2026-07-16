@@ -76,7 +76,7 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - gateway route: `/gateway/inventory/{everything}`
 - service routes: `/api/v1/inventory/items/{productId}`
 - public routes: item `GET`.
-- protected routes: item `PUT` requires the `Admin` authorization policy.
+- protected routes: item `PUT` requires `InventoryWrite`, accepting an `Admin` user role or the Auth0 `inventory:write` M2M permission.
 
 ## Identity API
 

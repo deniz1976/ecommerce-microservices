@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 
 namespace ECommerce.BuildingBlocks.Security;
 
@@ -48,6 +49,13 @@ public static class DependencyInjection
                 AuthorizationPolicies.Admin,
                 policy => policy.RequireRole(ApplicationRoles.Admin))
             .AddPolicy(
+                AuthorizationPolicies.InventoryWrite,
+                policy => policy
+                    .RequireAuthenticatedUser()
+                    .RequireAssertion(context =>
+                        context.User.IsInRole(ApplicationRoles.Admin) ||
+                        HasPermission(context.User, ApplicationPermissions.InventoryWrite)))
+            .AddPolicy(
                 AuthorizationPolicies.SellerOrAdmin,
                 policy => policy.RequireRole(ApplicationRoles.Seller, ApplicationRoles.Admin))
             .AddPolicy(
@@ -55,5 +63,13 @@ public static class DependencyInjection
                 policy => policy.RequireRole(ApplicationRoles.Customer, ApplicationRoles.Admin));
 
         return services;
+    }
+
+    private static bool HasPermission(ClaimsPrincipal user, string permission)
+    {
+        return user.Claims
+            .Where(claim => claim.Type is "permissions" or "scope")
+            .SelectMany(claim => claim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Contains(permission, StringComparer.Ordinal);
     }
 }

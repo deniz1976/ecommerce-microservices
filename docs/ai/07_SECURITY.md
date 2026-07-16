@@ -64,6 +64,7 @@ Shared policies from `ECommerce.BuildingBlocks.Security` are:
 
 - `AuthenticatedUser`: any valid authenticated Auth0 access token.
 - `Admin`: `Admin` role.
+- `InventoryWrite`: `Admin` role or exact `inventory:write` permission from an Auth0 M2M token.
 - `SellerOrAdmin`: `Seller` or `Admin` role.
 - `CustomerOrAdmin`: `Customer` or `Admin` role.
 
@@ -72,7 +73,7 @@ JWT role evaluation reads the claim configured by `Auth__RoleClaimType`. The Aut
 Currently enforced privileged operations are:
 
 - Catalog product `POST` and `PUT`: `Admin`.
-- Inventory item `PUT`: `Admin`.
+- Inventory item `PUT`: `Admin` role or `inventory:write` M2M permission.
 - Identity user lookup by arbitrary id: `Admin`.
 
 Identity local roles and Auth0 authorization roles are separate stores. An operational administrator must currently be assigned `Admin` in both systems. Self-service role selection updates only Identity; automatic synchronization to Auth0 token roles is TODO.
@@ -104,6 +105,8 @@ Required secret keys include:
 - `Auth__Authority`
 - `Auth__Audience`
 - `Auth__RequireHttpsMetadata`
+- `RuntimeChecks__Auth0ClientId` for trusted runtime-token acquisition; identifier only, but managed with the runtime configuration.
+- `RuntimeChecks__Auth0ClientSecret` for trusted runtime-token acquisition; secret.
 - `OTEL_EXPORTER_OTLP_HEADERS` when managed Grafana Cloud export is enabled
 
 `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_PROTOCOL` are configuration values; the header contains the Grafana Cloud credential and must remain secret. Do not print it during validation, store it in `.env`, or include it in screenshots. Use a telemetry-write token and rotate/revoke it from Grafana Cloud if exposed.
