@@ -1,9 +1,27 @@
 using System.Net;
+using Npgsql;
 
 namespace ECommerce.BuildingBlocks.Persistence;
 
 public static class PostgresConnectionString
 {
+    public static string CreateLocalDevelopment(string database, string username)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(database);
+        ArgumentException.ThrowIfNullOrWhiteSpace(username);
+
+        NpgsqlConnectionStringBuilder builder = new()
+        {
+            Host = "localhost",
+            Port = 5432,
+            Database = database,
+            Username = username,
+            Password = $"{username}_password"
+        };
+
+        return builder.ConnectionString;
+    }
+
     public static string Normalize(string connectionString)
     {
         if (!Uri.TryCreate(connectionString, UriKind.Absolute, out Uri? uri) ||

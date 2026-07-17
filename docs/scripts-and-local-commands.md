@@ -290,6 +290,8 @@ What it checks:
 3. `docker compose config`.
 4. Secret-like values are not present in repository files.
 
+The secret scan covers credential-bearing PostgreSQL/RabbitMQ URIs, Neon identifiers, and ODBC/Npgsql-style connection-string literals. Tests should build synthetic connection strings at runtime instead of committing even fake credential-shaped literals.
+
 Why it exists:
 
 - We do not want accidental secrets committed.

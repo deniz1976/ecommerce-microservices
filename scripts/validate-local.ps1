@@ -21,7 +21,7 @@ Get-ChildItem scripts -Filter *.ps1 | ForEach-Object {
 
 docker compose config | Out-Null
 
-$patterns = "postgresql://[^\s]+:[^\s]+@|amqps://[^\s]+:[^\s]+@|npg_[A-Za-z0-9]{12,}|ep-[a-z0-9-]+-pooler"
+$patterns = "postgresql://[^\s]+:[^\s]+@|amqps://[^\s]+:[^\s]+@|npg_[A-Za-z0-9]{12,}|ep-[a-z0-9-]+-pooler|(?i)(?:Host|Server)\s*=\s*[^;\r\n]+;[^\r\n]*(?:Password|Pwd)\s*=\s*[^;\r\n]+"
 $ripgrep = Get-Command rg -ErrorAction SilentlyContinue
 
 if ($null -ne $ripgrep) {

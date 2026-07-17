@@ -28,7 +28,7 @@ Catalog project and package dependencies visible in this repository.
 - `ECommerce.BuildingBlocks.EventBus`
 - `ECommerce.BuildingBlocks.Localization`
 - `ECommerce.BuildingBlocks.Observability`
-- `ECommerce.BuildingBlocks.Persistence`
+- `ECommerce.BuildingBlocks.Persistence`: shared EF/Npgsql registration, managed PostgreSQL URI normalization, and runtime-built local design-time connection defaults.
 - `ECommerce.BuildingBlocks.Security`
 
 ## Services

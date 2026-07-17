@@ -153,7 +153,7 @@ Contains PostgreSQL registration helpers and Neon connection string normalizatio
 Important files:
 
 - `DependencyInjection.cs`
-- `PostgresConnectionString.cs`
+- `PostgresConnectionString.cs`: normalizes managed PostgreSQL URIs and builds non-production design-time defaults without committing credential-shaped connection-string literals.
 - `PostgresOptions.cs`
 
 ### Security

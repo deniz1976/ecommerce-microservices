@@ -11,7 +11,7 @@ public sealed class OrderingSagaDbContextFactory : IDesignTimeDbContextFactory<O
         DbContextOptionsBuilder<OrderingSagaDbContext> builder = new();
 
         string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__OrderingSagaDb")
-            ?? "Host=localhost;Port=5432;Database=ordering_saga_db;Username=ordering_saga_user;Password=ordering_saga_password";
+            ?? PostgresConnectionString.CreateLocalDevelopment("ordering_saga_db", "ordering_saga_user");
 
         builder.UseNpgsql(PostgresConnectionString.Normalize(connectionString));
 

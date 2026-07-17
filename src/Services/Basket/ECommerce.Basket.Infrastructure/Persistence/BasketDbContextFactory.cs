@@ -11,7 +11,7 @@ public sealed class BasketDbContextFactory : IDesignTimeDbContextFactory<BasketD
         DbContextOptionsBuilder<BasketDbContext> builder = new();
 
         string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__BasketDb")
-            ?? "Host=localhost;Port=5432;Database=basket_db;Username=basket_user;Password=basket_password";
+            ?? PostgresConnectionString.CreateLocalDevelopment("basket_db", "basket_user");
 
         builder.UseNpgsql(PostgresConnectionString.Normalize(connectionString));
 

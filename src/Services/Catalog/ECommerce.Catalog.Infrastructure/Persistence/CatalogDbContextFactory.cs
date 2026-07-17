@@ -11,7 +11,7 @@ public sealed class CatalogDbContextFactory : IDesignTimeDbContextFactory<Catalo
         DbContextOptionsBuilder<CatalogDbContext> builder = new();
 
         string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__CatalogDb")
-            ?? "Host=localhost;Port=5432;Database=catalog_db;Username=catalog_user;Password=catalog_password";
+            ?? PostgresConnectionString.CreateLocalDevelopment("catalog_db", "catalog_user");
 
         builder.UseNpgsql(PostgresConnectionString.Normalize(connectionString));
 

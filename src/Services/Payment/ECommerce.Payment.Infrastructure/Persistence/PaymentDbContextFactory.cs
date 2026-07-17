@@ -11,7 +11,7 @@ public sealed class PaymentDbContextFactory : IDesignTimeDbContextFactory<Paymen
         DbContextOptionsBuilder<PaymentDbContext> builder = new();
 
         string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__PaymentDb")
-            ?? "Host=localhost;Port=5432;Database=payment_db;Username=payment_user;Password=payment_password";
+            ?? PostgresConnectionString.CreateLocalDevelopment("payment_db", "payment_user");
 
         builder.UseNpgsql(PostgresConnectionString.Normalize(connectionString));
 

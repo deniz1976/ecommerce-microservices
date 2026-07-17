@@ -134,6 +134,8 @@ Belirlenen sure dolarsa son health hatasiyla birlikte basarisiz olur. Gerektigin
 Workflow checker gizli olmayan senaryo ve probe ilerlemesini yazdirir. Hata durumunda exception turunu ve mesajini gosterir; access token'i veya veritabani connection string'lerini yazdirmaz.
 Dogudan PostgreSQL probe'lari, ortak persistence normalizer'ini kullanarak hem Neon `postgresql://` URI bicimini hem de yerel Npgsql connection string bicimini kabul eder.
 
+Repository secret taramasi credential iceren PostgreSQL/RabbitMQ URI'lerini, Neon kimliklerini ve ODBC/Npgsql connection string literal'larini kontrol eder. Testler sahte olsa bile credential bicimli connection string'i kaynak koda tek parca yazmak yerine runtime'da builder ile olusturmalidir.
+
 ## start-local.ps1
 
 Amac:

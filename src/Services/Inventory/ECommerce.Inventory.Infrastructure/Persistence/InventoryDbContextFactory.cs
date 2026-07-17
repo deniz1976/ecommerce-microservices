@@ -11,7 +11,7 @@ public sealed class InventoryDbContextFactory : IDesignTimeDbContextFactory<Inve
         DbContextOptionsBuilder<InventoryDbContext> builder = new();
 
         string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__InventoryDb")
-            ?? "Host=localhost;Port=5432;Database=inventory_db;Username=inventory_user;Password=inventory_password";
+            ?? PostgresConnectionString.CreateLocalDevelopment("inventory_db", "inventory_user");
 
         builder.UseNpgsql(PostgresConnectionString.Normalize(connectionString));
 

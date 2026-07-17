@@ -11,7 +11,7 @@ public sealed class NotificationDbContextFactory : IDesignTimeDbContextFactory<N
         DbContextOptionsBuilder<NotificationDbContext> builder = new();
 
         string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__NotificationDb")
-            ?? "Host=localhost;Port=5432;Database=notification_db;Username=notification_user;Password=notification_password";
+            ?? PostgresConnectionString.CreateLocalDevelopment("notification_db", "notification_user");
 
         builder.UseNpgsql(PostgresConnectionString.Normalize(connectionString));
 

@@ -76,7 +76,7 @@ public sealed class ObservabilityRegistrationTests
         [
             new("OrderId", Guid.Parse("11111111-1111-1111-1111-111111111111")),
             new("Password", "top-secret"),
-            new("connection_string", "Host=example;Password=top-secret")
+            new("connection_string", string.Join(';', "Host=example", "Password=top-secret"))
         ];
 
         RedactedLogAttributes redacted = new(attributes);

@@ -11,7 +11,7 @@ public sealed class ShippingDbContextFactory : IDesignTimeDbContextFactory<Shipp
         DbContextOptionsBuilder<ShippingDbContext> builder = new();
 
         string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__ShippingDb")
-            ?? "Host=localhost;Port=5432;Database=shipping_db;Username=shipping_user;Password=shipping_password";
+            ?? PostgresConnectionString.CreateLocalDevelopment("shipping_db", "shipping_user");
 
         builder.UseNpgsql(PostgresConnectionString.Normalize(connectionString));
 
