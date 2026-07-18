@@ -478,8 +478,9 @@ Important fields:
 - city
 - country_code
 - postal_code
-- tracking_number
+- tracking_number: unique when present; `NULL` for failed shipments
 - status
+- failure_reason
 - created_at
 
 Why:

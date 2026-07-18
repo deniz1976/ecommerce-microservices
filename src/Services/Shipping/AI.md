@@ -80,6 +80,8 @@ Shipping is driven by saga commands rather than direct order database reads. App
 
 The mock provider rejects configured postal codes (`00000` by default). A rejection is persisted as `ShipmentStatus.Failed` and follows the normal `ShipmentFailed` event and saga compensation path.
 
+Successful shipments require a unique tracking number. Failed shipments persist `NULL` for `tracking_number`, allowing multiple independent provider failures without colliding on the unique tracking-number index.
+
 # Future Improvements
 
 - Add carrier integration.

@@ -73,7 +73,7 @@ Ana tablolar:
 - `shipments`: siparis icin kargo kaydi.
 - MassTransit outbox/inbox tablolari.
 
-Shipping, tracking number ve shipment status bilgisini tutar.
+Shipping, tracking number ve shipment status bilgisini tutar. Basarili shipment kayitlarinda tracking number benzersizdir; provider veya adres reddiyle olusan basarisiz kayitlarda `tracking_number` `NULL` tutulur. Boylece birden fazla basarisiz shipment ayni unique indekste cakisma olusturmaz.
 
 ## Notification Database
 

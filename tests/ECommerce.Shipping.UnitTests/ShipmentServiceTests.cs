@@ -32,6 +32,7 @@ public sealed class ShipmentServiceTests
         Assert.False(result.Succeeded);
         Assert.Equal("Postal code rejected.", result.Reason);
         Assert.Equal(ShipmentStatus.Failed, repository.Shipment!.Status);
+        Assert.Null(repository.Shipment.TrackingNumber);
         Assert.Equal("Postal code rejected.", repository.Shipment.FailureReason);
         Assert.Equal(1, repository.SaveChangesCount);
     }
@@ -49,6 +50,7 @@ public sealed class ShipmentServiceTests
         Assert.False(result.Succeeded);
         Assert.Equal(0, provider.CallCount);
         Assert.Equal(ShipmentStatus.Failed, repository.Shipment!.Status);
+        Assert.Null(repository.Shipment.TrackingNumber);
     }
 
     private static CreateShipmentRequest CreateValidRequest()

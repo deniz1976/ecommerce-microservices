@@ -17,7 +17,7 @@ public sealed class ShipmentConfiguration : IEntityTypeConfiguration<Domain.Ship
         builder.Property(x => x.City).HasColumnName("city").HasMaxLength(128).IsRequired();
         builder.Property(x => x.CountryCode).HasColumnName("country_code").HasMaxLength(2).IsRequired();
         builder.Property(x => x.PostalCode).HasColumnName("postal_code").HasMaxLength(32).IsRequired();
-        builder.Property(x => x.TrackingNumber).HasColumnName("tracking_number").HasMaxLength(64).IsRequired();
+        builder.Property(x => x.TrackingNumber).HasColumnName("tracking_number").HasMaxLength(64);
         builder.Property(x => x.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(32);
         builder.Property(x => x.FailureReason).HasColumnName("failure_reason").HasMaxLength(512);
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");

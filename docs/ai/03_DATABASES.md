@@ -70,6 +70,7 @@ Describe database ownership, table groups, and runtime stores used by this repos
 - env: `ConnectionStrings__ShippingDb`
 - owner: [[02_SERVICES#Shipping]]
 - tables: `shipments`, `InboxState`, `OutboxMessage`, `OutboxState`
+- `shipments.tracking_number`: nullable for failed shipments and unique when present; successful provider responses supply the value.
 
 ## NotificationDb
 
@@ -100,6 +101,8 @@ Describe database ownership, table groups, and runtime stores used by this repos
 Each service infrastructure project owns its EF Core migrations under `Persistence/Migrations`.
 
 The Ordering, OrderingSaga, Inventory, Payment, Shipping, and Notification migration chains include `RemoveObsoleteOutboxBusName`. It synchronizes their MassTransit 8.5.1 model snapshots by removing the obsolete nullable `OutboxState.BusName` column and its `BusName, Created` index; domain tables and business data are unchanged.
+
+Shipping migration `AllowNullTrackingNumberForFailedShipments` makes `shipments.tracking_number` nullable while retaining its unique index. Existing successful tracking numbers remain unchanged; failed shipments can store `NULL` without colliding with other failures.
 
 # TODO
 

@@ -9,7 +9,6 @@ public sealed class Shipment
         City = string.Empty;
         CountryCode = string.Empty;
         PostalCode = string.Empty;
-        TrackingNumber = string.Empty;
     }
 
     private Shipment(
@@ -20,7 +19,7 @@ public sealed class Shipment
         string city,
         string countryCode,
         string postalCode,
-        string trackingNumber,
+        string? trackingNumber,
         ShipmentStatus status,
         string? failureReason)
     {
@@ -55,7 +54,7 @@ public sealed class Shipment
 
     public string PostalCode { get; private set; }
 
-    public string TrackingNumber { get; private set; }
+    public string? TrackingNumber { get; private set; }
 
     public ShipmentStatus Status { get; private set; }
 
@@ -106,7 +105,7 @@ public sealed class Shipment
             city,
             countryCode,
             postalCode,
-            string.Empty,
+            null,
             ShipmentStatus.Failed,
             reason);
     }
