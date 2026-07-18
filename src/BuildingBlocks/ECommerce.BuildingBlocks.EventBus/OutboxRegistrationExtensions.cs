@@ -17,6 +17,15 @@ public static class OutboxRegistrationExtensions
             options.DuplicateDetectionWindow = TimeSpan.FromMinutes(10);
         });
 
+        registration.AddConfigureEndpointsCallback((context, _, endpoint) =>
+        {
+            endpoint.UseMessageRetry(retry => retry.Intervals(
+                TimeSpan.FromMilliseconds(100),
+                TimeSpan.FromMilliseconds(500),
+                TimeSpan.FromSeconds(1)));
+            endpoint.UseEntityFrameworkOutbox<TDbContext>(context);
+        });
+
         return registration;
     }
 }

@@ -234,6 +234,13 @@ OutboxState
 
 So Ordering can safely store the order and the outgoing `OrderSubmitted` message.
 
+The shared registration enables both MassTransit transactional outbox modes:
+
+- The bus outbox captures messages produced outside a consumer through scoped publish/send interfaces.
+- The consumer outbox wraps every receive endpoint so the inbox record, domain database changes, and outgoing messages complete as one unit.
+
+Receive endpoints retry transient failures after 100 ms, 500 ms, and 1 second before MassTransit moves a persistent fault to the endpoint's `_error` queue. The consumer outbox prevents a failed attempt from committing a partial consumer result or publishing its follow-up messages twice.
+
 ## Inbox Pattern
 
 Inbox solves this problem:

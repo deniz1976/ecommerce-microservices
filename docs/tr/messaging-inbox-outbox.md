@@ -54,6 +54,10 @@ Akis:
 
 Bu projede Ordering `OrderSubmitted` yayinlarken outbox kullanir. Inventory, Payment, Shipping ve Saga gibi messaging yapan servislerde de MassTransit outbox/inbox altyapisi vardir.
 
+Ortak kayit hem Bus Outbox hem Consumer Outbox davranisini etkinlestirir. Bus Outbox consumer disindaki scoped publish/send islemlerini veritabanina yazar. Consumer Outbox ise her receive endpoint'te inbox kaydini, business verisi degisikligini ve consumer'in uretecegi yeni mesajlari tek bir islem birimi olarak tamamlar.
+
+Receive endpoint'ler gecici hatalari 100 ms, 500 ms ve 1 saniye sonra yeniden dener. Hata kaliciysa MassTransit mesaji ilgili endpoint'in `_error` queue'suna tasir. Consumer Outbox basarisiz denemenin yarim business sonucu commit etmesini veya devam mesajlarini iki kez yayinlamasini engeller.
+
 ## Inbox Pattern
 
 RabbitMQ gibi sistemlerde ayni mesaj bazi durumlarda tekrar gelebilir. Consumer ayni mesaji iki kez islerse stok iki kez dusulebilir veya iki kez refund yapilabilir.

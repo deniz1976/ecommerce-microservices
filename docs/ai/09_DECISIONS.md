@@ -44,9 +44,9 @@ Track architectural decisions as stable graph nodes.
 
 - id: `decision-transactional-outbox`
 - status: active
-- decision: messaging services use MassTransit EF outbox/inbox.
-- reason: reliable message publishing and duplicate detection.
-- tuning: `QueryDelay` is 5 seconds.
+- decision: messaging services use the MassTransit EF bus outbox for scoped producers and the EF consumer outbox on every generated receive endpoint.
+- reason: reliable message publishing, duplicate detection, and atomic consumer database/message processing. Enabling only the bus outbox leaves consumer database updates outside the inbox/outbox transaction and can surface concurrency faults during compensation.
+- tuning: delivery `QueryDelay` is 5 seconds, duplicate detection is 10 minutes, and receive endpoints retry after 100 ms, 500 ms, and 1 second before using the `_error` queue.
 - related: [[03_DATABASES#OrderingDb]], [[04_EVENTS#Broker]]
 
 ## decision-service-owned-consumer-queues

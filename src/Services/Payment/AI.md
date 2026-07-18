@@ -76,6 +76,8 @@ No public payment HTTP API is currently documented. The service hosts health end
 
 MassTransit receive endpoints use the `payment-` service prefix so queue ownership remains explicit and collision-free.
 
+The shared EF consumer outbox wraps authorization and refund consumers. Payment changes, inbox duplicate detection, and any outgoing events therefore commit as one processing unit; transient failures receive bounded retries before the service-owned `_error` queue.
+
 Payment behavior is mock. See [[../../../docs/ai/10_ROADMAP#Service Features]].
 
 # Future Improvements
