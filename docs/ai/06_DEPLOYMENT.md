@@ -148,12 +148,13 @@ GitHub Actions workflow: `.github/workflows/ci.yml`.
 
 Trusted runtime workflow: `.github/workflows/runtime-integration.yml`.
 
-- trigger: manual `workflow_dispatch` only; inputs select the Infisical environment, scenario, and scenario timeout.
+- trigger: manual `workflow_dispatch` only; inputs select the scenario and scenario timeout. The Infisical environment is not caller-selectable.
 - protection boundary: the job targets the `runtime-integration` GitHub environment and never runs for pull requests.
-- secret injection: `Infisical/secrets-action` exchanges GitHub's short-lived OIDC token for environment-scoped secrets; no long-lived Infisical credential is stored in GitHub.
+- secret injection: `Infisical/secrets-action` exchanges GitHub's short-lived OIDC token for the fixed Infisical `staging` environment; no long-lived Infisical credential is stored in GitHub. The `staging` root imports shared `dev` values and locally overrides every `ConnectionStrings__*Db` key with a connection to the Neon `runtime-integration` child branch.
 - configuration: GitHub environment variables `INFISICAL_IDENTITY_ID` and `INFISICAL_PROJECT_SLUG` identify the Infisical machine identity and project; both are non-secret identifiers.
 - execution: validate required variables and the non-sensitive GitHub OIDC issuer/audience/subject claims without logging the JWT, obtain a short-lived Auth0 `inventory:write` M2M token, restore solution dependencies and the local EF tool, apply all migrations with fail-fast exit-code handling, build/start the application Compose graph, wait for health, and execute the selected saga scenario.
 - cleanup: print bounded container diagnostics only on failure and always remove containers and local volumes.
+- database isolation: the Neon `runtime-integration` branch contains all nine PostgreSQL databases and isolates migrations and probe records from its `production` parent. All nine local Infisical connection overrides are required to prevent imported development connections from being used.
 - Infisical OIDC trust is restricted to GitHub's immutable owner/repository identity plus the exact environment. For this repository the subject is `repo:deniz1976@96434352/ecommerce-microservices@1302913896:environment:runtime-integration`; the numeric IDs remain stable if either display name changes.
 
 # TODO

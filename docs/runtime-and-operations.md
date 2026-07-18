@@ -329,6 +329,8 @@ Not recommended for production:
 
 `.github/workflows/runtime-integration.yml` is a manually triggered managed-environment test. It targets the protected GitHub environment `runtime-integration`, obtains short-lived access to Infisical through GitHub OIDC, restores the solution dependencies and local EF tool, applies all EF migrations, starts the application Compose graph, waits for downstream health, and runs the selected success or compensation scenario. The migration script stops at the first failed service instead of continuing with a partially migrated environment.
 
+The workflow always reads the Infisical `staging` environment; callers cannot select `dev` or `prod`. The `staging` root imports shared values from Infisical `dev` and defines local overrides for all nine `ConnectionStrings__*Db` keys. Those overrides target the Neon `runtime-integration` child branch of `production`. A Neon branch contains all project databases, so migrations and workflow records remain isolated from the parent branch. Keep the import and all nine local overrides together; a missing override would fall back to the imported development connection.
+
 Before contacting Infisical, the job decodes only the non-sensitive `iss`, `aud`, and `sub` claims from its GitHub OIDC token, prints those three values, and asserts the exact repository/environment trust boundary. The JWT itself is never logged.
 
 After Infisical injection, the workflow exchanges `RuntimeChecks__Auth0ClientId` and secret `RuntimeChecks__Auth0ClientSecret` through Auth0 Client Credentials for a short-lived token requesting only `inventory:write`. The token is masked, exists only for the job, and does not grant Catalog or Identity administrator access.
@@ -348,4 +350,4 @@ repo:deniz1976@96434352/ecommerce-microservices@1302913896:environment:runtime-i
 
 GitHub repositories created with immutable OIDC subjects include both the owner ID and repository ID after `@`. These IDs are intentional and remain stable if the owner or repository display name changes. Copy the exact `OIDC subject` printed by the diagnostic step when configuring a different repository.
 
-The workflow is deliberately manual and serialized because it applies migrations and writes test records to the configured databases. It always tears down local runner containers; managed test records remain subject to the environment's retention policy.
+The workflow is deliberately manual and serialized because it applies migrations and writes test records to the managed test branch. It always tears down local runner containers; records written to the Neon `runtime-integration` branch remain until that branch is reset, cleaned, or deleted.

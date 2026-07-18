@@ -121,6 +121,8 @@ Production ortamda migration adimi CI/CD pipeline icinde kontrollu calistirilmal
 
 `.github/workflows/runtime-integration.yml` yalnizca elle tetiklenen managed-environment testidir. Korumali `runtime-integration` GitHub environment'ini kullanir, GitHub OIDC ile Infisical'dan kisa omurlu secret erisimi alir, solution bagimliliklarini ve yerel EF aracini restore eder, tum EF migration'larini uygular, application Compose graph'ini baslatir, servislerin hazir olmasini bekler ve secilen basari veya compensation senaryosunu calistirir. Migration script'i bir servis basarisiz oldugunda kismen migrate edilmis bir ortamla devam etmek yerine hemen durur.
 
+Workflow her zaman Infisical `staging` environment'ini okur; calistiran kisi `dev` veya `prod` secemez. `staging` kok dizini ortak degerleri Infisical `dev` ortamindan import eder ve dokuz `ConnectionStrings__*Db` anahtarinin tamamini yerel degerlerle override eder. Bu override'lar Neon `production` dalinin `runtime-integration` child branch'ini hedefler. Tek bir Neon branch proje icindeki tum veritabanlarini tasidigi icin migration ve workflow kayitlari parent branch'ten yalitilir. Import ile dokuz yerel override birlikte korunmalidir; eksik bir override Development baglantisina geri duser.
+
 Job, Infisical'a baglanmadan once GitHub OIDC token'indan yalnizca gizli olmayan `iss`, `aud` ve `sub` claim'lerini cozer, bu uc degeri yazdirir ve kesin repository/environment guven sinirini dogrular. JWT'nin kendisi loglanmaz.
 
 Infisical injection sonrasinda workflow, `RuntimeChecks__Auth0ClientId` ve gizli `RuntimeChecks__Auth0ClientSecret` ile Auth0 Client Credentials akisini kullanir ve yalnizca `inventory:write` isteyen kisa omurlu token alir. Token maskelenir, sadece job boyunca yasar ve Catalog ya da Identity administrator erisimi vermez.
@@ -140,7 +142,7 @@ repo:deniz1976@96434352/ecommerce-microservices@1302913896:environment:runtime-i
 
 GitHub'in immutable OIDC subject kullandigi repolarda sahip ID'si ve repository ID'si `@` isaretinden sonra yer alir. Bu ID'ler bilerek kullanilir ve sahip ya da repository gorunen adi degisse bile sabit kalir. Farkli bir repository kurulurken diagnostic adiminin yazdigi kesin `OIDC subject` degeri kopyalanmalidir.
 
-Workflow migration uygulayip test kaydi yazdigi icin bilerek manuel ve tekil calisir. Runner container'lari her durumda kaldirilir; managed veritabanlarindaki test kayitlari environment retention politikasina tabidir.
+Workflow migration uygulayip managed test branch'ine kayit yazdigi icin bilerek manuel ve tekil calisir. Runner container'lari her durumda kaldirilir; Neon `runtime-integration` dalina yazilan kayitlar bu dal resetlenene, temizlenene veya silinene kadar kalir.
 
 ## Secret Yonetimi
 

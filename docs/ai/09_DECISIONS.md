@@ -170,7 +170,7 @@ Track architectural decisions as stable graph nodes.
 - status: active
 - decision: run managed end-to-end workflow probes only through a manually triggered, GitHub-environment-protected job that obtains Infisical secrets with GitHub OIDC.
 - reason: database migrations and saga probes need trusted managed-service credentials, but pull requests and long-lived CI credentials must not receive them.
-- consequence: the Infisical machine identity must trust only the exact repository/environment subject and have least-privilege access to the selected secret environment; the workflow mutates test data in the configured managed databases and therefore remains serialized and manual.
+- consequence: the Infisical machine identity must trust only the exact repository/environment subject and have least-privilege access to Infisical `staging`; callers cannot select another secret environment. `staging` imports shared `dev` values but locally overrides all nine database connections to the Neon `runtime-integration` child branch, so managed test mutations are isolated from `production`. The workflow remains serialized and manual, and every database override is mandatory to prevent fallback to an imported development connection.
 - related: [[06_DEPLOYMENT#CI/CD]], [[07_SECURITY#Secrets]], [[10_ROADMAP#Runtime Verification]]
 
 ## decision-runtime-m2m-permission

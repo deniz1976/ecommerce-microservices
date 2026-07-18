@@ -3,11 +3,6 @@ name: Runtime integration
 on:
   workflow_dispatch:
     inputs:
-      infisical_environment:
-        description: Infisical environment slug
-        required: true
-        default: dev
-        type: string
       scenario:
         description: Runtime workflow scenario
         required: true
@@ -43,6 +38,7 @@ env:
   DOTNET_NOLOGO: "1"
   DOCKER_BUILDKIT: "1"
   COMPOSE_DOCKER_CLI_BUILD: "1"
+  INFISICAL_ENVIRONMENT: staging
 
 jobs:
   runtime-integration:
@@ -98,7 +94,7 @@ jobs:
           method: oidc
           identity-id: ${{ vars.INFISICAL_IDENTITY_ID }}
           project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
-          env-slug: ${{ inputs.infisical_environment }}
+          env-slug: ${{ env.INFISICAL_ENVIRONMENT }}
 
       - name: Validate runtime environment
         shell: pwsh
