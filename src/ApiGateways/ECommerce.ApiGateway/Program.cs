@@ -18,7 +18,7 @@ WebApplication app = builder.Build();
 app.UseExceptionHandler();
 app.UseWebSockets();
 app.UseCors();
-app.UseECommerceSecurity();
+app.UseECommerceAuthentication();
 app.UseGatewayHealthChecks();
 
 await app.UseOcelot();

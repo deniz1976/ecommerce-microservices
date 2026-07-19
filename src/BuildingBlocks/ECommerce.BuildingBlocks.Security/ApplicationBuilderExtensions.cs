@@ -5,20 +5,37 @@ namespace ECommerce.BuildingBlocks.Security;
 
 public static class ApplicationBuilderExtensions
 {
-    public static WebApplication UseECommerceSecurity(this WebApplication app)
+    public static WebApplication UseECommerceAuthentication(this WebApplication app)
     {
-        AuthOptions options = app.Configuration
-            .GetSection(AuthOptions.SectionName)
-            .Get<AuthOptions>() ?? new AuthOptions();
+        AuthOptions options = ReadOptions(app);
 
-        if (!string.IsNullOrWhiteSpace(options.Authority) &&
-            !string.IsNullOrWhiteSpace(options.Audience))
+        if (IsConfigured(options))
         {
             app.UseAuthentication();
         }
 
+        return app;
+    }
+
+    public static WebApplication UseECommerceSecurity(this WebApplication app)
+    {
+        app.UseECommerceAuthentication();
+
         app.UseAuthorization();
 
         return app;
+    }
+
+    private static AuthOptions ReadOptions(WebApplication app)
+    {
+        return app.Configuration
+            .GetSection(AuthOptions.SectionName)
+            .Get<AuthOptions>() ?? new AuthOptions();
+    }
+
+    private static bool IsConfigured(AuthOptions options)
+    {
+        return !string.IsNullOrWhiteSpace(options.Authority) &&
+            !string.IsNullOrWhiteSpace(options.Audience);
     }
 }

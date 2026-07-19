@@ -61,6 +61,21 @@ public sealed class GatewaySecurityConfigurationTests
             $"Unexpected anonymous gateway routes: {string.Join(", ", actualAnonymousRoutes.Order())}");
     }
 
+    [Fact]
+    public void GatewayDefersRouteAuthorizationToOcelot()
+    {
+        string path = Path.Combine(
+            FindRepositoryRoot(),
+            "src",
+            "ApiGateways",
+            "ECommerce.ApiGateway",
+            "Program.cs");
+        string program = File.ReadAllText(path);
+
+        Assert.Contains("app.UseECommerceAuthentication();", program, StringComparison.Ordinal);
+        Assert.DoesNotContain("app.UseECommerceSecurity();", program, StringComparison.Ordinal);
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? directory = new(AppContext.BaseDirectory);
