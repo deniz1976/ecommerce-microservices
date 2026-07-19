@@ -6,6 +6,12 @@ This document shows example requests through the API Gateway. Gateway examples u
 http://localhost:5080
 ```
 
+Protected examples assume a valid Auth0 access token:
+
+```powershell
+$authenticatedHeaders = @{ Authorization = "Bearer $accessToken" }
+```
+
 ## Health Checks
 
 Gateway live check:
@@ -59,7 +65,9 @@ Example response shape:
 Get user:
 
 ```powershell
-Invoke-RestMethod http://localhost:5080/gateway/users/{userId}
+Invoke-RestMethod `
+    -Uri http://localhost:5080/gateway/users/{userId} `
+    -Headers $authenticatedHeaders
 ```
 
 ## Catalog
@@ -71,6 +79,8 @@ Invoke-RestMethod http://localhost:5080/gateway/catalog/products
 ```
 
 Create product:
+
+This request needs an access token with the `Admin` role.
 
 ```powershell
 $categoryId = [Guid]::NewGuid()
@@ -102,7 +112,7 @@ Invoke-RestMethod `
     -Method Post `
     -Uri http://localhost:5080/gateway/catalog/products `
     -ContentType "application/json" `
-    -Headers @{ "Accept-Language" = "en" } `
+    -Headers ($authenticatedHeaders + @{ "Accept-Language" = "en" }) `
     -Body $body
 ```
 
@@ -115,7 +125,9 @@ The current Catalog create flow expects existing category and brand identifiers.
 Get basket:
 
 ```powershell
-Invoke-RestMethod http://localhost:5080/gateway/baskets/{customerId}
+Invoke-RestMethod `
+    -Uri http://localhost:5080/gateway/baskets/{customerId} `
+    -Headers $authenticatedHeaders
 ```
 
 Add basket item:
@@ -133,6 +145,7 @@ Invoke-RestMethod `
     -Method Put `
     -Uri http://localhost:5080/gateway/baskets/{customerId}/items `
     -ContentType "application/json" `
+    -Headers $authenticatedHeaders `
     -Body $body
 ```
 
@@ -141,12 +154,15 @@ Checkout basket:
 ```powershell
 Invoke-RestMethod `
     -Method Post `
-    -Uri http://localhost:5080/gateway/baskets/{customerId}/checkout
+    -Uri http://localhost:5080/gateway/baskets/{customerId}/checkout `
+    -Headers $authenticatedHeaders
 ```
 
 ## Inventory
 
 Seed or update stock:
+
+This request needs `Admin` or the `inventory:write` permission.
 
 ```powershell
 $body = @{
@@ -157,6 +173,7 @@ Invoke-RestMethod `
     -Method Put `
     -Uri http://localhost:5080/gateway/inventory/items/{productId} `
     -ContentType "application/json" `
+    -Headers $authenticatedHeaders `
     -Body $body
 ```
 
@@ -206,19 +223,24 @@ Invoke-RestMethod `
     -Method Post `
     -Uri http://localhost:5080/gateway/orders `
     -ContentType "application/json" `
+    -Headers $authenticatedHeaders `
     -Body $body
 ```
 
 Get order:
 
 ```powershell
-Invoke-RestMethod http://localhost:5080/gateway/orders/{orderId}
+Invoke-RestMethod `
+    -Uri http://localhost:5080/gateway/orders/{orderId} `
+    -Headers $authenticatedHeaders
 ```
 
 Get customer orders:
 
 ```powershell
-Invoke-RestMethod http://localhost:5080/gateway/orders/customer/{customerId}
+Invoke-RestMethod `
+    -Uri http://localhost:5080/gateway/orders/customer/{customerId} `
+    -Headers $authenticatedHeaders
 ```
 
 ## Notifications
@@ -228,6 +250,8 @@ SignalR hub:
 ```text
 http://localhost:5080/gateway/hubs/notifications
 ```
+
+The SignalR client must send the Auth0 access token when establishing the connection.
 
 Client group:
 

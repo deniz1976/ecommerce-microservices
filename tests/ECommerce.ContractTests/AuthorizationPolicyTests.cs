@@ -1,10 +1,12 @@
 using ECommerce.BuildingBlocks.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace ECommerce.ContractTests;
@@ -34,6 +36,37 @@ public sealed class AuthorizationPolicyTests
             .Get(JwtBearerDefaults.AuthenticationScheme);
 
         Assert.Equal(roleClaimType, options.TokenValidationParameters.RoleClaimType);
+    }
+
+    [Theory]
+    [InlineData("/hubs/notifications", true)]
+    [InlineData("/gateway/hubs/notifications/negotiate", true)]
+    [InlineData("/api/v1/orders", false)]
+    public async Task QueryStringAccessTokenIsRestrictedToNotificationHubPaths(string path, bool expected)
+    {
+        Dictionary<string, string?> values = new()
+        {
+            [$"{AuthOptions.SectionName}:Authority"] = "https://example.test",
+            [$"{AuthOptions.SectionName}:Audience"] = "example-api"
+        };
+        ServiceCollection services = new();
+        services.AddOidcReadySecurity(new ConfigurationBuilder().AddInMemoryCollection(values).Build());
+
+        using ServiceProvider provider = services.BuildServiceProvider();
+        JwtBearerOptions options = provider
+            .GetRequiredService<IOptionsMonitor<JwtBearerOptions>>()
+            .Get(JwtBearerDefaults.AuthenticationScheme);
+        DefaultHttpContext httpContext = new();
+        httpContext.Request.Path = path;
+        httpContext.Request.QueryString = new QueryString("?access_token=query-token");
+        MessageReceivedContext context = new(
+            httpContext,
+            new AuthenticationScheme(JwtBearerDefaults.AuthenticationScheme, null, typeof(JwtBearerHandler)),
+            options);
+
+        await options.Events.OnMessageReceived(context);
+
+        Assert.Equal(expected ? "query-token" : null, context.Token);
     }
 
     [Fact]
@@ -90,6 +123,22 @@ public sealed class AuthorizationPolicyTests
         Assert.Equal(
             [ApplicationRoles.Customer, ApplicationRoles.Admin],
             requirement.AllowedRoles);
+    }
+
+    [Fact]
+    public async Task FallbackPolicyRequiresAnAuthenticatedUser()
+    {
+        ServiceCollection services = new();
+        services.AddLogging();
+        services.AddOidcReadySecurity(new ConfigurationBuilder().Build());
+
+        await using ServiceProvider provider = services.BuildServiceProvider();
+        AuthorizationOptions options = provider.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
+
+        Assert.NotNull(options.FallbackPolicy);
+        Assert.Contains(
+            options.FallbackPolicy.Requirements,
+            requirement => requirement is DenyAnonymousAuthorizationRequirement);
     }
 
     private static async Task<AuthorizationPolicy> GetPolicyAsync(string policyName)

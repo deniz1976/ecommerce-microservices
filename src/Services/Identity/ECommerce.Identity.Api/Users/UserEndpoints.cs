@@ -12,7 +12,8 @@ public static class UserEndpoints
             .WithTags("Users");
 
         group.MapPost("/", RegisterAsync)
-            .WithName("RegisterUser");
+            .WithName("RegisterUser")
+            .AllowAnonymous();
 
         group.MapGet("/{id:guid}", GetByIdAsync)
             .RequireAuthorization(AuthorizationPolicies.Admin)

@@ -30,7 +30,7 @@ Track known future work without inventing completed behavior.
 
 ## Runtime Verification
 
-- Run the OIDC-protected runtime integration workflow against a dedicated non-production environment and record its first successful managed execution.
+- Completed: the OIDC-protected `all` runtime scenario passed against Infisical `staging` and the isolated Neon `runtime-integration` branch on 2026-07-19.
 
 ## Observability
 

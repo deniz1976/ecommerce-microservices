@@ -1,5 +1,6 @@
 using ECommerce.Basket.Application.Baskets;
 using ECommerce.BuildingBlocks.Contracts.Results;
+using ECommerce.BuildingBlocks.Security;
 
 namespace ECommerce.Basket.Api.Baskets;
 
@@ -8,7 +9,8 @@ public static class BasketEndpoints
     public static IEndpointRouteBuilder MapBasketEndpoints(this IEndpointRouteBuilder endpoints)
     {
         RouteGroupBuilder group = endpoints.MapGroup("/api/v1/baskets")
-            .WithTags("Baskets");
+            .WithTags("Baskets")
+            .RequireAuthorization(AuthorizationPolicies.AuthenticatedUser);
 
         group.MapGet("/{customerId:guid}", GetAsync)
             .WithName("GetBasket");

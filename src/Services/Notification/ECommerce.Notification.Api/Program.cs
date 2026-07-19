@@ -30,8 +30,9 @@ WebApplication app = builder.Build();
 app.UseExceptionHandler();
 app.UseECommerceSecurity();
 
-app.MapHealthChecks("/health/live");
-app.MapHealthChecks("/health/ready");
-app.MapHub<NotificationsHub>("/hubs/notifications");
+app.MapHealthChecks("/health/live").AllowAnonymous();
+app.MapHealthChecks("/health/ready").AllowAnonymous();
+app.MapHub<NotificationsHub>("/hubs/notifications")
+    .RequireAuthorization(AuthorizationPolicies.AuthenticatedUser);
 
 app.Run();

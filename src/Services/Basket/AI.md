@@ -76,6 +76,8 @@ Redis configuration is validated during startup and is required. The service has
 
 Active basket is in Redis; checkout history is in PostgreSQL. Missing Redis configuration fails startup to prevent silent data loss.
 
+Every Basket route requires the shared `AuthenticatedUser` policy. This closes anonymous access; matching the route `customerId` to the authenticated Auth0 identity remains pending because the token `sub` and local Identity `Guid` are different identifiers.
+
 # Future Improvements
 
 - Add basket expiration policy documentation.

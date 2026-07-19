@@ -89,6 +89,8 @@ Public role selection replaces the `Customer` or `Seller` role atomically in Ide
 
 Public registration and Auth0 onboarding can only select `Customer` or `Seller`. `Admin` is intentionally not reachable through self-registration.
 
+Public registration explicitly uses `AllowAnonymous`; the shared fallback policy protects any new Identity route unless it is deliberately opened.
+
 The API authorization role is read from the namespaced Auth0 token claim configured by `Auth__RoleClaimType`. Identity database roles are not yet synchronized automatically to Auth0 roles; operational administrators currently require controlled `Admin` assignment in both systems.
 
 # Future Improvements

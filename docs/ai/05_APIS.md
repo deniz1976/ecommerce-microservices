@@ -29,6 +29,7 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - local base URL: `http://localhost:5080`
 - docker base URL: `http://localhost:5080`
 - config: `src/ApiGateways/ECommerce.ApiGateway/ocelot.json`, `ocelot.Docker.json`
+- authentication: global `Bearer` authentication; only the documented public route allow-list bypasses it.
 
 ## Frontend Client
 
@@ -59,6 +60,8 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - direct base: `http://localhost:5041`
 - gateway route: `/gateway/baskets/{everything}`
 - service routes: `/api/v1/baskets/{customerId}`, `/items`, `/checkout`
+- protected routes: every Basket route requires `AuthenticatedUser`.
+- ownership status: authenticated baseline active; customer ownership enforcement pending.
 
 ## Ordering API
 
@@ -67,6 +70,8 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - direct base: `http://localhost:5265`
 - gateway routes: `/gateway/orders`, `/gateway/orders/{everything}`
 - service routes: `/api/v1/orders`
+- protected routes: every Ordering route requires `AuthenticatedUser`.
+- ownership status: authenticated baseline active; customer ownership enforcement pending.
 
 ## Inventory API
 
@@ -97,6 +102,8 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - gateway route: `/gateway/hubs/notifications/{everything}`
 - hub: `/hubs/notifications`
 - client method: `notificationReceived`
+- protected route: the SignalR connection requires `AuthenticatedUser`.
+- ownership status: connection authentication active; customer group ownership enforcement pending.
 
 ## Health APIs
 

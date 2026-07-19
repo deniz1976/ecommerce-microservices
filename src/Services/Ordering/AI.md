@@ -79,6 +79,8 @@ See [[../../../docs/ai/05_APIS#Ordering API]].
 Order workflow orchestration is delegated to [[../OrderingSaga/AI#Purpose]].
 MassTransit receive endpoints use the `ordering-` service prefix so their queues cannot collide with same-named consumers in another service.
 
+Every Ordering HTTP route requires the shared `AuthenticatedUser` policy. Cross-customer ownership enforcement remains pending until Auth0 `sub` can be resolved to the local Identity `Guid` without trusting a caller-supplied customer id.
+
 # Future Improvements
 
 - Add order status history.

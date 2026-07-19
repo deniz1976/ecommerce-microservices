@@ -25,7 +25,7 @@ Expose a single HTTP entry point for the microservices through Ocelot.
 - Route gateway paths to service HTTP endpoints.
 - Expose gateway health endpoints.
 - Load environment-specific Ocelot configuration.
-- Configure shared observability and auth-ready security.
+- Enforce global Bearer authentication with an explicit public-route allow-list.
 
 # Dependencies
 
@@ -76,10 +76,10 @@ None.
 
 # Design Decisions
 
-See [[../../../docs/ai/09_DECISIONS#decision-authorization-opt-in]] and [[../../../docs/ai/09_DECISIONS#decision-local-trace-pipeline]].
+See [[../../../docs/ai/09_DECISIONS#decision-authorization-default-deny]] and [[../../../docs/ai/09_DECISIONS#decision-local-trace-pipeline]].
 
 # Future Improvements
 
-- Add gateway-level authorization policies.
+- Add rate and abuse controls per route.
 - Add rate limiting.
 - Add request correlation headers.

@@ -13,10 +13,12 @@ public static class ProductEndpoints
             .WithTags("Products");
 
         group.MapGet("/", SearchAsync)
-            .WithName("SearchProducts");
+            .WithName("SearchProducts")
+            .AllowAnonymous();
 
         group.MapGet("/{id:guid}", GetByIdAsync)
-            .WithName("GetProductById");
+            .WithName("GetProductById")
+            .AllowAnonymous();
 
         group.MapPost("/", CreateAsync)
             .WithName("CreateProduct")

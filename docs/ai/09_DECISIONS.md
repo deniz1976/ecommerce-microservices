@@ -77,11 +77,20 @@ Track architectural decisions as stable graph nodes.
 ## decision-authorization-opt-in
 
 - id: `decision-authorization-opt-in`
-- status: active
+- status: superseded
 - decision: JWT authentication uses shared named policies, while authorization remains endpoint-level opt-in.
 - reason: protect privileged mutations and user-directory reads without blocking health checks and explicitly public queries.
 - consequence: Catalog mutations and arbitrary Identity user lookup require the namespaced Auth0 `Admin` role claim; Inventory upsert accepts `Admin` or the narrow `inventory:write` permission used by trusted runtime verification.
 - related: [[07_SECURITY#Authorization]]
+
+## decision-authorization-default-deny
+
+- id: `decision-authorization-default-deny`
+- status: active
+- decision: service APIs require an authenticated user through a shared fallback policy unless an endpoint explicitly uses `AllowAnonymous`; Ocelot independently applies global Bearer authentication with the same public allow-list.
+- reason: endpoint-level opt-in allowed new business routes to be exposed when authorization metadata was forgotten.
+- consequence: health checks, Catalog reads, Inventory reads, and Identity registration are explicitly public; Basket, Ordering, and Notification SignalR require authentication. Contract tests verify fallback policy, endpoint metadata, and both gateway configurations. Resource ownership remains a separate mandatory control.
+- related: [[07_SECURITY#Authorization]], [[05_APIS#API Catalog]]
 
 ## decision-auth0-centered-login
 

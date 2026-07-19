@@ -42,6 +42,8 @@ See [[../../../docs/ai/05_APIS#Catalog API]].
 
 Product queries are public. Product creation and update require the shared `Admin` authorization policy.
 
+Public product queries explicitly use `AllowAnonymous`; the shared fallback policy protects any new Catalog route unless it is deliberately opened.
+
 # Events Published
 
 None.

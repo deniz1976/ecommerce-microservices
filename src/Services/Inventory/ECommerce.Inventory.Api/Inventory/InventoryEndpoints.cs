@@ -11,7 +11,8 @@ public static class InventoryEndpoints
             .WithTags("Inventory");
 
         group.MapGet("/items/{productId:guid}", GetItemAsync)
-            .WithName("GetInventoryItem");
+            .WithName("GetInventoryItem")
+            .AllowAnonymous();
 
         group.MapPut("/items/{productId:guid}", UpsertAsync)
             .WithName("UpsertInventoryItem")

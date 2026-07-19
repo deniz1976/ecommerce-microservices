@@ -22,6 +22,7 @@ Bu klasor, projeyi Turkce ve sade bir dille anlatir. Kod, servis, tablo, endpoin
 16. [Sorun Giderme](./troubleshooting.md)
 17. [Mimari Karar Kaydi](./architecture-decision-log.md)
 18. [Eksikler ve Iyilestirmeler](./current-gaps-and-improvements.md)
+19. [API Guvenlik Temeli](./security-baseline.md)
 
 ## Proje Tek Paragrafta
 

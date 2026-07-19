@@ -58,7 +58,11 @@ The Auth0 onboarding role endpoint is:
 
 # Authorization
 
-Endpoint-level authorization is opt-in. There is no global fallback policy, so health checks and documented public query endpoints remain reachable without a token.
+Authorization is default-deny. The shared fallback policy requires an authenticated user whenever an endpoint has no more specific authorization metadata. When OIDC settings are absent, the registered Bearer scheme fails closed instead of silently disabling protection.
+
+Every intentionally public service endpoint is marked with `AllowAnonymous`. Ocelot applies the global `Bearer` authentication scheme and uses a route-level anonymous allow-list for the same public surface. Health checks, Catalog reads, Inventory reads, and Identity registration are intentionally public.
+
+SignalR may send its Bearer token through the `access_token` query parameter when browser transport restrictions prevent an Authorization header. The JWT handler accepts that query parameter only on `/hubs/notifications` and `/gateway/hubs/notifications`; other routes do not accept query-string tokens.
 
 Shared policies from `ECommerce.BuildingBlocks.Security` are:
 
@@ -75,6 +79,14 @@ Currently enforced privileged operations are:
 - Catalog product `POST` and `PUT`: `Admin`.
 - Inventory item `PUT`: `Admin` role or `inventory:write` M2M permission.
 - Identity user lookup by arbitrary id: `Admin`.
+
+Authenticated baseline operations are:
+
+- every Basket route: `AuthenticatedUser`;
+- every Ordering route: `AuthenticatedUser`;
+- Notification SignalR connection: `AuthenticatedUser`.
+
+Authentication is not resource ownership. Basket and Ordering still accept local `Guid` customer identifiers while Auth0 identifies a user by external `sub`; Notification group joins have the same ownership gap. These routes are no longer anonymous, but cross-customer authorization remains TODO until the local/external identity mapping is available to the owning services.
 
 Identity local roles and Auth0 authorization roles are separate stores. An operational administrator must currently be assigned `Admin` in both systems. Self-service role selection updates only Identity; automatic synchronization to Auth0 token roles is TODO.
 
@@ -141,4 +153,4 @@ Docker development exposes Jaeger on `16686`, Prometheus on `9090`, Loki on `310
 
 - Add frontend Auth0 login flow documentation.
 - Add rate limiting.
-- Add gateway auth policies.
+- Add automated dynamic negative authorization tests after resource ownership is implemented.

@@ -2,222 +2,176 @@
   "Routes": [
     {
       "UpstreamPathTemplate": "/gateway/catalog/products",
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/v1/products",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5283
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5283 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/catalog/products",
+      "UpstreamHttpMethod": [ "POST" ],
+      "DownstreamPathTemplate": "/api/v1/products",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5283 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/catalog/products/{everything}",
-      "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/v1/products/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5283
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5283 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/catalog/products/{everything}",
+      "UpstreamHttpMethod": [ "PUT" ],
+      "DownstreamPathTemplate": "/api/v1/products/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5283 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/baskets/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "DownstreamPathTemplate": "/api/v1/baskets/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5041
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5041 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/orders",
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": [ "POST" ],
       "DownstreamPathTemplate": "/api/v1/orders",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5265
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5265 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/orders/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/v1/orders/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5265
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5265 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/inventory/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/v1/inventory/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5054
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5054 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/inventory/{everything}",
+      "UpstreamHttpMethod": [ "PUT" ],
+      "DownstreamPathTemplate": "/api/v1/inventory/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5054 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/users",
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": [ "POST" ],
       "DownstreamPathTemplate": "/api/v1/users",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5090
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5090 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
     },
     {
       "UpstreamPathTemplate": "/gateway/users/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/v1/users/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5090
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5090 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/auth/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
+      "UpstreamHttpMethod": [ "GET", "PUT" ],
       "DownstreamPathTemplate": "/api/v1/auth/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5090
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5090 } ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/hubs/notifications",
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "DownstreamPathTemplate": "/hubs/notifications",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5234 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/hubs/notifications/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST" ],
       "DownstreamPathTemplate": "/hubs/notifications/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5234
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5234 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/health/catalog",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/health/ready",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5283
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5283 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
     },
     {
       "UpstreamPathTemplate": "/gateway/health/basket",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/health/ready",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5041
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5041 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
     },
     {
       "UpstreamPathTemplate": "/gateway/health/ordering",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/health/ready",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5265
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5265 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
     },
     {
       "UpstreamPathTemplate": "/gateway/health/inventory",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/health/ready",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5054
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5054 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
     },
     {
       "UpstreamPathTemplate": "/gateway/health/payment",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/health/ready",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5004
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5004 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
     },
     {
       "UpstreamPathTemplate": "/gateway/health/shipping",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/health/ready",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5187
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5187 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
     },
     {
       "UpstreamPathTemplate": "/gateway/health/notification",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/health/ready",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5234
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5234 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
     },
     {
       "UpstreamPathTemplate": "/gateway/health/identity",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/health/ready",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5090
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5090 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5080"
+    "BaseUrl": "http://localhost:5080",
+    "AuthenticationOptions": {
+      "AuthenticationProviderKeys": [ "Bearer" ],
+      "AllowedScopes": []
+    }
   }
 }

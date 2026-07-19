@@ -44,6 +44,8 @@ See [[../../../docs/ai/05_APIS#Inventory API]].
 
 Inventory item reads are public. Inventory item upsert requires the shared `InventoryWrite` authorization policy, which accepts either the `Admin` role or the narrow Auth0 `inventory:write` M2M permission.
 
+Public inventory reads explicitly use `AllowAnonymous`; the shared fallback policy protects any new Inventory route unless it is deliberately opened.
+
 # Events Published
 
 - [[../../../docs/ai/04_EVENTS#InventoryReserved]]

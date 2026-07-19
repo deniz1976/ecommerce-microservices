@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -26,10 +29,11 @@ public static class DependencyInjection
 
         bool isConfigured = !string.IsNullOrWhiteSpace(options.Authority) && !string.IsNullOrWhiteSpace(options.Audience);
 
+        AuthenticationBuilder authentication = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
+
         if (isConfigured)
         {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(jwt =>
+            authentication.AddJwtBearer(jwt =>
                 {
                     jwt.Authority = options.Authority;
                     jwt.Audience = options.Audience;
@@ -38,10 +42,34 @@ public static class DependencyInjection
                     {
                         RoleClaimType = roleClaimType
                     };
+                    jwt.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            PathString path = context.HttpContext.Request.Path;
+                            if (context.Request.Query.TryGetValue("access_token", out Microsoft.Extensions.Primitives.StringValues token) &&
+                                (path.StartsWithSegments("/hubs/notifications") ||
+                                 path.StartsWithSegments("/gateway/hubs/notifications")))
+                            {
+                                context.Token = token;
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
+        }
+        else
+        {
+            authentication.AddScheme<AuthenticationSchemeOptions, UnavailableAuthenticationHandler>(
+                JwtBearerDefaults.AuthenticationScheme,
+                _ => { });
         }
 
         services.AddAuthorizationBuilder()
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build())
             .AddPolicy(
                 AuthorizationPolicies.AuthenticatedUser,
                 policy => policy.RequireAuthenticatedUser())

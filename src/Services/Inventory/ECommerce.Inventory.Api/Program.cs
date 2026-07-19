@@ -27,8 +27,8 @@ WebApplication app = builder.Build();
 app.UseExceptionHandler();
 app.UseECommerceSecurity();
 
-app.MapHealthChecks("/health/live");
-app.MapHealthChecks("/health/ready");
+app.MapHealthChecks("/health/live").AllowAnonymous();
+app.MapHealthChecks("/health/ready").AllowAnonymous();
 app.MapInventoryEndpoints();
 
 app.Run();

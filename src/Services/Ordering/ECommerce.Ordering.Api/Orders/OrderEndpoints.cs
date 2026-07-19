@@ -1,4 +1,5 @@
 using ECommerce.BuildingBlocks.Contracts.Results;
+using ECommerce.BuildingBlocks.Security;
 using ECommerce.Ordering.Application.Orders;
 
 namespace ECommerce.Ordering.Api.Orders;
@@ -8,7 +9,8 @@ public static class OrderEndpoints
     public static IEndpointRouteBuilder MapOrderEndpoints(this IEndpointRouteBuilder endpoints)
     {
         RouteGroupBuilder group = endpoints.MapGroup("/api/v1/orders")
-            .WithTags("Orders");
+            .WithTags("Orders")
+            .RequireAuthorization(AuthorizationPolicies.AuthenticatedUser);
 
         group.MapPost("/", CreateAsync)
             .WithName("CreateOrder");

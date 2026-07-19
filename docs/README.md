@@ -26,6 +26,7 @@ AI-first graph-ready documentation is available here: [AI Documentation](./ai/RE
 16. [Troubleshooting](./troubleshooting.md)
 17. [Architecture Decision Log](./architecture-decision-log.md)
 18. [Current Gaps and Improvements](./current-gaps-and-improvements.md)
+19. [API Security Baseline](./security-baseline.md)
 
 ## Project in One Paragraph
 

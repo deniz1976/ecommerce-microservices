@@ -77,6 +77,8 @@ None.
 Notification history is durable; live SignalR delivery is best-effort.
 MassTransit receive endpoints use the `notification-` service prefix, giving Notification its own event subscription instead of competing with same-named Saga consumers.
 
+SignalR connections require the shared `AuthenticatedUser` policy. Joining a customer group is not yet treated as proof of ownership; authenticated identity-to-local-customer mapping must be added before group membership is considered fully authorized.
+
 # Future Improvements
 
 - Add email/SMS/push channels.
