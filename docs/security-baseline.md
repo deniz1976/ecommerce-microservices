@@ -6,7 +6,7 @@ All service APIs use a shared fallback authorization policy. An endpoint require
 
 Ocelot repeats this boundary at the gateway. Both gateway route files apply global `Bearer` authentication. Public routes override the global rule with `AuthenticationOptions.AllowAnonymous`.
 
-The gateway does not run the service fallback authorization middleware before Ocelot. At that point no Ocelot route has been selected, so the fallback would reject even approved anonymous and health routes. Ocelot performs the gateway route authorization; downstream services independently retain their ASP.NET fallback policy.
+The gateway registers shared authentication with `AddOidcReadyAuthentication` but does not register the service authorization policies. This prevents ASP.NET minimal hosting from automatically inserting fallback authorization before Ocelot, where no route has been selected and even approved anonymous and health routes would be rejected. Ocelot performs gateway route authorization; downstream services use `AddOidcReadySecurity` and independently retain their ASP.NET fallback policy.
 
 ## Public Allow-List
 

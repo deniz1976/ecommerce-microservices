@@ -10,7 +10,7 @@ builder.Configuration.AddGatewayRoutes(builder.Environment);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.ApiGateway");
-builder.Services.AddOidcReadySecurity(builder.Configuration);
+builder.Services.AddOidcReadyAuthentication(builder.Configuration);
 builder.Services.AddGateway(builder.Configuration);
 
 WebApplication app = builder.Build();

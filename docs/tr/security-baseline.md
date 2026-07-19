@@ -6,7 +6,7 @@ Butun servis API'leri ortak fallback authorization policy kullanir. Bir endpoint
 
 Ocelot ayni siniri gateway katmaninda tekrar uygular. Iki gateway route dosyasi da global `Bearer` authentication kullanir. Public route'lar bu kurali `AuthenticationOptions.AllowAnonymous` ile acikca ezer.
 
-Gateway, Ocelot'tan once servis fallback authorization middleware'ini calistirmaz. Bu noktada Ocelot route'u henuz secilmedigi icin fallback, onayli anonymous ve health route'larini bile reddederdi. Gateway route authorization islemini Ocelot yapar; downstream servisler kendi ASP.NET fallback policy'sini bagimsiz olarak korur.
+Gateway ortak authentication kaydini `AddOidcReadyAuthentication` ile yapar, fakat servis authorization policy'lerini kaydetmez. Boylece ASP.NET minimal hosting, Ocelot route'u secilmeden once fallback authorization middleware'ini otomatik ekleyemez; aksi durumda gateway'in kendi health endpoint'i dahil anonymous route'lar reddedilirdi. Gateway route authorization islemini Ocelot yapar; downstream servisler `AddOidcReadySecurity` ile kendi ASP.NET fallback policy'sini bagimsiz olarak korur.
 
 ## Public Allow-List
 

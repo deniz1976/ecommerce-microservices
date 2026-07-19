@@ -14,6 +14,18 @@ namespace ECommerce.ContractTests;
 public sealed class AuthorizationPolicyTests
 {
     [Fact]
+    public void AuthenticationOnlyRegistrationDoesNotAddAuthorizationServices()
+    {
+        ServiceCollection services = new();
+
+        services.AddOidcReadyAuthentication(new ConfigurationBuilder().Build());
+
+        Assert.DoesNotContain(
+            services,
+            descriptor => descriptor.ServiceType == typeof(IAuthorizationService));
+    }
+
+    [Fact]
     public void JwtValidationUsesConfiguredRoleClaimType()
     {
         const string roleClaimType = "https://example.test/claims/roles";

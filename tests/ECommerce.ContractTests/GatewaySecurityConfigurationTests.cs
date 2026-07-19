@@ -72,6 +72,8 @@ public sealed class GatewaySecurityConfigurationTests
             "Program.cs");
         string program = File.ReadAllText(path);
 
+        Assert.Contains("builder.Services.AddOidcReadyAuthentication(builder.Configuration);", program, StringComparison.Ordinal);
+        Assert.DoesNotContain("builder.Services.AddOidcReadySecurity(builder.Configuration);", program, StringComparison.Ordinal);
         Assert.Contains("app.UseECommerceAuthentication();", program, StringComparison.Ordinal);
         Assert.DoesNotContain("app.UseECommerceSecurity();", program, StringComparison.Ordinal);
     }

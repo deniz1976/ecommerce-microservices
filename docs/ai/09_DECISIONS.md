@@ -89,7 +89,7 @@ Track architectural decisions as stable graph nodes.
 - status: active
 - decision: service APIs require an authenticated user through a shared fallback policy unless an endpoint explicitly uses `AllowAnonymous`; Ocelot independently applies global Bearer authentication with the same public allow-list.
 - reason: endpoint-level opt-in allowed new business routes to be exposed when authorization metadata was forgotten.
-- consequence: health checks, Catalog reads, Inventory reads, and Identity registration are explicitly public; Basket, Ordering, and Notification SignalR require authentication. Service hosts use ASP.NET fallback authorization, while the gateway defers route authorization to Ocelot so its public allow-list can be evaluated after route selection. Contract tests verify fallback policy, endpoint metadata, and both gateway configurations. Resource ownership remains a separate mandatory control.
+- consequence: health checks, Catalog reads, Inventory reads, and Identity registration are explicitly public; Basket, Ordering, and Notification SignalR require authentication. Service hosts register authentication and ASP.NET fallback authorization, while the gateway registers authentication only and defers route authorization to Ocelot so minimal hosting cannot apply the service fallback before route selection. Contract tests verify the registration boundary, fallback policy, endpoint metadata, and both gateway configurations. Resource ownership remains a separate mandatory control.
 - related: [[07_SECURITY#Authorization]], [[05_APIS#API Catalog]]
 
 ## decision-auth0-centered-login

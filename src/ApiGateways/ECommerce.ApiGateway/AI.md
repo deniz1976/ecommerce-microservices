@@ -78,7 +78,7 @@ None.
 
 See [[../../../docs/ai/09_DECISIONS#decision-authorization-default-deny]] and [[../../../docs/ai/09_DECISIONS#decision-local-trace-pipeline]].
 
-The gateway runs shared authentication without ASP.NET fallback authorization because Ocelot selects and authorizes its routes inside the Ocelot pipeline. Applying the service fallback before `UseOcelot` would treat the not-yet-selected endpoint as protected and return `401` even for gateway health and anonymous allow-list routes.
+The gateway registers shared authentication through `AddOidcReadyAuthentication` without registering ASP.NET authorization services because Ocelot selects and authorizes its routes inside the Ocelot pipeline. Registering the service fallback through `AddOidcReadySecurity` would let minimal hosting auto-insert authorization before `UseOcelot`, treating the not-yet-selected endpoint as protected and returning `401` even for gateway health and anonymous allow-list routes.
 
 # Future Improvements
 

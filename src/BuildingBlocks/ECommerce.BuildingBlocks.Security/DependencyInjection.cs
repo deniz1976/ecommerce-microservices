@@ -18,14 +18,14 @@ public static class DependencyInjection
         return services;
     }
 
-    public static IServiceCollection AddOidcReadySecurity(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOidcReadyAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         AuthOptions options = configuration.GetSection(AuthOptions.SectionName).Get<AuthOptions>() ?? new AuthOptions();
         string roleClaimType = string.IsNullOrWhiteSpace(options.RoleClaimType)
             ? AuthOptions.DefaultRoleClaimType
             : options.RoleClaimType.Trim();
-
-        services.AddCurrentUser();
 
         bool isConfigured = !string.IsNullOrWhiteSpace(options.Authority) && !string.IsNullOrWhiteSpace(options.Audience);
 
@@ -65,6 +65,14 @@ public static class DependencyInjection
                 JwtBearerDefaults.AuthenticationScheme,
                 _ => { });
         }
+
+        return services;
+    }
+
+    public static IServiceCollection AddOidcReadySecurity(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddCurrentUser();
+        services.AddOidcReadyAuthentication(configuration);
 
         services.AddAuthorizationBuilder()
             .SetFallbackPolicy(new AuthorizationPolicyBuilder()

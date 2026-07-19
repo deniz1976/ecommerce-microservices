@@ -62,7 +62,7 @@ Authorization is default-deny. The shared fallback policy requires an authentica
 
 Every intentionally public service endpoint is marked with `AllowAnonymous`. Ocelot applies the global `Bearer` authentication scheme and uses a route-level anonymous allow-list for the same public surface. Health checks, Catalog reads, Inventory reads, and Identity registration are intentionally public.
 
-Service hosts run the ASP.NET fallback authorization middleware. The API Gateway runs authentication only before Ocelot; Ocelot's own pipeline applies its global Bearer rule and route allow-list. Running the service fallback before Ocelot would reject requests before Ocelot can select a route, including public health checks.
+Service hosts register authentication plus authorization through `AddOidcReadySecurity` and run the ASP.NET fallback authorization middleware. The API Gateway registers authentication alone through `AddOidcReadyAuthentication`; Ocelot's own pipeline applies its global Bearer rule and route allow-list. Keeping authorization services out of the gateway also prevents minimal hosting from auto-inserting fallback authorization before Ocelot, which would reject requests before route selection, including the gateway's own health checks.
 
 SignalR may send its Bearer token through the `access_token` query parameter when browser transport restrictions prevent an Authorization header. The JWT handler accepts that query parameter only on `/hubs/notifications` and `/gateway/hubs/notifications`; other routes do not accept query-string tokens.
 
