@@ -10,7 +10,7 @@ public sealed class PaymentTransactionConfiguration : IEntityTypeConfiguration<P
     {
         builder.ToTable("payment_transactions");
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(x => x.PaymentId).HasColumnName("payment_id");
         builder.Property(x => x.Type).HasColumnName("type").HasConversion<string>().HasMaxLength(32);
         builder.Property(x => x.Amount).HasColumnName("amount").HasPrecision(18, 2);

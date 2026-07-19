@@ -62,7 +62,7 @@ Describe database ownership, table groups, and runtime stores used by this repos
 - id: `database-payment`
 - env: `ConnectionStrings__PaymentDb`
 - owner: [[02_SERVICES#Payment]]
-- tables: `payments`, `payment_transactions`, `InboxState`, `OutboxMessage`, `OutboxState`
+- tables: `payments`, `payment_transactions` (domain-generated identifiers configured as non-database-generated), `InboxState`, `OutboxMessage`, `OutboxState`
 
 ## ShippingDb
 

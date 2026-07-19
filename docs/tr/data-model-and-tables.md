@@ -59,7 +59,7 @@ Database: `payment_db`
 Ana tablolar:
 
 - `payments`: siparise ait odeme kaydi.
-- `payment_transactions`: authorize/refund gibi hareketlerin gecmisi.
+- `payment_transactions`: authorize/refund gibi hareketlerin gecmisi. Kimlikler Payment domain tarafindan uretilir ve EF Core bunlari yeni audit kaydi olarak ekler.
 - MassTransit outbox/inbox tablolari.
 
 Payment su an mock davranir; gercek provider daha sonra eklenebilir.
