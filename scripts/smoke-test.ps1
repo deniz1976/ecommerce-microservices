@@ -35,10 +35,17 @@ function Assert-StatusCode {
         [string]$Uri
     )
 
-    $response = Invoke-WebRequest -Method Get -Uri $Uri -UseBasicParsing
+    Write-Host "Checking $Name health at $Uri"
+
+    try {
+        $response = Invoke-WebRequest -Method Get -Uri $Uri -UseBasicParsing
+    }
+    catch {
+        throw "$Name health check failed at '$Uri': $($_.Exception.Message)"
+    }
 
     if ($response.StatusCode -lt 200 -or $response.StatusCode -gt 299) {
-        throw "$Name returned $($response.StatusCode)"
+        throw "$Name health check at '$Uri' returned $($response.StatusCode)"
     }
 
     Write-Host "$Name OK"

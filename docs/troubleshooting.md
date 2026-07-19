@@ -147,6 +147,8 @@ Health-only smoke test:
 .\scripts\smoke-test.ps1 -SkipWorkflowProbe
 ```
 
+The script prints the component name and exact health URL before every request. If readiness times out, use the final named URL to distinguish the gateway's own health endpoint from an Ocelot downstream health route.
+
 ## Gateway Route Fails
 
 Check local gateway:

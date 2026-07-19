@@ -136,6 +136,8 @@ Sadece health check calistirmak icin:
 .\scripts\smoke-test.ps1 -SkipWorkflowProbe
 ```
 
+Script her istekten once component adini ve tam health URL'sini yazar. Readiness timeout olursa son adlandirilmis URL, gateway'in kendi health endpoint'i ile Ocelot downstream health route'unu ayirmayi saglar.
+
 ## Gateway Route Calismiyor
 
 Gateway health:

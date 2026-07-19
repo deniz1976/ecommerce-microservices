@@ -112,7 +112,7 @@ See [[07_SECURITY#Secrets]].
 
 - `scripts/check-runtime-env.ps1`: validates required env vars.
 - `scripts/run-migrations.ps1`: applies EF Core migrations and stops immediately when any service migration fails; callers on clean machines must restore `ECommerce.sln` dependencies first.
-- `scripts/smoke-test.ps1`: gateway health plus basic user/inventory/order probe; the full probe reads `RuntimeChecks__AccessToken`, while `-SkipWorkflowProbe` needs no token.
+- `scripts/smoke-test.ps1`: gateway health plus basic user/inventory/order probe; the full probe reads `RuntimeChecks__AccessToken`, while `-SkipWorkflowProbe` needs no token. Every health request logs its component name and exact URL so readiness failures identify the rejected or unavailable route.
 - `scripts/wait-for-runtime.ps1`: retries the health-only smoke test until the gateway and all downstream APIs are reachable or a bounded timeout expires.
 - `scripts/request-runtime-access-token.ps1`: exchanges the Infisical-injected Auth0 M2M client ID/secret for a short-lived API token with requested scope `inventory:write`; masks and persists the token through `GITHUB_ENV` without printing it.
 - `scripts/workflow-check.ps1`: end-to-end order workflow verification; reads `RuntimeChecks__AccessToken`, accepts `-Scenario`, logs non-sensitive scenario/probe progress and the exception type/message on failure, and reports success or failure through the process exit code.
