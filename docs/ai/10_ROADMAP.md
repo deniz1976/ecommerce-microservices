@@ -24,7 +24,8 @@ Track known future work without inventing completed behavior.
 
 ## Authentication Completion
 
-- Synchronize Identity role changes with Auth0 authorization roles.
+- Completed: authenticated `Customer`/`Seller` onboarding synchronizes Auth0 role membership through a dedicated Management API M2M client and refreshes the browser token.
+- Add reconciliation/outbox handling for an Auth0-success/local-database-failure edge case.
 - Completed: Basket, Ordering, and Notification enforce authenticated local-customer ownership through Identity resolution, with explicit `Admin` and `customer:act` delegation.
 - Add seller/store ownership before enabling `SellerOrAdmin` Catalog mutations.
 

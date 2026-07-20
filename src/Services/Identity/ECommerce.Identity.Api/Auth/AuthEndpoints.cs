@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.BuildingBlocks.Security;
+using ECommerce.Identity.Application;
 using ECommerce.Identity.Application.Users;
 
 namespace ECommerce.Identity.Api.Auth;
@@ -45,9 +46,16 @@ public static class AuthEndpoints
             request,
             cancellationToken);
 
-        return result.IsFailure
-            ? Results.BadRequest(result.Error)
-            : Results.Ok(result.Value);
+        if (result.IsSuccess)
+        {
+            return Results.Ok(result.Value);
+        }
+
+        return result.Error?.Code == IdentityErrorCodes.ExternalRoleSynchronizationFailed
+            ? Results.Problem(
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                title: result.Error.Code)
+            : Results.BadRequest(result.Error);
     }
 
     private static ExternalUserProfile CreateExternalUserProfile(ClaimsPrincipal principal)

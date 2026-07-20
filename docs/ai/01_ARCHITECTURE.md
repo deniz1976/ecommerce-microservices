@@ -62,7 +62,7 @@ Services do not share business tables. Cross-service workflow is expressed throu
 # Known Constraints
 
 - Endpoint authorization is policy-based and intentionally opt-in so health and public query endpoints remain anonymous. Privileged Catalog, Inventory, and Identity operations require the Auth0 `Admin` role claim.
-- Identity database roles are not yet synchronized automatically into Auth0 access-token role claims.
+- Authenticated Identity onboarding synchronizes `Customer` or `Seller` membership through the Auth0 Management API before committing the local role; the frontend then requests a fresh access token so the namespaced role claim is current.
 - Basket, Ordering, and Notification resolve the authenticated Auth0 identity through Identity `/api/v1/auth/me` and enforce local customer `Guid` ownership; only `Admin` or the narrow `customer:act` automation permission bypasses the owner check.
 - Payment provider behavior is mock/in-process.
 - Shipping uses a provider abstraction backed by a configurable in-process mock provider.

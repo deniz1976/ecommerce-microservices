@@ -8,11 +8,16 @@ public sealed class UserService
 {
     private readonly IUserRepository userRepository;
     private readonly IPasswordHashService passwordHashService;
+    private readonly IExternalRoleSynchronizer externalRoleSynchronizer;
 
-    public UserService(IUserRepository userRepository, IPasswordHashService passwordHashService)
+    public UserService(
+        IUserRepository userRepository,
+        IPasswordHashService passwordHashService,
+        IExternalRoleSynchronizer externalRoleSynchronizer)
     {
         this.userRepository = userRepository;
         this.passwordHashService = passwordHashService;
+        this.externalRoleSynchronizer = externalRoleSynchronizer;
     }
 
     public async Task<Result<UserResponse>> RegisterAsync(RegisterUserRequest request, CancellationToken cancellationToken)
@@ -118,6 +123,17 @@ public sealed class UserService
 
         string provider = profile.Provider.Trim();
         string subject = profile.Subject.Trim();
+        bool externalRoleSynchronized = await externalRoleSynchronizer.SynchronizeSelfServiceRoleAsync(
+            subject,
+            role,
+            cancellationToken);
+        if (!externalRoleSynchronized)
+        {
+            return Result<UserResponse>.Failure(new Error(
+                IdentityErrorCodes.ExternalRoleSynchronizationFailed,
+                IdentityErrorCodes.ExternalRoleSynchronizationFailed));
+        }
+
         Domain.User? user = await userRepository.ReplaceSelfServiceRoleAsync(
             provider,
             subject,

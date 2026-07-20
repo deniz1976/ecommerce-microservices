@@ -7,6 +7,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddIdentityApplication(this IServiceCollection services)
     {
+        services.AddSingleton<IExternalRoleSynchronizer, DisabledExternalRoleSynchronizer>();
         services.AddScoped<UserService>();
         return services;
     }

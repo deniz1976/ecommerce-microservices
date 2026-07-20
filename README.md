@@ -106,6 +106,8 @@ CloudAMQP can be configured with `RabbitMq__ConnectionString` as a single `amqps
 
 Auth0 access tokens use `Auth__RoleClaimType` (default `https://ecommerce.local/claims/roles`) for API roles. Catalog mutations and arbitrary Identity user lookup require `Admin`; Inventory upsert accepts `Admin` or the narrow `inventory:write` permission. Basket, Ordering, and Notification resolve the caller through Identity and require customer ownership unless the token has `Admin` or the dedicated `customer:act` automation permission. Trusted CI obtains a short-lived M2M token with `inventory:write customer:act` from Infisical-injected `RuntimeChecks__Auth0ClientId` and `RuntimeChecks__Auth0ClientSecret`; normal users must never receive `customer:act`. Local probes may set `RuntimeChecks__AccessToken` directly. Health-only smoke checks need no token.
 
+Authenticated role onboarding can synchronize `Customer` and `Seller` to Auth0 with `Auth0Management__Enabled=true`. Use a dedicated Management API M2M application and configure its client credentials plus the two Auth0 role IDs through Infisical. The runtime-check M2M application must remain separate. Auth0 is updated before local role persistence; failures return `503`, and the frontend requests a fresh token after success.
+
 Initial PostgreSQL databases:
 
 - `catalog_db`
@@ -183,4 +185,4 @@ The workflow check defaults to `all`, which runs success, inventory-failure, pay
 
 ## Next Phase
 
-Next phase is synchronizing Identity roles with Auth0 authorization roles, adding seller/store ownership, and expanding automated API integration tests around authorization and the order workflow.
+Next phase is adding seller/store ownership, reconciliation for cross-system role updates, and automated API integration tests around authorization and the order workflow.

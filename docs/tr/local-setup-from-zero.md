@@ -52,6 +52,20 @@ ConnectionStrings__OrderingSagaDb
 RabbitMq__ConnectionString
 ```
 
+Auth0 `Customer`/`Seller` onboarding rol senkronizasyonunu acmak icin Infisical'a su anahtarlari da ekle:
+
+```text
+Auth0Management__Enabled=true
+Auth0Management__Domain=<https:// olmadan tenant hostu>
+Auth0Management__ClientId=<ayri Management API M2M client id>
+Auth0Management__ClientSecret=<secret>
+Auth0Management__CustomerRoleId=<Auth0 Customer role id>
+Auth0Management__SellerRoleId=<Auth0 Seller role id>
+Auth0Management__TimeoutSeconds=10
+```
+
+`ecommerce-runtime-integration` uygulamasini tekrar kullanma. Auth0 Management API icin ayri bir Machine-to-Machine uygulama olustur ve yalniz user-role membership yetkilerini ver.
+
 Redis icin production connection string daha sonra verilecek. Lokal Docker Compose icinde `redis:6379` kullanilir.
 
 Tercih edilen kullanim Infisical'dir:

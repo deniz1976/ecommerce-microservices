@@ -39,6 +39,12 @@ Authentication tek basina kullanicinin customer kaydina sahip oldugunu kanitlama
 
 `Admin` ve tam `customer:act` izni owner karsilastirmasini atlayabilir. `customer:act` yalniz guvenilir runtime otomasyonu icindir, normal kullanicilara verilmemelidir ve ilgisiz admin islemlerini acmaz.
 
+## Auth0 Role Senkronizasyonu
+
+Authenticated onboarding yalniz `Customer` ve `Seller` rollerini senkronlar. Identity, ayri ve en az yetkili Auth0 Management API M2M uygulamasiyla once diger self-service rolunu kaldirir, secilen rolu ekler, sonra yerel veritabanini gunceller. Auth0 hatasi `503` dondurur ve yerel rol degismez. Basaridan sonra frontend eski claim'lerle devam etmemek icin cache disindan yeni token ister.
+
+Management istemcisi runtime-integration uygulamasindan ayridir; secret Infisical'da kalir ve uygulama/client yonetimi ya da `Admin` atama yetkisi almamalidir. Auth0 basarili olup hemen ardindan veritabani yazimi basarisiz olursa calisacak reconciliation/outbox mekanizmasi sonraki istir.
+
 ## Otomatik Denetim
 
 Contract testleri sunlari dogrular:
@@ -46,6 +52,7 @@ Contract testleri sunlari dogrular:
 - fallback policy authentication ister;
 - Basket ve Ordering route group'lari `AuthenticatedUser` ister;
 - Notification SignalR `AuthenticatedUser` ister;
+- Auth0 role senkronizasyonu dogru remove/assign cagrilarini yapar ve hata halinde yerel yazimdan once durur;
 - public servis route'lari acikca `AllowAnonymous` tanimlar;
 - iki Ocelot konfigurasyonu da global Bearer authentication kullanir;
 - gateway anonymous route'lari onayli allow-list ile birebir aynidir.

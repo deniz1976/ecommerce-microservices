@@ -65,6 +65,20 @@ Auth__Authority
 Auth__Audience
 ```
 
+To enable Auth0 `Customer`/`Seller` onboarding synchronization, add these values to Infisical and run Identity through the secret wrapper:
+
+```text
+Auth0Management__Enabled=true
+Auth0Management__Domain=<tenant host without https://>
+Auth0Management__ClientId=<dedicated Management API M2M client id>
+Auth0Management__ClientSecret=<secret>
+Auth0Management__CustomerRoleId=<Auth0 Customer role id>
+Auth0Management__SellerRoleId=<Auth0 Seller role id>
+Auth0Management__TimeoutSeconds=10
+```
+
+Do not reuse `ecommerce-runtime-integration`; create a separate Auth0 Machine-to-Machine application and authorize only the Management API user-role membership scopes.
+
 ## Set Runtime Variables Without Writing Secrets to Files
 
 Preferred development flow is Infisical:

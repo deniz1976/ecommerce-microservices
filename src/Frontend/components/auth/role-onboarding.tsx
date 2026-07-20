@@ -8,6 +8,7 @@ import { FormError } from "@/components/auth/form-error"
 import { LoadingButton } from "@/components/auth/loading-button"
 import { RoleSelector } from "@/components/auth/role-selector"
 import { getProfile, updateRole } from "@/lib/api/auth"
+import { refreshAccessToken } from "@/lib/auth/auth0"
 import { useI18n } from "@/lib/i18n/provider"
 import type { PublicRole } from "@/types"
 
@@ -54,6 +55,7 @@ export function RoleOnboarding() {
     setSubmitting(true)
     try {
       await updateRole({ role })
+      await refreshAccessToken()
       router.push("/")
     } catch {
       setFormError(t.errors.roleUpdateFailed)

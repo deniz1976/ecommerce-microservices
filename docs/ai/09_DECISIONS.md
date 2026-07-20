@@ -200,6 +200,15 @@ Track architectural decisions as stable graph nodes.
 - consequence: the three services depend synchronously on the Identity API through `IdentityClient__BaseUrl` and fail closed when resolution fails. `Admin` and exact `customer:act` permission bypass lookup; another customer's order-by-id is hidden as not found. SignalR query tokens are forwarded only from `/hubs/notifications`. Contract tests cover mapping, failure, delegation, query-token restriction, and endpoint adoption.
 - related: [[05_APIS#Basket API]], [[05_APIS#Ordering API]], [[05_APIS#Notification SignalR]], [[07_SECURITY#Authorization]]
 
+## decision-auth0-role-synchronization
+
+- id: `decision-auth0-role-synchronization`
+- status: active
+- decision: authenticated `Customer` and `Seller` onboarding uses a dedicated least-privilege Auth0 Management API M2M client to update Auth0 membership before committing the same role to Identity; the frontend then forces a non-cached token refresh.
+- reason: downstream role policies evaluate the signed Auth0 access-token claim, while the local profile is the application's onboarding source of truth. Updating only PostgreSQL creates an authorization mismatch.
+- consequence: Auth0 rejection, timeout, or malformed token response fails closed with `503` and no local role commit. The Management client is separate from runtime automation and its secret stays in Infisical. Auth0 success followed by local database failure remains a rare cross-system consistency case requiring later reconciliation/outbox processing.
+- related: [[02_SERVICES#Identity]], [[05_APIS#Identity API]], [[07_SECURITY#Authorization]]
+
 # TODO
 
 - Add decision dates once ADR workflow is formalized.

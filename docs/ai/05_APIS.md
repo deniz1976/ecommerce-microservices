@@ -92,6 +92,7 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - service routes: `/api/v1/users`, `/api/v1/auth/me`, `/api/v1/auth/me/role`
 - public routes: `POST /gateway/users` supports self-registration as `Customer` or `Seller` only.
 - authenticated-user routes: `GET /gateway/auth/me` and `PUT /gateway/auth/me/role` require a valid Bearer token from [[07_SECURITY#Authentication]].
+- role synchronization: `PUT /gateway/auth/me/role` synchronizes the selected `Customer` or `Seller` role to Auth0 before updating Identity persistence. Auth0 rejection, timeout, or malformed token response returns `503 Service Unavailable`; validation failures remain `400`.
 - admin route: `GET /gateway/users/{id}` requires the `Admin` authorization policy.
 
 ## Notification SignalR

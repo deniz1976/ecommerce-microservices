@@ -83,6 +83,8 @@ Docker Compose defines:
 
 Basket, Ordering, and Notification use `IdentityClient__BaseUrl` for authenticated customer ownership resolution and `IdentityClient__TimeoutSeconds` for a bounded fail-closed lookup, defaulting to 5 seconds. Direct host execution defaults to `http://localhost:5090`; Docker Compose injects `http://identity-api:8080`. A deployed environment must set this to the trusted internal Identity API address and must not route the forwarded user token to an untrusted host.
 
+Identity self-service role synchronization is enabled with `Auth0Management__Enabled=true`. Configure `Auth0Management__Domain` as the tenant host without scheme or path, a dedicated Management API M2M `ClientId`/`ClientSecret`, the Auth0 `CustomerRoleId` and `SellerRoleId`, and a 1-30 second timeout. The client removes the opposite self-service role and assigns the requested role before local persistence. Do not reuse the runtime-integration M2M client; the Management client has a separate trust purpose and secret.
+
 ## Managed Grafana Cloud
 
 The shared observability registration supports the standard OpenTelemetry environment variables:

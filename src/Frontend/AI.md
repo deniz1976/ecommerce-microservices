@@ -27,6 +27,7 @@ Provide the TR/EN Next.js web client for Auth0 login, local role onboarding, and
 
 - Authenticate browser users through Auth0 Authorization Code with PKCE.
 - Read the local Identity profile through the API Gateway.
+- Refresh the Auth0 access token without using the local cache after role onboarding.
 - Route an authenticated `Admin` to the administration overview at `/`.
 - Display a live read-only Catalog summary for the administrator.
 
@@ -81,6 +82,8 @@ None.
 # Design Decisions
 
 The initial administrator overview uses only the existing profile and public Catalog query. It does not model a personal seller store because Catalog currently has no seller or store ownership field. See [[../../docs/ai/09_DECISIONS#decision-role-aware-frontend-entry]].
+
+After Identity confirms a self-service role change in both Auth0 and local persistence, the onboarding client forces a silent token refresh. This prevents the existing cached JWT from continuing without the newly assigned namespaced role claim.
 
 # Future Improvements
 

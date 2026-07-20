@@ -91,7 +91,9 @@ Authenticated baseline operations are:
 
 Authentication is not resource ownership. Basket, Ordering, and Notification therefore forward the caller's Bearer token to Identity `/api/v1/auth/me`, resolve Auth0 `sub` to the local user `Guid`, and compare that trusted value with the requested customer resource. Identity lookup errors fail closed. `Admin` and the dedicated runtime M2M `customer:act` permission are the only bypasses. The query-string SignalR token is forwarded only when the original path is `/hubs/notifications`.
 
-Identity local roles and Auth0 authorization roles are separate stores. An operational administrator must currently be assigned `Admin` in both systems. Self-service role selection updates only Identity; automatic synchronization to Auth0 token roles is TODO.
+Identity local roles and Auth0 authorization roles remain separate stores, but authenticated self-service role selection synchronizes `Customer` and `Seller` through a dedicated Auth0 Management API M2M client before committing the local role. Auth0 failure fails closed and leaves local onboarding unchanged. The browser then bypasses its token cache to obtain the updated role claim. A later local database failure after Auth0 success is still a cross-system consistency edge case and requires reconciliation/outbox work.
+
+The Management M2M application is not the runtime-integration application. It receives only user-role membership scopes required by Auth0 (`update:users`, or the tenant's equivalent `create:role_members` and `delete:role_members` grants); it does not receive application/client administration permissions. `Admin` is never synchronized through the public onboarding path and remains a controlled operational assignment.
 
 Current role model:
 
@@ -101,7 +103,7 @@ Current role model:
 
 TODO:
 
-- Synchronize Identity role changes with Auth0 authorization roles.
+- Add reconciliation/outbox handling for cross-system role synchronization.
 - Apply `SellerOrAdmin` only after Catalog models seller/store ownership.
 
 # Secrets
@@ -119,6 +121,11 @@ Required secret keys include:
 - `Auth__Authority`
 - `Auth__Audience`
 - `Auth__RequireHttpsMetadata`
+- `Auth0Management__Enabled`
+- `Auth0Management__Domain`
+- `Auth0Management__ClientId` and secret `Auth0Management__ClientSecret` for the dedicated Management API M2M client
+- `Auth0Management__CustomerRoleId` and `Auth0Management__SellerRoleId`
+- `Auth0Management__TimeoutSeconds`
 - `RuntimeChecks__Auth0ClientId` for trusted runtime-token acquisition; identifier only, but managed with the runtime configuration.
 - `RuntimeChecks__Auth0ClientSecret` for trusted runtime-token acquisition; secret.
 - `OTEL_EXPORTER_OTLP_HEADERS` when managed Grafana Cloud export is enabled

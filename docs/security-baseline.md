@@ -39,6 +39,12 @@ Authentication alone does not prove that a caller owns a customer resource. Bask
 
 `Admin` and the exact `customer:act` permission may bypass the owner comparison. `customer:act` exists for trusted runtime automation, must not be granted to normal users, and does not grant unrelated administrator operations. Notification query-string tokens are forwarded only from the direct hub path.
 
+## Auth0 Role Synchronization
+
+Authenticated onboarding synchronizes only `Customer` and `Seller`. Identity uses a dedicated Auth0 Management API M2M application to remove the opposite self-service role and assign the requested role before committing it locally. Auth0 failure returns `503` and leaves the local role unchanged. The frontend requests a non-cached token after success so authorization does not continue with stale claims.
+
+The Management client is separate from runtime integration, its secret stays in Infisical, and it must not receive client/application administration or `Admin` assignment powers. Cross-system reconciliation after the rare Auth0-success/database-failure sequence remains planned work.
+
 ## Automated Enforcement
 
 Contract tests verify:
@@ -49,6 +55,7 @@ Contract tests verify:
 - the shared ownership authorizer allows the Identity-resolved owner and rejects another customer;
 - `Admin` and `customer:act` delegation bypass Identity lookup;
 - Basket, Ordering, and Notification source guards require ownership checks and registration;
+- Auth0 role synchronization uses the expected remove/assign requests and fails closed before local persistence;
 - public service routes explicitly declare `AllowAnonymous`;
 - both Ocelot configurations use global Bearer authentication;
 - the gateway anonymous routes exactly match the approved allow-list.

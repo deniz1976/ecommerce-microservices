@@ -68,6 +68,18 @@ export async function getAccessToken(): Promise<string | null> {
   })
 }
 
+export async function refreshAccessToken(): Promise<string> {
+  const client = await getAuth0Client()
+  await handleAuth0RedirectIfNeeded(client)
+
+  return client.getTokenSilently({
+    authorizationParams: {
+      audience: getAuth0Config().audience,
+    },
+    cacheMode: "off",
+  })
+}
+
 async function getAuth0Client(): Promise<Auth0Client> {
   if (!isAuth0Configured()) {
     throw new Error("Auth0 public environment variables are not configured.")

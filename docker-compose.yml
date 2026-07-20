@@ -224,6 +224,13 @@ services:
     env_file: *env-file
     environment:
       <<: [*api-env, *managed-env]
+      Auth0Management__Enabled: ${Auth0Management__Enabled:-false}
+      Auth0Management__Domain: ${Auth0Management__Domain:-}
+      Auth0Management__ClientId: ${Auth0Management__ClientId:-}
+      Auth0Management__ClientSecret: ${Auth0Management__ClientSecret:-}
+      Auth0Management__CustomerRoleId: ${Auth0Management__CustomerRoleId:-}
+      Auth0Management__SellerRoleId: ${Auth0Management__SellerRoleId:-}
+      Auth0Management__TimeoutSeconds: ${Auth0Management__TimeoutSeconds:-10}
     restart: unless-stopped
     ports:
       - "5090:8080"
