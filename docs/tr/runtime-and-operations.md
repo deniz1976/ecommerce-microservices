@@ -129,6 +129,8 @@ Job, Infisical'a baglanmadan once GitHub OIDC token'indan yalnizca gizli olmayan
 
 Infisical injection sonrasinda workflow, `RuntimeChecks__Auth0ClientId` ve gizli `RuntimeChecks__Auth0ClientSecret` ile Auth0 Client Credentials akisini kullanir ve `inventory:write customer:act` isteyen kisa omurlu token alir. Ilk izin test stoklarini hazirlar; ikinci izin ownership denetiminden sonra izole workflow-check musterisi adina siparis olusturur. Token maskelenir, sadece job boyunca yasar ve Catalog ya da Identity administrator erisimi vermez. Auth0 API'de iki permission'i da tanimla ve yalniz runtime M2M uygulamasina ver.
 
+Workflow ayrica Identity role-sync icin ayri M2M konfigurasyonunu veri degistirmeden kontrol eder. Tam olarak `update:users` scope isteyen Management API token'i alir, claim'i lokal cozer ve hicbir Auth0 user kaydina dokunmadan token'i atar. Boylece eksik `dev`/`staging` Infisical degerleri, gecersiz rol ID'leri, yanlis client credentials veya hatali Management API grant'i uygulama baslamadan bulunur.
+
 Docker API container'lari `IdentityClient__BaseUrl=http://identity-api:8080` kullanir. Basket, Ordering ve Notification customer-resource erisiminden once authenticated kullaniciyi bu guvenilir internal Identity adresinden cozer; `IdentityClient__TimeoutSeconds` varsayilan olarak bes saniyelik fail-closed timeout uygular. Host uzerinden calistirmada varsayilan adres `http://localhost:5090` olur.
 
 GitHub `runtime-integration` environment'ina secret olmayan su iki variable eklenmelidir:

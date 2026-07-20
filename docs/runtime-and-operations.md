@@ -339,6 +339,8 @@ Before contacting Infisical, the job decodes only the non-sensitive `iss`, `aud`
 
 After Infisical injection, the workflow exchanges `RuntimeChecks__Auth0ClientId` and secret `RuntimeChecks__Auth0ClientSecret` through Auth0 Client Credentials for a short-lived token requesting `inventory:write customer:act`. The first permission seeds test inventory; the second lets trusted automation create orders for the isolated workflow-check customer after ownership enforcement. The token is masked, exists only for the job, and does not grant Catalog or Identity administrator access. Define both API permissions in Auth0 and grant them only to the dedicated runtime M2M application.
 
+The workflow separately preflights the dedicated Identity role-sync M2M configuration. It requests a Management API token scoped exactly to `update:users`, validates the token claim locally, and discards it without touching any Auth0 user. This detects missing `dev`/`staging` Infisical values, invalid role IDs, bad client credentials, or an incorrect Management API grant before application startup.
+
 Configure these non-secret variables on the GitHub `runtime-integration` environment:
 
 ```text

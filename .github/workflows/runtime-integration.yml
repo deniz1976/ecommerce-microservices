@@ -104,6 +104,10 @@ jobs:
         shell: pwsh
         run: ./scripts/request-runtime-access-token.ps1
 
+      - name: Verify Auth0 Management API access
+        shell: pwsh
+        run: ./scripts/test-auth0-management-access.ps1
+
       - name: Restore .NET dependencies
         run: dotnet restore ECommerce.sln
 

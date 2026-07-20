@@ -32,6 +32,7 @@ Track known future work without inventing completed behavior.
 ## Runtime Verification
 
 - Completed: the OIDC-protected `all` runtime scenario passed against Infisical `staging` and the isolated Neon `runtime-integration` branch on 2026-07-19.
+- Completed: Runtime integration non-mutating preflight verifies the dedicated Auth0 Management client and exact `update:users` scope before startup.
 
 ## Observability
 

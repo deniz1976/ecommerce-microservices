@@ -134,6 +134,16 @@ Belirlenen sure dolarsa son health hatasiyla birlikte basarisiz olur. Gerektigin
 Workflow checker gizli olmayan senaryo ve probe ilerlemesini yazdirir. Hata durumunda exception turunu ve mesajini gosterir; access token'i veya veritabani connection string'lerini yazdirmaz.
 Dogudan PostgreSQL probe'lari, ortak persistence normalizer'ini kullanarak hem Neon `postgresql://` URI bicimini hem de yerel Npgsql connection string bicimini kabul eder.
 
+## test-auth0-management-access.ps1
+
+Identity rol senkronizasyonu icin veri degistirmeyen bir on kontrol yapar. Yedi `Auth0Management__*` ayarini dogrular, yalniz `update:users` isteyen kisa omurlu Auth0 Management API token'i alir, token scope'unu lokal olarak cozer ve eksik ya da fazla yetkiyi reddeder. User endpoint'i cagirmaz, rol atamaz, token'i yazdirmaz veya saklamaz.
+
+Guvenilir Runtime integration workflow'u bu kontrolu Infisical injection sonrasinda calistirir. Lokal kullanimda yalniz Infisical wrapper ile calistir:
+
+```powershell
+.\scripts\run-with-secrets.ps1 .\scripts\test-auth0-management-access.ps1
+```
+
 Repository secret taramasi credential iceren PostgreSQL/RabbitMQ URI'lerini, Neon kimliklerini ve ODBC/Npgsql connection string literal'larini kontrol eder. Testler sahte olsa bile credential bicimli connection string'i kaynak koda tek parca yazmak yerine runtime'da builder ile olusturmalidir.
 
 ## start-local.ps1

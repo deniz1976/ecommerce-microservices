@@ -37,6 +37,27 @@ public sealed class WorkflowScenarioTests
         Assert.DoesNotContain("Admin", script, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void Auth0ManagementPreflightRequestsOnlyUserUpdatePermission()
+    {
+        string script = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "scripts",
+            "test-auth0-management-access.ps1"));
+        string workflow = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            ".github",
+            "workflows",
+            "runtime-integration.yml"));
+
+        Assert.Contains("scope = \"update:users\"", script, StringComparison.Ordinal);
+        Assert.Contains("exactly the update:users scope", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("create:users", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("delete:users", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("update:clients", script, StringComparison.Ordinal);
+        Assert.Contains("./scripts/test-auth0-management-access.ps1", workflow, StringComparison.Ordinal);
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? directory = new(AppContext.BaseDirectory);

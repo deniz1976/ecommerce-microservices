@@ -21,6 +21,7 @@ PowerShell scripts make these repeated tasks less error-prone.
 scripts/check-runtime-env.ps1
 scripts/load-env.ps1
 scripts/run-with-secrets.ps1
+scripts/test-auth0-management-access.ps1
 scripts/run-migrations.ps1
 scripts/smoke-test.ps1
 scripts/start-local.ps1
@@ -221,6 +222,16 @@ Requests a short-lived Auth0 Client Credentials token with `inventory:write cust
 
 The workflow checker prints non-sensitive scenario and probe progress. On failure it prints the exception type and message, but never prints the access token or database connection strings.
 Its direct PostgreSQL probes accept both Neon-style `postgresql://` URIs and native Npgsql connection strings by using the shared persistence normalizer.
+
+## test-auth0-management-access.ps1
+
+Performs a non-mutating preflight for Identity role synchronization. It validates the seven `Auth0Management__*` settings, requests a short-lived Auth0 Management API token with only `update:users`, decodes the token locally, and rejects missing or additional scopes. It does not call a user endpoint, assign a role, print the token, or persist it.
+
+The trusted Runtime integration workflow runs this check immediately after Infisical injection and runtime-token acquisition. Run it locally only through Infisical:
+
+```powershell
+.\scripts\run-with-secrets.ps1 .\scripts\test-auth0-management-access.ps1
+```
 
 ## start-local.ps1
 
