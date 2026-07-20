@@ -18,6 +18,37 @@ public static class DependencyInjection
         return services;
     }
 
+    public static IServiceCollection AddCustomerOwnership(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        CustomerIdentityOptions options = configuration
+            .GetSection(CustomerIdentityOptions.SectionName)
+            .Get<CustomerIdentityOptions>() ?? new CustomerIdentityOptions();
+
+        if (!Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out Uri? baseUri) ||
+            (!string.Equals(baseUri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) &&
+             !string.Equals(baseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException(
+                $"{CustomerIdentityOptions.SectionName}:BaseUrl must be an absolute HTTP or HTTPS URL.");
+        }
+
+        if (options.TimeoutSeconds is < 1 or > 30)
+        {
+            throw new InvalidOperationException(
+                $"{CustomerIdentityOptions.SectionName}:TimeoutSeconds must be between 1 and 30.");
+        }
+
+        services.AddHttpClient<ICustomerOwnershipAuthorizer, IdentityCustomerOwnershipAuthorizer>(client =>
+        {
+            client.BaseAddress = baseUri;
+            client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+        });
+
+        return services;
+    }
+
     public static IServiceCollection AddOidcReadyAuthentication(
         this IServiceCollection services,
         IConfiguration configuration)

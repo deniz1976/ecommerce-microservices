@@ -29,15 +29,15 @@ SignalR transport uyumlulugu icin JWT handler `access_token` query parametresini
 | Inventory write | `InventoryWrite` | Operasyonel kaynak |
 | Identity rastgele user okuma | `Admin` | Yalnizca admin |
 | Identity `/auth/me` | `AuthenticatedUser` | Token `sub` degerinden uretilir |
-| Basket | `AuthenticatedUser` | Customer ownership bekliyor |
-| Ordering | `AuthenticatedUser` | Customer ownership bekliyor |
-| Notification SignalR | `AuthenticatedUser` | Customer group ownership bekliyor |
+| Basket | `AuthenticatedUser` ve ownership | Identity ile cozulmus owner, `Admin` veya `customer:act` |
+| Ordering | `AuthenticatedUser` ve ownership | Identity ile cozulmus owner, `Admin` veya `customer:act` |
+| Notification SignalR | `AuthenticatedUser` ve ownership | Identity ile cozulmus customer group, `Admin` veya `customer:act` |
 
-## Onemli Sinir
+## Customer Ownership
 
-Authentication, “gecerli token'i kim sundu?” sorusunu cevaplar. Kullanicinin bir customer kaydinin sahibi oldugunu tek basina kanitlamaz. Basket ve Ordering yerel Identity `Guid` degerini tutarken Auth0 token'i kullaniciyi harici `sub` ile tanir. Bu iki kimlik guvenli bicimde eslestirilene kadar authenticated bir kullanici bildigi baska bir customer kimligini isteyebilir. Notification group join icin de ayni sinir vardir.
+Authentication tek basina kullanicinin customer kaydina sahip oldugunu kanitlamaz. Basket, Ordering ve Notification ortak ownership authorizer ile asil Bearer token'i Identity `/api/v1/auth/me` endpoint'ine iletir ve donen yerel user `Guid` degerini istenen customer kimligiyle karsilastirir. Lookup hatasi erisimi reddeder. Order-by-id baska musteriye ait kaydi not found olarak gizler.
 
-Siradaki guvenlik asamasi, kaynak servislerinin kullanabilecegi guvenilir local-user mapping olusturmali; sonra owner-or-admin kurallari ve negatif testler eklenmelidir.
+`Admin` ve tam `customer:act` izni owner karsilastirmasini atlayabilir. `customer:act` yalniz guvenilir runtime otomasyonu icindir, normal kullanicilara verilmemelidir ve ilgisiz admin islemlerini acmaz.
 
 ## Otomatik Denetim
 

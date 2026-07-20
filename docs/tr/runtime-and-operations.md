@@ -125,7 +125,9 @@ Workflow her zaman Infisical `staging` environment'ini okur; calistiran kisi `de
 
 Job, Infisical'a baglanmadan once GitHub OIDC token'indan yalnizca gizli olmayan `iss`, `aud` ve `sub` claim'lerini cozer, bu uc degeri yazdirir ve kesin repository/environment guven sinirini dogrular. JWT'nin kendisi loglanmaz.
 
-Infisical injection sonrasinda workflow, `RuntimeChecks__Auth0ClientId` ve gizli `RuntimeChecks__Auth0ClientSecret` ile Auth0 Client Credentials akisini kullanir ve yalnizca `inventory:write` isteyen kisa omurlu token alir. Token maskelenir, sadece job boyunca yasar ve Catalog ya da Identity administrator erisimi vermez.
+Infisical injection sonrasinda workflow, `RuntimeChecks__Auth0ClientId` ve gizli `RuntimeChecks__Auth0ClientSecret` ile Auth0 Client Credentials akisini kullanir ve `inventory:write customer:act` isteyen kisa omurlu token alir. Ilk izin test stoklarini hazirlar; ikinci izin ownership denetiminden sonra izole workflow-check musterisi adina siparis olusturur. Token maskelenir, sadece job boyunca yasar ve Catalog ya da Identity administrator erisimi vermez. Auth0 API'de iki permission'i da tanimla ve yalniz runtime M2M uygulamasina ver.
+
+Docker API container'lari `IdentityClient__BaseUrl=http://identity-api:8080` kullanir. Basket, Ordering ve Notification customer-resource erisiminden once authenticated kullaniciyi bu guvenilir internal Identity adresinden cozer; `IdentityClient__TimeoutSeconds` varsayilan olarak bes saniyelik fail-closed timeout uygular. Host uzerinden calistirmada varsayilan adres `http://localhost:5090` olur.
 
 GitHub `runtime-integration` environment'ina secret olmayan su iki variable eklenmelidir:
 

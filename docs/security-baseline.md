@@ -29,15 +29,15 @@ For SignalR transport compatibility, the JWT handler accepts an `access_token` q
 | Inventory write | `InventoryWrite` | Operational resource |
 | Identity arbitrary user read | `Admin` | Admin-only |
 | Identity `/auth/me` | `AuthenticatedUser` | Derived from token `sub` |
-| Basket | `AuthenticatedUser` | Customer ownership pending |
-| Ordering | `AuthenticatedUser` | Customer ownership pending |
-| Notification SignalR | `AuthenticatedUser` | Customer group ownership pending |
+| Basket | `AuthenticatedUser` plus ownership | Identity-resolved owner, `Admin`, or `customer:act` |
+| Ordering | `AuthenticatedUser` plus ownership | Identity-resolved owner, `Admin`, or `customer:act` |
+| Notification SignalR | `AuthenticatedUser` plus ownership | Identity-resolved customer group, `Admin`, or `customer:act` |
 
-## Important Limitation
+## Customer Ownership
 
-Authentication answers “who presented a valid token?” It does not prove that a caller owns a customer resource. Basket and Ordering store the local Identity `Guid`, while Auth0 tokens identify users with an external `sub`. Until those identifiers are securely resolved, an authenticated caller could still request another known customer identifier. Notification group joins have the same limitation.
+Authentication alone does not prove that a caller owns a customer resource. Basket, Ordering, and Notification use the shared ownership authorizer, which forwards the original Bearer token to Identity `/api/v1/auth/me` and compares the returned local user `Guid` with the requested customer identifier. Lookup failure denies access. Order-by-id hides another customer's existing order as not found.
 
-The next security phase must create a trusted local-user mapping available to resource-owning services, then enforce owner-or-admin rules and negative tests.
+`Admin` and the exact `customer:act` permission may bypass the owner comparison. `customer:act` exists for trusted runtime automation, must not be granted to normal users, and does not grant unrelated administrator operations. Notification query-string tokens are forwarded only from the direct hub path.
 
 ## Automated Enforcement
 
@@ -46,6 +46,9 @@ Contract tests verify:
 - the fallback policy requires authentication;
 - Basket and Ordering route groups require `AuthenticatedUser`;
 - Notification SignalR requires `AuthenticatedUser`;
+- the shared ownership authorizer allows the Identity-resolved owner and rejects another customer;
+- `Admin` and `customer:act` delegation bypass Identity lookup;
+- Basket, Ordering, and Notification source guards require ownership checks and registration;
 - public service routes explicitly declare `AllowAnonymous`;
 - both Ocelot configurations use global Bearer authentication;
 - the gateway anonymous routes exactly match the approved allow-list.

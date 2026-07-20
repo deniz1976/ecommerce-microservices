@@ -1,17 +1,37 @@
+using ECommerce.BuildingBlocks.Security;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ECommerce.Notification.Api.Hubs;
 
 public sealed class NotificationsHub : Hub
 {
-    public Task JoinCustomerGroup(string customerId)
+    private readonly ICustomerOwnershipAuthorizer ownershipAuthorizer;
+
+    public NotificationsHub(ICustomerOwnershipAuthorizer ownershipAuthorizer)
     {
-        return Groups.AddToGroupAsync(Context.ConnectionId, CustomerGroupName(customerId));
+        this.ownershipAuthorizer = ownershipAuthorizer;
     }
 
-    public Task LeaveCustomerGroup(string customerId)
+    public async Task JoinCustomerGroup(string customerId)
     {
-        return Groups.RemoveFromGroupAsync(Context.ConnectionId, CustomerGroupName(customerId));
+        Guid parsedCustomerId = ParseCustomerId(customerId);
+        if (!await CanAccessAsync(parsedCustomerId))
+        {
+            throw new HubException("Access to the requested customer notification group is denied.");
+        }
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, CustomerGroupName(parsedCustomerId));
+    }
+
+    public async Task LeaveCustomerGroup(string customerId)
+    {
+        Guid parsedCustomerId = ParseCustomerId(customerId);
+        if (!await CanAccessAsync(parsedCustomerId))
+        {
+            throw new HubException("Access to the requested customer notification group is denied.");
+        }
+
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, CustomerGroupName(parsedCustomerId));
     }
 
     public static string CustomerGroupName(Guid customerId)
@@ -19,10 +39,20 @@ public sealed class NotificationsHub : Hub
         return $"customer:{customerId:N}";
     }
 
-    private static string CustomerGroupName(string customerId)
+    private Task<bool> CanAccessAsync(Guid customerId)
+    {
+        HttpContext? httpContext = Context.GetHttpContext();
+        return ownershipAuthorizer.CanAccessAsync(
+            customerId,
+            Context.User,
+            CustomerAccessTokenReader.Read(httpContext),
+            Context.ConnectionAborted);
+    }
+
+    private static Guid ParseCustomerId(string customerId)
     {
         return Guid.TryParse(customerId, out Guid parsedCustomerId)
-            ? CustomerGroupName(parsedCustomerId)
-            : $"customer:{customerId}";
+            ? parsedCustomerId
+            : throw new HubException("Customer id must be a valid GUID.");
     }
 }

@@ -71,6 +71,7 @@ Shared policies from `ECommerce.BuildingBlocks.Security` are:
 - `AuthenticatedUser`: any valid authenticated Auth0 access token.
 - `Admin`: `Admin` role.
 - `InventoryWrite`: `Admin` role or exact `inventory:write` permission from an Auth0 M2M token.
+- customer delegation: `Admin` role or exact `customer:act` permission; this is evaluated by the shared ownership authorizer and is not a general user permission.
 - `SellerOrAdmin`: `Seller` or `Admin` role.
 - `CustomerOrAdmin`: `Customer` or `Admin` role.
 
@@ -88,7 +89,7 @@ Authenticated baseline operations are:
 - every Ordering route: `AuthenticatedUser`;
 - Notification SignalR connection: `AuthenticatedUser`.
 
-Authentication is not resource ownership. Basket and Ordering still accept local `Guid` customer identifiers while Auth0 identifies a user by external `sub`; Notification group joins have the same ownership gap. These routes are no longer anonymous, but cross-customer authorization remains TODO until the local/external identity mapping is available to the owning services.
+Authentication is not resource ownership. Basket, Ordering, and Notification therefore forward the caller's Bearer token to Identity `/api/v1/auth/me`, resolve Auth0 `sub` to the local user `Guid`, and compare that trusted value with the requested customer resource. Identity lookup errors fail closed. `Admin` and the dedicated runtime M2M `customer:act` permission are the only bypasses. The query-string SignalR token is forwarded only when the original path is `/hubs/notifications`.
 
 Identity local roles and Auth0 authorization roles are separate stores. An operational administrator must currently be assigned `Admin` in both systems. Self-service role selection updates only Identity; automatic synchronization to Auth0 token roles is TODO.
 
@@ -101,7 +102,6 @@ Current role model:
 TODO:
 
 - Synchronize Identity role changes with Auth0 authorization roles.
-- Enforce ownership for Basket, Ordering, and Notification customer resources before treating role checks as sufficient protection.
 - Apply `SellerOrAdmin` only after Catalog models seller/store ownership.
 
 # Secrets
@@ -155,4 +155,4 @@ Docker development exposes Jaeger on `16686`, Prometheus on `9090`, Loki on `310
 
 - Add frontend Auth0 login flow documentation.
 - Add rate limiting.
-- Add automated dynamic negative authorization tests after resource ownership is implemented.
+- Add full HTTP/SignalR integration tests for dynamic negative ownership cases; shared authorizer behavior and endpoint adoption already have contract tests.

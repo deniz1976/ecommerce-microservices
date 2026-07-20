@@ -217,7 +217,7 @@ The command fails after the bounded timeout and reports the last health error. `
 
 ## request-runtime-access-token.ps1
 
-Requests a short-lived Auth0 Client Credentials token with `inventory:write` from `Auth__Authority` and `Auth__Audience`. It reads `RuntimeChecks__Auth0ClientId` and `RuntimeChecks__Auth0ClientSecret`, never prints the token, and exports it as `RuntimeChecks__AccessToken` for the current process or subsequent GitHub Actions steps.
+Requests a short-lived Auth0 Client Credentials token with `inventory:write customer:act` from `Auth__Authority` and `Auth__Audience`. `inventory:write` seeds scenario stock; `customer:act` lets trusted automation create orders for its isolated test customer without granting `Admin`. It reads `RuntimeChecks__Auth0ClientId` and `RuntimeChecks__Auth0ClientSecret`, never prints the token, and exports it as `RuntimeChecks__AccessToken` for the current process or subsequent GitHub Actions steps.
 
 The workflow checker prints non-sensitive scenario and probe progress. On failure it prints the exception type and message, but never prints the access token or database connection strings.
 Its direct PostgreSQL probes accept both Neon-style `postgresql://` URIs and native Npgsql connection strings by using the shared persistence normalizer.

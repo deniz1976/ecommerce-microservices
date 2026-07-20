@@ -25,7 +25,7 @@ Track known future work without inventing completed behavior.
 ## Authentication Completion
 
 - Synchronize Identity role changes with Auth0 authorization roles.
-- Add authenticated resource ownership enforcement for Basket, Ordering, and Notification.
+- Completed: Basket, Ordering, and Notification enforce authenticated local-customer ownership through Identity resolution, with explicit `Admin` and `customer:act` delegation.
 - Add seller/store ownership before enabling `SellerOrAdmin` Catalog mutations.
 
 ## Runtime Verification

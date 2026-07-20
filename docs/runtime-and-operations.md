@@ -122,6 +122,8 @@ Development secrets are managed in Infisical under the project environment selec
 
 Managed Grafana Cloud export uses `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, and secret `OTEL_EXPORTER_OTLP_HEADERS` from Infisical. The standard variables take precedence over the Docker-local `Observability__OtlpEndpoint`; without either endpoint, services run with no OTLP exporter.
 
+Docker API containers receive `IdentityClient__BaseUrl=http://identity-api:8080`. Basket, Ordering, and Notification resolve the authenticated user through this trusted internal Identity address before customer-resource access, with `IdentityClient__TimeoutSeconds` defaulting to a five-second fail-closed timeout. Direct host execution defaults to `http://localhost:5090`; production must configure its trusted internal Identity API address explicitly.
+
 `Observability__RedactionEnabled` defaults to `true`. It masks sensitive trace tags and structured-log attributes before export. This does not sanitize arbitrary free-text log bodies, so application logs must never embed credentials or personal/payment secrets in message text.
 
 Recommended local command style:
@@ -333,7 +335,7 @@ The workflow always reads the Infisical `staging` environment; callers cannot se
 
 Before contacting Infisical, the job decodes only the non-sensitive `iss`, `aud`, and `sub` claims from its GitHub OIDC token, prints those three values, and asserts the exact repository/environment trust boundary. The JWT itself is never logged.
 
-After Infisical injection, the workflow exchanges `RuntimeChecks__Auth0ClientId` and secret `RuntimeChecks__Auth0ClientSecret` through Auth0 Client Credentials for a short-lived token requesting only `inventory:write`. The token is masked, exists only for the job, and does not grant Catalog or Identity administrator access.
+After Infisical injection, the workflow exchanges `RuntimeChecks__Auth0ClientId` and secret `RuntimeChecks__Auth0ClientSecret` through Auth0 Client Credentials for a short-lived token requesting `inventory:write customer:act`. The first permission seeds test inventory; the second lets trusted automation create orders for the isolated workflow-check customer after ownership enforcement. The token is masked, exists only for the job, and does not grant Catalog or Identity administrator access. Define both API permissions in Auth0 and grant them only to the dedicated runtime M2M application.
 
 Configure these non-secret variables on the GitHub `runtime-integration` environment:
 

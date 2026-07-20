@@ -15,6 +15,7 @@ builder.Services.AddSignalR();
 builder.Services.AddECommerceLocalization();
 builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.Notification.Api");
 builder.Services.AddOidcReadySecurity(builder.Configuration);
+builder.Services.AddCustomerOwnership(builder.Configuration);
 builder.Services.AddNotificationApplication();
 builder.Services.AddNotificationInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ILiveNotificationPublisher, SignalRLiveNotificationPublisher>();

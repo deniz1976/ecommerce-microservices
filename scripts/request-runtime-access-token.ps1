@@ -24,7 +24,7 @@ $response = Invoke-RestMethod -Method Post -Uri $tokenEndpoint -ContentType "app
     client_id = $clientId
     client_secret = $clientSecret
     audience = $audience
-    scope = "inventory:write"
+    scope = "inventory:write customer:act"
 }
 
 $accessToken = $response.access_token

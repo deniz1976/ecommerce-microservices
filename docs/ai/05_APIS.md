@@ -60,8 +60,8 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - direct base: `http://localhost:5041`
 - gateway route: `/gateway/baskets/{everything}`
 - service routes: `/api/v1/baskets/{customerId}`, `/items`, `/checkout`
-- protected routes: every Basket route requires `AuthenticatedUser`.
-- ownership status: authenticated baseline active; customer ownership enforcement pending.
+- protected routes: every Basket route requires `AuthenticatedUser` plus owner-or-privileged customer authorization.
+- ownership status: normal users may access only the customer `Guid` resolved by Identity `/api/v1/auth/me`; `Admin` or `customer:act` may act for another customer.
 
 ## Ordering API
 
@@ -70,8 +70,8 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - direct base: `http://localhost:5265`
 - gateway routes: `/gateway/orders`, `/gateway/orders/{everything}`
 - service routes: `/api/v1/orders`
-- protected routes: every Ordering route requires `AuthenticatedUser`.
-- ownership status: authenticated baseline active; customer ownership enforcement pending.
+- protected routes: every Ordering route requires `AuthenticatedUser` plus owner-or-privileged customer authorization.
+- ownership status: create and customer-list operations validate the requested customer `Guid`; another customer's order-by-id is hidden as not found. `Admin` or `customer:act` may act for another customer.
 
 ## Inventory API
 
@@ -102,8 +102,8 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - gateway route: `/gateway/hubs/notifications/{everything}`
 - hub: `/hubs/notifications`
 - client method: `notificationReceived`
-- protected route: the SignalR connection requires `AuthenticatedUser`.
-- ownership status: connection authentication active; customer group ownership enforcement pending.
+- protected route: the SignalR connection requires `AuthenticatedUser`; joining or leaving a customer group additionally requires owner-or-privileged authorization.
+- ownership status: normal users may join only the group for the customer `Guid` resolved by Identity `/api/v1/auth/me`; `Admin` or `customer:act` may act for another customer.
 
 ## Health APIs
 
@@ -115,4 +115,4 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 # TODO
 
 - Add request/response schemas for every endpoint.
-- Add authenticated customer ownership checks for Basket, Ordering, and Notification resources.
+- Add full HTTP/SignalR integration tests for negative customer ownership cases.

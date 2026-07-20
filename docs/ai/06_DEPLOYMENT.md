@@ -81,6 +81,8 @@ Docker Compose defines:
 
 `Observability__OtlpEndpoint` defaults to the Collector service address in Docker Compose. When running .NET services directly on the host, set it to `http://localhost:4317`. `Observability__RedactionEnabled` defaults to `true` and applies the shared trace-tag and structured-log-attribute processors before export. Grafana anonymous Viewer access and Loki's disabled authentication are enabled only for this local development stack. Production backends, authentication, TLS, message-body redaction, and retention remain environment-specific TODOs.
 
+Basket, Ordering, and Notification use `IdentityClient__BaseUrl` for authenticated customer ownership resolution and `IdentityClient__TimeoutSeconds` for a bounded fail-closed lookup, defaulting to 5 seconds. Direct host execution defaults to `http://localhost:5090`; Docker Compose injects `http://identity-api:8080`. A deployed environment must set this to the trusted internal Identity API address and must not route the forwarded user token to an untrusted host.
+
 ## Managed Grafana Cloud
 
 The shared observability registration supports the standard OpenTelemetry environment variables:
@@ -114,7 +116,7 @@ See [[07_SECURITY#Secrets]].
 - `scripts/run-migrations.ps1`: applies EF Core migrations and stops immediately when any service migration fails; callers on clean machines must restore `ECommerce.sln` dependencies first.
 - `scripts/smoke-test.ps1`: gateway health plus basic user/inventory/order probe; the full probe reads `RuntimeChecks__AccessToken`, while `-SkipWorkflowProbe` needs no token. Every health request logs its component name and exact URL so readiness failures identify the rejected or unavailable route.
 - `scripts/wait-for-runtime.ps1`: retries the health-only smoke test until the gateway and all downstream APIs are reachable or a bounded timeout expires.
-- `scripts/request-runtime-access-token.ps1`: exchanges the Infisical-injected Auth0 M2M client ID/secret for a short-lived API token with requested scope `inventory:write`; masks and persists the token through `GITHUB_ENV` without printing it.
+- `scripts/request-runtime-access-token.ps1`: exchanges the Infisical-injected Auth0 M2M client ID/secret for a short-lived API token with requested scopes `inventory:write customer:act`; masks and persists the token through `GITHUB_ENV` without printing it.
 - `scripts/workflow-check.ps1`: end-to-end order workflow verification; reads `RuntimeChecks__AccessToken`, accepts `-Scenario`, logs non-sensitive scenario/probe progress and the exception type/message on failure, and reports success or failure through the process exit code.
 - `scripts/start-local.ps1`: Docker local startup helper.
 - `scripts/validate-local.ps1`: repo validation, including URI-style and ODBC/Npgsql-style credential-bearing connection-string detection.
@@ -125,7 +127,7 @@ See [[07_SECURITY#Secrets]].
 - project: `tools/ECommerce.RuntimeChecks`
 - purpose: create orders and verify success plus deterministic compensation state across Ordering, Saga, Inventory, Payment, Shipping, and Notification.
 - database probes: reuse `ECommerce.BuildingBlocks.Persistence.PostgresConnectionString.Normalize`, so both Neon-style `postgresql://` URIs and native Npgsql connection strings are accepted without logging either value.
-- authorization: Inventory seeding accepts either an Auth0 user token with the `Admin` role or an M2M token with exact permission `inventory:write`. Trusted CI stores `RuntimeChecks__Auth0ClientId` and secret `RuntimeChecks__Auth0ClientSecret` in Infisical and generates `RuntimeChecks__AccessToken` at job runtime; local manual probes may still inject a valid access token directly.
+- authorization: Inventory seeding accepts either an Auth0 user token with the `Admin` role or an M2M token with exact permission `inventory:write`. Ownership-protected order creation additionally requires the exact `customer:act` permission because the workflow acts for its isolated registered customer. Auth0 must grant both permissions only to the dedicated runtime M2M application. Trusted CI stores `RuntimeChecks__Auth0ClientId` and secret `RuntimeChecks__Auth0ClientSecret` in Infisical and generates `RuntimeChecks__AccessToken` at job runtime; local manual probes may still inject a valid access token directly.
 - CLI scenarios: `all` (default), `success`, `inventory-failure`, `payment-failure`, `shipping-failure`.
 - `success`: expects confirmed order, completed saga, authorized payment, created shipment, and notification persistence.
 - `inventory-failure`: orders a product without an inventory row and expects failed reservation plus cancelled saga/order.
@@ -152,7 +154,7 @@ Trusted runtime workflow: `.github/workflows/runtime-integration.yml`.
 - protection boundary: the job targets the `runtime-integration` GitHub environment and never runs for pull requests.
 - secret injection: `Infisical/secrets-action` exchanges GitHub's short-lived OIDC token for the fixed Infisical `staging` environment; no long-lived Infisical credential is stored in GitHub. The `staging` root imports shared `dev` values and locally overrides every `ConnectionStrings__*Db` key with a connection to the Neon `runtime-integration` child branch.
 - configuration: GitHub environment variables `INFISICAL_IDENTITY_ID` and `INFISICAL_PROJECT_SLUG` identify the Infisical machine identity and project; both are non-secret identifiers.
-- execution: validate required variables and the non-sensitive GitHub OIDC issuer/audience/subject claims without logging the JWT, obtain a short-lived Auth0 `inventory:write` M2M token, restore solution dependencies and the local EF tool, apply all migrations with fail-fast exit-code handling, build/start the application Compose graph, wait for health, and execute the selected saga scenario.
+- execution: validate required variables and the non-sensitive GitHub OIDC issuer/audience/subject claims without logging the JWT, obtain a short-lived Auth0 `inventory:write customer:act` M2M token, restore solution dependencies and the local EF tool, apply all migrations with fail-fast exit-code handling, build/start the application Compose graph, wait for health, and execute the selected saga scenario.
 - cleanup: print bounded container diagnostics only on failure and always remove containers and local volumes.
 - database isolation: the Neon `runtime-integration` branch contains all nine PostgreSQL databases and isolates migrations and probe records from its `production` parent. All nine local Infisical connection overrides are required to prevent imported development connections from being used.
 - Infisical OIDC trust is restricted to GitHub's immutable owner/repository identity plus the exact environment. For this repository the subject is `repo:deniz1976@96434352/ecommerce-microservices@1302913896:environment:runtime-integration`; the numeric IDs remain stable if either display name changes.

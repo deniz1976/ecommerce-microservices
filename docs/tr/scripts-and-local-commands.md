@@ -129,7 +129,7 @@ Belirlenen sure dolarsa son health hatasiyla birlikte basarisiz olur. Gerektigin
 
 ## request-runtime-access-token.ps1
 
-`Auth__Authority` ve `Auth__Audience` icin `inventory:write` isteyen kisa omurlu Auth0 Client Credentials token'i alir. `RuntimeChecks__Auth0ClientId` ve `RuntimeChecks__Auth0ClientSecret` degerlerini okur, token'i yazdirmaz ve mevcut process ya da sonraki GitHub Actions adimlari icin `RuntimeChecks__AccessToken` olarak aktarir.
+`Auth__Authority` ve `Auth__Audience` icin `inventory:write customer:act` isteyen kisa omurlu Auth0 Client Credentials token'i alir. Ilk izin test stoklarini hazirlar; ikinci izin otomasyonun `Admin` olmadan izole test musterisi adina siparis olusturmasini saglar. `RuntimeChecks__Auth0ClientId` ve `RuntimeChecks__Auth0ClientSecret` degerlerini okur, token'i yazdirmaz ve mevcut process ya da sonraki GitHub Actions adimlari icin `RuntimeChecks__AccessToken` olarak aktarir.
 
 Workflow checker gizli olmayan senaryo ve probe ilerlemesini yazdirir. Hata durumunda exception turunu ve mesajini gosterir; access token'i veya veritabani connection string'lerini yazdirmaz.
 Dogudan PostgreSQL probe'lari, ortak persistence normalizer'ini kullanarak hem Neon `postgresql://` URI bicimini hem de yerel Npgsql connection string bicimini kabul eder.

@@ -33,6 +33,7 @@ Own order records and order status.
 
 - [[../../../docs/ai/03_DATABASES#OrderingDb]]
 - [[../../../docs/ai/04_EVENTS#Message Contracts]]
+- Identity `GET /api/v1/auth/me` for trusted Auth0 `sub` to local customer `Guid` resolution.
 - MassTransit EF outbox/inbox
 
 # Database
@@ -73,13 +74,15 @@ See [[../../../docs/ai/05_APIS#Ordering API]].
 
 - `ConnectionStrings__OrderingDb`
 - `RabbitMq__ConnectionString`
+- `IdentityClient__BaseUrl`
+- `IdentityClient__TimeoutSeconds`
 
 # Design Decisions
 
 Order workflow orchestration is delegated to [[../OrderingSaga/AI#Purpose]].
 MassTransit receive endpoints use the `ordering-` service prefix so their queues cannot collide with same-named consumers in another service.
 
-Every Ordering HTTP route requires the shared `AuthenticatedUser` policy. Cross-customer ownership enforcement remains pending until Auth0 `sub` can be resolved to the local Identity `Guid` without trusting a caller-supplied customer id.
+Every Ordering HTTP route requires the shared `AuthenticatedUser` policy and customer ownership authorization. Creation and customer-list queries reject a caller-supplied customer `Guid` that differs from Identity `/api/v1/auth/me`; an order-by-id owned by another customer is returned as not found. `Admin` or the narrow `customer:act` automation permission may act for another customer. Identity resolution fails closed.
 
 # Future Improvements
 

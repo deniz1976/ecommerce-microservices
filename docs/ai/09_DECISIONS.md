@@ -89,7 +89,7 @@ Track architectural decisions as stable graph nodes.
 - status: active
 - decision: service APIs require an authenticated user through a shared fallback policy unless an endpoint explicitly uses `AllowAnonymous`; Ocelot independently applies global Bearer authentication with the same public allow-list.
 - reason: endpoint-level opt-in allowed new business routes to be exposed when authorization metadata was forgotten.
-- consequence: health checks, Catalog reads, Inventory reads, and Identity registration are explicitly public; Basket, Ordering, and Notification SignalR require authentication. Service hosts register authentication and ASP.NET fallback authorization, while the gateway registers authentication only and defers route authorization to Ocelot so minimal hosting cannot apply the service fallback before route selection. Contract tests verify the registration boundary, fallback policy, endpoint metadata, and both gateway configurations. Resource ownership remains a separate mandatory control.
+- consequence: health checks, Catalog reads, Inventory reads, and Identity registration are explicitly public; Basket, Ordering, and Notification SignalR require authentication and separately enforce customer ownership. Service hosts register authentication and ASP.NET fallback authorization, while the gateway registers authentication only and defers route authorization to Ocelot so minimal hosting cannot apply the service fallback before route selection. Contract tests verify the registration boundary, fallback policy, endpoint metadata, and both gateway configurations.
 - related: [[07_SECURITY#Authorization]], [[05_APIS#API Catalog]]
 
 ## decision-auth0-centered-login
@@ -186,10 +186,19 @@ Track architectural decisions as stable graph nodes.
 
 - id: `decision-runtime-m2m-permission`
 - status: active
-- decision: trusted runtime verification obtains a short-lived Auth0 Client Credentials token and grants it only `inventory:write`; the shared `Admin` policy remains role-only.
-- reason: storing expiring administrator user tokens is unreliable, while granting an M2M client the full administrator role would exceed the workflow's actual need to seed inventory.
-- consequence: Inventory upsert uses the `InventoryWrite` policy (`Admin` role or exact permission), Auth0 must define and grant `inventory:write` to the dedicated M2M application, and its client secret remains only in Infisical.
+- decision: trusted runtime verification obtains a short-lived Auth0 Client Credentials token with only `inventory:write` and `customer:act`; the shared `Admin` policy remains role-only.
+- reason: storing expiring administrator user tokens is unreliable, while granting an M2M client the full administrator role would exceed the workflow's needs to seed inventory and create orders for its isolated test customer.
+- consequence: Inventory upsert uses `inventory:write`; customer ownership checks accept `customer:act`. Auth0 must define and grant both exact permissions only to the dedicated runtime M2M application, normal users must never receive `customer:act`, and the client secret remains only in Infisical.
 - related: [[05_APIS#Inventory API]], [[06_DEPLOYMENT#Runtime Checks]], [[07_SECURITY#Authorization]]
+
+## decision-customer-resource-ownership
+
+- id: `decision-customer-resource-ownership`
+- status: active
+- decision: Basket, Ordering, and Notification forward the caller's original Bearer token to Identity `/api/v1/auth/me`, resolve the external Auth0 identity to the local user `Guid`, and enforce owner-or-explicit-delegate access at every customer resource boundary.
+- reason: customer resources store a local Identity `Guid`, while Auth0 access tokens identify the caller by external `sub`; trusting a route or request-body `customerId` allows cross-customer access.
+- consequence: the three services depend synchronously on the Identity API through `IdentityClient__BaseUrl` and fail closed when resolution fails. `Admin` and exact `customer:act` permission bypass lookup; another customer's order-by-id is hidden as not found. SignalR query tokens are forwarded only from `/hubs/notifications`. Contract tests cover mapping, failure, delegation, query-token restriction, and endpoint adoption.
+- related: [[05_APIS#Basket API]], [[05_APIS#Ordering API]], [[05_APIS#Notification SignalR]], [[07_SECURITY#Authorization]]
 
 # TODO
 

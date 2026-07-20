@@ -27,9 +27,15 @@ public static class OrderEndpoints
     private static async Task<IResult> CreateAsync(
         CreateOrderRequest request,
         OrderService orderService,
+        ICustomerOwnershipAuthorizer ownershipAuthorizer,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
+        if (!await ownershipAuthorizer.CanAccessAsync(request.CustomerId, cancellationToken))
+        {
+            return Results.Forbid();
+        }
+
         Guid correlationId = CorrelationReader.Read(httpContext);
         Guid? causationId = CausationReader.Read(httpContext);
         Result<OrderResponse> result = await orderService.CreateAsync(request, correlationId, causationId, cancellationToken);
@@ -39,14 +45,35 @@ public static class OrderEndpoints
             : Results.Created($"/api/v1/orders/{result.Value!.Id}", result.Value);
     }
 
-    private static async Task<IResult> GetByIdAsync(Guid id, OrderService orderService, HttpContext httpContext, CancellationToken cancellationToken)
+    private static async Task<IResult> GetByIdAsync(
+        Guid id,
+        OrderService orderService,
+        ICustomerOwnershipAuthorizer ownershipAuthorizer,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
     {
         Result<OrderResponse> result = await orderService.GetByIdAsync(id, cancellationToken);
+        if (!result.IsFailure &&
+            !await ownershipAuthorizer.CanAccessAsync(result.Value!.CustomerId, cancellationToken))
+        {
+            return Results.NotFound();
+        }
+
         return OrderResults.FromResult(result, httpContext);
     }
 
-    private static async Task<IResult> GetByCustomerIdAsync(Guid customerId, OrderService orderService, HttpContext httpContext, CancellationToken cancellationToken)
+    private static async Task<IResult> GetByCustomerIdAsync(
+        Guid customerId,
+        OrderService orderService,
+        ICustomerOwnershipAuthorizer ownershipAuthorizer,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
     {
+        if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
+        {
+            return Results.Forbid();
+        }
+
         Result<IReadOnlyCollection<OrderResponse>> result = await orderService.GetByCustomerIdAsync(customerId, cancellationToken);
         return OrderResults.FromResult(result, httpContext);
     }

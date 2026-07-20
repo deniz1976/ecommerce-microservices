@@ -30,8 +30,18 @@ public static class BasketEndpoints
         return endpoints;
     }
 
-    private static async Task<IResult> GetAsync(Guid customerId, BasketService basketService, HttpContext httpContext, CancellationToken cancellationToken)
+    private static async Task<IResult> GetAsync(
+        Guid customerId,
+        BasketService basketService,
+        ICustomerOwnershipAuthorizer ownershipAuthorizer,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
     {
+        if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
+        {
+            return Results.Forbid();
+        }
+
         Result<BasketResponse> result = await basketService.GetAsync(customerId, cancellationToken);
         return BasketResults.FromResult(result, httpContext);
     }
@@ -40,9 +50,15 @@ public static class BasketEndpoints
         Guid customerId,
         AddBasketItemRequest request,
         BasketService basketService,
+        ICustomerOwnershipAuthorizer ownershipAuthorizer,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
+        if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
+        {
+            return Results.Forbid();
+        }
+
         Result<BasketResponse> result = await basketService.AddItemAsync(customerId, request, cancellationToken);
         return BasketResults.FromResult(result, httpContext);
     }
@@ -51,21 +67,46 @@ public static class BasketEndpoints
         Guid customerId,
         Guid productId,
         BasketService basketService,
+        ICustomerOwnershipAuthorizer ownershipAuthorizer,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
+        if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
+        {
+            return Results.Forbid();
+        }
+
         Result<BasketResponse> result = await basketService.RemoveItemAsync(customerId, productId, cancellationToken);
         return BasketResults.FromResult(result, httpContext);
     }
 
-    private static async Task<IResult> ClearAsync(Guid customerId, BasketService basketService, CancellationToken cancellationToken)
+    private static async Task<IResult> ClearAsync(
+        Guid customerId,
+        BasketService basketService,
+        ICustomerOwnershipAuthorizer ownershipAuthorizer,
+        CancellationToken cancellationToken)
     {
+        if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
+        {
+            return Results.Forbid();
+        }
+
         await basketService.ClearAsync(customerId, cancellationToken);
         return Results.NoContent();
     }
 
-    private static async Task<IResult> CheckoutAsync(Guid customerId, BasketService basketService, HttpContext httpContext, CancellationToken cancellationToken)
+    private static async Task<IResult> CheckoutAsync(
+        Guid customerId,
+        BasketService basketService,
+        ICustomerOwnershipAuthorizer ownershipAuthorizer,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
     {
+        if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
+        {
+            return Results.Forbid();
+        }
+
         Result<CheckoutBasketResponse> result = await basketService.CheckoutAsync(customerId, cancellationToken);
         return BasketResults.FromResult(result, httpContext);
     }

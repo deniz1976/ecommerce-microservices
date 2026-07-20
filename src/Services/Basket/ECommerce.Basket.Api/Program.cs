@@ -11,6 +11,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddECommerceLocalization();
 builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.Basket.Api");
 builder.Services.AddOidcReadySecurity(builder.Configuration);
+builder.Services.AddCustomerOwnership(builder.Configuration);
 builder.Services.AddBasketApplication();
 builder.Services.AddBasketInfrastructure(builder.Configuration);
 builder.Services.AddHealthChecks();

@@ -31,6 +31,7 @@ Own active basket state and checkout snapshot history.
 
 - [[../../../docs/ai/03_DATABASES#BasketDb]]
 - [[../../../docs/ai/03_DATABASES#Redis]]
+- Identity `GET /api/v1/auth/me` for trusted Auth0 `sub` to local customer `Guid` resolution.
 - StackExchange.Redis
 
 # Database
@@ -69,6 +70,8 @@ None.
 - `ConnectionStrings__BasketDb`
 - `Redis__ConnectionString`
 - `Redis__BasketTtlHours`
+- `IdentityClient__BaseUrl`
+- `IdentityClient__TimeoutSeconds`
 
 Redis configuration is validated during startup and is required. The service has no process-memory fallback.
 
@@ -76,7 +79,7 @@ Redis configuration is validated during startup and is required. The service has
 
 Active basket is in Redis; checkout history is in PostgreSQL. Missing Redis configuration fails startup to prevent silent data loss.
 
-Every Basket route requires the shared `AuthenticatedUser` policy. This closes anonymous access; matching the route `customerId` to the authenticated Auth0 identity remains pending because the token `sub` and local Identity `Guid` are different identifiers.
+Every Basket route requires the shared `AuthenticatedUser` policy and the shared customer ownership authorizer. Normal users may access only the local customer `Guid` resolved by forwarding their Bearer token to Identity `/api/v1/auth/me`; `Admin` or the narrow `customer:act` automation permission may act for another customer. Identity resolution fails closed.
 
 # Future Improvements
 

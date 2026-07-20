@@ -104,7 +104,7 @@ Copy `.env.example` to `.env` for local Docker-based development and fill in man
 
 CloudAMQP can be configured with `RabbitMq__ConnectionString` as a single `amqps://` URI, or with the split `RabbitMq__Host`, `RabbitMq__Port`, `RabbitMq__Username`, `RabbitMq__Password`, `RabbitMq__VirtualHost`, and `RabbitMq__UseSsl` values.
 
-Auth0 access tokens use `Auth__RoleClaimType` (default `https://ecommerce.local/claims/roles`) for API roles. Catalog mutations and arbitrary Identity user lookup require `Admin`; Inventory upsert accepts `Admin` or the narrow `inventory:write` permission. Trusted CI obtains a short-lived M2M token from Infisical-injected `RuntimeChecks__Auth0ClientId` and `RuntimeChecks__Auth0ClientSecret`; local probes may set `RuntimeChecks__AccessToken` directly. Health-only smoke checks need no token.
+Auth0 access tokens use `Auth__RoleClaimType` (default `https://ecommerce.local/claims/roles`) for API roles. Catalog mutations and arbitrary Identity user lookup require `Admin`; Inventory upsert accepts `Admin` or the narrow `inventory:write` permission. Basket, Ordering, and Notification resolve the caller through Identity and require customer ownership unless the token has `Admin` or the dedicated `customer:act` automation permission. Trusted CI obtains a short-lived M2M token with `inventory:write customer:act` from Infisical-injected `RuntimeChecks__Auth0ClientId` and `RuntimeChecks__Auth0ClientSecret`; normal users must never receive `customer:act`. Local probes may set `RuntimeChecks__AccessToken` directly. Health-only smoke checks need no token.
 
 Initial PostgreSQL databases:
 
@@ -183,4 +183,4 @@ The workflow check defaults to `all`, which runs success, inventory-failure, pay
 
 ## Next Phase
 
-Next phase is synchronizing Identity roles with Auth0 authorization roles, adding customer-resource ownership enforcement, and expanding automated integration tests around the order workflow.
+Next phase is synchronizing Identity roles with Auth0 authorization roles, adding seller/store ownership, and expanding automated API integration tests around authorization and the order workflow.

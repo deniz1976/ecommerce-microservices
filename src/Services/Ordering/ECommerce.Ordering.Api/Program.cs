@@ -14,6 +14,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddECommerceLocalization();
 builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.Ordering.Api");
 builder.Services.AddOidcReadySecurity(builder.Configuration);
+builder.Services.AddCustomerOwnership(builder.Configuration);
 builder.Services.AddOrderingApplication();
 builder.Services.AddOrderingInfrastructure(builder.Configuration);
 builder.Services.AddECommerceMassTransit(

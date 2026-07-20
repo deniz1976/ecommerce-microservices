@@ -31,6 +31,7 @@ Own notification history and real-time SignalR delivery.
 - [[../../../docs/ai/03_DATABASES#NotificationDb]]
 - [[../../../docs/ai/04_EVENTS#Message Contracts]]
 - SignalR
+- Identity `GET /api/v1/auth/me` for trusted Auth0 `sub` to local customer `Guid` resolution.
 
 # Database
 
@@ -71,13 +72,15 @@ None.
 
 - `ConnectionStrings__NotificationDb`
 - `RabbitMq__ConnectionString`
+- `IdentityClient__BaseUrl`
+- `IdentityClient__TimeoutSeconds`
 
 # Design Decisions
 
 Notification history is durable; live SignalR delivery is best-effort.
 MassTransit receive endpoints use the `notification-` service prefix, giving Notification its own event subscription instead of competing with same-named Saga consumers.
 
-SignalR connections require the shared `AuthenticatedUser` policy. Joining a customer group is not yet treated as proof of ownership; authenticated identity-to-local-customer mapping must be added before group membership is considered fully authorized.
+SignalR connections require the shared `AuthenticatedUser` policy. Joining or leaving a customer group additionally resolves the caller through Identity `/api/v1/auth/me` and permits only the matching local customer `Guid`; `Admin` or the narrow `customer:act` automation permission may act for another customer. Browser query-string tokens are forwarded only from the notification hub path, matching the JWT handler restriction. Identity resolution fails closed.
 
 # Future Improvements
 

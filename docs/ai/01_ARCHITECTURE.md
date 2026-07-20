@@ -63,7 +63,7 @@ Services do not share business tables. Cross-service workflow is expressed throu
 
 - Endpoint authorization is policy-based and intentionally opt-in so health and public query endpoints remain anonymous. Privileged Catalog, Inventory, and Identity operations require the Auth0 `Admin` role claim.
 - Identity database roles are not yet synchronized automatically into Auth0 access-token role claims.
-- Basket, Ordering, and Notification customer-resource ownership enforcement is still TODO.
+- Basket, Ordering, and Notification resolve the authenticated Auth0 identity through Identity `/api/v1/auth/me` and enforce local customer `Guid` ownership; only `Admin` or the narrow `customer:act` automation permission bypasses the owner check.
 - Payment provider behavior is mock/in-process.
 - Shipping uses a provider abstraction backed by a configurable in-process mock provider.
 - Local Jaeger storage is in-memory and intended for development diagnostics, not durable production retention.

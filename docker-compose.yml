@@ -1,5 +1,6 @@
 x-api-env: &api-env
   ASPNETCORE_ENVIRONMENT: Docker
+  IdentityClient__BaseUrl: http://identity-api:8080
 
 x-worker-env: &worker-env
   DOTNET_ENVIRONMENT: Docker

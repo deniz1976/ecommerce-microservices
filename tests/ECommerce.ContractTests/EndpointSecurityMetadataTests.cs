@@ -51,6 +51,29 @@ public sealed class EndpointSecurityMetadataTests
         AssertPolicyOnEveryRoute(app, "/hubs/notifications", AuthorizationPolicies.AuthenticatedUser);
     }
 
+    [Theory]
+    [InlineData("Basket", "ECommerce.Basket.Api", "Baskets", "BasketEndpoints.cs", 5)]
+    [InlineData("Ordering", "ECommerce.Ordering.Api", "Orders", "OrderEndpoints.cs", 3)]
+    [InlineData("Notification", "ECommerce.Notification.Api", "Hubs", "NotificationsHub.cs", 1)]
+    public void CustomerResourceEndpointsEnforceOwnership(
+        string service,
+        string project,
+        string feature,
+        string fileName,
+        int expectedCheckCount)
+    {
+        string root = FindRepositoryRoot();
+        string sourcePath = Path.Combine(root, "src", "Services", service, project, feature, fileName);
+        string programPath = Path.Combine(root, "src", "Services", service, project, "Program.cs");
+        string source = File.ReadAllText(sourcePath);
+        string program = File.ReadAllText(programPath);
+
+        Assert.Equal(
+            expectedCheckCount,
+            source.Split(".CanAccessAsync(", StringSplitOptions.None).Length - 1);
+        Assert.Contains("builder.Services.AddCustomerOwnership(builder.Configuration);", program, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void DocumentedPublicServiceRoutesExplicitlyAllowAnonymous()
     {
@@ -75,6 +98,7 @@ public sealed class EndpointSecurityMetadataTests
         builder.Services.AddScoped<UserService>();
         builder.Services.AddScoped<InventoryService>();
         builder.Services.AddScoped<OrderService>();
+        builder.Services.AddSingleton<ICustomerOwnershipAuthorizer, AllowAllCustomerOwnershipAuthorizer>();
         return builder.Build();
     }
 
@@ -104,5 +128,34 @@ public sealed class EndpointSecurityMetadataTests
         return ((IEndpointRouteBuilder)app).DataSources
             .SelectMany(source => source.Endpoints)
             .OfType<RouteEndpoint>();
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        DirectoryInfo? directory = new(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "ECommerce.sln")))
+        {
+            directory = directory.Parent;
+        }
+
+        return directory?.FullName
+            ?? throw new DirectoryNotFoundException("Repository root containing ECommerce.sln was not found.");
+    }
+
+    private sealed class AllowAllCustomerOwnershipAuthorizer : ICustomerOwnershipAuthorizer
+    {
+        public Task<bool> CanAccessAsync(Guid customerId, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> CanAccessAsync(
+            Guid customerId,
+            System.Security.Claims.ClaimsPrincipal? principal,
+            string? accessToken,
+            CancellationToken cancellationToken)
+        {
+            return Task.FromResult(true);
+        }
     }
 }
