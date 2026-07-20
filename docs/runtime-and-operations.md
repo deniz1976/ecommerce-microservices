@@ -331,6 +331,8 @@ Not recommended for production:
 
 `.github/workflows/runtime-integration.yml` is a manually triggered managed-environment test. It targets the protected GitHub environment `runtime-integration`, obtains short-lived access to Infisical through GitHub OIDC, restores the solution dependencies and local EF tool, applies all EF migrations, starts the application Compose graph, waits for downstream health, and runs the selected success or compensation scenario. The migration script stops at the first failed service instead of continuing with a partially migrated environment.
 
+Secret injection uses `Infisical/secrets-action@v1.0.16`. The upgrade from `v1.0.9` keeps the same OIDC inputs while moving the action away from GitHub's deprecated Node 20 runtime.
+
 The workflow always reads the Infisical `staging` environment; callers cannot select `dev` or `prod`. The `staging` root imports shared values from Infisical `dev` and defines local overrides for all nine `ConnectionStrings__*Db` keys. Those overrides target the Neon `runtime-integration` child branch of `production`. A Neon branch contains all project databases, so migrations and workflow records remain isolated from the parent branch. Keep the import and all nine local overrides together; a missing override would fall back to the imported development connection.
 
 Before contacting Infisical, the job decodes only the non-sensitive `iss`, `aud`, and `sub` claims from its GitHub OIDC token, prints those three values, and asserts the exact repository/environment trust boundary. The JWT itself is never logged.

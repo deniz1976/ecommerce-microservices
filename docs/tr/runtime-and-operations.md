@@ -121,6 +121,8 @@ Production ortamda migration adimi CI/CD pipeline icinde kontrollu calistirilmal
 
 `.github/workflows/runtime-integration.yml` yalnizca elle tetiklenen managed-environment testidir. Korumali `runtime-integration` GitHub environment'ini kullanir, GitHub OIDC ile Infisical'dan kisa omurlu secret erisimi alir, solution bagimliliklarini ve yerel EF aracini restore eder, tum EF migration'larini uygular, application Compose graph'ini baslatir, servislerin hazir olmasini bekler ve secilen basari veya compensation senaryosunu calistirir. Migration script'i bir servis basarisiz oldugunda kismen migrate edilmis bir ortamla devam etmek yerine hemen durur.
 
+Secret injection `Infisical/secrets-action@v1.0.16` kullanir. `v1.0.9` surumunden bu gecis ayni OIDC girdilerini korurken GitHub'in deprecated Node 20 runtime warning'ini kaldirir.
+
 Workflow her zaman Infisical `staging` environment'ini okur; calistiran kisi `dev` veya `prod` secemez. `staging` kok dizini ortak degerleri Infisical `dev` ortamindan import eder ve dokuz `ConnectionStrings__*Db` anahtarinin tamamini yerel degerlerle override eder. Bu override'lar Neon `production` dalinin `runtime-integration` child branch'ini hedefler. Tek bir Neon branch proje icindeki tum veritabanlarini tasidigi icin migration ve workflow kayitlari parent branch'ten yalitilir. Import ile dokuz yerel override birlikte korunmalidir; eksik bir override Development baglantisina geri duser.
 
 Job, Infisical'a baglanmadan once GitHub OIDC token'indan yalnizca gizli olmayan `iss`, `aud` ve `sub` claim'lerini cozer, bu uc degeri yazdirir ve kesin repository/environment guven sinirini dogrular. JWT'nin kendisi loglanmaz.

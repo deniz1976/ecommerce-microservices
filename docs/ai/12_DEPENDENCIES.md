@@ -84,6 +84,10 @@ Key packages:
 - Jaeger storage mode: in-memory local development.
 - Loki, Prometheus, and Grafana storage: named local Docker volumes.
 
+# Workflow Actions
+
+- `Infisical/secrets-action@v1.0.16`: OIDC-authenticated runtime secret injection using the current GitHub Actions Node runtime.
+
 # TODO
 
 - Generate exact project-reference graph automatically.

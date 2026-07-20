@@ -89,7 +89,7 @@ jobs:
           }
 
       - name: Fetch runtime secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.9
+        uses: Infisical/secrets-action@v1.0.16
         with:
           method: oidc
           identity-id: ${{ vars.INFISICAL_IDENTITY_ID }}
