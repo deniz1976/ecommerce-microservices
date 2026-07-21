@@ -14,13 +14,4 @@ public sealed class EndpointNameFormatterTests
         Assert.Equal("notification-order-submitted", notificationFormatter.Consumer<OrderSubmittedConsumer>());
     }
 
-    private sealed class OrderSubmittedConsumer : IConsumer<TestMessage>
-    {
-        public Task Consume(ConsumeContext<TestMessage> context)
-        {
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed record TestMessage;
 }

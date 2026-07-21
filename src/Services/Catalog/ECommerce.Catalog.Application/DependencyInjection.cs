@@ -9,6 +9,9 @@ public static class DependencyInjection
     public static IServiceCollection AddCatalogApplication(this IServiceCollection services)
     {
         services.AddScoped<ProductService>();
+        services.AddScoped<IProductStoreAccessValidator, ProductStoreAccessValidator>();
+        services.AddScoped<IProductReferenceValidator, ProductReferenceValidator>();
+        services.AddScoped<IProductImageAttacher, ProductImageAttacher>();
         services.AddScoped<StoreService>();
         return services;
     }

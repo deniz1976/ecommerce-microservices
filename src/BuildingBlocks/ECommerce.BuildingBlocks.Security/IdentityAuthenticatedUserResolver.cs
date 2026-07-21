@@ -76,6 +76,4 @@ public sealed class IdentityAuthenticatedUserResolver : IAuthenticatedUserResolv
             return null;
         }
     }
-
-    private sealed record IdentityProfile(Guid Id);
 }

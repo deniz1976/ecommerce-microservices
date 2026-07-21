@@ -218,6 +218,15 @@ Track architectural decisions as stable graph nodes.
 - consequence: Catalog synchronously resolves the caller through Identity `/api/v1/auth/me` and fails closed when resolution fails. Store owner is never client-controlled, store ownership is immutable in the initial API, product `store_id` is nullable only for backward compatibility/admin platform products, and seller product writes use `SellerOrAdmin` plus an application-layer ownership check.
 - related: [[03_DATABASES#CatalogDb]], [[05_APIS#Catalog API]], [[07_SECURITY#Authorization]]
 
+## decision-single-type-solid-boundaries
+
+- id: `decision-single-type-solid-boundaries`
+- status: active
+- decision: every C# source file contains at most one declared type, and responsibility-heavy coordinators delegate focused work through interfaces or scenario strategies.
+- reason: explicit type locations improve navigation and review, while separating independently changing validation, external-token, and runtime-scenario concerns prevents coordinators from accumulating unrelated reasons to change.
+- consequence: local validation rejects multiple class, record, interface, enum, struct, or delegate declarations in one file, including nested test helpers. Catalog product orchestration delegates store access, reference validation, and image attachment; Auth0 role synchronization delegates Management API token lifecycle; runtime verification composes one strategy per scenario. Cohesive aggregates and composition roots remain intact when they have one reason to change.
+- related: [[08_CODING_RULES#Coding Rules]], [[06_DEPLOYMENT#Runtime Checks]], [[../../src/Services/Catalog/AI#Design Decisions]], [[../../src/Services/Identity/AI#Design Decisions]]
+
 # TODO
 
 - Add decision dates once ADR workflow is formalized.

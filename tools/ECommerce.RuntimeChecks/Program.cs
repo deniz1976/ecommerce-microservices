@@ -1,4 +1,6 @@
 using ECommerce.RuntimeChecks.Configuration;
+using ECommerce.RuntimeChecks.Clients;
+using ECommerce.RuntimeChecks.Probes;
 using ECommerce.RuntimeChecks.Services;
 
 using var cancellationSource = new CancellationTokenSource();
@@ -13,7 +15,17 @@ try
 {
     RuntimeCheckOptions options = RuntimeCheckOptions.Parse(args);
     using HttpClient httpClient = new();
-    WorkflowCheckRunner runner = new(httpClient, options);
+    IGatewayWorkflowClient gatewayClient = new GatewayWorkflowClient(httpClient, options.GatewayBaseUri, options.AccessToken);
+    IWorkflowProbe workflowProbe = new PostgresWorkflowProbe();
+    WorkflowScenarioContext scenarioContext = new(gatewayClient, workflowProbe, options);
+    IWorkflowScenarioCheck[] scenarioChecks =
+    [
+        new SuccessWorkflowScenarioCheck(scenarioContext),
+        new InventoryFailureWorkflowScenarioCheck(scenarioContext),
+        new PaymentFailureWorkflowScenarioCheck(scenarioContext),
+        new ShippingFailureWorkflowScenarioCheck(scenarioContext)
+    ];
+    WorkflowCheckRunner runner = new(gatewayClient, options, scenarioChecks);
 
     await runner.RunAsync(cancellationSource.Token);
 }

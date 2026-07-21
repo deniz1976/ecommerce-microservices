@@ -1,6 +1,5 @@
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Catalog.Application;
-using ECommerce.Catalog.Application.Images;
 using ECommerce.Catalog.Application.Products;
 using ECommerce.Catalog.Application.Stores;
 using ECommerce.Catalog.Domain;
@@ -86,10 +85,12 @@ public sealed class CatalogSellerOwnershipTests
             10m,
             "TRY",
             ProductStatus.Active);
+        FakeProductRepository products = new(platformProduct);
         ProductService service = new(
-            new FakeProductRepository(platformProduct),
-            new AlwaysValidImageService(),
-            new FakeStoreRepository());
+            products,
+            new ProductStoreAccessValidator(new FakeStoreRepository()),
+            new ProductReferenceValidator(products),
+            new ProductImageAttacher(new AlwaysValidImageService()));
 
         Result<ProductResponse> result = await service.UpdateAsync(
             platformProduct.Id,
@@ -122,10 +123,12 @@ public sealed class CatalogSellerOwnershipTests
             10m,
             "TRY",
             ProductStatus.Active);
+        FakeProductRepository products = new(product);
         ProductService service = new(
-            new FakeProductRepository(product),
-            new AlwaysValidImageService(),
-            new FakeStoreRepository(otherStore));
+            products,
+            new ProductStoreAccessValidator(new FakeStoreRepository(otherStore)),
+            new ProductReferenceValidator(products),
+            new ProductImageAttacher(new AlwaysValidImageService()));
 
         Result<ProductResponse> result = await service.UpdateAsync(
             product.Id,
@@ -163,7 +166,12 @@ public sealed class CatalogSellerOwnershipTests
 
     private static ProductService CreateService(FakeStoreRepository stores)
     {
-        return new ProductService(new FakeProductRepository(), new AlwaysValidImageService(), stores);
+        FakeProductRepository products = new();
+        return new ProductService(
+            products,
+            new ProductStoreAccessValidator(stores),
+            new ProductReferenceValidator(products),
+            new ProductImageAttacher(new AlwaysValidImageService()));
     }
 
     private static CreateProductRequest ProductRequest(Guid? storeId) => new(
@@ -177,60 +185,4 @@ public sealed class CatalogSellerOwnershipTests
         [new ProductTranslationInput("en", "Product", "Description")],
         []);
 
-    private sealed class FakeProductRepository : IProductRepository
-    {
-        private Product? product;
-
-        public FakeProductRepository(Product? product = null)
-        {
-            this.product = product;
-        }
-
-        public Task<PagedResult<Product>> SearchAsync(ProductListQuery query, CancellationToken cancellationToken) =>
-            Task.FromResult(new PagedResult<Product>([], 1, 20, 0));
-
-        public Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken) => Task.FromResult(product);
-
-        public Task<bool> CategoryExistsAsync(Guid categoryId, CancellationToken cancellationToken) => Task.FromResult(true);
-
-        public Task<bool> BrandExistsAsync(Guid brandId, CancellationToken cancellationToken) => Task.FromResult(true);
-
-        public void Add(Product value) => product = value;
-
-        public Task SaveChangesAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-    }
-
-    private sealed class FakeStoreRepository : IStoreRepository
-    {
-        private readonly Dictionary<Guid, Store> stores;
-
-        public FakeStoreRepository(params Store[] stores)
-        {
-            this.stores = stores.ToDictionary(x => x.Id);
-        }
-
-        public Store? Added { get; private set; }
-
-        public Task<Store?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
-            Task.FromResult(stores.GetValueOrDefault(id));
-
-        public Task<IReadOnlyCollection<Store>> GetByOwnerAsync(Guid ownerUserId, CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyCollection<Store>>(stores.Values.Where(x => x.OwnerUserId == ownerUserId).ToArray());
-
-        public Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken) =>
-            Task.FromResult(stores.Values.Any(x => x.Slug == slug));
-
-        public void Add(Store store)
-        {
-            Added = store;
-            stores.Add(store.Id, store);
-        }
-
-        public Task SaveChangesAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-    }
-
-    private sealed class AlwaysValidImageService : ICloudImageService
-    {
-        public Task<bool> ImageExistsAsync(string publicId, CancellationToken cancellationToken) => Task.FromResult(true);
-    }
 }

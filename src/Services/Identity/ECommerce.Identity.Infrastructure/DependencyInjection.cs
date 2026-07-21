@@ -46,6 +46,7 @@ public static class DependencyInjection
 
             client.Timeout = TimeSpan.FromSeconds(managementOptions.TimeoutSeconds);
         });
+        services.AddSingleton<IAuth0ManagementTokenProvider, Auth0ManagementTokenProvider>();
         services.Replace(ServiceDescriptor.Singleton<IExternalRoleSynchronizer, Auth0RoleSynchronizer>());
 
         return services;

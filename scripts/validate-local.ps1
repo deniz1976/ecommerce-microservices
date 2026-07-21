@@ -8,6 +8,8 @@ if (-not $SkipBuild) {
     dotnet build ECommerce.sln
 }
 
+& "$PSScriptRoot/validate-csharp-types.ps1" -Root (Split-Path $PSScriptRoot -Parent)
+
 Get-ChildItem scripts -Filter *.ps1 | ForEach-Object {
     $errors = $null
     $tokens = $null

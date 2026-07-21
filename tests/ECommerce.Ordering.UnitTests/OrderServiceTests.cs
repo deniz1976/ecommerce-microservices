@@ -9,7 +9,7 @@ public sealed class OrderServiceTests
     [Fact]
     public async Task CreateAsync_returns_validation_error_when_customer_id_is_empty()
     {
-        FakeOrderRepository repository = new();
+        OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
         OrderService service = new(repository, publisher);
 
@@ -27,7 +27,7 @@ public sealed class OrderServiceTests
     [Fact]
     public async Task CreateAsync_trims_shipping_fields_and_uppercases_country_code()
     {
-        FakeOrderRepository repository = new();
+        OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
         OrderService service = new(repository, publisher);
 
@@ -54,7 +54,7 @@ public sealed class OrderServiceTests
     [Fact]
     public async Task CreateAsync_publishes_before_saving_order()
     {
-        FakeOrderRepository repository = new();
+        OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
         OrderService service = new(repository, publisher);
 
@@ -84,59 +84,4 @@ public sealed class OrderServiceTests
             [new CreateOrderItemRequest(Guid.NewGuid(), "Test Product", 2, 12.50m, "USD")]);
     }
 
-    private sealed class FakeOrderRepository : IOrderRepository
-    {
-        public List<Order> Orders { get; } = [];
-
-        public int SaveCount { get; private set; }
-
-        public Task<Order?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(Orders.FirstOrDefault(x => x.Id == id));
-        }
-
-        public Task<IReadOnlyCollection<Order>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken)
-        {
-            IReadOnlyCollection<Order> orders = Orders.Where(x => x.CustomerId == customerId).ToArray();
-            return Task.FromResult(orders);
-        }
-
-        public void Add(Order order)
-        {
-            Orders.Add(order);
-        }
-
-        public Task SaveChangesAsync(CancellationToken cancellationToken)
-        {
-            SaveCount++;
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed class FakeOrderSubmittedPublisher : IOrderSubmittedPublisher
-    {
-        private readonly FakeOrderRepository repository;
-
-        public FakeOrderSubmittedPublisher(FakeOrderRepository repository)
-        {
-            this.repository = repository;
-        }
-
-        public int PublishCount { get; private set; }
-
-        public Guid? CorrelationId { get; private set; }
-
-        public Guid? CausationId { get; private set; }
-
-        public bool WasPublishedBeforeSave { get; private set; }
-
-        public Task PublishAsync(Order order, Guid correlationId, Guid? causationId, CancellationToken cancellationToken)
-        {
-            PublishCount++;
-            CorrelationId = correlationId;
-            CausationId = causationId;
-            WasPublishedBeforeSave = repository.SaveCount == 0;
-            return Task.CompletedTask;
-        }
-    }
 }

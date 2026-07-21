@@ -3,7 +3,7 @@ using Npgsql;
 
 namespace ECommerce.RuntimeChecks.Probes;
 
-internal sealed class PostgresWorkflowProbe
+internal sealed class PostgresWorkflowProbe : IWorkflowProbe
 {
     public async Task<bool> HasExpectedValueAsync<T>(
         string connectionName,

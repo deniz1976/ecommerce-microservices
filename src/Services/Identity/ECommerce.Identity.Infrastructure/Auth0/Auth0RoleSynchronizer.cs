@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using ECommerce.Identity.Application.Users;
 using ECommerce.Identity.Domain;
 using Microsoft.Extensions.Logging;
@@ -9,23 +8,23 @@ using Microsoft.Extensions.Options;
 
 namespace ECommerce.Identity.Infrastructure.Auth0;
 
-public sealed class Auth0RoleSynchronizer : IExternalRoleSynchronizer, IDisposable
+public sealed class Auth0RoleSynchronizer : IExternalRoleSynchronizer
 {
     public const string HttpClientName = "Auth0Management";
 
     private readonly IHttpClientFactory httpClientFactory;
+    private readonly IAuth0ManagementTokenProvider tokenProvider;
     private readonly Auth0ManagementOptions options;
     private readonly ILogger<Auth0RoleSynchronizer> logger;
-    private readonly SemaphoreSlim tokenLock = new(1, 1);
-    private string? accessToken;
-    private DateTimeOffset accessTokenExpiresAt;
 
     public Auth0RoleSynchronizer(
         IHttpClientFactory httpClientFactory,
+        IAuth0ManagementTokenProvider tokenProvider,
         IOptions<Auth0ManagementOptions> options,
         ILogger<Auth0RoleSynchronizer> logger)
     {
         this.httpClientFactory = httpClientFactory;
+        this.tokenProvider = tokenProvider;
         this.options = options.Value;
         this.logger = logger;
     }
@@ -47,7 +46,7 @@ public sealed class Auth0RoleSynchronizer : IExternalRoleSynchronizer, IDisposab
 
         try
         {
-            string token = await GetAccessTokenAsync(cancellationToken);
+            string token = await tokenProvider.GetAccessTokenAsync(cancellationToken);
             HttpClient client = httpClientFactory.CreateClient(HttpClientName);
             string userRolesPath = $"api/v2/users/{Uri.EscapeDataString(externalSubject)}/roles";
 
@@ -90,54 +89,6 @@ public sealed class Auth0RoleSynchronizer : IExternalRoleSynchronizer, IDisposab
         }
     }
 
-    public void Dispose()
-    {
-        tokenLock.Dispose();
-    }
-
-    private async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken)
-    {
-        if (accessToken is not null && accessTokenExpiresAt > DateTimeOffset.UtcNow.AddMinutes(1))
-        {
-            return accessToken;
-        }
-
-        await tokenLock.WaitAsync(cancellationToken);
-        try
-        {
-            if (accessToken is not null && accessTokenExpiresAt > DateTimeOffset.UtcNow.AddMinutes(1))
-            {
-                return accessToken;
-            }
-
-            HttpClient client = httpClientFactory.CreateClient(HttpClientName);
-            using HttpResponseMessage response = await client.PostAsJsonAsync("oauth/token", new
-            {
-                grant_type = "client_credentials",
-                client_id = options.ClientId,
-                client_secret = options.ClientSecret,
-                audience = $"https://{options.Domain}/api/v2/"
-            }, cancellationToken);
-
-            response.EnsureSuccessStatusCode();
-            TokenResponse token = await response.Content.ReadFromJsonAsync<TokenResponse>(cancellationToken)
-                ?? throw new HttpRequestException("Auth0 returned an empty token response.");
-
-            if (string.IsNullOrWhiteSpace(token.AccessToken) || token.ExpiresIn <= 0)
-            {
-                throw new HttpRequestException("Auth0 returned an invalid Management API token response.");
-            }
-
-            accessToken = token.AccessToken;
-            accessTokenExpiresAt = DateTimeOffset.UtcNow.AddSeconds(token.ExpiresIn);
-            return accessToken;
-        }
-        finally
-        {
-            tokenLock.Release();
-        }
-    }
-
     private string GetRoleId(string role)
     {
         return role switch
@@ -161,8 +112,4 @@ public sealed class Auth0RoleSynchronizer : IExternalRoleSynchronizer, IDisposab
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return request;
     }
-
-    private sealed record TokenResponse(
-        [property: JsonPropertyName("access_token")] string AccessToken,
-        [property: JsonPropertyName("expires_in")] int ExpiresIn);
 }

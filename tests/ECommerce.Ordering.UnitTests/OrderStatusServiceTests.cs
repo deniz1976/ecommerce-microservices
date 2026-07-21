@@ -8,7 +8,7 @@ public sealed class OrderStatusServiceTests
     [Fact]
     public async Task ConfirmAsync_marks_submitted_order_as_confirmed()
     {
-        FakeOrderRepository repository = new();
+        OrderStatusFakeOrderRepository repository = new();
         Order order = CreateOrder();
         repository.Add(order);
         OrderStatusService service = new(repository);
@@ -22,7 +22,7 @@ public sealed class OrderStatusServiceTests
     [Fact]
     public async Task CancelAsync_marks_submitted_order_as_cancelled()
     {
-        FakeOrderRepository repository = new();
+        OrderStatusFakeOrderRepository repository = new();
         Order order = CreateOrder();
         repository.Add(order);
         OrderStatusService service = new(repository);
@@ -36,7 +36,7 @@ public sealed class OrderStatusServiceTests
     [Fact]
     public async Task ConfirmAsync_does_not_change_cancelled_order()
     {
-        FakeOrderRepository repository = new();
+        OrderStatusFakeOrderRepository repository = new();
         Order order = CreateOrder();
         order.MarkCancelled();
         repository.Add(order);
@@ -51,7 +51,7 @@ public sealed class OrderStatusServiceTests
     [Fact]
     public async Task CancelAsync_does_not_change_confirmed_order()
     {
-        FakeOrderRepository repository = new();
+        OrderStatusFakeOrderRepository repository = new();
         Order order = CreateOrder();
         order.MarkConfirmed();
         repository.Add(order);
@@ -66,7 +66,7 @@ public sealed class OrderStatusServiceTests
     [Fact]
     public async Task ConfirmAsync_ignores_customer_mismatch()
     {
-        FakeOrderRepository repository = new();
+        OrderStatusFakeOrderRepository repository = new();
         Order order = CreateOrder();
         repository.Add(order);
         OrderStatusService service = new(repository);
@@ -93,32 +93,4 @@ public sealed class OrderStatusServiceTests
         return order;
     }
 
-    private sealed class FakeOrderRepository : IOrderRepository
-    {
-        private readonly List<Order> orders = [];
-
-        public int SaveCount { get; private set; }
-
-        public Task<Order?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(orders.FirstOrDefault(x => x.Id == id));
-        }
-
-        public Task<IReadOnlyCollection<Order>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken)
-        {
-            IReadOnlyCollection<Order> result = orders.Where(x => x.CustomerId == customerId).ToArray();
-            return Task.FromResult(result);
-        }
-
-        public void Add(Order order)
-        {
-            orders.Add(order);
-        }
-
-        public Task SaveChangesAsync(CancellationToken cancellationToken)
-        {
-            SaveCount++;
-            return Task.CompletedTask;
-        }
-    }
 }

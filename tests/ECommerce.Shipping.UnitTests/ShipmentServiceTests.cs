@@ -65,46 +65,4 @@ public sealed class ShipmentServiceTests
             "34000");
     }
 
-    private sealed class FakeShipmentRepository : IShipmentRepository
-    {
-        public Shipment? Shipment { get; private set; }
-
-        public int SaveChangesCount { get; private set; }
-
-        public Task<Shipment?> GetByOrderIdAsync(Guid orderId, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(Shipment?.OrderId == orderId ? Shipment : null);
-        }
-
-        public void Add(Shipment shipment)
-        {
-            Shipment = shipment;
-        }
-
-        public Task SaveChangesAsync(CancellationToken cancellationToken)
-        {
-            SaveChangesCount++;
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed class StubShippingProvider : IShippingProvider
-    {
-        private readonly ShippingProviderResult result;
-
-        public StubShippingProvider(ShippingProviderResult result)
-        {
-            this.result = result;
-        }
-
-        public int CallCount { get; private set; }
-
-        public Task<ShippingProviderResult> CreateAsync(
-            ShippingProviderRequest request,
-            CancellationToken cancellationToken)
-        {
-            CallCount++;
-            return Task.FromResult(result);
-        }
-    }
 }

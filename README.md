@@ -2,7 +2,7 @@
 
 Production-oriented e-commerce backend built with .NET 10, independent microservices, RabbitMQ through MassTransit, database-per-service persistence, saga orchestration, transactional outbox, localization, observability, and OAuth 2.0/OIDC-ready security.
 
-Detailed documentation starts at [docs/README.md](./docs/README.md). Turkish documentation starts at [docs/tr/README.md](./docs/tr/README.md). AI-first graph-ready documentation starts at [docs/ai/README.md](./docs/ai/README.md).
+Detailed documentation starts at [docs/README.md](./docs/README.md). Turkish documentation starts at [docs/tr/README.md](./docs/tr/README.md). AI-first graph-ready documentation starts at [docs/ai/README.md](./docs/ai/README.md). The repository-wide SOLID and C# type-layout review is recorded in [docs/solid-review.md](./docs/solid-review.md).
 
 ## Phase
 

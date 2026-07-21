@@ -5,7 +5,7 @@ using ECommerce.RuntimeChecks.Models;
 
 namespace ECommerce.RuntimeChecks.Clients;
 
-internal sealed class GatewayWorkflowClient
+internal sealed class GatewayWorkflowClient : IGatewayWorkflowClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 

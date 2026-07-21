@@ -20,7 +20,7 @@ public sealed class Auth0RoleSynchronizerTests
                 new HttpResponseMessage(HttpStatusCode.NoContent),
             _ => new HttpResponseMessage(HttpStatusCode.NotFound)
         });
-        using Auth0RoleSynchronizer synchronizer = CreateSynchronizer(handler);
+        Auth0RoleSynchronizer synchronizer = CreateSynchronizer(handler);
 
         bool result = await synchronizer.SynchronizeSelfServiceRoleAsync("auth0|user-1", "Customer", default);
 
@@ -48,7 +48,7 @@ public sealed class Auth0RoleSynchronizerTests
             "/oauth/token" => Json(HttpStatusCode.OK, "{\"access_token\":\"management-token\",\"expires_in\":3600}"),
             _ => new HttpResponseMessage(HttpStatusCode.Forbidden)
         });
-        using Auth0RoleSynchronizer synchronizer = CreateSynchronizer(handler);
+        Auth0RoleSynchronizer synchronizer = CreateSynchronizer(handler);
 
         bool result = await synchronizer.SynchronizeSelfServiceRoleAsync("github|user-2", "Seller", default);
 
@@ -60,7 +60,7 @@ public sealed class Auth0RoleSynchronizerTests
     public async Task DisabledSynchronizationDoesNotCallAuth0()
     {
         RecordingHandler handler = new(_ => throw new InvalidOperationException("Auth0 should not be called."));
-        using Auth0RoleSynchronizer synchronizer = CreateSynchronizer(handler, enabled: false);
+        Auth0RoleSynchronizer synchronizer = CreateSynchronizer(handler, enabled: false);
 
         bool result = await synchronizer.SynchronizeSelfServiceRoleAsync("auth0|user-3", "Customer", default);
 
@@ -72,7 +72,7 @@ public sealed class Auth0RoleSynchronizerTests
     public async Task MalformedTokenResponseFailsClosed()
     {
         RecordingHandler handler = new(_ => Json(HttpStatusCode.OK, "{}"));
-        using Auth0RoleSynchronizer synchronizer = CreateSynchronizer(handler);
+        Auth0RoleSynchronizer synchronizer = CreateSynchronizer(handler);
 
         bool result = await synchronizer.SynchronizeSelfServiceRoleAsync("auth0|user-4", "Customer", default);
 
@@ -87,17 +87,22 @@ public sealed class Auth0RoleSynchronizerTests
             BaseAddress = new Uri("https://tenant.auth0.com/")
         };
 
+        SingleHttpClientFactory httpClientFactory = new(client);
+        IOptions<Auth0ManagementOptions> options = Options.Create(new Auth0ManagementOptions
+        {
+            Enabled = enabled,
+            Domain = "tenant.auth0.com",
+            ClientId = "client-id",
+            ClientSecret = "client-secret",
+            CustomerRoleId = "customer-role",
+            SellerRoleId = "seller-role"
+        });
+        Auth0ManagementTokenProvider tokenProvider = new(httpClientFactory, options);
+
         return new Auth0RoleSynchronizer(
-            new SingleHttpClientFactory(client),
-            Options.Create(new Auth0ManagementOptions
-            {
-                Enabled = enabled,
-                Domain = "tenant.auth0.com",
-                ClientId = "client-id",
-                ClientSecret = "client-secret",
-                CustomerRoleId = "customer-role",
-                SellerRoleId = "seller-role"
-            }),
+            httpClientFactory,
+            tokenProvider,
+            options,
             NullLogger<Auth0RoleSynchronizer>.Instance);
     }
 
@@ -114,32 +119,4 @@ public sealed class Auth0RoleSynchronizerTests
         return (request.Method, request.Path, request.AuthorizationToken);
     }
 
-    private sealed class SingleHttpClientFactory(HttpClient client) : IHttpClientFactory
-    {
-        public HttpClient CreateClient(string name) => client;
-    }
-
-    private sealed class RecordingHandler(Func<HttpRequestMessage, HttpResponseMessage> responseFactory) : HttpMessageHandler
-    {
-        public List<RecordedRequest> Requests { get; } = [];
-
-        protected override async Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request,
-            CancellationToken cancellationToken)
-        {
-            Requests.Add(new RecordedRequest(
-                request.Method,
-                request.RequestUri?.AbsolutePath ?? string.Empty,
-                request.Headers.Authorization?.Parameter,
-                request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken)));
-
-            return responseFactory(request);
-        }
-    }
-
-    private sealed record RecordedRequest(
-        HttpMethod Method,
-        string Path,
-        string? AuthorizationToken,
-        string Body);
 }

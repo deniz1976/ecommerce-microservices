@@ -61,6 +61,8 @@ None.
 - `AuthEndpoints`
 - `UserEndpoints`
 - `UserService`
+- `Auth0RoleSynchronizer`
+- `Auth0ManagementTokenProvider`
 - `PasswordHashService`
 - `UserRepository`
 - `IdentityDbContext`
@@ -103,6 +105,8 @@ Public registration explicitly uses `AllowAnonymous`; the shared fallback policy
 The API authorization role is read from the namespaced Auth0 token claim configured by `Auth__RoleClaimType`. When `Auth0Management__Enabled=true`, authenticated onboarding removes the opposite self-service Auth0 role, assigns the selected role, and only then commits the same role locally. Auth0 failure returns a retryable service-unavailable response and leaves the local onboarding role unchanged. The frontend bypasses its token cache after a successful change so the next access token contains the new role claim.
 
 The Management API client is separate from the runtime-test M2M client and receives only the scopes needed to update user role membership. `Admin` remains outside self-service synchronization and requires controlled operational assignment.
+
+`Auth0RoleSynchronizer` owns role-membership synchronization only. `Auth0ManagementTokenProvider` separately owns Client Credentials exchange, caching, expiry, and concurrent refresh so token lifecycle changes do not alter role policy code.
 
 # Future Improvements
 

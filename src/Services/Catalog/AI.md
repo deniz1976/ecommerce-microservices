@@ -58,6 +58,9 @@ None.
 - `ProductEndpoints`
 - `StoreEndpoints`
 - `ProductService`
+- `ProductStoreAccessValidator`
+- `ProductReferenceValidator`
+- `ProductImageAttacher`
 - `StoreService`
 - `ProductRepository`
 - `CatalogDbContext`
@@ -83,6 +86,8 @@ None.
 # Design Decisions
 
 Catalog does not own inventory. See [[../../../docs/ai/09_DECISIONS#decision-database-per-service]]. Seller ownership uses the local Identity user `Guid`, never a request-body owner or external Auth0 `sub`. Existing products remain valid with nullable `store_id`; sellers cannot mutate those platform products.
+
+`ProductService` coordinates the use case. Store authorization, category/brand/translation validation, and image verification/attachment are separate injected responsibilities so each policy can change and be tested independently.
 
 # Future Improvements
 

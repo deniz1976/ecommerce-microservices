@@ -170,26 +170,4 @@ public sealed class EndpointSecurityMetadataTests
             ?? throw new DirectoryNotFoundException("Repository root containing ECommerce.sln was not found.");
     }
 
-    private sealed class AllowAllCustomerOwnershipAuthorizer : ICustomerOwnershipAuthorizer
-    {
-        public Task<bool> CanAccessAsync(Guid customerId, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(true);
-        }
-
-        public Task<bool> CanAccessAsync(
-            Guid customerId,
-            System.Security.Claims.ClaimsPrincipal? principal,
-            string? accessToken,
-            CancellationToken cancellationToken)
-        {
-            return Task.FromResult(true);
-        }
-    }
-
-    private sealed class FixedAuthenticatedUserResolver : IAuthenticatedUserResolver
-    {
-        public Task<Guid?> ResolveUserIdAsync(CancellationToken cancellationToken) =>
-            Task.FromResult<Guid?>(Guid.NewGuid());
-    }
 }
