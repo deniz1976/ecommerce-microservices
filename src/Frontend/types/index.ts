@@ -49,6 +49,11 @@ export interface CatalogStore {
   updatedAt: string
 }
 
+export interface CreateCatalogStorePayload {
+  name: string
+  slug: string
+}
+
 export interface CatalogProductImage {
   id: string
   url: string

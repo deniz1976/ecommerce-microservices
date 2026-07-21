@@ -39,7 +39,8 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - framework: Next.js App Router
 - API base env: `NEXT_PUBLIC_API_BASE_URL`
 - Auth0 public env: `NEXT_PUBLIC_AUTH0_DOMAIN`, `NEXT_PUBLIC_AUTH0_CLIENT_ID`, `NEXT_PUBLIC_AUTH0_AUDIENCE`
-- calls: `/gateway/users`, `/gateway/auth/me`, `/gateway/auth/me/role`
+- calls: `/gateway/users`, `/gateway/auth/me`, `/gateway/auth/me/role`, `/gateway/catalog/products`, `/gateway/catalog/stores/mine`, `/gateway/catalog/stores`
+- seller behavior: authenticated sellers list/create only their Identity-resolved stores and filter product search by the selected store. Store creation sends name/slug only; ownership is derived server-side.
 
 ## Catalog API
 

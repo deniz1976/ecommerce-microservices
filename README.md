@@ -185,4 +185,4 @@ The workflow check defaults to `all`, which runs success, inventory-failure, pay
 
 ## Next Phase
 
-Next phase is adding the seller store/product editor UI, reconciliation for cross-system role updates, and managed end-to-end ownership probes.
+The seller workspace now lists and creates owned stores and displays each store's products. Next phase is exposing Catalog category/brand references for the product editor, adding managed end-to-end ownership probes, and reconciling cross-system role updates.

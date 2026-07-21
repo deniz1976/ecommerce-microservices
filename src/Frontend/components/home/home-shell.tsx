@@ -10,6 +10,7 @@ import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { LoadingButton } from "@/components/auth/loading-button"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
+import { SellerDashboard } from "@/components/seller/seller-dashboard"
 import { buttonVariants } from "@/components/ui/button"
 import { getProfile } from "@/lib/api/auth"
 import { logoutFromAuth0 } from "@/lib/auth/auth0"
@@ -66,6 +67,10 @@ export function HomeShell() {
 
   if (profile.roles.includes("Admin")) {
     return <AdminDashboard profile={profile} />
+  }
+
+  if (profile.roles.includes("Seller")) {
+    return <SellerDashboard profile={profile} />
   }
 
   async function handleSignOut() {

@@ -48,7 +48,8 @@ Track known future work without inventing completed behavior.
 ## Service Features
 
 - Catalog: image upload integration completion.
-- Catalog/frontend: seller store-management and product-editor UI plus managed end-to-end ownership probes.
+- Completed: frontend seller workspace lists and creates Identity-owned stores and displays products filtered by the selected store.
+- Catalog/frontend: expose category/brand references, add the ownership-aware product editor, and add managed end-to-end ownership probes.
 - Basket: managed Redis production verification.
 - Ordering: richer order status history.
 - Payment: real provider integration.

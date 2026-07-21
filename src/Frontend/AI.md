@@ -30,6 +30,8 @@ Provide the TR/EN Next.js web client for Auth0 login, local role onboarding, and
 - Refresh the Auth0 access token without using the local cache after role onboarding.
 - Route an authenticated `Admin` to the administration overview at `/`.
 - Display a live read-only Catalog summary for the administrator.
+- Route an authenticated `Seller` to an ownership-aware seller workspace.
+- List and create stores owned by the current seller and show products filtered by the selected store.
 
 # Dependencies
 
@@ -46,6 +48,8 @@ The frontend does not own a database. See [[../../docs/ai/03_DATABASES#IdentityD
 - `GET /gateway/auth/me`
 - `PUT /gateway/auth/me/role`
 - `GET /gateway/catalog/products`
+- `GET /gateway/catalog/stores/mine`
+- `POST /gateway/catalog/stores`
 
 The Catalog product `status` field is the numeric .NET `ProductStatus` enum and is mapped to localized UI labels in the typed client.
 
@@ -61,6 +65,8 @@ None.
 
 - `HomeShell`
 - `AdminDashboard`
+- `SellerDashboard`
+- `StoreCreateForm`
 - `getProfile`
 - `getCatalogProducts`
 
@@ -81,12 +87,12 @@ None.
 
 # Design Decisions
 
-The initial administrator overview uses only the existing profile and public Catalog query. Catalog now exposes seller-owned stores and nullable product `storeId`, but the frontend does not yet provide the seller store/product editor. See [[../../docs/ai/09_DECISIONS#decision-catalog-seller-store-ownership]].
+The administrator overview uses only the existing profile and public Catalog query. The seller workspace uses authenticated store endpoints, never accepts an owner id, and filters public product search by the selected owned store. Product creation remains pending until Catalog exposes selectable category and brand references. See [[../../docs/ai/09_DECISIONS#decision-catalog-seller-store-ownership]].
 
 After Identity confirms a self-service role change in both Auth0 and local persistence, the onboarding client forces a silent token refresh. This prevents the existing cached JWT from continuing without the newly assigned namespaced role claim.
 
 # Future Improvements
 
 - Add server-enforced admin API authorization.
-- Add seller store-management and ownership-aware product-editor screens.
+- Add Catalog category/brand reference queries and the ownership-aware product editor.
 - Add dedicated administrator metrics endpoints instead of client-side summary values.

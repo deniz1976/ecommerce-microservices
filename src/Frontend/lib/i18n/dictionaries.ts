@@ -106,6 +106,31 @@ export interface Dictionary {
     noProducts: string
     status: Record<ProductStatusName, string>
   }
+  seller: {
+    workspace: string
+    roleLabel: string
+    welcome: string
+    description: string
+    stores: string
+    products: string
+    createStore: string
+    storeName: string
+    storeNamePlaceholder: string
+    storeSlug: string
+    storeSlugPlaceholder: string
+    slugHint: string
+    saveStore: string
+    savingStore: string
+    noStores: string
+    noStoresDescription: string
+    storeLoadFailed: string
+    storeCreateFailed: string
+    slugConflict: string
+    selectStore: string
+    productCount: string
+    noProducts: string
+    productLoadFailed: string
+  }
   validation: {
     required: string
     invalidEmail: string
@@ -224,6 +249,31 @@ const en: Dictionary = {
       Archived: "Archived",
     },
   },
+  seller: {
+    workspace: "Seller workspace",
+    roleLabel: "Seller",
+    welcome: "Welcome back, {name}",
+    description: "Manage stores you own and review the products assigned to each store.",
+    stores: "Your stores",
+    products: "Store products",
+    createStore: "Create a store",
+    storeName: "Store name",
+    storeNamePlaceholder: "Example Store",
+    storeSlug: "Store address",
+    storeSlugPlaceholder: "example-store",
+    slugHint: "Use lowercase letters, numbers, and single hyphens.",
+    saveStore: "Create store",
+    savingStore: "Creating store",
+    noStores: "You do not have a store yet.",
+    noStoresDescription: "Create your first store before adding products.",
+    storeLoadFailed: "Your stores could not be loaded.",
+    storeCreateFailed: "The store could not be created. Check the fields and try again.",
+    slugConflict: "This store address is already in use.",
+    selectStore: "Select a store",
+    productCount: "{count} products",
+    noProducts: "This store does not have any products yet.",
+    productLoadFailed: "Products for this store could not be loaded.",
+  },
   validation: {
     required: "This field is required.",
     invalidEmail: "Please enter a valid email address.",
@@ -341,6 +391,31 @@ const tr: Dictionary = {
       Inactive: "Pasif",
       Archived: "Arsivlenmis",
     },
+  },
+  seller: {
+    workspace: "Satici calisma alani",
+    roleLabel: "Satici",
+    welcome: "Tekrar hos geldiniz, {name}",
+    description: "Sahibi oldugunuz magazalari yonetin ve her magazaya bagli urunleri inceleyin.",
+    stores: "Magazalariniz",
+    products: "Magaza urunleri",
+    createStore: "Magaza olustur",
+    storeName: "Magaza adi",
+    storeNamePlaceholder: "Ornek Magaza",
+    storeSlug: "Magaza adresi",
+    storeSlugPlaceholder: "ornek-magaza",
+    slugHint: "Kucuk harf, rakam ve tek tire kullanin.",
+    saveStore: "Magazayi olustur",
+    savingStore: "Magaza olusturuluyor",
+    noStores: "Henuz bir magazaniz yok.",
+    noStoresDescription: "Urun eklemeden once ilk magazanizi olusturun.",
+    storeLoadFailed: "Magazalariniz yuklenemedi.",
+    storeCreateFailed: "Magaza olusturulamadi. Alanlari kontrol edip tekrar deneyin.",
+    slugConflict: "Bu magaza adresi zaten kullaniliyor.",
+    selectStore: "Magaza secin",
+    productCount: "{count} urun",
+    noProducts: "Bu magazada henuz urun yok.",
+    productLoadFailed: "Bu magazanin urunleri yuklenemedi.",
   },
   validation: {
     required: "Bu alan zorunludur.",
