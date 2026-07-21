@@ -1,6 +1,7 @@
 using ECommerce.BuildingBlocks.Persistence;
 using ECommerce.Catalog.Application.Images;
 using ECommerce.Catalog.Application.Products;
+using ECommerce.Catalog.Application.References;
 using ECommerce.Catalog.Application.Stores;
 using ECommerce.Catalog.Infrastructure.Images;
 using ECommerce.Catalog.Infrastructure.Persistence;
@@ -17,6 +18,7 @@ public static class DependencyInjection
         services.Configure<CloudinaryOptions>(configuration.GetSection(CloudinaryOptions.SectionName));
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IStoreRepository, StoreRepository>();
+        services.AddScoped<ICatalogReferenceRepository, CatalogReferenceRepository>();
         services.AddScoped<ICloudImageService, CloudImageService>();
         return services;
     }

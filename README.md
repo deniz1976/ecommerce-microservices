@@ -185,4 +185,4 @@ The workflow check defaults to `all`, which runs success, inventory-failure, pay
 
 ## Next Phase
 
-The seller workspace now lists and creates owned stores and displays each store's products. Next phase is exposing Catalog category/brand references for the product editor, adding managed end-to-end ownership probes, and reconciling cross-system role updates.
+The seller workspace now lists and creates owned stores, displays each store's products, loads Catalog category/brand references, and creates ownership-bound products. Next phase is product update/image editing, managed end-to-end ownership probes, and cross-system role reconciliation.

@@ -130,6 +130,23 @@ export interface Dictionary {
     productCount: string
     noProducts: string
     productLoadFailed: string
+    createProduct: string
+    sku: string
+    productName: string
+    productDescription: string
+    category: string
+    brand: string
+    price: string
+    currency: string
+    statusLabel: string
+    draft: string
+    active: string
+    saveProduct: string
+    savingProduct: string
+    productCreateFailed: string
+    referencesUnavailable: string
+    referencesEmpty: string
+    productCreated: string
   }
   validation: {
     required: string
@@ -273,6 +290,23 @@ const en: Dictionary = {
     productCount: "{count} products",
     noProducts: "This store does not have any products yet.",
     productLoadFailed: "Products for this store could not be loaded.",
+    createProduct: "Add a product",
+    sku: "SKU",
+    productName: "Product name",
+    productDescription: "Description",
+    category: "Category",
+    brand: "Brand",
+    price: "Price",
+    currency: "Currency",
+    statusLabel: "Status",
+    draft: "Draft",
+    active: "Active",
+    saveProduct: "Create product",
+    savingProduct: "Creating product",
+    productCreateFailed: "The product could not be created. Check the fields and try again.",
+    referencesUnavailable: "Category and brand options could not be loaded.",
+    referencesEmpty: "At least one active category and brand must exist before a product can be created.",
+    productCreated: "Product created successfully.",
   },
   validation: {
     required: "This field is required.",
@@ -416,6 +450,23 @@ const tr: Dictionary = {
     productCount: "{count} urun",
     noProducts: "Bu magazada henuz urun yok.",
     productLoadFailed: "Bu magazanin urunleri yuklenemedi.",
+    createProduct: "Urun ekle",
+    sku: "Stok kodu",
+    productName: "Urun adi",
+    productDescription: "Aciklama",
+    category: "Kategori",
+    brand: "Marka",
+    price: "Fiyat",
+    currency: "Para birimi",
+    statusLabel: "Durum",
+    draft: "Taslak",
+    active: "Aktif",
+    saveProduct: "Urunu olustur",
+    savingProduct: "Urun olusturuluyor",
+    productCreateFailed: "Urun olusturulamadi. Alanlari kontrol edip tekrar deneyin.",
+    referencesUnavailable: "Kategori ve marka secenekleri yuklenemedi.",
+    referencesEmpty: "Urun olusturmadan once en az bir aktif kategori ve marka bulunmalidir.",
+    productCreated: "Urun basariyla olusturuldu.",
   },
   validation: {
     required: "Bu alan zorunludur.",

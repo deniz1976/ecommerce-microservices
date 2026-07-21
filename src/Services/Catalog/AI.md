@@ -45,6 +45,8 @@ Product and store-by-id queries are public. Product creation/update and store cr
 
 Public product queries explicitly use `AllowAnonymous`; the shared fallback policy protects any new Catalog route unless it is deliberately opened.
 
+Active category and brand reference queries are public read-only endpoints used by product editors. Category names follow request culture with English, first-translation, and slug fallback order.
+
 # Events Published
 
 None.
@@ -61,6 +63,7 @@ None.
 - `ProductStoreAccessValidator`
 - `ProductReferenceValidator`
 - `ProductImageAttacher`
+- `CatalogReferenceService`
 - `StoreService`
 - `ProductRepository`
 - `CatalogDbContext`

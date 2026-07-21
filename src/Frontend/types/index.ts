@@ -54,6 +54,36 @@ export interface CreateCatalogStorePayload {
   slug: string
 }
 
+export interface CatalogCategoryReference {
+  id: string
+  name: string
+  slug: string
+}
+
+export interface CatalogBrandReference {
+  id: string
+  name: string
+  slug: string
+}
+
+export interface CreateCatalogProductPayload {
+  sku: string
+  categoryId: string
+  brandId: string
+  storeId: string
+  price: number
+  currency: string
+  status: ProductStatus
+  translations: CatalogProductTranslationInput[]
+  images: never[]
+}
+
+export interface CatalogProductTranslationInput {
+  languageCode: string
+  name: string
+  description: string
+}
+
 export interface CatalogProductImage {
   id: string
   url: string

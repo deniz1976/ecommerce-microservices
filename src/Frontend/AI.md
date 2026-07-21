@@ -50,6 +50,9 @@ The frontend does not own a database. See [[../../docs/ai/03_DATABASES#IdentityD
 - `GET /gateway/catalog/products`
 - `GET /gateway/catalog/stores/mine`
 - `POST /gateway/catalog/stores`
+- `GET /gateway/catalog/references/categories`
+- `GET /gateway/catalog/references/brands`
+- `POST /gateway/catalog/products`
 
 The Catalog product `status` field is the numeric .NET `ProductStatus` enum and is mapped to localized UI labels in the typed client.
 
@@ -87,12 +90,12 @@ None.
 
 # Design Decisions
 
-The administrator overview uses only the existing profile and public Catalog query. The seller workspace uses authenticated store endpoints, never accepts an owner id, and filters public product search by the selected owned store. Product creation remains pending until Catalog exposes selectable category and brand references. See [[../../docs/ai/09_DECISIONS#decision-catalog-seller-store-ownership]].
+The administrator overview uses only the existing profile and public Catalog query. The seller workspace uses authenticated store endpoints, never accepts an owner id, filters product search by the selected owned store, loads active category/brand references, and creates products against that store. Empty reference sets disable product creation instead of inventing identifiers. See [[../../docs/ai/09_DECISIONS#decision-catalog-seller-store-ownership]].
 
 After Identity confirms a self-service role change in both Auth0 and local persistence, the onboarding client forces a silent token refresh. This prevents the existing cached JWT from continuing without the newly assigned namespaced role claim.
 
 # Future Improvements
 
 - Add server-enforced admin API authorization.
-- Add Catalog category/brand reference queries and the ownership-aware product editor.
+- Add product update and image-upload editing.
 - Add dedicated administrator metrics endpoints instead of client-side summary values.

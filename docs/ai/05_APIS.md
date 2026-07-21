@@ -39,18 +39,18 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - framework: Next.js App Router
 - API base env: `NEXT_PUBLIC_API_BASE_URL`
 - Auth0 public env: `NEXT_PUBLIC_AUTH0_DOMAIN`, `NEXT_PUBLIC_AUTH0_CLIENT_ID`, `NEXT_PUBLIC_AUTH0_AUDIENCE`
-- calls: `/gateway/users`, `/gateway/auth/me`, `/gateway/auth/me/role`, `/gateway/catalog/products`, `/gateway/catalog/stores/mine`, `/gateway/catalog/stores`
-- seller behavior: authenticated sellers list/create only their Identity-resolved stores and filter product search by the selected store. Store creation sends name/slug only; ownership is derived server-side.
+- calls: `/gateway/users`, `/gateway/auth/me`, `/gateway/auth/me/role`, `/gateway/catalog/products`, `/gateway/catalog/stores/mine`, `/gateway/catalog/stores`, `/gateway/catalog/references/categories`, `/gateway/catalog/references/brands`
+- seller behavior: authenticated sellers list/create only their Identity-resolved stores, filter product search by the selected store, and create products from active category/brand references. Store creation sends name/slug only; ownership is derived server-side.
 
 ## Catalog API
 
 - id: `api-catalog`
 - owner: [[02_SERVICES#Catalog]]
 - direct base: `http://localhost:5283`
-- gateway routes: `/gateway/catalog/products`, `/gateway/catalog/products/{everything}`, `/gateway/catalog/stores`, `/gateway/catalog/stores/mine`, `/gateway/catalog/stores/{id}`
-- service routes: `/api/v1/products`, `/api/v1/stores`
+- gateway routes: `/gateway/catalog/products`, `/gateway/catalog/products/{everything}`, `/gateway/catalog/stores`, `/gateway/catalog/stores/mine`, `/gateway/catalog/stores/{id}`, `/gateway/catalog/references/categories`, `/gateway/catalog/references/brands`
+- service routes: `/api/v1/products`, `/api/v1/stores`, `/api/v1/catalog-references/categories`, `/api/v1/catalog-references/brands`
 - methods in code: `GET`, `POST`, `PUT`
-- public routes: product `GET` routes and store-by-id `GET`.
+- public routes: product `GET` routes, store-by-id `GET`, and active category/brand reference `GET` routes.
 - protected routes: product `POST`/`PUT`, store `POST`, and store `/mine` require `SellerOrAdmin`.
 - ownership: store owner is derived from Identity `/api/v1/auth/me`. Seller product creation requires an owned `storeId`; seller update requires ownership of the product's store. Admin bypasses ownership and may create a platform product with null `storeId`.
 - product search accepts optional `storeId`; product responses include nullable `storeId`.

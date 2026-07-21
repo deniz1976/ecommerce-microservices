@@ -31,6 +31,14 @@
       "DownstreamHostAndPorts": [ { "Host": "catalog-api", "Port": 8080 } ]
     },
     {
+      "UpstreamPathTemplate": "/gateway/catalog/references/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/catalog-references/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "catalog-api", "Port": 8080 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
+    },
+    {
       "UpstreamPathTemplate": "/gateway/catalog/stores/mine",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/v1/stores/mine",

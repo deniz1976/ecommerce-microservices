@@ -2,8 +2,10 @@ using ECommerce.Basket.Api.Baskets;
 using ECommerce.Basket.Application.Baskets;
 using ECommerce.BuildingBlocks.Security;
 using ECommerce.Catalog.Api.Products;
+using ECommerce.Catalog.Api.References;
 using ECommerce.Catalog.Api.Stores;
 using ECommerce.Catalog.Application.Products;
+using ECommerce.Catalog.Application.References;
 using ECommerce.Catalog.Application.Stores;
 using ECommerce.Identity.Api.Auth;
 using ECommerce.Identity.Api.Users;
@@ -81,6 +83,7 @@ public sealed class EndpointSecurityMetadataTests
     {
         using WebApplication app = BuildApplication();
         app.MapProductEndpoints();
+        app.MapCatalogReferenceEndpoints();
         app.MapStoreEndpoints();
         app.MapInventoryEndpoints();
         app.MapUserEndpoints();
@@ -88,6 +91,8 @@ public sealed class EndpointSecurityMetadataTests
 
         AssertAnonymous(app, "/api/v1/products/", "GET");
         AssertAnonymous(app, "/api/v1/products/{id:guid}", "GET");
+        AssertAnonymous(app, "/api/v1/catalog-references/categories", "GET");
+        AssertAnonymous(app, "/api/v1/catalog-references/brands", "GET");
         AssertAnonymous(app, "/api/v1/stores/{id:guid}", "GET");
         AssertAnonymous(app, "/api/v1/inventory/items/{productId:guid}", "GET");
         AssertAnonymous(app, "/api/v1/users/", "POST");
@@ -112,6 +117,7 @@ public sealed class EndpointSecurityMetadataTests
         builder.Services.AddAuthorization();
         builder.Services.AddScoped<BasketService>();
         builder.Services.AddScoped<ProductService>();
+        builder.Services.AddScoped<CatalogReferenceService>();
         builder.Services.AddScoped<StoreService>();
         builder.Services.AddScoped<UserService>();
         builder.Services.AddScoped<InventoryService>();

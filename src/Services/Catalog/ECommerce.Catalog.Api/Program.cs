@@ -2,6 +2,7 @@ using ECommerce.BuildingBlocks.Localization;
 using ECommerce.BuildingBlocks.Observability;
 using ECommerce.BuildingBlocks.Security;
 using ECommerce.Catalog.Api.Products;
+using ECommerce.Catalog.Api.References;
 using ECommerce.Catalog.Api.Stores;
 using ECommerce.Catalog.Application;
 using ECommerce.Catalog.Infrastructure;
@@ -25,6 +26,7 @@ app.UseECommerceSecurity();
 app.MapHealthChecks("/health/live").AllowAnonymous();
 app.MapHealthChecks("/health/ready").AllowAnonymous();
 app.MapProductEndpoints();
+app.MapCatalogReferenceEndpoints();
 app.MapStoreEndpoints();
 
 app.Run();

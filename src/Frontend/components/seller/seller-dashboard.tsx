@@ -7,6 +7,7 @@ import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { StoreCreateForm } from "@/components/seller/store-create-form"
+import { ProductCreateForm } from "@/components/seller/product-create-form"
 import { Button } from "@/components/ui/button"
 import { getMyCatalogStores, getStoreCatalogProducts } from "@/lib/api/catalog"
 import { logoutFromAuth0 } from "@/lib/auth/auth0"
@@ -88,10 +89,31 @@ export function SellerDashboard({ profile }: SellerDashboardProps) {
     setSelectedStoreId(storeId)
   }
 
+  function handleProductCreated(product: CatalogProduct) {
+    setProducts((current) => {
+      if (current.status !== "ready") {
+        return { status: "ready", products: { items: [product], pageNumber: 1, pageSize: 20, totalCount: 1, totalPages: 1 } }
+      }
+
+      return {
+        status: "ready",
+        products: {
+          ...current.products,
+          items: [product, ...current.products.items],
+          totalCount: current.products.totalCount + 1,
+        },
+      }
+    })
+  }
+
   async function handleSignOut() {
     setSigningOut(true)
     await logoutFromAuth0("/login")
   }
+
+  const selectedStore = stores.status === "ready"
+    ? stores.stores.find((store) => store.id === selectedStoreId)
+    : undefined
 
   return (
     <div className="min-h-svh bg-muted/35">
@@ -183,8 +205,14 @@ export function SellerDashboard({ profile }: SellerDashboardProps) {
             </div>
           </section>
 
-          <aside>
+          <aside className="space-y-6">
             <StoreCreateForm onCreated={handleStoreCreated} />
+            {selectedStore ? (
+              <ProductCreateForm
+                store={selectedStore}
+                onCreated={handleProductCreated}
+              />
+            ) : null}
           </aside>
         </div>
       </main>

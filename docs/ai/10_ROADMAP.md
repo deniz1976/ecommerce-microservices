@@ -49,7 +49,8 @@ Track known future work without inventing completed behavior.
 
 - Catalog: image upload integration completion.
 - Completed: frontend seller workspace lists and creates Identity-owned stores and displays products filtered by the selected store.
-- Catalog/frontend: expose category/brand references, add the ownership-aware product editor, and add managed end-to-end ownership probes.
+- Completed: Catalog exposes localized category/brand references and the seller workspace creates ownership-bound products without client-supplied owner identity.
+- Catalog/frontend: add product update/image editing and managed end-to-end ownership probes.
 - Basket: managed Redis production verification.
 - Ordering: richer order status history.
 - Payment: real provider integration.
