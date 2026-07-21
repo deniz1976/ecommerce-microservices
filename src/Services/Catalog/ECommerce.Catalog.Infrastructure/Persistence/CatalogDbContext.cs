@@ -22,6 +22,8 @@ public sealed class CatalogDbContext : DbContext
 
     public DbSet<Brand> Brands => Set<Brand>();
 
+    public DbSet<Store> Stores => Set<Store>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogDbContext).Assembly);

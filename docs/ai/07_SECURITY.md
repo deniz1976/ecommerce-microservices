@@ -79,7 +79,7 @@ JWT role evaluation reads the claim configured by `Auth__RoleClaimType`. The Aut
 
 Currently enforced privileged operations are:
 
-- Catalog product `POST` and `PUT`: `Admin`.
+- Catalog product `POST`/`PUT` and store `POST`/`mine`: `SellerOrAdmin`; sellers additionally require Identity-resolved store ownership, while admins bypass the ownership comparison.
 - Inventory item `PUT`: `Admin` role or `inventory:write` M2M permission.
 - Identity user lookup by arbitrary id: `Admin`.
 
@@ -89,7 +89,7 @@ Authenticated baseline operations are:
 - every Ordering route: `AuthenticatedUser`;
 - Notification SignalR connection: `AuthenticatedUser`.
 
-Authentication is not resource ownership. Basket, Ordering, and Notification therefore forward the caller's Bearer token to Identity `/api/v1/auth/me`, resolve Auth0 `sub` to the local user `Guid`, and compare that trusted value with the requested customer resource. Identity lookup errors fail closed. `Admin` and the dedicated runtime M2M `customer:act` permission are the only bypasses. The query-string SignalR token is forwarded only when the original path is `/hubs/notifications`.
+Authentication is not resource ownership. Basket, Ordering, Notification, and Catalog therefore use the shared authenticated-user resolver, which forwards the caller's Bearer token to Identity `/api/v1/auth/me` and resolves Auth0 `sub` to the local user `Guid`. Customer services compare it with the requested customer resource; Catalog stores it as `stores.owner_user_id` and compares it for seller product writes. Identity lookup errors fail closed. Catalog never accepts an owner id from the request body and never uses external Auth0 `sub` as a business foreign key.
 
 Identity local roles and Auth0 authorization roles remain separate stores, but authenticated self-service role selection synchronizes `Customer` and `Seller` through a dedicated Auth0 Management API M2M client before committing the local role. Auth0 failure fails closed and leaves local onboarding unchanged. The browser then bypasses its token cache to obtain the updated role claim. A later local database failure after Auth0 success is still a cross-system consistency edge case and requires reconciliation/outbox work.
 
@@ -104,7 +104,7 @@ Current role model:
 TODO:
 
 - Add reconciliation/outbox handling for cross-system role synchronization.
-- Apply `SellerOrAdmin` only after Catalog models seller/store ownership.
+- Add seller store-management UI and end-to-end ownership probes.
 
 # Secrets
 

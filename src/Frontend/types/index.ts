@@ -34,10 +34,19 @@ export interface CatalogProduct {
   categoryName: string | null
   brandId: string
   brandName: string | null
+  storeId: string | null
   price: number
   currency: string
   status: ProductStatus
   images: CatalogProductImage[]
+}
+
+export interface CatalogStore {
+  id: string
+  name: string
+  slug: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CatalogProductImage {

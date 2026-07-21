@@ -209,6 +209,15 @@ Track architectural decisions as stable graph nodes.
 - consequence: Auth0 rejection, timeout, or malformed token response fails closed with `503` and no local role commit. The Management client is separate from runtime automation and its secret stays in Infisical. Auth0 success followed by local database failure remains a rare cross-system consistency case requiring later reconciliation/outbox processing.
 - related: [[02_SERVICES#Identity]], [[05_APIS#Identity API]], [[07_SECURITY#Authorization]]
 
+## decision-catalog-seller-store-ownership
+
+- id: `decision-catalog-seller-store-ownership`
+- status: active
+- decision: Catalog owns `stores`; each store records the local Identity user `Guid`, seller product writes require an owned store, and `Admin` may manage all products including legacy platform products with null `store_id`.
+- reason: a `Seller` role grants a capability but does not prove ownership of an individual product or store. Trusting a request-body owner or Auth0 `sub` would allow cross-seller writes or couple domain data to an external provider identifier.
+- consequence: Catalog synchronously resolves the caller through Identity `/api/v1/auth/me` and fails closed when resolution fails. Store owner is never client-controlled, store ownership is immutable in the initial API, product `store_id` is nullable only for backward compatibility/admin platform products, and seller product writes use `SellerOrAdmin` plus an application-layer ownership check.
+- related: [[03_DATABASES#CatalogDb]], [[05_APIS#Catalog API]], [[07_SECURITY#Authorization]]
+
 # TODO
 
 - Add decision dates once ADR workflow is formalized.

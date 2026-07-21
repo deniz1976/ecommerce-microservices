@@ -31,6 +31,30 @@
       "DownstreamHostAndPorts": [ { "Host": "catalog-api", "Port": 8080 } ]
     },
     {
+      "UpstreamPathTemplate": "/gateway/catalog/stores/mine",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/stores/mine",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "catalog-api", "Port": 8080 } ],
+      "Priority": 1
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/catalog/stores",
+      "UpstreamHttpMethod": [ "POST" ],
+      "DownstreamPathTemplate": "/api/v1/stores",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "catalog-api", "Port": 8080 } ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/catalog/stores/{id}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/stores/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "catalog-api", "Port": 8080 } ],
+      "AuthenticationOptions": { "AllowAnonymous": true }
+    },
+
+    {
       "UpstreamPathTemplate": "/gateway/baskets/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "DownstreamPathTemplate": "/api/v1/baskets/{everything}",

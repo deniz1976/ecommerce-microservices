@@ -1,6 +1,7 @@
 using ECommerce.BuildingBlocks.Persistence;
 using ECommerce.Catalog.Application.Images;
 using ECommerce.Catalog.Application.Products;
+using ECommerce.Catalog.Application.Stores;
 using ECommerce.Catalog.Infrastructure.Images;
 using ECommerce.Catalog.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +16,7 @@ public static class DependencyInjection
         services.AddPostgresDbContext<CatalogDbContext>(configuration, "CatalogDb");
         services.Configure<CloudinaryOptions>(configuration.GetSection(CloudinaryOptions.SectionName));
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IStoreRepository, StoreRepository>();
         services.AddScoped<ICloudImageService, CloudImageService>();
         return services;
     }

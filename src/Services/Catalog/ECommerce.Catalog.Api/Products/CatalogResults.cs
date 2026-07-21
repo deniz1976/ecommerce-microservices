@@ -31,6 +31,11 @@ public static class CatalogResults
             CatalogErrorCodes.CategoryNotFound => StatusCodes.Status400BadRequest,
             CatalogErrorCodes.BrandNotFound => StatusCodes.Status400BadRequest,
             CatalogErrorCodes.InvalidProductTranslation => StatusCodes.Status400BadRequest,
+            CatalogErrorCodes.StoreNotFound => StatusCodes.Status404NotFound,
+            CatalogErrorCodes.StoreAccessDenied => StatusCodes.Status403Forbidden,
+            CatalogErrorCodes.IdentityResolutionFailed => StatusCodes.Status503ServiceUnavailable,
+            CatalogErrorCodes.StoreSlugConflict => StatusCodes.Status409Conflict,
+            CatalogErrorCodes.StoreRequired => StatusCodes.Status400BadRequest,
             ErrorCodes.ValidationFailed => StatusCodes.Status400BadRequest,
             _ => StatusCodes.Status500InternalServerError
         };
@@ -43,6 +48,11 @@ public static class CatalogResults
             CatalogErrorCodes.CategoryNotFound => culture == "tr" ? "Kategori bulunamadı." : "Category was not found.",
             CatalogErrorCodes.BrandNotFound => culture == "tr" ? "Marka bulunamadı." : "Brand was not found.",
             CatalogErrorCodes.InvalidProductTranslation => culture == "tr" ? "Ürün çevirileri geçersiz." : "Product translations are invalid.",
+            CatalogErrorCodes.StoreNotFound => culture == "tr" ? "Mağaza bulunamadı." : "Store was not found.",
+            CatalogErrorCodes.StoreRequired => culture == "tr" ? "Satıcı ürünleri için mağaza zorunludur." : "A store is required for seller products.",
+            CatalogErrorCodes.StoreAccessDenied => culture == "tr" ? "Bu mağaza için yetkiniz yok." : "You do not have access to this store.",
+            CatalogErrorCodes.StoreSlugConflict => culture == "tr" ? "Mağaza adresi zaten kullanılıyor." : "The store slug is already in use.",
+            CatalogErrorCodes.IdentityResolutionFailed => culture == "tr" ? "Kullanıcı kimliği doğrulanamadı." : "The authenticated user could not be resolved.",
             _ => localizer.GetMessage(code, culture)
         };
     }

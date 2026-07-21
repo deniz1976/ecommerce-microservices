@@ -81,12 +81,12 @@ None.
 
 # Design Decisions
 
-The initial administrator overview uses only the existing profile and public Catalog query. It does not model a personal seller store because Catalog currently has no seller or store ownership field. See [[../../docs/ai/09_DECISIONS#decision-role-aware-frontend-entry]].
+The initial administrator overview uses only the existing profile and public Catalog query. Catalog now exposes seller-owned stores and nullable product `storeId`, but the frontend does not yet provide the seller store/product editor. See [[../../docs/ai/09_DECISIONS#decision-catalog-seller-store-ownership]].
 
 After Identity confirms a self-service role change in both Auth0 and local persistence, the onboarding client forces a silent token refresh. This prevents the existing cached JWT from continuing without the newly assigned namespaced role claim.
 
 # Future Improvements
 
 - Add server-enforced admin API authorization.
-- Add seller/store ownership before implementing seller-specific store dashboards.
+- Add seller store-management and ownership-aware product-editor screens.
 - Add dedicated administrator metrics endpoints instead of client-side summary values.

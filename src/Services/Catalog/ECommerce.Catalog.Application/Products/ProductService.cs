@@ -1,6 +1,7 @@
 using ECommerce.BuildingBlocks.Contracts.Errors;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Catalog.Application.Images;
+using ECommerce.Catalog.Application.Stores;
 using ECommerce.Catalog.Domain;
 
 namespace ECommerce.Catalog.Application.Products;
@@ -15,11 +16,16 @@ public sealed class ProductService
 
     private readonly IProductRepository repository;
     private readonly ICloudImageService cloudImageService;
+    private readonly IStoreRepository storeRepository;
 
-    public ProductService(IProductRepository repository, ICloudImageService cloudImageService)
+    public ProductService(
+        IProductRepository repository,
+        ICloudImageService cloudImageService,
+        IStoreRepository storeRepository)
     {
         this.repository = repository;
         this.cloudImageService = cloudImageService;
+        this.storeRepository = storeRepository;
     }
 
     public async Task<Result<PagedResult<ProductResponse>>> SearchAsync(ProductListQuery query, string culture, CancellationToken cancellationToken)
@@ -43,8 +49,18 @@ public sealed class ProductService
             : Result<ProductResponse>.Success(product.ToResponse(culture));
     }
 
-    public async Task<Result<ProductResponse>> CreateAsync(CreateProductRequest request, string culture, CancellationToken cancellationToken)
+    public async Task<Result<ProductResponse>> CreateAsync(
+        CreateProductRequest request,
+        ProductAccessContext access,
+        string culture,
+        CancellationToken cancellationToken)
     {
+        Result storeAccess = await ValidateStoreAccessAsync(request.StoreId, access, requireStoreForSeller: true, cancellationToken);
+        if (storeAccess.IsFailure)
+        {
+            return Result<ProductResponse>.Failure(storeAccess.Error!);
+        }
+
         Result validation = await ValidateReferencesAndTranslationsAsync(request.CategoryId, request.BrandId, request.Translations, cancellationToken);
 
         if (validation.IsFailure)
@@ -52,7 +68,15 @@ public sealed class ProductService
             return Result<ProductResponse>.Failure(validation.Error!);
         }
 
-        Product product = new(Guid.NewGuid(), request.Sku, request.CategoryId, request.BrandId, request.Price, request.Currency, request.Status);
+        Product product = new(
+            Guid.NewGuid(),
+            request.Sku,
+            request.CategoryId,
+            request.BrandId,
+            request.StoreId,
+            request.Price,
+            request.Currency,
+            request.Status);
 
         foreach (ProductTranslationInput translation in request.Translations)
         {
@@ -89,13 +113,30 @@ public sealed class ProductService
         return Result<ProductResponse>.Success((createdProduct ?? product).ToResponse(culture));
     }
 
-    public async Task<Result<ProductResponse>> UpdateAsync(Guid id, UpdateProductRequest request, string culture, CancellationToken cancellationToken)
+    public async Task<Result<ProductResponse>> UpdateAsync(
+        Guid id,
+        UpdateProductRequest request,
+        ProductAccessContext access,
+        string culture,
+        CancellationToken cancellationToken)
     {
         Product? product = await repository.GetByIdAsync(id, cancellationToken);
 
         if (product is null)
         {
             return Result<ProductResponse>.Failure(new Error(ErrorCodes.ProductNotFound, ErrorCodes.ProductNotFound));
+        }
+
+        if (!access.IsAdmin && product.StoreId is null)
+        {
+            return Result<ProductResponse>.Failure(
+                new Error(CatalogErrorCodes.StoreAccessDenied, CatalogErrorCodes.StoreAccessDenied));
+        }
+
+        Result storeAccess = await ValidateStoreAccessAsync(product.StoreId, access, requireStoreForSeller: true, cancellationToken);
+        if (storeAccess.IsFailure)
+        {
+            return Result<ProductResponse>.Failure(storeAccess.Error!);
         }
 
         Result validation = await ValidateReferencesAndTranslationsAsync(request.CategoryId, request.BrandId, request.Translations, cancellationToken);
@@ -115,6 +156,35 @@ public sealed class ProductService
         await repository.SaveChangesAsync(cancellationToken);
 
         return Result<ProductResponse>.Success(product.ToResponse(culture));
+    }
+
+    private async Task<Result> ValidateStoreAccessAsync(
+        Guid? storeId,
+        ProductAccessContext access,
+        bool requireStoreForSeller,
+        CancellationToken cancellationToken)
+    {
+        if (!access.IsAdmin && access.UserId is null)
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.IdentityResolutionFailed, CatalogErrorCodes.IdentityResolutionFailed));
+        }
+
+        if (storeId is null)
+        {
+            return access.IsAdmin || !requireStoreForSeller
+                ? Result.Success()
+                : Result.Failure(new Error(CatalogErrorCodes.StoreRequired, CatalogErrorCodes.StoreRequired));
+        }
+
+        Domain.Store? store = await storeRepository.GetByIdAsync(storeId.Value, cancellationToken);
+        if (store is null)
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.StoreNotFound, CatalogErrorCodes.StoreNotFound));
+        }
+
+        return access.IsAdmin || store.OwnerUserId == access.UserId
+            ? Result.Success()
+            : Result.Failure(new Error(CatalogErrorCodes.StoreAccessDenied, CatalogErrorCodes.StoreAccessDenied));
     }
 
     private async Task<Result> ValidateReferencesAndTranslationsAsync(

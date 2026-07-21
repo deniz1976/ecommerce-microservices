@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -5,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 
 namespace ECommerce.BuildingBlocks.Security;
 
@@ -19,6 +19,15 @@ public static class DependencyInjection
     }
 
     public static IServiceCollection AddCustomerOwnership(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddAuthenticatedUserResolution(configuration);
+        services.AddScoped<ICustomerOwnershipAuthorizer, IdentityCustomerOwnershipAuthorizer>();
+        return services;
+    }
+
+    public static IServiceCollection AddAuthenticatedUserResolution(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -40,7 +49,7 @@ public static class DependencyInjection
                 $"{CustomerIdentityOptions.SectionName}:TimeoutSeconds must be between 1 and 30.");
         }
 
-        services.AddHttpClient<ICustomerOwnershipAuthorizer, IdentityCustomerOwnershipAuthorizer>(client =>
+        services.AddHttpClient<IAuthenticatedUserResolver, IdentityAuthenticatedUserResolver>(client =>
         {
             client.BaseAddress = baseUri;
             client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);

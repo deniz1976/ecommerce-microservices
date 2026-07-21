@@ -1,4 +1,5 @@
 using ECommerce.Catalog.Application.Products;
+using ECommerce.Catalog.Application.Stores;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ECommerce.Catalog.Application;
@@ -8,6 +9,7 @@ public static class DependencyInjection
     public static IServiceCollection AddCatalogApplication(this IServiceCollection services)
     {
         services.AddScoped<ProductService>();
+        services.AddScoped<StoreService>();
         return services;
     }
 }

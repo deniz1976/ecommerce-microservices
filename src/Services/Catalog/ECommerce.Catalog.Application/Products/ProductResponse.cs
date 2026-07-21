@@ -11,6 +11,7 @@ public sealed record ProductResponse(
     string? CategoryName,
     Guid BrandId,
     string? BrandName,
+    Guid? StoreId,
     decimal Price,
     string Currency,
     ProductStatus Status,

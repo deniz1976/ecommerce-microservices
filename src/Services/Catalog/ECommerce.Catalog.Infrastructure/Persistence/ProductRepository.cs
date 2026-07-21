@@ -43,6 +43,11 @@ public sealed class ProductRepository : IProductRepository
             products = products.Where(x => x.BrandId == query.BrandId);
         }
 
+        if (query.StoreId.HasValue)
+        {
+            products = products.Where(x => x.StoreId == query.StoreId);
+        }
+
         if (query.Status.HasValue)
         {
             products = products.Where(x => x.Status == query.Status);

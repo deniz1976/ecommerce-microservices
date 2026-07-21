@@ -27,7 +27,7 @@ Track known future work without inventing completed behavior.
 - Completed: authenticated `Customer`/`Seller` onboarding synchronizes Auth0 role membership through a dedicated Management API M2M client and refreshes the browser token.
 - Add reconciliation/outbox handling for an Auth0-success/local-database-failure edge case.
 - Completed: Basket, Ordering, and Notification enforce authenticated local-customer ownership through Identity resolution, with explicit `Admin` and `customer:act` delegation.
-- Add seller/store ownership before enabling `SellerOrAdmin` Catalog mutations.
+- Completed: Catalog models seller-owned stores, derives owner identity through Identity, and enables ownership-checked `SellerOrAdmin` product mutations.
 
 ## Runtime Verification
 
@@ -48,6 +48,7 @@ Track known future work without inventing completed behavior.
 ## Service Features
 
 - Catalog: image upload integration completion.
+- Catalog/frontend: seller store-management and product-editor UI plus managed end-to-end ownership probes.
 - Basket: managed Redis production verification.
 - Ordering: richer order status history.
 - Payment: real provider integration.

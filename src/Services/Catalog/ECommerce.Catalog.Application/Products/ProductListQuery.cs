@@ -8,6 +8,7 @@ public sealed record ProductListQuery(
     string? Search,
     Guid? CategoryId,
     Guid? BrandId,
+    Guid? StoreId,
     ProductStatus? Status,
     string? SortBy,
     bool SortDescending);

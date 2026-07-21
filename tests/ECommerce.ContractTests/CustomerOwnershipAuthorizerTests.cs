@@ -183,10 +183,12 @@ public sealed class CustomerOwnershipAuthorizerTests
             BaseAddress = new Uri("http://identity.test/")
         };
 
-        return new IdentityCustomerOwnershipAuthorizer(
+        HttpContextAccessor accessor = new() { HttpContext = httpContext };
+        IdentityAuthenticatedUserResolver resolver = new(
             httpClient,
-            new HttpContextAccessor { HttpContext = httpContext },
-            NullLogger<IdentityCustomerOwnershipAuthorizer>.Instance);
+            accessor,
+            NullLogger<IdentityAuthenticatedUserResolver>.Instance);
+        return new IdentityCustomerOwnershipAuthorizer(resolver, accessor);
     }
 
     private static ClaimsPrincipal AuthenticatedPrincipal(params Claim[] claims)

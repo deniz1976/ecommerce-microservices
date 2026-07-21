@@ -15,6 +15,7 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(x => x.Sku).HasColumnName("sku").HasMaxLength(128).IsRequired();
         builder.Property(x => x.CategoryId).HasColumnName("category_id");
         builder.Property(x => x.BrandId).HasColumnName("brand_id");
+        builder.Property(x => x.StoreId).HasColumnName("store_id");
         builder.Property(x => x.Price).HasColumnName("price").HasPrecision(18, 2);
         builder.Property(x => x.Currency).HasColumnName("currency").HasMaxLength(3).IsRequired();
         builder.Property(x => x.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(32);
@@ -24,6 +25,7 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.HasIndex(x => x.Sku).IsUnique();
         builder.HasIndex(x => x.CategoryId);
         builder.HasIndex(x => x.BrandId);
+        builder.HasIndex(x => x.StoreId);
         builder.HasIndex(x => x.Status);
 
         builder.HasMany(x => x.Translations)
@@ -35,6 +37,11 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             .WithOne(x => x.Product)
             .HasForeignKey(x => x.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Store)
+            .WithMany()
+            .HasForeignKey(x => x.StoreId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Navigation(x => x.Translations).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(x => x.Images).UsePropertyAccessMode(PropertyAccessMode.Field);

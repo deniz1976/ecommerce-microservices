@@ -18,6 +18,7 @@ public static class ProductMapper
             categoryTranslation?.Name,
             product.BrandId,
             product.Brand?.Name,
+            product.StoreId,
             product.Price,
             product.Currency,
             product.Status,

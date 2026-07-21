@@ -6,6 +6,7 @@ public sealed record CreateProductRequest(
     string Sku,
     Guid CategoryId,
     Guid BrandId,
+    Guid? StoreId,
     decimal Price,
     string Currency,
     ProductStatus Status,

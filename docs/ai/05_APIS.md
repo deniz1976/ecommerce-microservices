@@ -46,11 +46,13 @@ Catalog HTTP and SignalR APIs exposed by this repository.
 - id: `api-catalog`
 - owner: [[02_SERVICES#Catalog]]
 - direct base: `http://localhost:5283`
-- gateway routes: `/gateway/catalog/products`, `/gateway/catalog/products/{everything}`
-- service routes: `/api/v1/products`
+- gateway routes: `/gateway/catalog/products`, `/gateway/catalog/products/{everything}`, `/gateway/catalog/stores`, `/gateway/catalog/stores/mine`, `/gateway/catalog/stores/{id}`
+- service routes: `/api/v1/products`, `/api/v1/stores`
 - methods in code: `GET`, `POST`, `PUT`
-- public routes: product `GET` routes.
-- protected routes: product `POST` and `PUT` require the `Admin` authorization policy.
+- public routes: product `GET` routes and store-by-id `GET`.
+- protected routes: product `POST`/`PUT`, store `POST`, and store `/mine` require `SellerOrAdmin`.
+- ownership: store owner is derived from Identity `/api/v1/auth/me`. Seller product creation requires an owned `storeId`; seller update requires ownership of the product's store. Admin bypasses ownership and may create a platform product with null `storeId`.
+- product search accepts optional `storeId`; product responses include nullable `storeId`.
 - response note: product `status` is serialized as the numeric .NET `ProductStatus` enum (`0` Draft, `1` Active, `2` Inactive, `3` Archived).
 
 ## Basket API

@@ -8,6 +8,7 @@ public sealed class GatewaySecurityConfigurationTests
     {
         "GET /gateway/catalog/products",
         "GET /gateway/catalog/products/{everything}",
+        "GET /gateway/catalog/stores/{id}",
         "GET /gateway/inventory/{everything}",
         "POST /gateway/users",
         "GET /gateway/health/catalog",

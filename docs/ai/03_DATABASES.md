@@ -27,7 +27,10 @@ Describe database ownership, table groups, and runtime stores used by this repos
 - id: `database-catalog`
 - env: `ConnectionStrings__CatalogDb`
 - owner: [[02_SERVICES#Catalog]]
-- tables: `brands`, `categories`, `category_translations`, `products`, `product_images`, `product_translations`
+- tables: `brands`, `categories`, `category_translations`, `stores`, `products`, `product_images`, `product_translations`
+- `stores.owner_user_id`: local Identity user `Guid`; ownership is resolved through Identity rather than a cross-database foreign key.
+- `products.store_id`: nullable foreign key to `stores.id`; null preserves administrator-managed legacy/platform products, while seller-created products require an owned store.
+- migration: `20260720232705_AddSellerStoreOwnership`
 
 ## BasketDb
 

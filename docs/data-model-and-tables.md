@@ -28,10 +28,25 @@ Tables:
 brands
 categories
 category_translations
+stores
 products
 product_images
 product_translations
 ```
+
+### stores
+
+Stores seller-owned storefront metadata.
+
+Important fields:
+
+- `id`
+- `owner_user_id`: local Identity user `Guid`; intentionally not a database foreign key because Identity owns its own database.
+- `name`
+- `slug`: globally unique, lowercase URL-safe value.
+- `created_at`, `updated_at`
+
+The owner is derived from the authenticated token through Identity `/api/v1/auth/me`; clients cannot choose it.
 
 ### brands
 
@@ -98,6 +113,7 @@ Typical fields:
 
 - id
 - sku
+- store_id (nullable foreign key to `stores`; null means an administrator-managed platform/legacy product)
 - category_id
 - brand_id
 - price

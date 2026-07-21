@@ -16,6 +16,7 @@ public sealed class Product
         string sku,
         Guid categoryId,
         Guid brandId,
+        Guid? storeId,
         decimal price,
         string currency,
         ProductStatus status)
@@ -24,6 +25,7 @@ public sealed class Product
         Sku = sku;
         CategoryId = categoryId;
         BrandId = brandId;
+        StoreId = storeId;
         Price = price;
         Currency = currency;
         Status = status;
@@ -42,6 +44,10 @@ public sealed class Product
     public Guid BrandId { get; private set; }
 
     public Brand? Brand { get; private set; }
+
+    public Guid? StoreId { get; private set; }
+
+    public Store? Store { get; private set; }
 
     public decimal Price { get; private set; }
 

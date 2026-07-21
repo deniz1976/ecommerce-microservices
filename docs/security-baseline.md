@@ -12,7 +12,7 @@ The gateway registers shared authentication with `AddOidcReadyAuthentication` bu
 
 Only these business operations are intentionally public:
 
-- Catalog product `GET` routes.
+- Catalog product `GET` routes and store-by-id `GET`.
 - Inventory item `GET` route.
 - Identity user registration `POST` route.
 - Service and gateway health checks.
@@ -25,7 +25,7 @@ For SignalR transport compatibility, the JWT handler accepts an `access_token` q
 
 | Surface | Current requirement | Ownership status |
 |---|---|---|
-| Catalog writes | `Admin` | Seller/store ownership is not modeled |
+| Catalog writes | `SellerOrAdmin` plus ownership for sellers | Store owner is the local Identity `Guid`; admins may manage all and legacy platform products |
 | Inventory write | `InventoryWrite` | Operational resource |
 | Identity arbitrary user read | `Admin` | Admin-only |
 | Identity `/auth/me` | `AuthenticatedUser` | Derived from token `sub` |
@@ -38,6 +38,12 @@ For SignalR transport compatibility, the JWT handler accepts an `access_token` q
 Authentication alone does not prove that a caller owns a customer resource. Basket, Ordering, and Notification use the shared ownership authorizer, which forwards the original Bearer token to Identity `/api/v1/auth/me` and compares the returned local user `Guid` with the requested customer identifier. Lookup failure denies access. Order-by-id hides another customer's existing order as not found.
 
 `Admin` and the exact `customer:act` permission may bypass the owner comparison. `customer:act` exists for trusted runtime automation, must not be granted to normal users, and does not grant unrelated administrator operations. Notification query-string tokens are forwarded only from the direct hub path.
+
+## Seller Store Ownership
+
+Catalog resolves the caller through the same Identity `/api/v1/auth/me` boundary. Store creation never accepts an owner identifier; the service records the resolved local user `Guid`. A seller must provide an owned `storeId` when creating a product and can update only products attached to an owned store. An Identity lookup failure returns `503`, and another seller's store returns `403`.
+
+`Admin` bypasses the store-owner comparison. Existing products keep a nullable `store_id` for backward compatibility and are treated as platform products that sellers cannot mutate. Public store responses do not expose `owner_user_id`.
 
 ## Auth0 Role Synchronization
 
@@ -57,6 +63,7 @@ Contract tests verify:
 - Basket, Ordering, and Notification source guards require ownership checks and registration;
 - Auth0 role synchronization uses the expected remove/assign requests and fails closed before local persistence;
 - public service routes explicitly declare `AllowAnonymous`;
+- Catalog seller writes require `SellerOrAdmin`, derive store ownership server-side, and reject cross-seller product creation;
 - both Ocelot configurations use global Bearer authentication;
 - the gateway anonymous routes exactly match the approved allow-list.
 

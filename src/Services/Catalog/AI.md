@@ -18,11 +18,12 @@ graph_ready: true
 
 # Purpose
 
-Own product, category, brand, image, and translation data.
+Own store, product, category, brand, image, and translation data.
 
 # Responsibilities
 
 - Create, update, and query products.
+- Create seller-owned stores and enforce store ownership on seller product writes.
 - Store localized product/category text.
 - Keep catalog data separate from stock and orders.
 
@@ -40,7 +41,7 @@ See [[../../../docs/ai/03_DATABASES#CatalogDb]].
 
 See [[../../../docs/ai/05_APIS#Catalog API]].
 
-Product queries are public. Product creation and update require the shared `Admin` authorization policy.
+Product and store-by-id queries are public. Product creation/update and store creation/list-mine require `SellerOrAdmin`. A seller must target a store whose `owner_user_id` matches the local Identity `Guid` resolved from the caller's Bearer token. Admin may manage any store product and legacy platform products with no store.
 
 Public product queries explicitly use `AllowAnonymous`; the shared fallback policy protects any new Catalog route unless it is deliberately opened.
 
@@ -55,10 +56,12 @@ None.
 # Important Classes
 
 - `ProductEndpoints`
+- `StoreEndpoints`
 - `ProductService`
+- `StoreService`
 - `ProductRepository`
 - `CatalogDbContext`
-- `Product`, `Category`, `Brand`
+- `Product`, `Store`, `Category`, `Brand`
 
 # Folder Structure
 
@@ -74,10 +77,12 @@ None.
 - `Cloudinary__ApiKey`
 - `Cloudinary__ApiSecret`
 - `Auth__RoleClaimType`
+- `IdentityClient__BaseUrl`
+- `IdentityClient__TimeoutSeconds`
 
 # Design Decisions
 
-Catalog does not own inventory. See [[../../../docs/ai/09_DECISIONS#decision-database-per-service]]. Catalog mutations remain admin-only until seller/store ownership is modeled.
+Catalog does not own inventory. See [[../../../docs/ai/09_DECISIONS#decision-database-per-service]]. Seller ownership uses the local Identity user `Guid`, never a request-body owner or external Auth0 `sub`. Existing products remain valid with nullable `store_id`; sellers cannot mutate those platform products.
 
 # Future Improvements
 

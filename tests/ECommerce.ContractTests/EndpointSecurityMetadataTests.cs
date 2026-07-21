@@ -2,7 +2,9 @@ using ECommerce.Basket.Api.Baskets;
 using ECommerce.Basket.Application.Baskets;
 using ECommerce.BuildingBlocks.Security;
 using ECommerce.Catalog.Api.Products;
+using ECommerce.Catalog.Api.Stores;
 using ECommerce.Catalog.Application.Products;
+using ECommerce.Catalog.Application.Stores;
 using ECommerce.Identity.Api.Auth;
 using ECommerce.Identity.Api.Users;
 using ECommerce.Identity.Application.Users;
@@ -79,14 +81,29 @@ public sealed class EndpointSecurityMetadataTests
     {
         using WebApplication app = BuildApplication();
         app.MapProductEndpoints();
+        app.MapStoreEndpoints();
         app.MapInventoryEndpoints();
         app.MapUserEndpoints();
         app.MapAuthEndpoints();
 
         AssertAnonymous(app, "/api/v1/products/", "GET");
         AssertAnonymous(app, "/api/v1/products/{id:guid}", "GET");
+        AssertAnonymous(app, "/api/v1/stores/{id:guid}", "GET");
         AssertAnonymous(app, "/api/v1/inventory/items/{productId:guid}", "GET");
         AssertAnonymous(app, "/api/v1/users/", "POST");
+    }
+
+    [Fact]
+    public void CatalogWritesRequireSellerOrAdmin()
+    {
+        using WebApplication app = BuildApplication();
+        app.MapProductEndpoints();
+        app.MapStoreEndpoints();
+
+        AssertPolicy(app, "/api/v1/products/", "POST", AuthorizationPolicies.SellerOrAdmin);
+        AssertPolicy(app, "/api/v1/products/{id:guid}", "PUT", AuthorizationPolicies.SellerOrAdmin);
+        AssertPolicy(app, "/api/v1/stores/", "POST", AuthorizationPolicies.SellerOrAdmin);
+        AssertPolicy(app, "/api/v1/stores/mine", "GET", AuthorizationPolicies.SellerOrAdmin);
     }
 
     private static WebApplication BuildApplication()
@@ -95,10 +112,12 @@ public sealed class EndpointSecurityMetadataTests
         builder.Services.AddAuthorization();
         builder.Services.AddScoped<BasketService>();
         builder.Services.AddScoped<ProductService>();
+        builder.Services.AddScoped<StoreService>();
         builder.Services.AddScoped<UserService>();
         builder.Services.AddScoped<InventoryService>();
         builder.Services.AddScoped<OrderService>();
         builder.Services.AddSingleton<ICustomerOwnershipAuthorizer, AllowAllCustomerOwnershipAuthorizer>();
+        builder.Services.AddSingleton<IAuthenticatedUserResolver, FixedAuthenticatedUserResolver>();
         return builder.Build();
     }
 
@@ -121,6 +140,15 @@ public sealed class EndpointSecurityMetadataTests
             endpoint.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods.Contains(method, StringComparer.Ordinal) == true);
 
         Assert.NotNull(route.Metadata.GetMetadata<IAllowAnonymous>());
+    }
+
+    private static void AssertPolicy(WebApplication app, string pattern, string method, string policy)
+    {
+        RouteEndpoint route = Assert.Single(Routes(app), endpoint =>
+            endpoint.RoutePattern.RawText == pattern &&
+            endpoint.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods.Contains(method, StringComparer.Ordinal) == true);
+
+        Assert.Contains(route.Metadata.GetOrderedMetadata<IAuthorizeData>(), metadata => metadata.Policy == policy);
     }
 
     private static IEnumerable<RouteEndpoint> Routes(WebApplication app)
@@ -157,5 +185,11 @@ public sealed class EndpointSecurityMetadataTests
         {
             return Task.FromResult(true);
         }
+    }
+
+    private sealed class FixedAuthenticatedUserResolver : IAuthenticatedUserResolver
+    {
+        public Task<Guid?> ResolveUserIdAsync(CancellationToken cancellationToken) =>
+            Task.FromResult<Guid?>(Guid.NewGuid());
     }
 }

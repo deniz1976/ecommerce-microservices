@@ -87,7 +87,7 @@ Completed:
 
 ## Initial Infrastructure Direction
 
-- Catalog: PostgreSQL on Neon for product, translation, category, brand, and image metadata. Cloudinary or equivalent external image provider for product images.
+- Catalog: PostgreSQL on Neon for seller-owned stores plus product, translation, category, brand, and image metadata. Cloudinary or equivalent external image provider for product images.
 - Basket: Redis for active temporary basket state and PostgreSQL on Neon for basket history and checkout snapshots.
 - Ordering: PostgreSQL on Neon for order consistency, history, and relational querying.
 - Ordering Saga Worker: PostgreSQL on Neon for durable saga state.
@@ -104,7 +104,7 @@ Copy `.env.example` to `.env` for local Docker-based development and fill in man
 
 CloudAMQP can be configured with `RabbitMq__ConnectionString` as a single `amqps://` URI, or with the split `RabbitMq__Host`, `RabbitMq__Port`, `RabbitMq__Username`, `RabbitMq__Password`, `RabbitMq__VirtualHost`, and `RabbitMq__UseSsl` values.
 
-Auth0 access tokens use `Auth__RoleClaimType` (default `https://ecommerce.local/claims/roles`) for API roles. Catalog mutations and arbitrary Identity user lookup require `Admin`; Inventory upsert accepts `Admin` or the narrow `inventory:write` permission. Basket, Ordering, and Notification resolve the caller through Identity and require customer ownership unless the token has `Admin` or the dedicated `customer:act` automation permission. Trusted CI obtains a short-lived M2M token with `inventory:write customer:act` from Infisical-injected `RuntimeChecks__Auth0ClientId` and `RuntimeChecks__Auth0ClientSecret`; normal users must never receive `customer:act`. Local probes may set `RuntimeChecks__AccessToken` directly. Health-only smoke checks need no token.
+Auth0 access tokens use `Auth__RoleClaimType` (default `https://ecommerce.local/claims/roles`) for API roles. Catalog writes require `SellerOrAdmin`; sellers are restricted to stores owned by the local Identity user resolved from their token, while admins may manage all products. Arbitrary Identity user lookup requires `Admin`; Inventory upsert accepts `Admin` or the narrow `inventory:write` permission. Basket, Ordering, and Notification resolve the caller through Identity and require customer ownership unless the token has `Admin` or the dedicated `customer:act` automation permission. Trusted CI obtains a short-lived M2M token with `inventory:write customer:act` from Infisical-injected `RuntimeChecks__Auth0ClientId` and `RuntimeChecks__Auth0ClientSecret`; normal users must never receive `customer:act`. Local probes may set `RuntimeChecks__AccessToken` directly. Health-only smoke checks need no token.
 
 Authenticated role onboarding can synchronize `Customer` and `Seller` to Auth0 with `Auth0Management__Enabled=true`. Use a dedicated Management API M2M application and configure its client credentials plus the two Auth0 role IDs through Infisical. The runtime-check M2M application must remain separate. Auth0 is updated before local role persistence; failures return `503`, and the frontend requests a fresh token after success.
 
@@ -185,4 +185,4 @@ The workflow check defaults to `all`, which runs success, inventory-failure, pay
 
 ## Next Phase
 
-Next phase is adding seller/store ownership, reconciliation for cross-system role updates, and automated API integration tests around authorization and the order workflow.
+Next phase is adding the seller store/product editor UI, reconciliation for cross-system role updates, and managed end-to-end ownership probes.

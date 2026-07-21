@@ -80,7 +80,16 @@ Invoke-RestMethod http://localhost:5080/gateway/catalog/products
 
 Create product:
 
-This request needs an access token with the `Admin` role.
+This request needs `Seller` or `Admin`. A seller first creates a store and must use that owned store id. An admin may omit `storeId` for a platform product.
+
+```powershell
+$store = Invoke-RestMethod `
+    -Method Post `
+    -Uri http://localhost:5080/gateway/catalog/stores `
+    -ContentType "application/json" `
+    -Headers $authenticatedHeaders `
+    -Body (@{ name = "Deniz Store"; slug = "deniz-store" } | ConvertTo-Json)
+```
 
 ```powershell
 $categoryId = [Guid]::NewGuid()
@@ -90,6 +99,7 @@ $body = @{
     sku = "SKU-001"
     categoryId = $categoryId
     brandId = $brandId
+    storeId = $store.id
     price = 99.90
     currency = "USD"
     status = 1
@@ -118,7 +128,7 @@ Invoke-RestMethod `
 
 Note:
 
-The current Catalog create flow expects existing category and brand identifiers. Seed/admin tooling is a future improvement.
+The current Catalog create flow expects existing category and brand identifiers. Store ownership is derived from the token; there is no `ownerUserId` request field. Seed/admin tooling is a future improvement.
 
 ## Basket
 
