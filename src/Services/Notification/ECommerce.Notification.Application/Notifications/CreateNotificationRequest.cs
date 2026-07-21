@@ -1,6 +1,7 @@
 namespace ECommerce.Notification.Application.Notifications;
 
 public sealed record CreateNotificationRequest(
+    Guid SourceMessageId,
     Guid CustomerId,
     Guid? OrderId,
     string Type,

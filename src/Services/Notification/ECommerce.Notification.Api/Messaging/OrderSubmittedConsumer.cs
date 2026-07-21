@@ -16,6 +16,6 @@ public sealed class OrderSubmittedConsumer : IConsumer<OrderSubmitted>
     public Task Consume(ConsumeContext<OrderSubmitted> context)
     {
         (string title, string message) = NotificationText.OrderStatus("order.submitted", context.Message.OrderId, "Your order has been submitted.");
-        return notificationService.CreateAsync(new CreateNotificationRequest(context.Message.CustomerId, context.Message.OrderId, "order.submitted", title, message, "en"), context.CancellationToken);
+        return notificationService.CreateAsync(new CreateNotificationRequest(context.Message.MessageId, context.Message.CustomerId, context.Message.OrderId, "order.submitted", title, message, "en"), context.CancellationToken);
     }
 }

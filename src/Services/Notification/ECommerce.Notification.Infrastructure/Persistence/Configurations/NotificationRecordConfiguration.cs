@@ -11,6 +11,7 @@ public sealed class NotificationRecordConfiguration : IEntityTypeConfiguration<N
         builder.ToTable("notifications");
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.SourceMessageId).HasColumnName("source_message_id");
         builder.Property(x => x.CustomerId).HasColumnName("customer_id");
         builder.Property(x => x.OrderId).HasColumnName("order_id");
         builder.Property(x => x.Type).HasColumnName("type").HasMaxLength(128).IsRequired();
@@ -22,5 +23,6 @@ public sealed class NotificationRecordConfiguration : IEntityTypeConfiguration<N
         builder.HasIndex(x => x.CustomerId);
         builder.HasIndex(x => x.OrderId);
         builder.HasIndex(x => x.CreatedAt);
+        builder.HasIndex(x => new { x.SourceMessageId, x.Channel }).IsUnique();
     }
 }

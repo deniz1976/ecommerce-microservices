@@ -28,6 +28,7 @@ Catalog command and event contracts in `ECommerce.BuildingBlocks.Contracts`.
 - library: MassTransit 8.5.1
 - outbox: [[03_DATABASES#OrderingDb]], [[03_DATABASES#InventoryDb]], [[03_DATABASES#PaymentDb]], [[03_DATABASES#ShippingDb]], [[03_DATABASES#NotificationDb]], [[03_DATABASES#OrderingSagaDb]]
 - delivery guarantees: the shared registration enables the EF bus outbox and applies the EF consumer outbox to every generated receive endpoint. Consumer processing uses inbox duplicate detection and retries transient faults after 100 ms, 500 ms, and 1 second before the endpoint `_error` queue.
+- business idempotency: Notification persists each consumed contract `MessageId` and enforces uniqueness per delivery channel, so an event replay remains idempotent after the transport inbox window expires. Other workflow services additionally guard repeated work through order-scoped state and unique constraints.
 - consumer queues: kebab-case names are prefixed by the owning service (`ordering`, `ordering-saga`, `inventory`, `payment`, `shipping`, or `notification`). Event consumers in different services therefore receive independent copies instead of competing on a shared queue.
 
 # Message Contracts

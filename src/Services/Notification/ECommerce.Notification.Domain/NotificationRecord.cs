@@ -11,6 +11,7 @@ public sealed class NotificationRecord
     }
 
     public NotificationRecord(
+        Guid sourceMessageId,
         Guid customerId,
         Guid? orderId,
         string type,
@@ -20,6 +21,7 @@ public sealed class NotificationRecord
         NotificationChannel channel)
     {
         Id = Guid.NewGuid();
+        SourceMessageId = sourceMessageId;
         CustomerId = customerId;
         OrderId = orderId;
         Type = type;
@@ -31,6 +33,8 @@ public sealed class NotificationRecord
     }
 
     public Guid Id { get; private set; }
+
+    public Guid SourceMessageId { get; private set; }
 
     public Guid CustomerId { get; private set; }
 

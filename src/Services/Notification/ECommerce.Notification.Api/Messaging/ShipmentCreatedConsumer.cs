@@ -16,6 +16,6 @@ public sealed class ShipmentCreatedConsumer : IConsumer<ShipmentCreated>
     public Task Consume(ConsumeContext<ShipmentCreated> context)
     {
         (string title, string message) = NotificationText.OrderStatus("shipment.created", context.Message.OrderId, $"Shipment created. Tracking number: {context.Message.TrackingNumber}");
-        return notificationService.CreateAsync(new CreateNotificationRequest(context.Message.CustomerId, context.Message.OrderId, "shipment.created", title, message, "en"), context.CancellationToken);
+        return notificationService.CreateAsync(new CreateNotificationRequest(context.Message.MessageId, context.Message.CustomerId, context.Message.OrderId, "shipment.created", title, message, "en"), context.CancellationToken);
     }
 }

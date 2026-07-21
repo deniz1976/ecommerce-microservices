@@ -81,6 +81,7 @@ Describe database ownership, table groups, and runtime stores used by this repos
 - env: `ConnectionStrings__NotificationDb`
 - owner: [[02_SERVICES#Notification]]
 - tables: `notifications`, `InboxState`, `OutboxMessage`, `OutboxState`
+- `notifications.source_message_id`: originating contract `MessageId`; unique together with `channel` so business-event replay cannot create the same channel notification twice.
 
 ## IdentityDb
 
@@ -106,6 +107,8 @@ Each service infrastructure project owns its EF Core migrations under `Persisten
 The Ordering, OrderingSaga, Inventory, Payment, Shipping, and Notification migration chains include `RemoveObsoleteOutboxBusName`. It synchronizes their MassTransit 8.5.1 model snapshots by removing the obsolete nullable `OutboxState.BusName` column and its `BusName, Created` index; domain tables and business data are unchanged.
 
 Shipping migration `AllowNullTrackingNumberForFailedShipments` makes `shipments.tracking_number` nullable while retaining its unique index. Existing successful tracking numbers remain unchanged; failed shipments can store `NULL` without colliding with other failures.
+
+Notification migration `AddNotificationSourceMessageId` adds durable business-event idempotency. Historical rows are backfilled with distinct migration-generated identifiers because the original source event identifiers were not stored; newly consumed events retain their contract `MessageId`.
 
 # TODO
 

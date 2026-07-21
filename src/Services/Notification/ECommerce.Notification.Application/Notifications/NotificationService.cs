@@ -15,7 +15,18 @@ public sealed class NotificationService
 
     public async Task<NotificationMessage> CreateAsync(CreateNotificationRequest request, CancellationToken cancellationToken)
     {
+        NotificationRecord? existingNotification = await notificationRepository.FindBySourceAsync(
+            request.SourceMessageId,
+            NotificationChannel.Realtime,
+            cancellationToken);
+
+        if (existingNotification is not null)
+        {
+            return ToMessage(existingNotification);
+        }
+
         NotificationRecord notification = new(
+            request.SourceMessageId,
             request.CustomerId,
             request.OrderId,
             request.Type,
@@ -27,7 +38,15 @@ public sealed class NotificationService
         notificationRepository.Add(notification);
         await notificationRepository.SaveChangesAsync(cancellationToken);
 
-        NotificationMessage message = new(
+        NotificationMessage message = ToMessage(notification);
+
+        await liveNotificationPublisher.PublishAsync(message, cancellationToken);
+        return message;
+    }
+
+    private static NotificationMessage ToMessage(NotificationRecord notification)
+    {
+        return new NotificationMessage(
             notification.Id,
             notification.CustomerId,
             notification.OrderId,
@@ -36,8 +55,5 @@ public sealed class NotificationService
             notification.Message,
             notification.Culture,
             notification.CreatedAt);
-
-        await liveNotificationPublisher.PublishAsync(message, cancellationToken);
-        return message;
     }
 }

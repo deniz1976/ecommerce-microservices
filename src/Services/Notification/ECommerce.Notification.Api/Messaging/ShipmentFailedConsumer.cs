@@ -16,6 +16,6 @@ public sealed class ShipmentFailedConsumer : IConsumer<ShipmentFailed>
     public Task Consume(ConsumeContext<ShipmentFailed> context)
     {
         (string title, string message) = NotificationText.OrderStatus("shipment.failed", context.Message.OrderId, $"Shipment failed: {context.Message.Reason}");
-        return notificationService.CreateAsync(new CreateNotificationRequest(context.Message.CustomerId, context.Message.OrderId, "shipment.failed", title, message, "en"), context.CancellationToken);
+        return notificationService.CreateAsync(new CreateNotificationRequest(context.Message.MessageId, context.Message.CustomerId, context.Message.OrderId, "shipment.failed", title, message, "en"), context.CancellationToken);
     }
 }
