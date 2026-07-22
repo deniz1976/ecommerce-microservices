@@ -265,6 +265,18 @@ Every API has:
 
 The gateway also exposes its own health endpoints.
 
+## Messaging Health
+
+Ordering, OrderingSaga, Inventory, Payment, Shipping, and Notification export outbox pending-count, oldest-age, and polling-error metrics through OpenTelemetry. Defaults are a 30-second poll interval and a warning when the oldest pending message reaches 60 seconds. Configure them with `EventBusMonitoring__OutboxPollIntervalSeconds` and `EventBusMonitoring__OutboxWarningAgeSeconds`.
+
+To inspect persistent MassTransit failure queues through CloudAMQP's RabbitMQ management API using the already injected AMQP credentials:
+
+```powershell
+.\scripts\check-rabbitmq-error-queues.ps1
+```
+
+The script reports only queue names and counts; it does not print credentials or message bodies. Runtime integration captures a baseline and fails if `_error` or `_skipped` messages increase during the selected scenario.
+
 ## Current Runtime Blocker
 
 Docker Desktop must be running.

@@ -7,18 +7,19 @@ using ECommerce.Payment.Infrastructure;
 using ECommerce.Payment.Infrastructure.Persistence;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+const string serviceName = "ECommerce.Payment.Api";
 
 builder.Services.AddProblemDetails();
 builder.Services.AddECommerceLocalization();
-builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.Payment.Api");
+builder.Services.AddECommerceObservability(builder.Configuration, serviceName);
 builder.Services.AddOidcReadySecurity(builder.Configuration);
 builder.Services.AddPaymentApplication();
 builder.Services.AddPaymentInfrastructure(builder.Configuration);
-builder.Services.AddECommerceMassTransit(
+builder.Services.AddECommerceMassTransit<PaymentDbContext>(
     builder.Configuration,
+    serviceName,
     "payment",
-    [typeof(ECommerce.Payment.Infrastructure.Messaging.AuthorizePaymentConsumer).Assembly],
-    registration => registration.AddPostgresEntityFrameworkOutbox<PaymentDbContext>());
+    [typeof(ECommerce.Payment.Infrastructure.Messaging.AuthorizePaymentConsumer).Assembly]);
 builder.Services.AddHealthChecks();
 
 WebApplication app = builder.Build();

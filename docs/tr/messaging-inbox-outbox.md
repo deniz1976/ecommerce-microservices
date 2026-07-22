@@ -58,6 +58,10 @@ Ortak kayit hem Bus Outbox hem Consumer Outbox davranisini etkinlestirir. Bus Ou
 
 Receive endpoint'ler gecici hatalari 100 ms, 500 ms ve 1 saniye sonra yeniden dener. Hata kaliciysa MassTransit mesaji ilgili endpoint'in `_error` queue'suna tasir. Consumer Outbox basarisiz denemenin yarim business sonucu commit etmesini veya devam mesajlarini iki kez yayinlamasini engeller.
 
+Outbox kullanan her process kendi `OutboxMessage` tablosunu varsayilan olarak 30 saniyede bir kontrol eder. Bekleyen mesaj sayisi, en eski mesaj yasi ve sorgu hata sayisi OpenTelemetry metric'i olarak gonderilir. En eski mesaj 60 saniyeyi gecerse warning log yazilir; gecici broker kesintisinde restart dongusu olusmamasi icin readiness bozulmaz.
+
+Trusted runtime workflow senaryodan once RabbitMQ `_error` ve `_skipped` queue toplamlarini kaydeder. Senaryo sonunda toplam artmissa test basarisiz olur; onceden kalmis mesajlar baseline sayesinde yeni hata sayilmaz.
+
 ## Inbox Pattern
 
 RabbitMQ gibi sistemlerde ayni mesaj bazi durumlarda tekrar gelebilir. Consumer ayni mesaji iki kez islerse stok iki kez dusulebilir veya iki kez refund yapilabilir.

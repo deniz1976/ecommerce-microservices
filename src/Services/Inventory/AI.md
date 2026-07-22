@@ -82,6 +82,7 @@ Public inventory reads explicitly use `AllowAnonymous`; the shared fallback poli
 # Design Decisions
 
 MassTransit receive endpoints use the `inventory-` service prefix so queue ownership remains explicit and collision-free.
+The shared event-bus host service exports Inventory outbox backlog count, oldest-message age, and polling failures through the Inventory OpenTelemetry meter.
 
 Inventory does not read orders directly; it reacts to commands.
 

@@ -9,21 +9,22 @@ using ECommerce.Notification.Infrastructure;
 using ECommerce.Notification.Infrastructure.Persistence;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+const string serviceName = "ECommerce.Notification.Api";
 
 builder.Services.AddProblemDetails();
 builder.Services.AddSignalR();
 builder.Services.AddECommerceLocalization();
-builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.Notification.Api");
+builder.Services.AddECommerceObservability(builder.Configuration, serviceName);
 builder.Services.AddOidcReadySecurity(builder.Configuration);
 builder.Services.AddCustomerOwnership(builder.Configuration);
 builder.Services.AddNotificationApplication();
 builder.Services.AddNotificationInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ILiveNotificationPublisher, SignalRLiveNotificationPublisher>();
-builder.Services.AddECommerceMassTransit(
+builder.Services.AddECommerceMassTransit<NotificationDbContext>(
     builder.Configuration,
+    serviceName,
     "notification",
-    [typeof(ECommerce.Notification.Api.Messaging.OrderSubmittedConsumer).Assembly],
-    registration => registration.AddPostgresEntityFrameworkOutbox<NotificationDbContext>());
+    [typeof(ECommerce.Notification.Api.Messaging.OrderSubmittedConsumer).Assembly]);
 builder.Services.AddHealthChecks();
 
 WebApplication app = builder.Build();

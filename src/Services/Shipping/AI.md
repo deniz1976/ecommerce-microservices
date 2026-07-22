@@ -75,6 +75,7 @@ No public shipping HTTP API is currently documented. The service hosts health en
 # Design Decisions
 
 MassTransit receive endpoints use the `shipping-` service prefix so queue ownership remains explicit and collision-free.
+The shared event-bus host service exports Shipping outbox backlog count, oldest-message age, and polling failures through the Shipping OpenTelemetry meter.
 
 Shipping is driven by saga commands rather than direct order database reads. Application logic depends on a provider abstraction; Infrastructure supplies the current configurable mock provider. See [[../../../docs/ai/09_DECISIONS#decision-shipping-provider-boundary]].
 

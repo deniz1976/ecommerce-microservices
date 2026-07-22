@@ -100,6 +100,13 @@ jobs:
         shell: pwsh
         run: ./scripts/check-runtime-env.ps1
 
+      - name: Capture RabbitMQ failure queue baseline
+        id: rabbitmq_failure_baseline
+        shell: pwsh
+        run: |
+          $messageCount = ./scripts/check-rabbitmq-error-queues.ps1
+          "message_count=$messageCount" >> $env:GITHUB_OUTPUT
+
       - name: Acquire runtime Auth0 access token
         shell: pwsh
         run: ./scripts/request-runtime-access-token.ps1
@@ -128,6 +135,10 @@ jobs:
       - name: Verify order workflow
         shell: pwsh
         run: ./scripts/workflow-check.ps1 -Scenario "${{ inputs.scenario }}" -TimeoutSeconds ${{ inputs.timeout_seconds }}
+
+      - name: Verify RabbitMQ failure queues did not grow
+        shell: pwsh
+        run: ./scripts/check-rabbitmq-error-queues.ps1 -BaselineMessageCount ${{ steps.rabbitmq_failure_baseline.outputs.message_count }} | Out-Null
 
       - name: Show container state after failure
         if: failure()

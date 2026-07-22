@@ -1,5 +1,6 @@
 using System.Reflection;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -7,22 +8,29 @@ namespace ECommerce.BuildingBlocks.EventBus;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddECommerceMassTransit(
+    public static IServiceCollection AddECommerceMassTransit<TDbContext>(
         this IServiceCollection services,
         IConfiguration configuration,
+        string serviceName,
         string endpointNamePrefix,
         Assembly[] consumerAssemblies,
         Action<IBusRegistrationConfigurator>? configureRegistration = null,
         Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator>? configureBus = null)
+        where TDbContext : DbContext
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(serviceName);
         ArgumentException.ThrowIfNullOrWhiteSpace(endpointNamePrefix);
         services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
+        services.Configure<EventBusMonitoringOptions>(configuration.GetSection(EventBusMonitoringOptions.SectionName));
+        services.AddSingleton(new OutboxMetrics(serviceName));
+        services.AddHostedService<OutboxMonitoringService<TDbContext>>();
 
         services.AddMassTransit(registration =>
         {
             registration.SetEndpointNameFormatter(
                 new KebabCaseEndpointNameFormatter(endpointNamePrefix, includeNamespace: false));
             registration.AddConsumers(consumerAssemblies);
+            registration.AddPostgresEntityFrameworkOutbox<TDbContext>();
             configureRegistration?.Invoke(registration);
 
             registration.UsingRabbitMq((context, cfg) =>

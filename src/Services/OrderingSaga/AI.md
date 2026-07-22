@@ -89,6 +89,8 @@ MassTransit receive endpoints use the `ordering-saga-` service prefix. This give
 
 The shared EF consumer outbox makes each consumed workflow transition atomic with its inbox record and outgoing commands/events. Shipping failure compensation (`RefundPayment`, `ReleaseInventory`, and `OrderCancelled`) is therefore persisted as one consumer processing unit and receives bounded transient retries.
 
+The shared event-bus host service exports Saga outbox backlog count, oldest-message age, and polling failures through the worker OpenTelemetry meter.
+
 Saga orchestration is separated from Ordering API. See [[../../../docs/ai/09_DECISIONS#decision-event-driven-order-workflow]].
 
 `tools/ECommerce.RuntimeChecks` verifies the success path, inventory cancellation, payment cancellation with inventory release, and shipping cancellation with payment refund plus inventory release.

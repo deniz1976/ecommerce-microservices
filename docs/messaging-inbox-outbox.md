@@ -241,6 +241,10 @@ The shared registration enables both MassTransit transactional outbox modes:
 
 Receive endpoints retry transient failures after 100 ms, 500 ms, and 1 second before MassTransit moves a persistent fault to the endpoint's `_error` queue. The consumer outbox prevents a failed attempt from committing a partial consumer result or publishing its follow-up messages twice.
 
+Every outbox-owning process also checks its local `OutboxMessage` table every 30 seconds. It exports the pending row count, oldest pending message age, and polling failures through OpenTelemetry. A message older than 60 seconds produces a structured warning; the readiness endpoint remains healthy so a broker interruption does not cause a restart loop.
+
+The trusted runtime workflow records the total messages in RabbitMQ `_error` and `_skipped` queues before a scenario and compares the count afterwards. Pre-existing troubleshooting messages do not fail the run, but any increase caused by the current scenario does.
+
 ## Inbox Pattern
 
 Inbox solves this problem:

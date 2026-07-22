@@ -79,6 +79,7 @@ None.
 
 Notification history is durable; live SignalR delivery is best-effort.
 MassTransit receive endpoints use the `notification-` service prefix, giving Notification its own event subscription instead of competing with same-named Saga consumers.
+The shared event-bus host service exports Notification outbox backlog count, oldest-message age, and polling failures through the Notification OpenTelemetry meter.
 
 Every consumed business event copies its contract `MessageId` into `notifications.source_message_id`. The unique `(source_message_id, channel)` index prevents a replayed event from creating or broadcasting the same channel notification again after MassTransit's inbox duplicate-detection window expires. Existing notification rows receive migration-only source identifiers because their original event identifiers were not retained.
 

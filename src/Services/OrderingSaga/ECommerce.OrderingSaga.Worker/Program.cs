@@ -5,15 +5,16 @@ using ECommerce.OrderingSaga.Infrastructure;
 using ECommerce.OrderingSaga.Infrastructure.Persistence;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+const string serviceName = "ECommerce.OrderingSaga.Worker";
 
-builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.OrderingSaga.Worker");
+builder.Services.AddECommerceObservability(builder.Configuration, serviceName);
 builder.Services.AddOrderingSagaApplication();
 builder.Services.AddOrderingSagaInfrastructure(builder.Configuration);
-builder.Services.AddECommerceMassTransit(
+builder.Services.AddECommerceMassTransit<OrderingSagaDbContext>(
     builder.Configuration,
+    serviceName,
     "ordering-saga",
-    [typeof(ECommerce.OrderingSaga.Worker.Messaging.OrderSubmittedConsumer).Assembly],
-    registration => registration.AddPostgresEntityFrameworkOutbox<OrderingSagaDbContext>());
+    [typeof(ECommerce.OrderingSaga.Worker.Messaging.OrderSubmittedConsumer).Assembly]);
 
 IHost host = builder.Build();
 host.Run();

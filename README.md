@@ -129,6 +129,7 @@ dotnet build ECommerce.sln
 dotnet test ECommerce.sln
 .\scripts\validate-local.ps1
 .\scripts\check-runtime-env.ps1
+.\scripts\check-rabbitmq-error-queues.ps1
 ```
 
 ## Continuous Integration

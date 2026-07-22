@@ -19,6 +19,7 @@ PowerShell scripts make these repeated tasks less error-prone.
 
 ```text
 scripts/check-runtime-env.ps1
+scripts/check-rabbitmq-error-queues.ps1
 scripts/load-env.ps1
 scripts/run-with-secrets.ps1
 scripts/test-auth0-management-access.ps1
@@ -66,6 +67,23 @@ With optional variables:
 ```
 
 Optional variables include Cloudinary and Auth config.
+
+## check-rabbitmq-error-queues.ps1
+
+Purpose:
+
+- Query the RabbitMQ management HTTP API using `RabbitMq__ConnectionString` credentials.
+- Report message counts for MassTransit `_error` and `_skipped` queues without reading message bodies.
+- Optionally fail if the total exceeds a previously captured baseline.
+
+Commands:
+
+```powershell
+.\scripts\check-rabbitmq-error-queues.ps1
+.\scripts\check-rabbitmq-error-queues.ps1 -BaselineMessageCount 0
+```
+
+CloudAMQP exposes the management API on HTTPS port 443 of the AMQP hostname. The script derives that URL and does not require another secret.
 
 ## load-env.ps1
 

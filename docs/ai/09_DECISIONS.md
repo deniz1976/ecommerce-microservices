@@ -48,6 +48,7 @@ Track architectural decisions as stable graph nodes.
 - reason: reliable message publishing, duplicate detection, and atomic consumer database/message processing. Enabling only the bus outbox leaves consumer database updates outside the inbox/outbox transaction and can surface concurrency faults during compensation.
 - tuning: delivery `QueryDelay` is 5 seconds, duplicate detection is 10 minutes, and receive endpoints retry after 100 ms, 500 ms, and 1 second before using the `_error` queue.
 - business replay: transport inbox expiry is not treated as permanent business idempotency. Notification persists the contract `MessageId` and uses a unique `(source_message_id, channel)` constraint; workflow services retain their order-scoped state and uniqueness guards.
+- observability: every outbox-owning process polls its own MassTransit `OutboxMessage` table for OpenTelemetry backlog metrics and emits an aged-backlog warning; readiness remains independent. Managed runtime verification treats growth in RabbitMQ `_error` or `_skipped` queue messages as a failed scenario while allowing pre-existing messages through a captured baseline.
 - related: [[03_DATABASES#OrderingDb]], [[04_EVENTS#Broker]]
 
 ## decision-service-owned-consumer-queues

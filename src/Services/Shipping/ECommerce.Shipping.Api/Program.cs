@@ -7,18 +7,19 @@ using ECommerce.Shipping.Infrastructure;
 using ECommerce.Shipping.Infrastructure.Persistence;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+const string serviceName = "ECommerce.Shipping.Api";
 
 builder.Services.AddProblemDetails();
 builder.Services.AddECommerceLocalization();
-builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.Shipping.Api");
+builder.Services.AddECommerceObservability(builder.Configuration, serviceName);
 builder.Services.AddOidcReadySecurity(builder.Configuration);
 builder.Services.AddShippingApplication();
 builder.Services.AddShippingInfrastructure(builder.Configuration);
-builder.Services.AddECommerceMassTransit(
+builder.Services.AddECommerceMassTransit<ShippingDbContext>(
     builder.Configuration,
+    serviceName,
     "shipping",
-    [typeof(ECommerce.Shipping.Infrastructure.Messaging.CreateShipmentConsumer).Assembly],
-    registration => registration.AddPostgresEntityFrameworkOutbox<ShippingDbContext>());
+    [typeof(ECommerce.Shipping.Infrastructure.Messaging.CreateShipmentConsumer).Assembly]);
 builder.Services.AddHealthChecks();
 
 WebApplication app = builder.Build();

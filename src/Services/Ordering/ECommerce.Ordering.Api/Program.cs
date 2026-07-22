@@ -9,19 +9,20 @@ using ECommerce.Ordering.Infrastructure.Messaging;
 using ECommerce.Ordering.Infrastructure.Persistence;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+const string serviceName = "ECommerce.Ordering.Api";
 
 builder.Services.AddProblemDetails();
 builder.Services.AddECommerceLocalization();
-builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.Ordering.Api");
+builder.Services.AddECommerceObservability(builder.Configuration, serviceName);
 builder.Services.AddOidcReadySecurity(builder.Configuration);
 builder.Services.AddCustomerOwnership(builder.Configuration);
 builder.Services.AddOrderingApplication();
 builder.Services.AddOrderingInfrastructure(builder.Configuration);
-builder.Services.AddECommerceMassTransit(
+builder.Services.AddECommerceMassTransit<OrderingDbContext>(
     builder.Configuration,
+    serviceName,
     "ordering",
-    [typeof(OrderConfirmedConsumer).Assembly],
-    registration => registration.AddPostgresEntityFrameworkOutbox<OrderingDbContext>());
+    [typeof(OrderConfirmedConsumer).Assembly]);
 builder.Services.AddHealthChecks();
 
 WebApplication app = builder.Build();

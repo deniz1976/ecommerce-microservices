@@ -81,6 +81,18 @@ http://localhost:5080/health/live
 
 Gateway uzerinden service health route'lari da vardir.
 
+## Messaging Health
+
+Ordering, OrderingSaga, Inventory, Payment, Shipping ve Notification servisleri outbox bekleyen mesaj sayisini, en eski mesaj yasini ve polling hatalarini OpenTelemetry ile gonderir. Varsayilan polling araligi 30 saniye, warning esigi 60 saniyedir. `EventBusMonitoring__OutboxPollIntervalSeconds` ve `EventBusMonitoring__OutboxWarningAgeSeconds` ile degistirilebilir.
+
+CloudAMQP RabbitMQ failure queue durumunu mevcut AMQP bilgileriyle kontrol etmek icin:
+
+```powershell
+.\scripts\check-rabbitmq-error-queues.ps1
+```
+
+Script secret veya mesaj govdesi yazdirmaz; yalnizca `_error`/`_skipped` queue adlarini ve sayilarini raporlar.
+
 ## Logging
 
 Servis loglari Docker Compose ile okunabilir:

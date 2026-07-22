@@ -22,6 +22,17 @@ Komut:
 
 Bu script secret degerleri ekrana basmaz; sadece eksik olup olmadigini soyler.
 
+## check-rabbitmq-error-queues.ps1
+
+CloudAMQP'nin RabbitMQ management HTTP API'sini mevcut `RabbitMq__ConnectionString` bilgileriyle sorgular. `_error` ve `_skipped` queue mesaj sayilarini gosterir; mesaj govdesini veya secret degerleri yazdirmaz.
+
+```powershell
+.\scripts\check-rabbitmq-error-queues.ps1
+.\scripts\check-rabbitmq-error-queues.ps1 -BaselineMessageCount 0
+```
+
+Baseline verilirse toplam mesaj sayisi baseline'dan buyuk oldugunda script hata ile sonlanir.
+
 `.env` dosyasi varsa kontrol oncesi onu mevcut process icine yukler.
 
 ## load-env.ps1

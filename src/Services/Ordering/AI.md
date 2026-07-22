@@ -81,6 +81,7 @@ See [[../../../docs/ai/05_APIS#Ordering API]].
 
 Order workflow orchestration is delegated to [[../OrderingSaga/AI#Purpose]].
 MassTransit receive endpoints use the `ordering-` service prefix so their queues cannot collide with same-named consumers in another service.
+The shared event-bus host service exports Ordering outbox backlog count, oldest-message age, and polling failures through the Ordering OpenTelemetry meter.
 
 Every Ordering HTTP route requires the shared `AuthenticatedUser` policy and customer ownership authorization. Creation and customer-list queries reject a caller-supplied customer `Guid` that differs from Identity `/api/v1/auth/me`; an order-by-id owned by another customer is returned as not found. `Admin` or the narrow `customer:act` automation permission may act for another customer. Identity resolution fails closed.
 

@@ -79,6 +79,14 @@ Docker Compose defines:
 - metrics/log/dashboard storage: named volumes `prometheus-data`, `loki-data`, and `grafana-data` survive container restart/removal until the volumes are deleted.
 - Grafana provisioning: Prometheus is the default data source; Loki and Jaeger are also provisioned, trace-to-log navigation uses service resource labels plus trace id, and `ECommerce HTTP Overview` plus `ECommerce Logs` are loaded automatically.
 
+Each MassTransit runtime exports these service-resource-scoped instruments through its existing OTLP metrics pipeline:
+
+- `ecommerce.messaging.outbox.pending`: current `OutboxMessage` row count.
+- `ecommerce.messaging.outbox.oldest.age`: age in seconds of the oldest pending message.
+- `ecommerce.messaging.outbox.poll.errors`: cumulative database polling failures.
+
+`EventBusMonitoring__OutboxPollIntervalSeconds` controls collection frequency and defaults to 30 seconds; accepted runtime values are clamped to 5-300 seconds. `EventBusMonitoring__OutboxWarningAgeSeconds` defaults to 60 seconds and is clamped to 30-3600 seconds. An aged non-empty backlog writes a structured warning without failing readiness, because restarting a healthy process during a broker outage would delay outbox recovery.
+
 `Observability__OtlpEndpoint` defaults to the Collector service address in Docker Compose. When running .NET services directly on the host, set it to `http://localhost:4317`. `Observability__RedactionEnabled` defaults to `true` and applies the shared trace-tag and structured-log-attribute processors before export. Grafana anonymous Viewer access and Loki's disabled authentication are enabled only for this local development stack. Production backends, authentication, TLS, message-body redaction, and retention remain environment-specific TODOs.
 
 Basket, Ordering, and Notification use `IdentityClient__BaseUrl` for authenticated customer ownership resolution and `IdentityClient__TimeoutSeconds` for a bounded fail-closed lookup, defaulting to 5 seconds. Direct host execution defaults to `http://localhost:5090`; Docker Compose injects `http://identity-api:8080`. A deployed environment must set this to the trusted internal Identity API address and must not route the forwarded user token to an untrusted host.
@@ -115,6 +123,7 @@ See [[07_SECURITY#Secrets]].
 # Scripts
 
 - `scripts/check-runtime-env.ps1`: validates required env vars.
+- `scripts/check-rabbitmq-error-queues.ps1`: queries CloudAMQP's RabbitMQ management HTTP API with the existing AMQP username/password, reports `_error` and `_skipped` queue counts without printing credentials, and optionally fails when the total grows above a supplied baseline.
 - `scripts/run-migrations.ps1`: applies EF Core migrations and stops immediately when any service migration fails; callers on clean machines must restore `ECommerce.sln` dependencies first.
 - `scripts/smoke-test.ps1`: gateway health plus basic user/inventory/order probe; the full probe reads `RuntimeChecks__AccessToken`, while `-SkipWorkflowProbe` needs no token. Every health request logs its component name and exact URL so readiness failures identify the rejected or unavailable route.
 - `scripts/wait-for-runtime.ps1`: retries the health-only smoke test until the gateway and all downstream APIs are reachable or a bounded timeout expires.
@@ -158,7 +167,7 @@ Trusted runtime workflow: `.github/workflows/runtime-integration.yml`.
 - protection boundary: the job targets the `runtime-integration` GitHub environment and never runs for pull requests.
 - secret injection: `Infisical/secrets-action@v1.0.16` exchanges GitHub's short-lived OIDC token for the fixed Infisical `staging` environment; no long-lived Infisical credential is stored in GitHub. This version uses the current GitHub Actions Node runtime and avoids the Node 20 deprecation warning emitted by `v1.0.9`. The `staging` root imports shared `dev` values and locally overrides every `ConnectionStrings__*Db` key with a connection to the Neon `runtime-integration` child branch.
 - configuration: GitHub environment variables `INFISICAL_IDENTITY_ID` and `INFISICAL_PROJECT_SLUG` identify the Infisical machine identity and project; both are non-secret identifiers.
-- execution: validate required variables and the non-sensitive GitHub OIDC issuer/audience/subject claims without logging the JWT, obtain a short-lived Auth0 `inventory:write customer:act` M2M token, restore solution dependencies and the local EF tool, apply all migrations with fail-fast exit-code handling, build/start the application Compose graph, wait for health, and execute the selected saga scenario.
+- execution: validate required variables and the non-sensitive GitHub OIDC issuer/audience/subject claims without logging the JWT, capture a RabbitMQ `_error`/`_skipped` queue baseline, obtain a short-lived Auth0 `inventory:write customer:act` M2M token, restore solution dependencies and the local EF tool, apply all migrations with fail-fast exit-code handling, build/start the application Compose graph, wait for health, execute the selected saga scenario, and fail if failure-queue messages increased.
 - cleanup: print bounded container diagnostics only on failure and always remove containers and local volumes.
 - database isolation: the Neon `runtime-integration` branch contains all nine PostgreSQL databases and isolates migrations and probe records from its `production` parent. All nine local Infisical connection overrides are required to prevent imported development connections from being used.
 - Infisical OIDC trust is restricted to GitHub's immutable owner/repository identity plus the exact environment. For this repository the subject is `repo:deniz1976@96434352/ecommerce-microservices@1302913896:environment:runtime-integration`; the numeric IDs remain stable if either display name changes.
