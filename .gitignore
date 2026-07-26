@@ -24,3 +24,7 @@ docker-compose.local.yml
 
 tmp/
 output/
+
+# Keep development notes and agent documentation local.
+*.md
+!/README.md
