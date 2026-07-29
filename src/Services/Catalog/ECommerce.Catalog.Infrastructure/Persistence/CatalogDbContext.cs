@@ -16,6 +16,8 @@ public sealed class CatalogDbContext : DbContext
 
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
 
+    public DbSet<ProductImageDeletionJob> ProductImageDeletionJobs => Set<ProductImageDeletionJob>();
+
     public DbSet<Category> Categories => Set<Category>();
 
     public DbSet<CategoryTranslation> CategoryTranslations => Set<CategoryTranslation>();

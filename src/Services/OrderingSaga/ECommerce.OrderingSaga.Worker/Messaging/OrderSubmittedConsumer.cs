@@ -1,20 +1,24 @@
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
-using ECommerce.OrderingSaga.Application.Workflows;
+using ECommerce.OrderingSaga.Application.Commands.ProcessWorkflowEvent;
 using MassTransit;
 
 namespace ECommerce.OrderingSaga.Worker.Messaging;
 
 public sealed class OrderSubmittedConsumer : IConsumer<OrderSubmitted>
 {
-    private readonly OrderWorkflowService workflowService;
+    private readonly ICommandHandler<ProcessWorkflowEventCommand<OrderSubmitted>> commandHandler;
 
-    public OrderSubmittedConsumer(OrderWorkflowService workflowService)
+    public OrderSubmittedConsumer(
+        ICommandHandler<ProcessWorkflowEventCommand<OrderSubmitted>> commandHandler)
     {
-        this.workflowService = workflowService;
+        this.commandHandler = commandHandler;
     }
 
     public Task Consume(ConsumeContext<OrderSubmitted> context)
     {
-        return workflowService.HandleAsync(context.Message, context.CancellationToken);
+        return commandHandler.HandleAsync(
+            new ProcessWorkflowEventCommand<OrderSubmitted>(context.Message),
+            context.CancellationToken);
     }
 }

@@ -1,4 +1,10 @@
-@ECommerce.Payment.Api_HostAddress = http://localhost:5067
+@ECommerce.Payment.Api_HostAddress = http://localhost:5004
 
 GET {{ECommerce.Payment.Api_HostAddress}}/health/live
 Accept: application/json
+
+###
+
+GET {{ECommerce.Payment.Api_HostAddress}}/api/v1/payments/order/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{access_token}}
+Accept-Language: en

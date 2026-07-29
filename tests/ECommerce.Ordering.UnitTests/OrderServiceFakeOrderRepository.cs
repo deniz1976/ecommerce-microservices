@@ -1,9 +1,13 @@
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.Ordering.Application.Orders;
 using ECommerce.Ordering.Domain;
 
 namespace ECommerce.Ordering.UnitTests;
 
-internal sealed class OrderServiceFakeOrderRepository : IOrderRepository
+internal sealed class OrderServiceFakeOrderRepository :
+    IRepository<Order, Guid>,
+    IUnitOfWork,
+    IOrderReader
 {
     public List<Order> Orders { get; } = [];
 

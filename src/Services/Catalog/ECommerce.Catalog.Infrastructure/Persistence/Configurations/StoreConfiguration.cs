@@ -1,4 +1,5 @@
 using ECommerce.Catalog.Domain;
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,8 +16,8 @@ public sealed class StoreConfiguration : IEntityTypeConfiguration<Store>
         builder.Property(x => x.OwnerUserId).HasColumnName("owner_user_id");
         builder.Property(x => x.Name).HasColumnName("name").HasMaxLength(160).IsRequired();
         builder.Property(x => x.Slug).HasColumnName("slug").HasMaxLength(160).IsRequired();
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
 
         builder.HasIndex(x => x.OwnerUserId);
         builder.HasIndex(x => x.Slug).IsUnique();

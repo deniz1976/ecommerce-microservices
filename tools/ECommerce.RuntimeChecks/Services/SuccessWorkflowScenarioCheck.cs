@@ -29,5 +29,6 @@ internal sealed class SuccessWorkflowScenarioCheck : IWorkflowScenarioCheck
         await context.WaitForExpectedValueAsync("success payment authorization", "ConnectionStrings__PaymentDb", "select status from payments where order_id = @order_id", order.Id, "Authorized", deadline, cancellationToken);
         await context.WaitForExpectedValueAsync("success shipment creation", "ConnectionStrings__ShippingDb", "select status from shipments where order_id = @order_id", order.Id, "Created", deadline, cancellationToken);
         await context.WaitForPositiveValueAsync("success notification", "ConnectionStrings__NotificationDb", "select count(*) from notifications where order_id = @order_id", order.Id, deadline, cancellationToken);
+        await context.AssertOrderPresentationAsync(order.Id, customerId, RuntimeOrderStatus.Confirmed, "Workflow Check Success", "34000", cancellationToken);
     }
 }

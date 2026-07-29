@@ -1,4 +1,6 @@
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.BuildingBlocks.Persistence;
+using ECommerce.Notification.Domain;
 using ECommerce.Notification.Application.Notifications;
 using ECommerce.Notification.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +13,17 @@ public static class DependencyInjection
     public static IServiceCollection AddNotificationInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddPostgresDbContext<NotificationDbContext>(configuration, "NotificationDb");
-        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IRepository<NotificationRecord, Guid>>(serviceProvider =>
+            new EfRepository<NotificationRecord, Guid>(
+                serviceProvider.GetRequiredService<NotificationDbContext>(),
+                notification => notification.Id));
+        services.AddScoped<IUnitOfWork, EfUnitOfWork<NotificationDbContext>>();
+        services.AddScoped<NotificationReader>();
+        services.AddScoped<INotificationReader>(
+            serviceProvider => serviceProvider.GetRequiredService<NotificationReader>());
+        services.AddScoped<INotificationHistoryReader>(
+            serviceProvider => serviceProvider.GetRequiredService<NotificationReader>());
+        services.AddSingleton(TimeProvider.System);
         return services;
     }
 }

@@ -1,20 +1,24 @@
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
-using ECommerce.OrderingSaga.Application.Workflows;
+using ECommerce.OrderingSaga.Application.Commands.ProcessWorkflowEvent;
 using MassTransit;
 
 namespace ECommerce.OrderingSaga.Worker.Messaging;
 
 public sealed class PaymentAuthorizedConsumer : IConsumer<PaymentAuthorized>
 {
-    private readonly OrderWorkflowService workflowService;
+    private readonly ICommandHandler<ProcessWorkflowEventCommand<PaymentAuthorized>> commandHandler;
 
-    public PaymentAuthorizedConsumer(OrderWorkflowService workflowService)
+    public PaymentAuthorizedConsumer(
+        ICommandHandler<ProcessWorkflowEventCommand<PaymentAuthorized>> commandHandler)
     {
-        this.workflowService = workflowService;
+        this.commandHandler = commandHandler;
     }
 
     public Task Consume(ConsumeContext<PaymentAuthorized> context)
     {
-        return workflowService.HandleAsync(context.Message, context.CancellationToken);
+        return commandHandler.HandleAsync(
+            new ProcessWorkflowEventCommand<PaymentAuthorized>(context.Message),
+            context.CancellationToken);
     }
 }

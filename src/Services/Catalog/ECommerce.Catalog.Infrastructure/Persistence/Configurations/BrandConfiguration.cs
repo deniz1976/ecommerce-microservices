@@ -1,4 +1,5 @@
 using ECommerce.Catalog.Domain;
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,7 +16,7 @@ public sealed class BrandConfiguration : IEntityTypeConfiguration<Brand>
         builder.Property(x => x.Name).HasColumnName("name").HasMaxLength(256).IsRequired();
         builder.Property(x => x.Slug).HasColumnName("slug").HasMaxLength(160).IsRequired();
         builder.Property(x => x.IsActive).HasColumnName("is_active");
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
 
         builder.HasIndex(x => x.Slug).IsUnique();
     }

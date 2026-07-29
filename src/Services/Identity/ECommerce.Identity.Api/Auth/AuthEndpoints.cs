@@ -1,7 +1,10 @@
 using System.Security.Claims;
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.BuildingBlocks.Security;
-using ECommerce.Identity.Application;
+using ECommerce.Identity.Api.Errors;
+using ECommerce.Identity.Application.Commands.GetOrCreateExternalUser;
+using ECommerce.Identity.Application.Commands.SelectExternalUserRole;
 using ECommerce.Identity.Application.Users;
 
 namespace ECommerce.Identity.Api.Auth;
@@ -24,38 +27,33 @@ public static class AuthEndpoints
         return endpoints;
     }
 
-    private static async Task<IResult> GetMeAsync(ClaimsPrincipal principal, UserService userService, CancellationToken cancellationToken)
+    private static async Task<IResult> GetMeAsync(
+        ClaimsPrincipal principal,
+        ICommandHandler<GetOrCreateExternalUserCommand, Result<UserResponse>> commandHandler,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
     {
-        Result<UserResponse> result = await userService.GetOrCreateExternalUserAsync(
-            CreateExternalUserProfile(principal),
+        Result<UserResponse> result = await commandHandler.HandleAsync(
+            new GetOrCreateExternalUserCommand(CreateExternalUserProfile(principal)),
             cancellationToken);
 
-        return result.IsFailure
-            ? Results.BadRequest(result.Error)
-            : Results.Ok(result.Value);
+        return IdentityResults.FromResult(result, httpContext);
     }
 
     private static async Task<IResult> SelectRoleAsync(
         SelectUserRoleRequest request,
         ClaimsPrincipal principal,
-        UserService userService,
+        ICommandHandler<SelectExternalUserRoleCommand, Result<UserResponse>> commandHandler,
+        HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        Result<UserResponse> result = await userService.SelectExternalUserRoleAsync(
-            CreateExternalUserProfile(principal),
-            request,
+        Result<UserResponse> result = await commandHandler.HandleAsync(
+            new SelectExternalUserRoleCommand(
+                CreateExternalUserProfile(principal),
+                request.Role),
             cancellationToken);
 
-        if (result.IsSuccess)
-        {
-            return Results.Ok(result.Value);
-        }
-
-        return result.Error?.Code == IdentityErrorCodes.ExternalRoleSynchronizationFailed
-            ? Results.Problem(
-                statusCode: StatusCodes.Status503ServiceUnavailable,
-                title: result.Error.Code)
-            : Results.BadRequest(result.Error);
+        return IdentityResults.FromResult(result, httpContext);
     }
 
     private static ExternalUserProfile CreateExternalUserProfile(ClaimsPrincipal principal)

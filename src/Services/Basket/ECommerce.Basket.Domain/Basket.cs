@@ -17,6 +17,20 @@ public sealed class Basket
         UpdatedAt = CreatedAt;
     }
 
+    public Basket(
+        Guid customerId,
+        string currency,
+        DateTimeOffset createdAt,
+        DateTimeOffset updatedAt,
+        IEnumerable<BasketItem> restoredItems)
+    {
+        CustomerId = customerId;
+        Currency = currency;
+        CreatedAt = createdAt.ToUniversalTime();
+        UpdatedAt = updatedAt.ToUniversalTime();
+        items.AddRange(restoredItems);
+    }
+
     public Guid CustomerId { get; private set; }
 
     public string Currency { get; private set; }

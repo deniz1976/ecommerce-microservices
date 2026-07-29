@@ -1,5 +1,7 @@
 using ECommerce.BuildingBlocks.Contracts.Commands;
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
+using ECommerce.Shipping.Application.Commands.CreateShipment;
 using ECommerce.Shipping.Application.Shipments;
 using MassTransit;
 
@@ -7,24 +9,26 @@ namespace ECommerce.Shipping.Infrastructure.Messaging;
 
 public sealed class CreateShipmentConsumer : IConsumer<CreateShipment>
 {
-    private readonly ShipmentService shipmentService;
+    private readonly ICommandHandler<CreateShipmentCommand, CreateShipmentResult> commandHandler;
 
-    public CreateShipmentConsumer(ShipmentService shipmentService)
+    public CreateShipmentConsumer(
+        ICommandHandler<CreateShipmentCommand, CreateShipmentResult> commandHandler)
     {
-        this.shipmentService = shipmentService;
+        this.commandHandler = commandHandler;
     }
 
     public async Task Consume(ConsumeContext<CreateShipment> context)
     {
-        CreateShipmentResult result = await shipmentService.CreateAsync(
-            new CreateShipmentRequest(
-                context.Message.OrderId,
-                context.Message.CustomerId,
-                context.Message.RecipientName,
-                context.Message.AddressLine,
-                context.Message.City,
-                context.Message.CountryCode,
-                context.Message.PostalCode),
+        CreateShipmentResult result = await commandHandler.HandleAsync(
+            new CreateShipmentCommand(
+                new CreateShipmentRequest(
+                    context.Message.OrderId,
+                    context.Message.CustomerId,
+                    context.Message.RecipientName,
+                    context.Message.AddressLine,
+                    context.Message.City,
+                    context.Message.CountryCode,
+                    context.Message.PostalCode)),
             context.CancellationToken);
 
         if (result.Succeeded)

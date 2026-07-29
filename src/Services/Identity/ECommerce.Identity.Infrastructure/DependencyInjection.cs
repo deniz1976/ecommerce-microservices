@@ -1,8 +1,11 @@
 using ECommerce.BuildingBlocks.Persistence;
+using ECommerce.BuildingBlocks.Contracts.Persistence;
+using ECommerce.Identity.Application.AdminUsers;
 using ECommerce.Identity.Application.Users;
 using ECommerce.Identity.Infrastructure.Auth0;
 using ECommerce.Identity.Infrastructure.Persistence;
 using ECommerce.Identity.Infrastructure.Security;
+using ECommerce.Identity.Domain;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -14,8 +17,30 @@ public static class DependencyInjection
     public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddPostgresDbContext<IdentityDbContext>(configuration, "IdentityDb");
-        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAdminUserReader, AdminUserReader>();
+        services.AddScoped<IUserIdentityReader, UserIdentityReader>();
+        services.AddScoped<ISelfServiceRoleWriter, SelfServiceRoleWriter>();
+        services.Replace(ServiceDescriptor.Singleton<IRoleReconciliationQueue, RoleReconciliationQueue>());
+        services.AddScoped<RoleReconciliationProcessor>();
+        services.AddScoped<RoleReconciliationRetentionService>();
+        services.AddSingleton<RoleReconciliationMetrics>();
+        services.AddSingleton(TimeProvider.System);
+        services.AddScoped<IRepository<User, Guid>>(serviceProvider =>
+            new EfRepository<User, Guid>(
+                serviceProvider.GetRequiredService<IdentityDbContext>(),
+                user => user.Id));
+        services.AddScoped<IUnitOfWork, EfUnitOfWork<IdentityDbContext>>();
         services.AddScoped<IPasswordHashService, PasswordHashService>();
+
+        services.AddOptions<RoleReconciliationRetentionOptions>()
+            .Bind(configuration.GetSection(RoleReconciliationRetentionOptions.SectionName))
+            .Validate(
+                options => options.RetentionDays is >= 1 and <= 3650,
+                "RoleReconciliationRetention__RetentionDays must be between 1 and 3650 days.")
+            .Validate(
+                options => options.BatchSize is >= 1 and <= 1000,
+                "RoleReconciliationRetention__BatchSize must be between 1 and 1000.")
+            .ValidateOnStart();
 
         services.AddOptions<Auth0ManagementOptions>()
             .Bind(configuration.GetSection(Auth0ManagementOptions.SectionName))
@@ -48,6 +73,10 @@ public static class DependencyInjection
         });
         services.AddSingleton<IAuth0ManagementTokenProvider, Auth0ManagementTokenProvider>();
         services.Replace(ServiceDescriptor.Singleton<IExternalRoleSynchronizer, Auth0RoleSynchronizer>());
+        if (managementOptions.Enabled)
+        {
+            services.AddHostedService<RoleReconciliationBackgroundService>();
+        }
 
         return services;
     }

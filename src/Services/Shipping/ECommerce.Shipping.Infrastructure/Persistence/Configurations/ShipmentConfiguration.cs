@@ -1,3 +1,4 @@
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,8 +21,8 @@ public sealed class ShipmentConfiguration : IEntityTypeConfiguration<Domain.Ship
         builder.Property(x => x.TrackingNumber).HasColumnName("tracking_number").HasMaxLength(64);
         builder.Property(x => x.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(32);
         builder.Property(x => x.FailureReason).HasColumnName("failure_reason").HasMaxLength(512);
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
         builder.HasIndex(x => x.OrderId).IsUnique();
         builder.HasIndex(x => x.TrackingNumber).IsUnique();
     }

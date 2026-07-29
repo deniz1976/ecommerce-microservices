@@ -1,0 +1,23 @@
+groups:
+  - name: ecommerce-catalog
+    rules:
+      - alert: ECommerceCatalogImageDeletionBacklogStale
+        expr: |
+          max by (service_name) (ecommerce_catalog_product_image_deletion_pending) > 0
+            and on (service_name)
+          max by (service_name) (ecommerce_catalog_product_image_deletion_oldest_age_seconds) >= 300
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Catalog product image deletion backlog is stale"
+          description: "{{ $labels.service_name }} has a pending provider deletion job that is at least five minutes old."
+      - alert: ECommerceCatalogImageDeletionFailures
+        expr: |
+          sum by (service_name) (increase(ecommerce_catalog_product_image_deletion_failures_total[15m])) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Catalog product image deletion retry was scheduled"
+          description: "{{ $labels.service_name }} persisted a failed provider deletion attempt during the last 15 minutes."

@@ -24,27 +24,35 @@ internal sealed class WorkflowCheckRunner
     {
         Console.WriteLine($"Starting runtime workflow scenario: {options.Scenario}");
 
-        string suffix = Guid.NewGuid().ToString("N")[..12];
-        Console.WriteLine("Registering an isolated workflow-check user.");
-        UserResponse user = await gatewayClient.RegisterUserAsync(
-            new CreateUserRequest(
-                $"workflow-{suffix}@example.com",
-                $"Workflow Check {suffix}",
-                "WorkflowCheck123!"),
-            cancellationToken);
-        Console.WriteLine($"Workflow-check user registered: {user.Id}");
-
         IWorkflowScenarioCheck[] selectedChecks = scenarioChecks
-            .Where(check => options.Scenario == WorkflowScenario.All || check.Scenario == options.Scenario)
+            .Where(check =>
+                options.Scenario == WorkflowScenario.All
+                    ? check.IncludeInAll
+                    : check.Scenario == options.Scenario)
             .ToArray();
         if (selectedChecks.Length == 0)
         {
             throw new ArgumentOutOfRangeException(nameof(options.Scenario), options.Scenario, "Unsupported workflow scenario.");
         }
 
+        Guid customerId = Guid.Empty;
+        if (selectedChecks.Any(check => check.RequiresCustomer))
+        {
+            string suffix = Guid.NewGuid().ToString("N")[..12];
+            Console.WriteLine("Registering an isolated workflow-check user.");
+            UserResponse user = await gatewayClient.RegisterUserAsync(
+                new CreateUserRequest(
+                    $"workflow-{suffix}@example.com",
+                    $"Workflow Check {suffix}",
+                    "WorkflowCheck123!"),
+                cancellationToken);
+            customerId = user.Id;
+            Console.WriteLine($"Workflow-check user registered: {customerId}");
+        }
+
         foreach (IWorkflowScenarioCheck check in selectedChecks)
         {
-            await check.RunAsync(user.Id, cancellationToken);
+            await check.RunAsync(customerId, cancellationToken);
         }
 
         Console.WriteLine($"Runtime workflow scenario completed: {options.Scenario}");

@@ -8,6 +8,11 @@ namespace ECommerce.Basket.Api.Baskets;
 
 public static class BasketResults
 {
+    public static IResult Forbidden(HttpContext httpContext) =>
+        FromResult(
+            Result<object>.Failure(new Error(ErrorCodes.AccessDenied, ErrorCodes.AccessDenied)),
+            httpContext);
+
     public static IResult FromResult<T>(Result<T> result, HttpContext httpContext)
     {
         if (result.IsSuccess)
@@ -28,8 +33,13 @@ public static class BasketResults
         return code switch
         {
             ErrorCodes.BasketNotFound => StatusCodes.Status404NotFound,
+            ErrorCodes.ProductNotFound => StatusCodes.Status404NotFound,
+            ErrorCodes.AccessDenied => StatusCodes.Status403Forbidden,
             BasketErrorCodes.EmptyBasket => StatusCodes.Status400BadRequest,
             BasketErrorCodes.InvalidBasketItem => StatusCodes.Status400BadRequest,
+            BasketErrorCodes.CurrencyMismatch => StatusCodes.Status400BadRequest,
+            BasketErrorCodes.InvalidCheckoutAddress => StatusCodes.Status400BadRequest,
+            BasketErrorCodes.ProductCatalogUnavailable => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError
         };
     }
@@ -40,6 +50,9 @@ public static class BasketResults
         {
             BasketErrorCodes.EmptyBasket => culture == "tr" ? "Sepet boş." : "Basket is empty.",
             BasketErrorCodes.InvalidBasketItem => culture == "tr" ? "Sepet ürünü geçersiz." : "Basket item is invalid.",
+            BasketErrorCodes.ProductCatalogUnavailable => culture == "tr" ? "Ürün kataloğuna şu anda ulaşılamıyor." : "The product catalog is currently unavailable.",
+            BasketErrorCodes.CurrencyMismatch => culture == "tr" ? "Sepette yalnızca aynı para birimindeki ürünler bulunabilir." : "A basket can contain products in only one currency.",
+            BasketErrorCodes.InvalidCheckoutAddress => culture == "tr" ? "Teslimat adresi geçersiz." : "The shipping address is invalid.",
             _ => localizer.GetMessage(code, culture)
         };
     }

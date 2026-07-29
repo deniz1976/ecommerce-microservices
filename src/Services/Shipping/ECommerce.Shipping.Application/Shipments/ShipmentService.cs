@@ -1,22 +1,36 @@
 using ECommerce.BuildingBlocks.Contracts.Errors;
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.Shipping.Domain;
 
 namespace ECommerce.Shipping.Application.Shipments;
 
 public sealed class ShipmentService
 {
-    private readonly IShipmentRepository shipmentRepository;
+    private readonly IRepository<Domain.Shipment, Guid> shipmentRepository;
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IShipmentIdentityReader identityReader;
     private readonly IShippingProvider shippingProvider;
 
-    public ShipmentService(IShipmentRepository shipmentRepository, IShippingProvider shippingProvider)
+    public ShipmentService(
+        IRepository<Domain.Shipment, Guid> shipmentRepository,
+        IUnitOfWork unitOfWork,
+        IShipmentIdentityReader identityReader,
+        IShippingProvider shippingProvider)
     {
         this.shipmentRepository = shipmentRepository;
+        this.unitOfWork = unitOfWork;
+        this.identityReader = identityReader;
         this.shippingProvider = shippingProvider;
     }
 
     public async Task<CreateShipmentResult> CreateAsync(CreateShipmentRequest request, CancellationToken cancellationToken)
     {
-        Domain.Shipment? existingShipment = await shipmentRepository.GetByOrderIdAsync(request.OrderId, cancellationToken);
+        Guid? existingShipmentId = await identityReader.FindIdByOrderIdAsync(
+            request.OrderId,
+            cancellationToken);
+        Domain.Shipment? existingShipment = existingShipmentId is null
+            ? null
+            : await shipmentRepository.GetByIdAsync(existingShipmentId.Value, cancellationToken);
         if (existingShipment is not null)
         {
             return existingShipment.Status == ShipmentStatus.Failed
@@ -47,7 +61,7 @@ public sealed class ShipmentService
                 "Shipment address must be valid.");
 
             shipmentRepository.Add(failedShipment);
-            await shipmentRepository.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new CreateShipmentResult(false, failedShipment.Id, null, ErrorCodes.ShipmentFailed, failedShipment.FailureReason);
         }
@@ -77,7 +91,7 @@ public sealed class ShipmentService
                 failureReason);
 
             shipmentRepository.Add(failedShipment);
-            await shipmentRepository.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new CreateShipmentResult(false, failedShipment.Id, null, ErrorCodes.ShipmentFailed, failureReason);
         }
@@ -93,7 +107,7 @@ public sealed class ShipmentService
             providerResult.TrackingNumber);
 
         shipmentRepository.Add(shipment);
-        await shipmentRepository.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new CreateShipmentResult(true, shipment.Id, shipment.TrackingNumber, null, null);
     }

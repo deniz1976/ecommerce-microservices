@@ -1,4 +1,6 @@
 using ECommerce.BuildingBlocks.Contracts.Errors;
+using ECommerce.BuildingBlocks.Contracts.Events;
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Ordering.Domain;
 
@@ -6,18 +8,78 @@ namespace ECommerce.Ordering.Application.Orders;
 
 public sealed class OrderService
 {
-    private readonly IOrderRepository repository;
+    private readonly IRepository<Order, Guid> repository;
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IOrderReader orderReader;
     private readonly IOrderSubmittedPublisher publisher;
 
-    public OrderService(IOrderRepository repository, IOrderSubmittedPublisher publisher)
+    public OrderService(
+        IRepository<Order, Guid> repository,
+        IUnitOfWork unitOfWork,
+        IOrderReader orderReader,
+        IOrderSubmittedPublisher publisher)
     {
         this.repository = repository;
+        this.unitOfWork = unitOfWork;
+        this.orderReader = orderReader;
         this.publisher = publisher;
     }
 
     public async Task<Result<OrderResponse>> CreateAsync(CreateOrderRequest request, Guid correlationId, Guid? causationId, CancellationToken cancellationToken)
     {
-        if (request.CustomerId == Guid.Empty ||
+        return await CreateAsync(Guid.NewGuid(), request, correlationId, causationId, cancellationToken);
+    }
+
+    public async Task<Result<OrderResponse>> CreateFromCheckoutAsync(
+        BasketCheckedOut checkout,
+        CancellationToken cancellationToken)
+    {
+        Order? existingOrder = await repository.GetByIdAsync(checkout.CheckoutId, cancellationToken);
+        if (existingOrder is not null)
+        {
+            return Result<OrderResponse>.Success(existingOrder.ToResponse());
+        }
+
+        CreateOrderRequest request = new(
+            checkout.CustomerId,
+            checkout.Currency,
+            checkout.RecipientName,
+            checkout.AddressLine,
+            checkout.City,
+            checkout.CountryCode,
+            checkout.PostalCode,
+            checkout.Items.Select(
+                item => new CreateOrderItemRequest(
+                    item.ProductId,
+                    item.ProductName,
+                    item.Quantity,
+                    item.UnitPrice,
+                    item.Currency)).ToArray());
+
+        decimal calculatedTotal = request.Items.Sum(item => item.Quantity * item.UnitPrice);
+        if (calculatedTotal != checkout.TotalAmount ||
+            request.Items.Any(item => !string.Equals(item.Currency, checkout.Currency, StringComparison.OrdinalIgnoreCase)))
+        {
+            return Result<OrderResponse>.Failure(new Error(ErrorCodes.ValidationFailed, ErrorCodes.ValidationFailed));
+        }
+
+        return await CreateAsync(
+            checkout.CheckoutId,
+            request,
+            checkout.CorrelationId,
+            checkout.MessageId,
+            cancellationToken);
+    }
+
+    private async Task<Result<OrderResponse>> CreateAsync(
+        Guid orderId,
+        CreateOrderRequest request,
+        Guid correlationId,
+        Guid? causationId,
+        CancellationToken cancellationToken)
+    {
+        if (orderId == Guid.Empty ||
+            request.CustomerId == Guid.Empty ||
             string.IsNullOrWhiteSpace(request.Currency) ||
             string.IsNullOrWhiteSpace(request.RecipientName) ||
             string.IsNullOrWhiteSpace(request.AddressLine) ||
@@ -35,7 +97,7 @@ public sealed class OrderService
         }
 
         Order order = new(
-            Guid.NewGuid(),
+            orderId,
             request.CustomerId,
             request.Currency,
             request.RecipientName.Trim(),
@@ -51,7 +113,7 @@ public sealed class OrderService
 
         repository.Add(order);
         await publisher.PublishAsync(order, correlationId, causationId, cancellationToken);
-        await repository.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<OrderResponse>.Success(order.ToResponse());
     }
@@ -67,7 +129,9 @@ public sealed class OrderService
 
     public async Task<Result<IReadOnlyCollection<OrderResponse>>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<Order> orders = await repository.GetByCustomerIdAsync(customerId, cancellationToken);
+        IReadOnlyCollection<Order> orders = await orderReader.GetByCustomerIdAsync(
+            customerId,
+            cancellationToken);
         return Result<IReadOnlyCollection<OrderResponse>>.Success(orders.Select(x => x.ToResponse()).ToArray());
     }
 }

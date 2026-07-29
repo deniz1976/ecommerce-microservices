@@ -4,18 +4,19 @@ namespace ECommerce.Catalog.Application.References;
 
 public sealed class CatalogReferenceService
 {
-    private readonly ICatalogReferenceRepository repository;
+    private readonly ICatalogReferenceReader referenceReader;
 
-    public CatalogReferenceService(ICatalogReferenceRepository repository)
+    public CatalogReferenceService(ICatalogReferenceReader referenceReader)
     {
-        this.repository = repository;
+        this.referenceReader = referenceReader;
     }
 
     public async Task<IReadOnlyCollection<CatalogCategoryResponse>> GetCategoriesAsync(
         string culture,
         CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<Category> categories = await repository.GetActiveCategoriesAsync(cancellationToken);
+        IReadOnlyCollection<Category> categories =
+            await referenceReader.GetActiveCategoriesAsync(cancellationToken);
         return categories
             .Select(category => new CatalogCategoryResponse(category.Id, ResolveName(category, culture), category.Slug))
             .ToArray();
@@ -23,7 +24,8 @@ public sealed class CatalogReferenceService
 
     public async Task<IReadOnlyCollection<CatalogBrandResponse>> GetBrandsAsync(CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<Brand> brands = await repository.GetActiveBrandsAsync(cancellationToken);
+        IReadOnlyCollection<Brand> brands =
+            await referenceReader.GetActiveBrandsAsync(cancellationToken);
         return brands.Select(brand => new CatalogBrandResponse(brand.Id, brand.Name, brand.Slug)).ToArray();
     }
 

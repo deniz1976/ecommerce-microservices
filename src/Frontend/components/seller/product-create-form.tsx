@@ -29,7 +29,7 @@ type ReferenceState =
   | { status: "unavailable" }
 
 export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) {
-  const { t } = useI18n()
+  const { locale, t } = useI18n()
   const [references, setReferences] = useState<ReferenceState>({ status: "loading" })
   const [sku, setSku] = useState("")
   const [name, setName] = useState("")
@@ -75,8 +75,7 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
         price: Number(price),
         currency: currency.trim().toUpperCase(),
         status,
-        translations: [{ languageCode: "en", name: name.trim(), description: description.trim() }],
-        images: [],
+        translations: [{ languageCode: locale, name: name.trim(), description: description.trim() }],
       })
       setSku("")
       setName("")

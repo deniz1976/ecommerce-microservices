@@ -11,4 +11,6 @@ public static class AuthorizationPolicies
     public const string SellerOrAdmin = "SellerOrAdmin";
 
     public const string CustomerOrAdmin = "CustomerOrAdmin";
+
+    public const string TrustedOrderWrite = "TrustedOrderWrite";
 }

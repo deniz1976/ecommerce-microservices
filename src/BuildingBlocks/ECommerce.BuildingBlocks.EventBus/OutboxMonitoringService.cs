@@ -25,8 +25,8 @@ internal sealed class OutboxMonitoringService<TDbContext> : BackgroundService
         this.scopeFactory = scopeFactory;
         this.metrics = metrics;
         this.logger = logger;
-        pollInterval = TimeSpan.FromSeconds(Math.Clamp(options.Value.OutboxPollIntervalSeconds, 5, 300));
-        warningAge = TimeSpan.FromSeconds(Math.Clamp(options.Value.OutboxWarningAgeSeconds, 30, 3600));
+        pollInterval = options.Value.PollInterval;
+        warningAge = options.Value.WarningAge;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -38,7 +38,7 @@ internal sealed class OutboxMonitoringService<TDbContext> : BackgroundService
         }
     }
 
-    private async Task ObserveAsync(CancellationToken cancellationToken)
+    internal async Task ObserveAsync(CancellationToken cancellationToken)
     {
         try
         {

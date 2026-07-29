@@ -8,4 +8,5 @@ public sealed record NotificationMessage(
     string Title,
     string Message,
     string Culture,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? ReadAt);

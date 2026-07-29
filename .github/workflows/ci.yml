@@ -62,6 +62,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Reject critical dependency vulnerabilities
+        run: npm run audit:critical
+
       - name: Lint
         run: npm run lint
 
@@ -71,7 +74,7 @@ jobs:
   repository-validation:
     name: Repository validation
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
@@ -80,6 +83,10 @@ jobs:
       - name: Validate scripts, Compose, and secret patterns
         shell: pwsh
         run: ./scripts/validate-local.ps1 -SkipBuild
+
+      - name: Validate observability runtime configuration
+        shell: pwsh
+        run: ./scripts/validate-observability.ps1
 
   container-build:
     name: Container build

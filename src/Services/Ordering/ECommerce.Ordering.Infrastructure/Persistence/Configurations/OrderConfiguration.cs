@@ -1,4 +1,5 @@
 using ECommerce.Ordering.Domain;
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,8 +21,8 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(x => x.CountryCode).HasColumnName("country_code").HasMaxLength(2).IsRequired();
         builder.Property(x => x.PostalCode).HasColumnName("postal_code").HasMaxLength(32).IsRequired();
         builder.Property(x => x.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(32);
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
 
         builder.Ignore(x => x.TotalAmount);
 
@@ -34,6 +35,16 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasForeignKey(x => x.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Navigation(x => x.Items).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.HasMany(x => x.StatusHistory)
+            .WithOne(x => x.Order)
+            .HasForeignKey(x => x.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(x => x.Items)
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .AutoInclude();
+        builder.Navigation(x => x.StatusHistory)
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .AutoInclude();
     }
 }

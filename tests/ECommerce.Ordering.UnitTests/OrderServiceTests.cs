@@ -1,4 +1,7 @@
 using ECommerce.BuildingBlocks.Contracts.Errors;
+using ECommerce.BuildingBlocks.Contracts.Events;
+using ECommerce.BuildingBlocks.Contracts.Messaging;
+using ECommerce.BuildingBlocks.Contracts.Orders;
 using ECommerce.Ordering.Application.Orders;
 using ECommerce.Ordering.Domain;
 
@@ -11,7 +14,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, publisher);
+        OrderService service = new(repository, repository, repository, publisher);
 
         CreateOrderRequest request = CreateValidRequest() with { CustomerId = Guid.Empty };
 
@@ -29,7 +32,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, publisher);
+        OrderService service = new(repository, repository, repository, publisher);
 
         CreateOrderRequest request = CreateValidRequest() with
         {
@@ -56,7 +59,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, publisher);
+        OrderService service = new(repository, repository, repository, publisher);
 
         Guid correlationId = Guid.NewGuid();
         Guid causationId = Guid.NewGuid();
@@ -68,6 +71,41 @@ public sealed class OrderServiceTests
         Assert.Equal(correlationId, publisher.CorrelationId);
         Assert.Equal(causationId, publisher.CausationId);
         Assert.True(publisher.WasPublishedBeforeSave);
+        Assert.Equal(1, repository.SaveCount);
+    }
+
+    [Fact]
+    public async Task CreateFromCheckoutAsync_is_idempotent_and_uses_checkout_id()
+    {
+        OrderServiceFakeOrderRepository repository = new();
+        FakeOrderSubmittedPublisher publisher = new(repository);
+        OrderService service = new(repository, repository, repository, publisher);
+        Guid checkoutId = Guid.NewGuid();
+        BasketCheckedOut checkout = new(
+            Guid.NewGuid(),
+            checkoutId,
+            null,
+            DateTimeOffset.UtcNow,
+            MessageDefaults.CurrentVersion,
+            checkoutId,
+            Guid.NewGuid(),
+            25m,
+            "USD",
+            "Test Customer",
+            "Address 1",
+            "Istanbul",
+            "TR",
+            "34000",
+            [new OrderLine(Guid.NewGuid(), "Test Product", 2, 12.50m, "USD")]);
+
+        var first = await service.CreateFromCheckoutAsync(checkout, CancellationToken.None);
+        var duplicate = await service.CreateFromCheckoutAsync(checkout, CancellationToken.None);
+
+        Assert.True(first.IsSuccess);
+        Assert.True(duplicate.IsSuccess);
+        Assert.Equal(checkoutId, first.Value!.Id);
+        Assert.Single(repository.Orders);
+        Assert.Equal(1, publisher.PublishCount);
         Assert.Equal(1, repository.SaveCount);
     }
 
@@ -83,5 +121,4 @@ public sealed class OrderServiceTests
             "34000",
             [new CreateOrderItemRequest(Guid.NewGuid(), "Test Product", 2, 12.50m, "USD")]);
     }
-
 }

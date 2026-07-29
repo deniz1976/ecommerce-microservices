@@ -1,4 +1,5 @@
 using ECommerce.Payment.Domain;
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,7 +16,8 @@ public sealed class PaymentTransactionConfiguration : IEntityTypeConfiguration<P
         builder.Property(x => x.Type).HasColumnName("type").HasConversion<string>().HasMaxLength(32);
         builder.Property(x => x.Amount).HasColumnName("amount").HasPrecision(18, 2);
         builder.Property(x => x.Currency).HasColumnName("currency").HasMaxLength(3).IsRequired();
+        builder.Property(x => x.ProviderTransactionReference).HasColumnName("provider_transaction_reference").HasMaxLength(256);
         builder.Property(x => x.Reason).HasColumnName("reason").HasMaxLength(512);
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
     }
 }

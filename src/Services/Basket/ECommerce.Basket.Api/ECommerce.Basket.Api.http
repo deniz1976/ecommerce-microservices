@@ -14,16 +14,23 @@ Accept-Language: tr
 
 {
   "productId": "{{ProductId}}",
-  "productName": "Sample Product",
-  "quantity": 2,
-  "unitPrice": 100,
-  "currency": "TRY"
+  "quantity": 2
 }
 
 ###
 
 POST {{ECommerce.Basket.Api_HostAddress}}/api/v1/baskets/{{CustomerId}}/checkout
+Content-Type: application/json
 Accept: application/json
 Accept-Language: en
+
+{
+  "checkoutId": "33333333-3333-3333-3333-333333333333",
+  "recipientName": "Sample Customer",
+  "addressLine": "Example Street 1",
+  "city": "Istanbul",
+  "countryCode": "TR",
+  "postalCode": "34000"
+}
 
 ###

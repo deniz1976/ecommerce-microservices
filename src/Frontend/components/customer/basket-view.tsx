@@ -1,0 +1,331 @@
+"use client"
+
+import Link from "next/link"
+import { CheckCircle2, ClipboardList, CreditCard, Loader2, Minus, PackageOpen, Plus, ShoppingBag, Trash2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
+import type { FormEvent } from "react"
+
+import { LanguageSwitcher } from "@/components/auth/language-switcher"
+import { Logo } from "@/components/auth/logo"
+import { ThemeToggle } from "@/components/auth/theme-toggle"
+import { Button, buttonVariants } from "@/components/ui/button"
+import {
+  addBasketItem,
+  checkoutBasket,
+  clearBasket,
+  getBasket,
+  removeBasketItem,
+} from "@/lib/api/basket"
+import { getProfile } from "@/lib/api/auth"
+import { ApiError } from "@/lib/api/client"
+import { useI18n } from "@/lib/i18n/provider"
+import { cn } from "@/lib/utils"
+import type {
+  Basket,
+  CheckoutBasketPayload,
+  CheckoutBasketResult,
+  UserProfile,
+} from "@/types"
+
+type BasketState =
+  | { status: "loading" }
+  | { status: "ready"; profile: UserProfile; basket: Basket | null }
+  | { status: "unavailable" }
+
+export function BasketView() {
+  const { locale, t } = useI18n()
+  const router = useRouter()
+  const [state, setState] = useState<BasketState>({ status: "loading" })
+  const [busyItemId, setBusyItemId] = useState<string | null>(null)
+  const [clearing, setClearing] = useState(false)
+  const [checkingOut, setCheckingOut] = useState(false)
+  const [operationError, setOperationError] = useState(false)
+  const [checkoutResult, setCheckoutResult] = useState<CheckoutBasketResult | null>(null)
+  const [checkoutAddress, setCheckoutAddress] = useState<CheckoutBasketPayload>({
+    checkoutId: "",
+    recipientName: "",
+    addressLine: "",
+    city: "",
+    countryCode: "",
+    postalCode: "",
+  })
+  const checkoutId = useRef<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+
+    getProfile()
+      .then(async (profile) => {
+        if (!profile.isOnboardingComplete) {
+          router.replace("/onboarding/role")
+          return
+        }
+
+        if (!profile.roles.includes("Customer")) {
+          router.replace("/")
+          return
+        }
+
+        try {
+          const basket = await getBasket(profile.id)
+          if (active) setState({ status: "ready", profile, basket })
+        } catch (error) {
+          if (!active) return
+          if (error instanceof ApiError && error.status === 404) {
+            setState({ status: "ready", profile, basket: null })
+          } else {
+            setState({ status: "unavailable" })
+          }
+        }
+      })
+      .catch(() => {
+        if (active) router.replace("/login")
+      })
+
+    return () => {
+      active = false
+    }
+  }, [router])
+
+  async function updateQuantity(productId: string, quantity: number) {
+    if (state.status !== "ready" || quantity < 1) return
+    setBusyItemId(productId)
+    setOperationError(false)
+
+    try {
+      const basket = await addBasketItem(state.profile.id, { productId, quantity })
+      setState({ ...state, basket })
+    } catch {
+      setOperationError(true)
+    } finally {
+      setBusyItemId(null)
+    }
+  }
+
+  async function remove(productId: string) {
+    if (state.status !== "ready") return
+    setBusyItemId(productId)
+    setOperationError(false)
+
+    try {
+      const basket = await removeBasketItem(state.profile.id, productId)
+      setState({ ...state, basket: basket.items.length > 0 ? basket : null })
+    } catch {
+      setOperationError(true)
+    } finally {
+      setBusyItemId(null)
+    }
+  }
+
+  async function clear() {
+    if (state.status !== "ready") return
+    setClearing(true)
+    setOperationError(false)
+
+    try {
+      await clearBasket(state.profile.id)
+      setState({ ...state, basket: null })
+    } catch {
+      setOperationError(true)
+    } finally {
+      setClearing(false)
+    }
+  }
+
+  async function checkout(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (state.status !== "ready" || !state.basket) return
+    setCheckingOut(true)
+    setOperationError(false)
+
+    try {
+      checkoutId.current ??= crypto.randomUUID()
+      const result = await checkoutBasket(state.profile.id, {
+        ...checkoutAddress,
+        checkoutId: checkoutId.current,
+      })
+      setCheckoutResult(result)
+      setState({ ...state, basket: null })
+    } catch {
+      setOperationError(true)
+    } finally {
+      setCheckingOut(false)
+    }
+  }
+
+  return (
+    <div className="min-h-svh bg-muted/30">
+      <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
+        <Logo />
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <ThemeToggle />
+          <Link href="/orders" className={buttonVariants({ variant: "outline", size: "sm" })}>
+            <ClipboardList />
+            {t.orders.openOrders}
+          </Link>
+        </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+        <Link href="/" className={cn(buttonVariants({ variant: "ghost" }), "-ml-2")}>
+          {t.basket.continueShopping}
+        </Link>
+        <div className="mt-6 flex items-start gap-3">
+          <span className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <ShoppingBag className="size-5" />
+          </span>
+          <div>
+            <h1 className="font-heading text-3xl font-semibold tracking-tight">{t.basket.title}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t.basket.description}</p>
+          </div>
+        </div>
+
+        {state.status === "loading" ? (
+          <div className="flex min-h-80 items-center justify-center"><Loader2 className="size-6 animate-spin" /></div>
+        ) : state.status === "unavailable" ? (
+          <BasketMessage message={t.basket.loadFailed} />
+        ) : checkoutResult ? (
+          <div className="mt-8 rounded-xl border border-primary/30 bg-primary/5 p-8 text-center">
+            <CheckCircle2 className="mx-auto size-10 text-primary" />
+            <h2 className="mt-4 font-heading text-2xl font-semibold">{t.basket.checkoutRecorded}</h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t.basket.checkoutNote}</p>
+            <p className="mt-4 text-sm font-medium">{formatMoney(checkoutResult.totalAmount, checkoutResult.currency, locale)}</p>
+            <Link href={`/orders/${checkoutResult.snapshotId}`} className={cn(buttonVariants(), "mt-5")}>
+              {t.basket.viewOrder}
+            </Link>
+          </div>
+        ) : !state.basket || state.basket.items.length === 0 ? (
+          <BasketMessage message={t.basket.empty} />
+        ) : (
+          <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
+            <section className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+              {state.basket.items.map((item) => {
+                const busy = busyItemId === item.productId
+                return (
+                  <article key={item.productId} className="p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h2 className="font-heading text-lg font-semibold">{item.productName}</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {t.basket.unitPrice}: {formatMoney(item.unitPrice, item.currency, locale)}
+                        </p>
+                      </div>
+                      <p className="font-heading text-lg font-semibold">{formatMoney(item.totalPrice, item.currency, locale)}</p>
+                    </div>
+                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2" aria-label={t.basket.quantity}>
+                        <Button type="button" variant="outline" size="icon" disabled={busy || item.quantity <= 1} onClick={() => updateQuantity(item.productId, item.quantity - 1)} aria-label={`${t.basket.quantity} -`}><Minus /></Button>
+                        <span className="min-w-8 text-center text-sm font-medium">{busy ? <Loader2 className="mx-auto size-4 animate-spin" /> : item.quantity}</span>
+                        <Button type="button" variant="outline" size="icon" disabled={busy} onClick={() => updateQuantity(item.productId, item.quantity + 1)} aria-label={`${t.basket.quantity} +`}><Plus /></Button>
+                      </div>
+                      <Button type="button" variant="destructive" disabled={busy} onClick={() => remove(item.productId)}><Trash2 />{t.basket.remove}</Button>
+                    </div>
+                  </article>
+                )
+              })}
+            </section>
+
+            <form onSubmit={checkout} className="h-fit rounded-xl border border-border bg-card p-5">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm text-muted-foreground">{t.basket.total}</span>
+                <strong className="font-heading text-2xl">{formatMoney(state.basket.totalAmount, state.basket.currency, locale)}</strong>
+              </div>
+              <div className="mt-6 grid gap-3">
+                <CheckoutField
+                  label={t.basket.recipientName}
+                  value={checkoutAddress.recipientName}
+                  onChange={(recipientName) => setCheckoutAddress((current) => ({ ...current, recipientName }))}
+                />
+                <CheckoutField
+                  label={t.basket.addressLine}
+                  value={checkoutAddress.addressLine}
+                  onChange={(addressLine) => setCheckoutAddress((current) => ({ ...current, addressLine }))}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <CheckoutField
+                    label={t.basket.city}
+                    value={checkoutAddress.city}
+                    onChange={(city) => setCheckoutAddress((current) => ({ ...current, city }))}
+                  />
+                  <CheckoutField
+                    label={t.basket.postalCode}
+                    value={checkoutAddress.postalCode}
+                    onChange={(postalCode) => setCheckoutAddress((current) => ({ ...current, postalCode }))}
+                  />
+                </div>
+                <CheckoutField
+                  label={t.basket.countryCode}
+                  value={checkoutAddress.countryCode}
+                  maxLength={2}
+                  onChange={(countryCode) => setCheckoutAddress((current) => ({
+                    ...current,
+                    countryCode: countryCode.toUpperCase(),
+                  }))}
+                />
+              </div>
+              <div className="mt-5 flex gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <CreditCard className="mt-0.5 size-4 shrink-0 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">{t.basket.demoPayment}</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{t.basket.demoPaymentNote}</p>
+                </div>
+              </div>
+              {operationError ? <p className="mt-4 text-sm text-destructive">{t.basket.updateFailed}</p> : null}
+              <Button type="submit" size="lg" className="mt-6 w-full" disabled={checkingOut || clearing}>
+                {checkingOut ? <Loader2 className="animate-spin" /> : null}
+                {checkingOut ? t.basket.checkingOut : t.basket.checkout}
+              </Button>
+              <Button type="button" variant="ghost" className="mt-2 w-full" disabled={checkingOut || clearing} onClick={clear}>
+                {clearing ? <Loader2 className="animate-spin" /> : <Trash2 />}
+                {t.basket.clear}
+              </Button>
+            </form>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+function CheckoutField({
+  label,
+  value,
+  onChange,
+  maxLength,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  maxLength?: number
+}) {
+  return (
+    <label className="grid gap-1.5 text-xs font-medium text-muted-foreground">
+      {label}
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        maxLength={maxLength}
+        required
+        className="h-10 rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground outline-none focus:ring-2 focus:ring-ring/30"
+      />
+    </label>
+  )
+}
+
+function BasketMessage({ message }: { message: string }) {
+  return (
+    <div className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 text-center">
+      <PackageOpen className="size-10 text-muted-foreground/60" />
+      <p className="mt-4 text-sm text-muted-foreground">{message}</p>
+    </div>
+  )
+}
+
+function formatMoney(amount: number, currency: string, locale: "en" | "tr") {
+  return new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", {
+    style: "currency",
+    currency,
+  }).format(amount)
+}

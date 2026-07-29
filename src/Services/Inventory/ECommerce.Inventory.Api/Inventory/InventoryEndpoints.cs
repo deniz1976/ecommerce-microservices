@@ -1,5 +1,9 @@
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Security;
+using ECommerce.Inventory.Api.Errors;
+using ECommerce.Inventory.Application.Commands.UpsertInventoryItem;
 using ECommerce.Inventory.Application.Inventory;
+using ECommerce.Inventory.Application.Queries.GetInventoryItem;
 
 namespace ECommerce.Inventory.Api.Inventory;
 
@@ -21,23 +25,34 @@ public static class InventoryEndpoints
         return endpoints;
     }
 
-    private static async Task<IResult> GetItemAsync(Guid productId, InventoryService inventoryService, CancellationToken cancellationToken)
+    private static async Task<IResult> GetItemAsync(
+        Guid productId,
+        IQueryHandler<GetInventoryItemQuery, InventoryItemResponse?> queryHandler,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
     {
-        InventoryItemResponse? item = await inventoryService.GetItemAsync(productId, cancellationToken);
-        return item is null ? Results.NotFound() : Results.Ok(item);
+        InventoryItemResponse? item = await queryHandler.HandleAsync(
+            new GetInventoryItemQuery(productId),
+            cancellationToken);
+        return item is null ? InventoryResults.ProductNotFound(httpContext) : Results.Ok(item);
     }
 
-    private static async Task<IResult> UpsertAsync(Guid productId, UpsertInventoryItemBody body, InventoryService inventoryService, CancellationToken cancellationToken)
+    private static async Task<IResult> UpsertAsync(
+        Guid productId,
+        UpsertInventoryItemBody body,
+        ICommandHandler<UpsertInventoryItemCommand, InventoryItemResponse> commandHandler,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
     {
         if (body.QuantityOnHand < 0)
         {
-            return Results.ValidationProblem(new Dictionary<string, string[]>
-            {
-                ["quantityOnHand"] = ["Quantity on hand must be zero or greater."]
-            });
+            return InventoryResults.InvalidQuantity(httpContext);
         }
 
-        InventoryItemResponse item = await inventoryService.UpsertAsync(new UpsertInventoryItemRequest(productId, body.QuantityOnHand), cancellationToken);
+        InventoryItemResponse item = await commandHandler.HandleAsync(
+            new UpsertInventoryItemCommand(
+                new UpsertInventoryItemRequest(productId, body.QuantityOnHand)),
+            cancellationToken);
         return Results.Ok(item);
     }
 }

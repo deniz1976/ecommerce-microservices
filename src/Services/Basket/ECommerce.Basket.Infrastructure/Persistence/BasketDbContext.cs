@@ -1,4 +1,5 @@
 using ECommerce.Basket.Domain;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.Basket.Infrastructure.Persistence;
@@ -17,5 +18,8 @@ public sealed class BasketDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BasketDbContext).Assembly);
+        modelBuilder.AddInboxStateEntity();
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
     }
 }

@@ -29,5 +29,6 @@ internal sealed class PaymentFailureWorkflowScenarioCheck : IWorkflowScenarioChe
         await context.WaitForExpectedValueAsync("failed payment", "ConnectionStrings__PaymentDb", "select status from payments where order_id = @order_id", order.Id, "Failed", deadline, cancellationToken);
         await context.WaitForExpectedValueAsync("payment-failure inventory compensation", "ConnectionStrings__InventoryDb", "select status from stock_reservations where order_id = @order_id", order.Id, "Released", deadline, cancellationToken);
         await context.WaitForMinimumValueAsync("payment-failure notifications", "ConnectionStrings__NotificationDb", "select count(*) from notifications where order_id = @order_id", order.Id, 2, deadline, cancellationToken);
+        await context.AssertOrderPresentationAsync(order.Id, customerId, RuntimeOrderStatus.Cancelled, "Workflow Check Payment Failure", "34000", cancellationToken);
     }
 }

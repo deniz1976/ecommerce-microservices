@@ -8,6 +8,12 @@ public sealed record OrderResponse(
     string Currency,
     OrderStatus Status,
     decimal TotalAmount,
+    string RecipientName,
+    string AddressLine,
+    string City,
+    string CountryCode,
+    string PostalCode,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
-    IReadOnlyCollection<OrderItemResponse> Items);
+    IReadOnlyCollection<OrderItemResponse> Items,
+    IReadOnlyCollection<OrderStatusHistoryResponse> StatusHistory);

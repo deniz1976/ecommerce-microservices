@@ -14,6 +14,8 @@ public sealed class IdentityDbContext : DbContext
 
     public DbSet<UserRole> UserRoles => Set<UserRole>();
 
+    public DbSet<RoleReconciliationJob> RoleReconciliationJobs => Set<RoleReconciliationJob>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(IdentityDbContext).Assembly);

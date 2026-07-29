@@ -69,7 +69,7 @@ if ($SkipWorkflowProbe) {
 $accessToken = $env:RuntimeChecks__AccessToken
 
 if ([string]::IsNullOrWhiteSpace($accessToken)) {
-    throw "RuntimeChecks__AccessToken must contain an Auth0 access token with the Admin role for the workflow probe"
+    throw "RuntimeChecks__AccessToken must contain the validated runtime Auth0 access token for the workflow probe"
 }
 
 $suffix = [Guid]::NewGuid().ToString("N").Substring(0, 12)

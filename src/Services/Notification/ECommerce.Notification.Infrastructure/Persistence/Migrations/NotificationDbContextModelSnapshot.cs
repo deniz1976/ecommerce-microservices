@@ -37,7 +37,8 @@ namespace ECommerce.Notification.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<string>("Culture")
                         .IsRequired()
@@ -58,6 +59,11 @@ namespace ECommerce.Notification.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("OrderId")
                         .HasColumnType("uuid")
                         .HasColumnName("order_id");
+
+                    b.Property<DateTimeOffset?>("ReadAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("read_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<Guid>("SourceMessageId")
                         .HasColumnType("uuid")
@@ -85,6 +91,8 @@ namespace ECommerce.Notification.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("SourceMessageId", "Channel")
                         .IsUnique();
+
+                    b.HasIndex("CustomerId", "ReadAt", "CreatedAt");
 
                     b.ToTable("notifications", (string)null);
                 });

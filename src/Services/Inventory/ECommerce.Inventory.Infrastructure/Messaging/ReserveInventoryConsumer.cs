@@ -1,5 +1,7 @@
 using ECommerce.BuildingBlocks.Contracts.Commands;
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
+using ECommerce.Inventory.Application.Commands.ReserveInventory;
 using ECommerce.Inventory.Application.Inventory;
 using MassTransit;
 
@@ -7,11 +9,12 @@ namespace ECommerce.Inventory.Infrastructure.Messaging;
 
 public sealed class ReserveInventoryConsumer : IConsumer<ReserveInventory>
 {
-    private readonly InventoryService inventoryService;
+    private readonly ICommandHandler<ReserveInventoryCommand, InventoryReservationResult> commandHandler;
 
-    public ReserveInventoryConsumer(InventoryService inventoryService)
+    public ReserveInventoryConsumer(
+        ICommandHandler<ReserveInventoryCommand, InventoryReservationResult> commandHandler)
     {
-        this.inventoryService = inventoryService;
+        this.commandHandler = commandHandler;
     }
 
     public async Task Consume(ConsumeContext<ReserveInventory> context)
@@ -21,7 +24,9 @@ public sealed class ReserveInventoryConsumer : IConsumer<ReserveInventory>
             context.Message.CustomerId,
             context.Message.Items.Select(x => new InventoryReservationRequestItem(x.ProductId, x.Quantity)).ToArray());
 
-        InventoryReservationResult result = await inventoryService.ReserveAsync(request, context.CancellationToken);
+        InventoryReservationResult result = await commandHandler.HandleAsync(
+            new ReserveInventoryCommand(request),
+            context.CancellationToken);
 
         if (result.Succeeded)
         {

@@ -7,13 +7,20 @@ public sealed class PaymentTransaction
         Currency = string.Empty;
     }
 
-    public PaymentTransaction(Guid paymentId, PaymentTransactionType type, decimal amount, string currency, string? reason)
+    public PaymentTransaction(
+        Guid paymentId,
+        PaymentTransactionType type,
+        decimal amount,
+        string currency,
+        string? providerTransactionReference,
+        string? reason)
     {
         Id = Guid.NewGuid();
         PaymentId = paymentId;
         Type = type;
         Amount = amount;
         Currency = currency;
+        ProviderTransactionReference = providerTransactionReference;
         Reason = reason;
         CreatedAt = DateTimeOffset.UtcNow;
     }
@@ -27,6 +34,8 @@ public sealed class PaymentTransaction
     public decimal Amount { get; private set; }
 
     public string Currency { get; private set; }
+
+    public string? ProviderTransactionReference { get; private set; }
 
     public string? Reason { get; private set; }
 

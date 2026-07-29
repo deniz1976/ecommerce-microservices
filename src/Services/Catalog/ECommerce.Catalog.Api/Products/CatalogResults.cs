@@ -36,6 +36,10 @@ public static class CatalogResults
             CatalogErrorCodes.IdentityResolutionFailed => StatusCodes.Status503ServiceUnavailable,
             CatalogErrorCodes.StoreSlugConflict => StatusCodes.Status409Conflict,
             CatalogErrorCodes.StoreRequired => StatusCodes.Status400BadRequest,
+            CatalogErrorCodes.InvalidProductImage => StatusCodes.Status400BadRequest,
+            CatalogErrorCodes.ProductImageLimitExceeded => StatusCodes.Status400BadRequest,
+            CatalogErrorCodes.ProductImageNotFound => StatusCodes.Status404NotFound,
+            CatalogErrorCodes.ImageStorageUnavailable => StatusCodes.Status503ServiceUnavailable,
             ErrorCodes.ValidationFailed => StatusCodes.Status400BadRequest,
             _ => StatusCodes.Status500InternalServerError
         };
@@ -53,6 +57,10 @@ public static class CatalogResults
             CatalogErrorCodes.StoreAccessDenied => culture == "tr" ? "Bu mağaza için yetkiniz yok." : "You do not have access to this store.",
             CatalogErrorCodes.StoreSlugConflict => culture == "tr" ? "Mağaza adresi zaten kullanılıyor." : "The store slug is already in use.",
             CatalogErrorCodes.IdentityResolutionFailed => culture == "tr" ? "Kullanıcı kimliği doğrulanamadı." : "The authenticated user could not be resolved.",
+            CatalogErrorCodes.InvalidProductImage => culture == "tr" ? "Görsel geçersiz. JPEG, PNG, GIF veya WebP biçiminde en fazla 5 MB dosya yükleyin." : "The image is invalid. Upload a JPEG, PNG, GIF, or WebP file up to 5 MB.",
+            CatalogErrorCodes.ProductImageLimitExceeded => culture == "tr" ? "Bir ürüne en fazla 8 görsel eklenebilir." : "A product can have at most 8 images.",
+            CatalogErrorCodes.ProductImageNotFound => culture == "tr" ? "Ürün görseli bulunamadı." : "The product image was not found.",
+            CatalogErrorCodes.ImageStorageUnavailable => culture == "tr" ? "Görsel depolama hizmetine şu anda ulaşılamıyor." : "Image storage is currently unavailable.",
             _ => localizer.GetMessage(code, culture)
         };
     }

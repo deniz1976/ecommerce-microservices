@@ -1,10 +1,10 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ECommerce.BuildingBlocks.Security;
@@ -67,7 +67,7 @@ public static class DependencyInjection
             ? AuthOptions.DefaultRoleClaimType
             : options.RoleClaimType.Trim();
 
-        bool isConfigured = !string.IsNullOrWhiteSpace(options.Authority) && !string.IsNullOrWhiteSpace(options.Audience);
+        bool isConfigured = AuthConfigurationValidator.IsConfigured(options);
 
         AuthenticationBuilder authentication = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 
@@ -113,6 +113,9 @@ public static class DependencyInjection
     {
         services.AddCurrentUser();
         services.AddOidcReadyAuthentication(configuration);
+        services.Replace(ServiceDescriptor.Singleton<
+            IAuthorizationMiddlewareResultHandler,
+            LocalizedAuthorizationMiddlewareResultHandler>());
 
         services.AddAuthorizationBuilder()
             .SetFallbackPolicy(new AuthorizationPolicyBuilder()
@@ -123,29 +126,38 @@ public static class DependencyInjection
                 policy => policy.RequireAuthenticatedUser())
             .AddPolicy(
                 AuthorizationPolicies.Admin,
-                policy => policy.RequireRole(ApplicationRoles.Admin))
+                policy => policy
+                    .RequireAuthenticatedUser()
+                    .RequireRole(ApplicationRoles.Admin))
             .AddPolicy(
                 AuthorizationPolicies.InventoryWrite,
                 policy => policy
                     .RequireAuthenticatedUser()
                     .RequireAssertion(context =>
                         context.User.IsInRole(ApplicationRoles.Admin) ||
-                        HasPermission(context.User, ApplicationPermissions.InventoryWrite)))
+                        ClaimsPrincipalPermissionEvaluator.HasPermission(
+                            context.User,
+                            ApplicationPermissions.InventoryWrite)))
             .AddPolicy(
                 AuthorizationPolicies.SellerOrAdmin,
-                policy => policy.RequireRole(ApplicationRoles.Seller, ApplicationRoles.Admin))
+                policy => policy
+                    .RequireAuthenticatedUser()
+                    .RequireRole(ApplicationRoles.Seller, ApplicationRoles.Admin))
             .AddPolicy(
                 AuthorizationPolicies.CustomerOrAdmin,
-                policy => policy.RequireRole(ApplicationRoles.Customer, ApplicationRoles.Admin));
+                policy => policy
+                    .RequireAuthenticatedUser()
+                    .RequireRole(ApplicationRoles.Customer, ApplicationRoles.Admin))
+            .AddPolicy(
+                AuthorizationPolicies.TrustedOrderWrite,
+                policy => policy
+                    .RequireAuthenticatedUser()
+                    .RequireAssertion(context =>
+                        context.User.IsInRole(ApplicationRoles.Admin) ||
+                        ClaimsPrincipalPermissionEvaluator.HasPermission(
+                            context.User,
+                            ApplicationPermissions.ActAsCustomer)));
 
         return services;
-    }
-
-    private static bool HasPermission(ClaimsPrincipal user, string permission)
-    {
-        return user.Claims
-            .Where(claim => claim.Type is "permissions" or "scope")
-            .SelectMany(claim => claim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            .Contains(permission, StringComparer.Ordinal);
     }
 }

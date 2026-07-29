@@ -1,4 +1,4 @@
-import type { ProductStatusName } from "@/types"
+import type { ProductStatusName, Role } from "@/types"
 
 export const locales = ["en", "tr"] as const
 export type Locale = (typeof locales)[number]
@@ -97,13 +97,53 @@ export interface Dictionary {
     welcome: string
     description: string
     catalogSummary: string
+    catalogSummaryDescription: string
+    metricsUnavailable: string
     totalProducts: string
     activeProducts: string
     draftProducts: string
+    inactiveProducts: string
+    archivedProducts: string
+    totalStores: string
+    totalCategories: string
+    totalBrands: string
     recentProducts: string
     recentProductsDescription: string
     catalogUnavailable: string
     noProducts: string
+    manageCatalog: string
+    manageCatalogDescription: string
+    searchProducts: string
+    searchProductsPlaceholder: string
+    filterStatus: string
+    allStatuses: string
+    searchAction: string
+    noMatchingProducts: string
+    sellerProduct: string
+    platformProduct: string
+    editProduct: string
+    edit: string
+    pageStatus: string
+    previousPage: string
+    nextPage: string
+    selectProductToEdit: string
+    manageUsers: string
+    manageUsersDescription: string
+    searchUsers: string
+    searchUsersPlaceholder: string
+    filterRole: string
+    allRoles: string
+    filterUserStatus: string
+    allUserStatuses: string
+    userActive: string
+    userDisabled: string
+    usersUnavailable: string
+    noMatchingUsers: string
+    onboardingPending: string
+    joinedAt: string
+    userPageStatus: string
+    usersReadOnlyNote: string
+    userRole: Record<Role, string>
     status: Record<ProductStatusName, string>
   }
   seller: {
@@ -141,12 +181,144 @@ export interface Dictionary {
     statusLabel: string
     draft: string
     active: string
+    inactive: string
+    archived: string
     saveProduct: string
     savingProduct: string
     productCreateFailed: string
     referencesUnavailable: string
     referencesEmpty: string
     productCreated: string
+    edit: string
+    editProduct: string
+    cancelEditing: string
+    saveChanges: string
+    savingChanges: string
+    productUpdated: string
+    productUpdateFailed: string
+    currentImages: string
+    noImages: string
+    uploadImage: string
+    uploadingImage: string
+    imageUploadHint: string
+    imageInvalid: string
+    imageUploaded: string
+    imageUploadFailed: string
+    mainImage: string
+    setMainImage: string
+    mainImageUpdated: string
+    imageUpdateFailed: string
+    deleteImage: string
+    imageDeleted: string
+    imageDeleteFailed: string
+  }
+  customer: {
+    roleLabel: string
+    welcome: string
+    description: string
+    searchLabel: string
+    searchPlaceholder: string
+    searchAction: string
+    category: string
+    allCategories: string
+    brand: string
+    allBrands: string
+    sort: string
+    newest: string
+    priceLowToHigh: string
+    priceHighToLow: string
+    results: string
+    noProducts: string
+    catalogUnavailable: string
+    filtersUnavailable: string
+    previousPage: string
+    nextPage: string
+    page: string
+    viewProduct: string
+    productUnavailable: string
+    backToCatalog: string
+    productDetails: string
+  }
+  basket: {
+    title: string
+    description: string
+    openBasket: string
+    addToBasket: string
+    adding: string
+    added: string
+    addFailed: string
+    signInToAdd: string
+    empty: string
+    continueShopping: string
+    quantity: string
+    unitPrice: string
+    total: string
+    remove: string
+    clear: string
+    updateFailed: string
+    loadFailed: string
+    checkout: string
+    checkingOut: string
+    checkoutRecorded: string
+    checkoutNote: string
+    demoPayment: string
+    demoPaymentNote: string
+    recipientName: string
+    addressLine: string
+    city: string
+    countryCode: string
+    postalCode: string
+    addressRequired: string
+    viewOrder: string
+  }
+  orders: {
+    title: string
+    openOrders: string
+    description: string
+    empty: string
+    loadFailed: string
+    orderNumber: string
+    placedAt: string
+    status: Record<
+      "Submitted" | "InventoryReserved" | "PaymentAuthorized" | "ShipmentCreated" | "Confirmed" | "Cancelled",
+      string
+    >
+    processing: string
+    processingNote: string
+    backToOrders: string
+    shippingAddress: string
+    cancellationReason: string
+    cancellationReasons: Record<
+      "INSUFFICIENT_STOCK" | "PAYMENT_FAILED" | "SHIPMENT_FAILED" | "UNEXPECTED_ERROR",
+      string
+    >
+    payment: {
+      title: string
+      pending: string
+      unavailable: string
+      authorization: string
+      refund: string
+      status: Record<"authorized" | "failed" | "refunded", string>
+    }
+  }
+  notifications: {
+    title: string
+    openNotifications: string
+    openNotificationsWithUnread: string
+    description: string
+    all: string
+    unread: string
+    unreadLabel: string
+    readLabel: string
+    empty: string
+    emptyUnread: string
+    loadFailed: string
+    markRead: string
+    markingRead: string
+    viewOrder: string
+    previousPage: string
+    nextPage: string
+    pageStatus: string
   }
   validation: {
     required: string
@@ -252,13 +424,57 @@ const en: Dictionary = {
     welcome: "Welcome back, {name}",
     description: "Monitor the catalog and begin managing the marketplace from one operational workspace.",
     catalogSummary: "Catalog summary",
+    catalogSummaryDescription: "Current marketplace totals from the protected Catalog metrics API.",
+    metricsUnavailable: "Catalog metrics are currently unavailable.",
     totalProducts: "Total products",
-    activeProducts: "Active products on this page",
-    draftProducts: "Draft products on this page",
+    activeProducts: "Active products",
+    draftProducts: "Draft products",
+    inactiveProducts: "Inactive products",
+    archivedProducts: "Archived products",
+    totalStores: "Stores",
+    totalCategories: "Categories",
+    totalBrands: "Brands",
     recentProducts: "Recent catalog products",
     recentProductsDescription: "The latest products returned by the Catalog service.",
     catalogUnavailable: "Catalog data is currently unavailable. Check that the gateway and Catalog service are running.",
     noProducts: "No products have been created in the catalog yet.",
+    manageCatalog: "Manage catalog",
+    manageCatalogDescription: "Search, filter, page through, and update marketplace products across every store.",
+    searchProducts: "Search products",
+    searchProductsPlaceholder: "Product name or SKU",
+    filterStatus: "Status",
+    allStatuses: "All statuses",
+    searchAction: "Search",
+    noMatchingProducts: "No products match the current filters.",
+    sellerProduct: "Seller product",
+    platformProduct: "Platform product",
+    editProduct: "Edit product",
+    edit: "Edit",
+    pageStatus: "Page {page} of {total}",
+    previousPage: "Previous page",
+    nextPage: "Next page",
+    selectProductToEdit: "Select a product to update its catalog details, lifecycle status, or images.",
+    manageUsers: "Users",
+    manageUsersDescription: "Search and review locally registered marketplace identities.",
+    searchUsers: "Search users",
+    searchUsersPlaceholder: "Name or email address",
+    filterRole: "Role",
+    allRoles: "All roles",
+    filterUserStatus: "Account status",
+    allUserStatuses: "All statuses",
+    userActive: "Active",
+    userDisabled: "Disabled",
+    usersUnavailable: "User data is currently unavailable.",
+    noMatchingUsers: "No users match the current filters.",
+    onboardingPending: "Onboarding pending",
+    joinedAt: "Joined",
+    userPageStatus: "Page {page} of {total} · {count} users",
+    usersReadOnlyNote: "This view is read-only. Roles and Auth0 accounts cannot be changed here.",
+    userRole: {
+      Customer: "Customer",
+      Seller: "Seller",
+      Admin: "Administrator",
+    },
     status: {
       Active: "Active",
       Draft: "Draft",
@@ -301,12 +517,154 @@ const en: Dictionary = {
     statusLabel: "Status",
     draft: "Draft",
     active: "Active",
+    inactive: "Inactive",
+    archived: "Archived",
     saveProduct: "Create product",
     savingProduct: "Creating product",
     productCreateFailed: "The product could not be created. Check the fields and try again.",
     referencesUnavailable: "Category and brand options could not be loaded.",
     referencesEmpty: "At least one active category and brand must exist before a product can be created.",
     productCreated: "Product created successfully.",
+    edit: "Edit",
+    editProduct: "Edit product",
+    cancelEditing: "Close product editor",
+    saveChanges: "Save changes",
+    savingChanges: "Saving changes",
+    productUpdated: "Product updated successfully.",
+    productUpdateFailed: "The product could not be updated. Check the fields and your store access.",
+    currentImages: "Current images",
+    noImages: "This product does not have an image yet.",
+    uploadImage: "Upload image",
+    uploadingImage: "Uploading image",
+    imageUploadHint: "JPEG, PNG, GIF, or WebP. Maximum 5 MB and 8 images per product.",
+    imageInvalid: "Choose a supported image up to 5 MB.",
+    imageUploaded: "Image uploaded successfully.",
+    imageUploadFailed: "The image could not be uploaded. Check the file or media configuration.",
+    mainImage: "Main",
+    setMainImage: "Set as main image",
+    mainImageUpdated: "Main image updated.",
+    imageUpdateFailed: "The image could not be updated.",
+    deleteImage: "Delete image",
+    imageDeleted: "Image deleted.",
+    imageDeleteFailed: "The image could not be deleted.",
+  },
+  customer: {
+    roleLabel: "Customer",
+    welcome: "Find something worth keeping, {name}",
+    description: "Explore active products from marketplace sellers. Search by name or SKU, then narrow the catalog by category and brand.",
+    searchLabel: "Search products",
+    searchPlaceholder: "Product name or SKU",
+    searchAction: "Search",
+    category: "Category",
+    allCategories: "All categories",
+    brand: "Brand",
+    allBrands: "All brands",
+    sort: "Sort",
+    newest: "Newest",
+    priceLowToHigh: "Price: low to high",
+    priceHighToLow: "Price: high to low",
+    results: "{count} active products",
+    noProducts: "No active products match these filters.",
+    catalogUnavailable: "The catalog is temporarily unavailable.",
+    filtersUnavailable: "Category and brand filters are temporarily unavailable.",
+    previousPage: "Previous",
+    nextPage: "Next",
+    page: "Page {current} of {total}",
+    viewProduct: "View product",
+    productUnavailable: "This product is unavailable or no longer active.",
+    backToCatalog: "Back to catalog",
+    productDetails: "Product details",
+  },
+  basket: {
+    title: "Your basket",
+    description: "Review quantities and totals before continuing to checkout.",
+    openBasket: "Basket",
+    addToBasket: "Add to basket",
+    adding: "Adding",
+    added: "Added",
+    addFailed: "The product could not be added to your basket.",
+    signInToAdd: "Sign in to add this product",
+    empty: "Your basket is empty.",
+    continueShopping: "Continue shopping",
+    quantity: "Quantity",
+    unitPrice: "Unit price",
+    total: "Total",
+    remove: "Remove",
+    clear: "Clear basket",
+    updateFailed: "The basket could not be updated.",
+    loadFailed: "Your basket could not be loaded.",
+    checkout: "Confirm basket",
+    checkingOut: "Confirming basket",
+    checkoutRecorded: "Basket confirmed",
+    checkoutNote: "Your order was accepted and is now being processed.",
+    demoPayment: "Demo payment",
+    demoPaymentNote: "No real charge is made and no card information is requested.",
+    recipientName: "Recipient name",
+    addressLine: "Address",
+    city: "City",
+    countryCode: "Country code",
+    postalCode: "Postal code",
+    addressRequired: "Complete the shipping address before confirming your basket.",
+    viewOrder: "View order",
+  },
+  orders: {
+    title: "Your orders",
+    openOrders: "Orders",
+    description: "Follow order processing, payment, and shipment status.",
+    empty: "You have not placed an order yet.",
+    loadFailed: "Your orders could not be loaded.",
+    orderNumber: "Order",
+    placedAt: "Placed",
+    status: {
+      Submitted: "Processing",
+      InventoryReserved: "Stock reserved",
+      PaymentAuthorized: "Payment authorized",
+      ShipmentCreated: "Shipment created",
+      Confirmed: "Confirmed",
+      Cancelled: "Cancelled",
+    },
+    processing: "Order is being prepared",
+    processingNote: "The order handoff is durable. This page updates when processing completes.",
+    backToOrders: "Back to orders",
+    shippingAddress: "Shipping address",
+    cancellationReason: "Cancellation reason",
+    cancellationReasons: {
+      INSUFFICIENT_STOCK: "One or more products are out of stock.",
+      PAYMENT_FAILED: "The payment could not be authorized.",
+      SHIPMENT_FAILED: "The shipment could not be created.",
+      UNEXPECTED_ERROR: "The order could not be completed.",
+    },
+    payment: {
+      title: "Payment",
+      pending: "Payment details are being prepared.",
+      unavailable: "Payment details are temporarily unavailable.",
+      authorization: "Authorization",
+      refund: "Refund",
+      status: {
+        authorized: "Authorized",
+        failed: "Failed",
+        refunded: "Refunded",
+      },
+    },
+  },
+  notifications: {
+    title: "Notifications",
+    openNotifications: "Notifications",
+    openNotificationsWithUnread: "Notifications, {count} unread",
+    description: "Review order, payment, and shipment updates.",
+    all: "All",
+    unread: "Unread",
+    unreadLabel: "Unread",
+    readLabel: "Read",
+    empty: "You do not have any notifications yet.",
+    emptyUnread: "You do not have any unread notifications.",
+    loadFailed: "Your notifications could not be loaded.",
+    markRead: "Mark as read",
+    markingRead: "Marking as read",
+    viewOrder: "View order",
+    previousPage: "Previous",
+    nextPage: "Next",
+    pageStatus: "Page {page} of {total}",
   },
   validation: {
     required: "This field is required.",
@@ -412,13 +770,57 @@ const tr: Dictionary = {
     welcome: "Tekrar hos geldiniz, {name}",
     description: "Katalogu izleyin ve pazaryerini tek bir operasyon alanindan yonetmeye baslayin.",
     catalogSummary: "Katalog ozeti",
+    catalogSummaryDescription: "Korumali Katalog metrik API'sinden guncel pazaryeri toplamları.",
+    metricsUnavailable: "Katalog metrikleri su anda kullanilamiyor.",
     totalProducts: "Toplam urun",
-    activeProducts: "Bu sayfadaki aktif urunler",
-    draftProducts: "Bu sayfadaki taslak urunler",
+    activeProducts: "Aktif urunler",
+    draftProducts: "Taslak urunler",
+    inactiveProducts: "Pasif urunler",
+    archivedProducts: "Arsivlenmis urunler",
+    totalStores: "Magazalar",
+    totalCategories: "Kategoriler",
+    totalBrands: "Markalar",
     recentProducts: "Son katalog urunleri",
     recentProductsDescription: "Katalog servisinin dondurdugu en yeni urunler.",
     catalogUnavailable: "Katalog verisi su anda kullanilamiyor. Gateway ve Catalog servisinin calistigini kontrol edin.",
     noProducts: "Katalogda henuz urun olusturulmadi.",
+    manageCatalog: "Katalogu yonet",
+    manageCatalogDescription: "Tum magazalardaki urunleri arayin, filtreleyin, sayfalayin ve guncelleyin.",
+    searchProducts: "Urun ara",
+    searchProductsPlaceholder: "Urun adi veya stok kodu",
+    filterStatus: "Durum",
+    allStatuses: "Tum durumlar",
+    searchAction: "Ara",
+    noMatchingProducts: "Secili filtrelerle eslesen urun bulunamadi.",
+    sellerProduct: "Satici urunu",
+    platformProduct: "Platform urunu",
+    editProduct: "Urunu duzenle",
+    edit: "Duzenle",
+    pageStatus: "Sayfa {page} / {total}",
+    previousPage: "Onceki sayfa",
+    nextPage: "Sonraki sayfa",
+    selectProductToEdit: "Katalog bilgilerini, yasam dongusu durumunu veya gorsellerini guncellemek icin bir urun secin.",
+    manageUsers: "Kullanicilar",
+    manageUsersDescription: "Yerel olarak kayitli pazaryeri kimliklerini arayin ve inceleyin.",
+    searchUsers: "Kullanici ara",
+    searchUsersPlaceholder: "Ad veya e-posta adresi",
+    filterRole: "Rol",
+    allRoles: "Tum roller",
+    filterUserStatus: "Hesap durumu",
+    allUserStatuses: "Tum durumlar",
+    userActive: "Aktif",
+    userDisabled: "Devre disi",
+    usersUnavailable: "Kullanici verisi su anda kullanilamiyor.",
+    noMatchingUsers: "Secili filtrelerle eslesen kullanici bulunamadi.",
+    onboardingPending: "Rol secimi bekleniyor",
+    joinedAt: "Katilma tarihi",
+    userPageStatus: "Sayfa {page} / {total} · {count} kullanici",
+    usersReadOnlyNote: "Bu ekran salt okunurdur. Roller ve Auth0 hesaplari buradan degistirilemez.",
+    userRole: {
+      Customer: "Musteri",
+      Seller: "Satici",
+      Admin: "Yonetici",
+    },
     status: {
       Active: "Aktif",
       Draft: "Taslak",
@@ -461,12 +863,154 @@ const tr: Dictionary = {
     statusLabel: "Durum",
     draft: "Taslak",
     active: "Aktif",
+    inactive: "Pasif",
+    archived: "Arsivlenmis",
     saveProduct: "Urunu olustur",
     savingProduct: "Urun olusturuluyor",
     productCreateFailed: "Urun olusturulamadi. Alanlari kontrol edip tekrar deneyin.",
     referencesUnavailable: "Kategori ve marka secenekleri yuklenemedi.",
     referencesEmpty: "Urun olusturmadan once en az bir aktif kategori ve marka bulunmalidir.",
     productCreated: "Urun basariyla olusturuldu.",
+    edit: "Duzenle",
+    editProduct: "Urunu duzenle",
+    cancelEditing: "Urun duzenleyiciyi kapat",
+    saveChanges: "Degisiklikleri kaydet",
+    savingChanges: "Degisiklikler kaydediliyor",
+    productUpdated: "Urun basariyla guncellendi.",
+    productUpdateFailed: "Urun guncellenemedi. Alanlari ve magaza erisiminizi kontrol edin.",
+    currentImages: "Mevcut gorseller",
+    noImages: "Bu urune henuz gorsel eklenmemis.",
+    uploadImage: "Gorsel yukle",
+    uploadingImage: "Gorsel yukleniyor",
+    imageUploadHint: "JPEG, PNG, GIF veya WebP. En fazla 5 MB ve urun basina 8 gorsel.",
+    imageInvalid: "En fazla 5 MB boyutunda desteklenen bir gorsel secin.",
+    imageUploaded: "Gorsel basariyla yuklendi.",
+    imageUploadFailed: "Gorsel yuklenemedi. Dosyayi veya medya yapilandirmasini kontrol edin.",
+    mainImage: "Ana",
+    setMainImage: "Ana gorsel yap",
+    mainImageUpdated: "Ana gorsel guncellendi.",
+    imageUpdateFailed: "Gorsel guncellenemedi.",
+    deleteImage: "Gorseli sil",
+    imageDeleted: "Gorsel silindi.",
+    imageDeleteFailed: "Gorsel silinemedi.",
+  },
+  customer: {
+    roleLabel: "Musteri",
+    welcome: "Aradiginiz urunu bulun, {name}",
+    description: "Pazaryeri saticilarinin aktif urunlerini kesfedin. Urun adi veya stok koduyla arayin, kategori ve markaya gore filtreleyin.",
+    searchLabel: "Urun ara",
+    searchPlaceholder: "Urun adi veya stok kodu",
+    searchAction: "Ara",
+    category: "Kategori",
+    allCategories: "Tum kategoriler",
+    brand: "Marka",
+    allBrands: "Tum markalar",
+    sort: "Siralama",
+    newest: "En yeni",
+    priceLowToHigh: "Fiyat: dusukten yuksege",
+    priceHighToLow: "Fiyat: yuksekten dusuge",
+    results: "{count} aktif urun",
+    noProducts: "Bu filtrelerle eslesen aktif urun bulunamadi.",
+    catalogUnavailable: "Katalog gecici olarak kullanilamiyor.",
+    filtersUnavailable: "Kategori ve marka filtreleri gecici olarak kullanilamiyor.",
+    previousPage: "Onceki",
+    nextPage: "Sonraki",
+    page: "Sayfa {current} / {total}",
+    viewProduct: "Urunu incele",
+    productUnavailable: "Bu urun kullanilamiyor veya artik aktif degil.",
+    backToCatalog: "Kataloga don",
+    productDetails: "Urun detaylari",
+  },
+  basket: {
+    title: "Sepetiniz",
+    description: "Ödeme adımına geçmeden önce miktarları ve toplamı inceleyin.",
+    openBasket: "Sepet",
+    addToBasket: "Sepete ekle",
+    adding: "Ekleniyor",
+    added: "Eklendi",
+    addFailed: "Ürün sepetinize eklenemedi.",
+    signInToAdd: "Bu ürünü eklemek için giriş yapın",
+    empty: "Sepetiniz boş.",
+    continueShopping: "Alışverişe devam et",
+    quantity: "Miktar",
+    unitPrice: "Birim fiyat",
+    total: "Toplam",
+    remove: "Kaldır",
+    clear: "Sepeti temizle",
+    updateFailed: "Sepet güncellenemedi.",
+    loadFailed: "Sepetiniz yüklenemedi.",
+    checkout: "Sepeti onayla",
+    checkingOut: "Sepet onaylanıyor",
+    checkoutRecorded: "Sepet onaylandı",
+    checkoutNote: "Siparişiniz alındı ve işlenmeye başladı.",
+    demoPayment: "Demo ödeme",
+    demoPaymentNote: "Gerçek tahsilat yapılmaz ve kart bilgisi istenmez.",
+    recipientName: "Alıcı adı",
+    addressLine: "Adres",
+    city: "Şehir",
+    countryCode: "Ülke kodu",
+    postalCode: "Posta kodu",
+    addressRequired: "Sepetinizi onaylamadan önce teslimat adresini tamamlayın.",
+    viewOrder: "Siparişi görüntüle",
+  },
+  orders: {
+    title: "Siparişleriniz",
+    openOrders: "Siparişler",
+    description: "Sipariş, ödeme ve gönderim durumunu takip edin.",
+    empty: "Henüz bir sipariş vermediniz.",
+    loadFailed: "Siparişleriniz yüklenemedi.",
+    orderNumber: "Sipariş",
+    placedAt: "Oluşturulma",
+    status: {
+      Submitted: "İşleniyor",
+      InventoryReserved: "Stok ayrıldı",
+      PaymentAuthorized: "Ödeme onaylandı",
+      ShipmentCreated: "Gönderi oluşturuldu",
+      Confirmed: "Onaylandı",
+      Cancelled: "İptal edildi",
+    },
+    processing: "Sipariş hazırlanıyor",
+    processingNote: "Sipariş aktarımı güvenli biçimde kaydedildi. İşlem tamamlandığında bu sayfa güncellenir.",
+    backToOrders: "Siparişlere dön",
+    shippingAddress: "Teslimat adresi",
+    cancellationReason: "İptal nedeni",
+    cancellationReasons: {
+      INSUFFICIENT_STOCK: "Bir veya daha fazla ürün stokta bulunmuyor.",
+      PAYMENT_FAILED: "Ödeme onaylanamadı.",
+      SHIPMENT_FAILED: "Gönderi oluşturulamadı.",
+      UNEXPECTED_ERROR: "Sipariş tamamlanamadı.",
+    },
+    payment: {
+      title: "Ödeme",
+      pending: "Ödeme ayrıntıları hazırlanıyor.",
+      unavailable: "Ödeme ayrıntılarına geçici olarak ulaşılamıyor.",
+      authorization: "Onay",
+      refund: "İade",
+      status: {
+        authorized: "Onaylandı",
+        failed: "Başarısız",
+        refunded: "İade edildi",
+      },
+    },
+  },
+  notifications: {
+    title: "Bildirimler",
+    openNotifications: "Bildirimler",
+    openNotificationsWithUnread: "Bildirimler, {count} okunmamış",
+    description: "Sipariş, ödeme ve gönderim güncellemelerini inceleyin.",
+    all: "Tümü",
+    unread: "Okunmamış",
+    unreadLabel: "Okunmamış",
+    readLabel: "Okundu",
+    empty: "Henüz bir bildiriminiz yok.",
+    emptyUnread: "Okunmamış bildiriminiz yok.",
+    loadFailed: "Bildirimleriniz yüklenemedi.",
+    markRead: "Okundu işaretle",
+    markingRead: "İşaretleniyor",
+    viewOrder: "Siparişi görüntüle",
+    previousPage: "Önceki",
+    nextPage: "Sonraki",
+    pageStatus: "Sayfa {page} / {total}",
   },
   validation: {
     required: "Bu alan zorunludur.",

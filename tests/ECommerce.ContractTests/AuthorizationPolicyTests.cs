@@ -51,6 +51,48 @@ public sealed class AuthorizationPolicyTests
     }
 
     [Theory]
+    [InlineData("https://example.test", null, true)]
+    [InlineData(null, "example-api", true)]
+    [InlineData("not-an-authority", "example-api", true)]
+    [InlineData("http://example.test", "example-api", true)]
+    [InlineData("https://user@example.test", "example-api", true)]
+    [InlineData("https://example.test?tenant=unsafe", "example-api", true)]
+    public void AuthenticationRegistrationRejectsInvalidOrPartialConfiguration(
+        string? authority,
+        string? audience,
+        bool requireHttpsMetadata)
+    {
+        IConfiguration configuration = AuthenticationConfiguration(
+            authority,
+            audience,
+            requireHttpsMetadata);
+        ServiceCollection services = new();
+
+        Assert.Throws<InvalidOperationException>(
+            () => services.AddOidcReadyAuthentication(configuration));
+    }
+
+    [Fact]
+    public void HttpAuthorityRequiresExplicitlyDisabledHttpsMetadata()
+    {
+        IConfiguration configuration = AuthenticationConfiguration(
+            "http://identity.test",
+            "example-api",
+            requireHttpsMetadata: false);
+        ServiceCollection services = new();
+
+        services.AddOidcReadyAuthentication(configuration);
+
+        using ServiceProvider provider = services.BuildServiceProvider();
+        JwtBearerOptions options = provider
+            .GetRequiredService<IOptionsMonitor<JwtBearerOptions>>()
+            .Get(JwtBearerDefaults.AuthenticationScheme);
+
+        Assert.Equal("http://identity.test", options.Authority);
+        Assert.False(options.RequireHttpsMetadata);
+    }
+
+    [Theory]
     [InlineData("/hubs/notifications", true)]
     [InlineData("/gateway/hubs/notifications/negotiate", true)]
     [InlineData("/api/v1/orders", false)]
@@ -106,6 +148,20 @@ public sealed class AuthorizationPolicyTests
     }
 
     [Theory]
+    [InlineData("permissions", "inventory:write customer:act")]
+    [InlineData("scope", "inventory:write customer:act")]
+    public async Task SellerOrAdminPolicyRejectsRuntimeM2MPermissions(
+        string claimType,
+        string claimValue)
+    {
+        bool authorized = await AuthorizeAsync(
+            AuthorizationPolicies.SellerOrAdmin,
+            new Claim(claimType, claimValue));
+
+        Assert.False(authorized);
+    }
+
+    [Theory]
     [InlineData(AuthOptions.DefaultRoleClaimType, ApplicationRoles.Admin)]
     [InlineData("permissions", ApplicationPermissions.InventoryWrite)]
     [InlineData("scope", "openid inventory:write")]
@@ -124,6 +180,24 @@ public sealed class AuthorizationPolicyTests
         Assert.False(authorized);
     }
 
+    [Theory]
+    [InlineData(AuthOptions.DefaultRoleClaimType, ApplicationRoles.Admin, true)]
+    [InlineData("permissions", ApplicationPermissions.ActAsCustomer, true)]
+    [InlineData("scope", "openid customer:act", true)]
+    [InlineData(AuthOptions.DefaultRoleClaimType, ApplicationRoles.Customer, false)]
+    [InlineData("permissions", ApplicationPermissions.InventoryWrite, false)]
+    public async Task TrustedOrderWriteAcceptsOnlyAdminOrCustomerActor(
+        string claimType,
+        string claimValue,
+        bool expected)
+    {
+        bool authorized = await AuthorizeAsync(
+            AuthorizationPolicies.TrustedOrderWrite,
+            new Claim(claimType, claimValue));
+
+        Assert.Equal(expected, authorized);
+    }
+
     [Fact]
     public async Task CustomerOrAdminPolicyAcceptsCustomerAndAdminRoles()
     {
@@ -135,6 +209,22 @@ public sealed class AuthorizationPolicyTests
         Assert.Equal(
             [ApplicationRoles.Customer, ApplicationRoles.Admin],
             requirement.AllowedRoles);
+    }
+
+    [Theory]
+    [InlineData(AuthorizationPolicies.Admin, ApplicationRoles.Admin)]
+    [InlineData(AuthorizationPolicies.SellerOrAdmin, ApplicationRoles.Seller)]
+    [InlineData(AuthorizationPolicies.CustomerOrAdmin, ApplicationRoles.Customer)]
+    public async Task RolePoliciesRejectRoleClaimsFromUnauthenticatedIdentities(
+        string policyName,
+        string role)
+    {
+        bool authorized = await AuthorizeAsync(
+            policyName,
+            new Claim(AuthOptions.DefaultRoleClaimType, role),
+            isAuthenticated: false);
+
+        Assert.False(authorized);
     }
 
     [Fact]
@@ -153,6 +243,27 @@ public sealed class AuthorizationPolicyTests
             requirement => requirement is DenyAnonymousAuthorizationRequirement);
     }
 
+    [Fact]
+    public async Task EverySharedPolicyExplicitlyRequiresAnAuthenticatedUser()
+    {
+        string[] policyNames = typeof(AuthorizationPolicies)
+            .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+            .Where(field => field.IsLiteral && !field.IsInitOnly)
+            .Select(field => (string)field.GetRawConstantValue()!)
+            .ToArray();
+
+        Assert.NotEmpty(policyNames);
+
+        foreach (string policyName in policyNames)
+        {
+            AuthorizationPolicy policy = await GetPolicyAsync(policyName);
+
+            Assert.Contains(
+                policy.Requirements,
+                requirement => requirement is DenyAnonymousAuthorizationRequirement);
+        }
+    }
+
     private static async Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
     {
         ServiceCollection services = new();
@@ -168,6 +279,29 @@ public sealed class AuthorizationPolicyTests
 
     private static async Task<bool> AuthorizeInventoryWriteAsync(Claim claim)
     {
+        return await AuthorizeAsync(AuthorizationPolicies.InventoryWrite, claim);
+    }
+
+    private static IConfiguration AuthenticationConfiguration(
+        string? authority,
+        string? audience,
+        bool requireHttpsMetadata)
+    {
+        return new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [$"{AuthOptions.SectionName}:Authority"] = authority,
+                [$"{AuthOptions.SectionName}:Audience"] = audience,
+                [$"{AuthOptions.SectionName}:RequireHttpsMetadata"] = requireHttpsMetadata.ToString()
+            })
+            .Build();
+    }
+
+    private static async Task<bool> AuthorizeAsync(
+        string policyName,
+        Claim claim,
+        bool isAuthenticated = true)
+    {
         ServiceCollection services = new();
         services.AddLogging();
         services.AddOidcReadySecurity(new ConfigurationBuilder().Build());
@@ -176,14 +310,14 @@ public sealed class AuthorizationPolicyTests
         IAuthorizationService authorizationService = provider.GetRequiredService<IAuthorizationService>();
         ClaimsIdentity identity = new(
             [claim],
-            "Test",
+            isAuthenticated ? "Test" : null,
             ClaimTypes.Name,
             AuthOptions.DefaultRoleClaimType);
 
         AuthorizationResult result = await authorizationService.AuthorizeAsync(
             new ClaimsPrincipal(identity),
             resource: null,
-            AuthorizationPolicies.InventoryWrite);
+            policyName);
 
         return result.Succeeded;
     }

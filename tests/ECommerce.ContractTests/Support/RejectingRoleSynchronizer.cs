@@ -4,8 +4,10 @@ namespace ECommerce.ContractTests;
 
 internal sealed class RejectingRoleSynchronizer : IExternalRoleSynchronizer
 {
-    public Task<bool> SynchronizeSelfServiceRoleAsync(
+    public Task<ExternalRoleSynchronizationResult> SynchronizeSelfServiceRoleAsync(
         string externalSubject,
         string role,
-        CancellationToken cancellationToken) => Task.FromResult(false);
+        string? previousRole,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(ExternalRoleSynchronizationResult.FailedRestored);
 }

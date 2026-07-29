@@ -30,5 +30,6 @@ internal sealed class ShippingFailureWorkflowScenarioCheck : IWorkflowScenarioCh
         await context.WaitForExpectedValueAsync("shipping-failure payment compensation", "ConnectionStrings__PaymentDb", "select status from payments where order_id = @order_id", order.Id, "Refunded", deadline, cancellationToken);
         await context.WaitForExpectedValueAsync("shipping-failure inventory compensation", "ConnectionStrings__InventoryDb", "select status from stock_reservations where order_id = @order_id", order.Id, "Released", deadline, cancellationToken);
         await context.WaitForMinimumValueAsync("shipping-failure notifications", "ConnectionStrings__NotificationDb", "select count(*) from notifications where order_id = @order_id", order.Id, 3, deadline, cancellationToken);
+        await context.AssertOrderPresentationAsync(order.Id, customerId, RuntimeOrderStatus.Cancelled, "Workflow Check Shipping Failure", "00000", cancellationToken);
     }
 }

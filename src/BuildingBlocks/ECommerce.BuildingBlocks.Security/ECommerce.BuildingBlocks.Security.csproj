@@ -11,4 +11,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ECommerce.BuildingBlocks.Contracts\ECommerce.BuildingBlocks.Contracts.csproj" />
+    <ProjectReference Include="..\ECommerce.BuildingBlocks.Localization\ECommerce.BuildingBlocks.Localization.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -4,6 +4,7 @@
     <ProjectReference Include="..\ECommerce.Basket.Application\ECommerce.Basket.Application.csproj" />
     <ProjectReference Include="..\ECommerce.Basket.Infrastructure\ECommerce.Basket.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\ECommerce.BuildingBlocks.Localization\ECommerce.BuildingBlocks.Localization.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\ECommerce.BuildingBlocks.EventBus\ECommerce.BuildingBlocks.EventBus.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\ECommerce.BuildingBlocks.Observability\ECommerce.BuildingBlocks.Observability.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\ECommerce.BuildingBlocks.Security\ECommerce.BuildingBlocks.Security.csproj" />
   </ItemGroup>

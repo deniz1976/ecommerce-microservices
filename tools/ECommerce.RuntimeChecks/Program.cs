@@ -16,13 +16,23 @@ try
     RuntimeCheckOptions options = RuntimeCheckOptions.Parse(args);
     using HttpClient httpClient = new();
     IGatewayWorkflowClient gatewayClient = new GatewayWorkflowClient(httpClient, options.GatewayBaseUri, options.AccessToken);
+    IAuthorizationBoundaryProbe authorizationBoundaryProbe = new GatewayAuthorizationBoundaryProbe(
+        httpClient,
+        options.GatewayBaseUri,
+        options.AccessToken);
     IWorkflowProbe workflowProbe = new PostgresWorkflowProbe();
+    ICatalogProductFixture catalogProductFixture = new PostgresCatalogProductFixture();
+    INotificationLiveDeliveryProbe notificationLiveDeliveryProbe = new SignalRNotificationLiveDeliveryProbe(options);
     WorkflowScenarioContext scenarioContext = new(gatewayClient, workflowProbe, options);
     IWorkflowScenarioCheck[] scenarioChecks =
     [
+        new BasketCheckoutWorkflowScenarioCheck(scenarioContext, catalogProductFixture),
         new SuccessWorkflowScenarioCheck(scenarioContext),
         new InventoryFailureWorkflowScenarioCheck(scenarioContext),
         new PaymentFailureWorkflowScenarioCheck(scenarioContext),
+        new PaymentDeclineWorkflowScenarioCheck(scenarioContext),
+        new NotificationSignalRWorkflowScenarioCheck(scenarioContext, notificationLiveDeliveryProbe),
+        new SellerAuthorizationWorkflowScenarioCheck(authorizationBoundaryProbe),
         new ShippingFailureWorkflowScenarioCheck(scenarioContext)
     ];
     WorkflowCheckRunner runner = new(gatewayClient, options, scenarioChecks);

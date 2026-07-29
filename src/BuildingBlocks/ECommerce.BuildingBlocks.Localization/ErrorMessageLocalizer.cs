@@ -12,10 +12,15 @@ public sealed class ErrorMessageLocalizer : IErrorMessageLocalizer
                 [ErrorCodes.ProductNotFound] = "Product was not found.",
                 [ErrorCodes.BasketNotFound] = "Basket was not found.",
                 [ErrorCodes.OrderNotFound] = "Order was not found.",
+                [ErrorCodes.PaymentNotFound] = "Payment was not found.",
+                [ErrorCodes.NotificationNotFound] = "Notification was not found.",
                 [ErrorCodes.InsufficientStock] = "Insufficient stock.",
                 [ErrorCodes.PaymentFailed] = "Payment failed.",
                 [ErrorCodes.ShipmentFailed] = "Shipment failed.",
                 [ErrorCodes.ValidationFailed] = "Validation failed.",
+                [ErrorCodes.AuthenticationRequired] = "Authentication is required.",
+                [ErrorCodes.AccessDenied] = "Access to the requested resource is denied.",
+                [ErrorCodes.RateLimitExceeded] = "Too many requests. Please try again later.",
                 [ErrorCodes.UnexpectedError] = "An unexpected error occurred."
             },
             [SupportedCultures.Turkish] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -23,10 +28,15 @@ public sealed class ErrorMessageLocalizer : IErrorMessageLocalizer
                 [ErrorCodes.ProductNotFound] = "Ürün bulunamadı.",
                 [ErrorCodes.BasketNotFound] = "Sepet bulunamadı.",
                 [ErrorCodes.OrderNotFound] = "Sipariş bulunamadı.",
+                [ErrorCodes.PaymentNotFound] = "Ödeme bulunamadı.",
+                [ErrorCodes.NotificationNotFound] = "Bildirim bulunamadı.",
                 [ErrorCodes.InsufficientStock] = "Yetersiz stok.",
                 [ErrorCodes.PaymentFailed] = "Ödeme başarısız oldu.",
                 [ErrorCodes.ShipmentFailed] = "Kargo işlemi başarısız oldu.",
                 [ErrorCodes.ValidationFailed] = "Doğrulama başarısız oldu.",
+                [ErrorCodes.AuthenticationRequired] = "Kimlik doğrulaması gereklidir.",
+                [ErrorCodes.AccessDenied] = "İstenen kaynağa erişim reddedildi.",
+                [ErrorCodes.RateLimitExceeded] = "Çok fazla istek gönderildi. Lütfen daha sonra tekrar deneyin.",
                 [ErrorCodes.UnexpectedError] = "Beklenmeyen bir hata oluştu."
             }
         };

@@ -1,11 +1,8 @@
-ARG PROJECT
-ARG ASSEMBLY_NAME
-
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-ARG PROJECT
 WORKDIR /src
 COPY . .
 RUN dotnet restore ECommerce.sln
+ARG PROJECT
 RUN dotnet publish ${PROJECT} --configuration Release --output /app/publish --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime

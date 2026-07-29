@@ -1,4 +1,5 @@
 using ECommerce.BuildingBlocks.Contracts.Errors;
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Catalog.Domain;
 
@@ -6,41 +7,94 @@ namespace ECommerce.Catalog.Application.Products;
 
 public sealed class ProductService
 {
-    private readonly IProductRepository repository;
+    private readonly IRepository<Product, Guid> repository;
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IProductSearchReader searchReader;
     private readonly IProductStoreAccessValidator storeAccessValidator;
     private readonly IProductReferenceValidator referenceValidator;
-    private readonly IProductImageAttacher imageAttacher;
 
     public ProductService(
-        IProductRepository repository,
+        IRepository<Product, Guid> repository,
+        IUnitOfWork unitOfWork,
+        IProductSearchReader searchReader,
         IProductStoreAccessValidator storeAccessValidator,
-        IProductReferenceValidator referenceValidator,
-        IProductImageAttacher imageAttacher)
+        IProductReferenceValidator referenceValidator)
     {
         this.repository = repository;
+        this.unitOfWork = unitOfWork;
+        this.searchReader = searchReader;
         this.storeAccessValidator = storeAccessValidator;
         this.referenceValidator = referenceValidator;
-        this.imageAttacher = imageAttacher;
     }
 
-    public async Task<Result<PagedResult<ProductResponse>>> SearchAsync(ProductListQuery query, string culture, CancellationToken cancellationToken)
+    public Task<Result<PagedResult<ProductResponse>>> SearchPublicAsync(
+        ProductListQuery query,
+        string culture,
+        CancellationToken cancellationToken)
     {
-        PagedResult<Product> products = await repository.SearchAsync(query, cancellationToken);
-        PagedResult<ProductResponse> response = new(
-            products.Items.Select(product => product.ToResponse(culture)).ToArray(),
-            products.PageNumber,
-            products.PageSize,
-            products.TotalCount);
-
-        return Result<PagedResult<ProductResponse>>.Success(response);
+        return SearchCoreAsync(
+            query with { Status = ProductStatus.Active },
+            culture,
+            cancellationToken);
     }
 
-    public async Task<Result<ProductResponse>> GetByIdAsync(Guid id, string culture, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ProductResponse>>> SearchManagedAsync(
+        ProductListQuery query,
+        ProductAccessContext access,
+        string culture,
+        CancellationToken cancellationToken)
+    {
+        Result storeAccess = await storeAccessValidator.ValidateAsync(
+            query.StoreId,
+            access,
+            requireStoreForSeller: true,
+            cancellationToken);
+        if (storeAccess.IsFailure)
+        {
+            return Result<PagedResult<ProductResponse>>.Failure(storeAccess.Error!);
+        }
+
+        return await SearchCoreAsync(query, culture, cancellationToken);
+    }
+
+    public async Task<Result<ProductResponse>> GetPublicByIdAsync(
+        Guid id,
+        string culture,
+        CancellationToken cancellationToken)
     {
         Product? product = await repository.GetByIdAsync(id, cancellationToken);
 
-        return product is null
+        return product is null || product.Status != ProductStatus.Active
             ? Result<ProductResponse>.Failure(new Error(ErrorCodes.ProductNotFound, ErrorCodes.ProductNotFound))
+            : Result<ProductResponse>.Success(product.ToResponse(culture));
+    }
+
+    public async Task<Result<ProductResponse>> GetManagedByIdAsync(
+        Guid id,
+        ProductAccessContext access,
+        string culture,
+        CancellationToken cancellationToken)
+    {
+        Product? product = await repository.GetByIdAsync(id, cancellationToken);
+
+        if (product is null)
+        {
+            return Result<ProductResponse>.Failure(new Error(ErrorCodes.ProductNotFound, ErrorCodes.ProductNotFound));
+        }
+
+        if (!access.IsAdmin && product.StoreId is null)
+        {
+            return Result<ProductResponse>.Failure(
+                new Error(CatalogErrorCodes.StoreAccessDenied, CatalogErrorCodes.StoreAccessDenied));
+        }
+
+        Result storeAccess = await storeAccessValidator.ValidateAsync(
+            product.StoreId,
+            access,
+            requireStoreForSeller: true,
+            cancellationToken);
+        return storeAccess.IsFailure
+            ? Result<ProductResponse>.Failure(storeAccess.Error!)
             : Result<ProductResponse>.Success(product.ToResponse(culture));
     }
 
@@ -86,14 +140,8 @@ public sealed class ProductService
             product.SetTranslation(translation.LanguageCode.ToLowerInvariant(), translation.Name, translation.Description);
         }
 
-        Result imageResult = await imageAttacher.AttachAsync(product, request.Images, cancellationToken);
-        if (imageResult.IsFailure)
-        {
-            return Result<ProductResponse>.Failure(imageResult.Error!);
-        }
-
         repository.Add(product);
-        await repository.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         Product? createdProduct = await repository.GetByIdAsync(product.Id, cancellationToken);
 
@@ -148,9 +196,24 @@ public sealed class ProductService
             product.SetTranslation(translation.LanguageCode.ToLowerInvariant(), translation.Name, translation.Description);
         }
 
-        await repository.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<ProductResponse>.Success(product.ToResponse(culture));
+    }
+
+    private async Task<Result<PagedResult<ProductResponse>>> SearchCoreAsync(
+        ProductListQuery query,
+        string culture,
+        CancellationToken cancellationToken)
+    {
+        PagedResult<Product> products = await searchReader.SearchAsync(query, cancellationToken);
+        PagedResult<ProductResponse> response = new(
+            products.Items.Select(product => product.ToResponse(culture)).ToArray(),
+            products.PageNumber,
+            products.PageSize,
+            products.TotalCount);
+
+        return Result<PagedResult<ProductResponse>>.Success(response);
     }
 
 }

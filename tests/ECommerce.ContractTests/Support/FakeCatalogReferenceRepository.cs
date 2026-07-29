@@ -3,7 +3,7 @@ using ECommerce.Catalog.Domain;
 
 namespace ECommerce.ContractTests;
 
-internal sealed class FakeCatalogReferenceRepository : ICatalogReferenceRepository
+internal sealed class FakeCatalogReferenceRepository : ICatalogReferenceReader
 {
     public IReadOnlyCollection<Category> Categories { get; init; } = [];
 

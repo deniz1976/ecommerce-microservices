@@ -9,6 +9,9 @@ if (-not $SkipBuild) {
 }
 
 & "$PSScriptRoot/validate-csharp-types.ps1" -Root (Split-Path $PSScriptRoot -Parent)
+& "$PSScriptRoot/validate-utc-time.ps1" -Root (Split-Path $PSScriptRoot -Parent)
+& "$PSScriptRoot/validate-observability.ps1" -SkipContainerValidation
+& "$PSScriptRoot/test-runtime-token-validation.ps1"
 
 Get-ChildItem scripts -Filter *.ps1 | ForEach-Object {
     $errors = $null

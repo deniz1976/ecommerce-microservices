@@ -1,4 +1,10 @@
 using ECommerce.Basket.Application.Baskets;
+using ECommerce.Basket.Application.Commands.AddBasketItem;
+using ECommerce.Basket.Application.Commands.CheckoutBasket;
+using ECommerce.Basket.Application.Commands.ClearBasket;
+using ECommerce.Basket.Application.Commands.RemoveBasketItem;
+using ECommerce.Basket.Application.Queries.GetBasket;
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.BuildingBlocks.Security;
 
@@ -32,82 +38,92 @@ public static class BasketEndpoints
 
     private static async Task<IResult> GetAsync(
         Guid customerId,
-        BasketService basketService,
+        IQueryHandler<GetBasketQuery, Result<BasketResponse>> queryHandler,
         ICustomerOwnershipAuthorizer ownershipAuthorizer,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
         if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
         {
-            return Results.Forbid();
+            return BasketResults.Forbidden(httpContext);
         }
 
-        Result<BasketResponse> result = await basketService.GetAsync(customerId, cancellationToken);
+        Result<BasketResponse> result = await queryHandler.HandleAsync(
+            new GetBasketQuery(customerId),
+            cancellationToken);
         return BasketResults.FromResult(result, httpContext);
     }
 
     private static async Task<IResult> AddItemAsync(
         Guid customerId,
         AddBasketItemRequest request,
-        BasketService basketService,
+        ICommandHandler<AddBasketItemCommand, Result<BasketResponse>> commandHandler,
         ICustomerOwnershipAuthorizer ownershipAuthorizer,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
         if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
         {
-            return Results.Forbid();
+            return BasketResults.Forbidden(httpContext);
         }
 
-        Result<BasketResponse> result = await basketService.AddItemAsync(customerId, request, cancellationToken);
+        Result<BasketResponse> result = await commandHandler.HandleAsync(
+            new AddBasketItemCommand(customerId, request),
+            cancellationToken);
         return BasketResults.FromResult(result, httpContext);
     }
 
     private static async Task<IResult> RemoveItemAsync(
         Guid customerId,
         Guid productId,
-        BasketService basketService,
+        ICommandHandler<RemoveBasketItemCommand, Result<BasketResponse>> commandHandler,
         ICustomerOwnershipAuthorizer ownershipAuthorizer,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
         if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
         {
-            return Results.Forbid();
+            return BasketResults.Forbidden(httpContext);
         }
 
-        Result<BasketResponse> result = await basketService.RemoveItemAsync(customerId, productId, cancellationToken);
+        Result<BasketResponse> result = await commandHandler.HandleAsync(
+            new RemoveBasketItemCommand(customerId, productId),
+            cancellationToken);
         return BasketResults.FromResult(result, httpContext);
     }
 
     private static async Task<IResult> ClearAsync(
         Guid customerId,
-        BasketService basketService,
-        ICustomerOwnershipAuthorizer ownershipAuthorizer,
-        CancellationToken cancellationToken)
-    {
-        if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
-        {
-            return Results.Forbid();
-        }
-
-        await basketService.ClearAsync(customerId, cancellationToken);
-        return Results.NoContent();
-    }
-
-    private static async Task<IResult> CheckoutAsync(
-        Guid customerId,
-        BasketService basketService,
+        ICommandHandler<ClearBasketCommand, Result> commandHandler,
         ICustomerOwnershipAuthorizer ownershipAuthorizer,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
         if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
         {
-            return Results.Forbid();
+            return BasketResults.Forbidden(httpContext);
         }
 
-        Result<CheckoutBasketResponse> result = await basketService.CheckoutAsync(customerId, cancellationToken);
+        await commandHandler.HandleAsync(new ClearBasketCommand(customerId), cancellationToken);
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> CheckoutAsync(
+        Guid customerId,
+        CheckoutBasketRequest request,
+        ICommandHandler<CheckoutBasketCommand, Result<CheckoutBasketResponse>> commandHandler,
+        ICustomerOwnershipAuthorizer ownershipAuthorizer,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
+        {
+            return BasketResults.Forbidden(httpContext);
+        }
+
+        Result<CheckoutBasketResponse> result = await commandHandler.HandleAsync(
+            new CheckoutBasketCommand(customerId, request),
+            cancellationToken);
         return BasketResults.FromResult(result, httpContext);
     }
 }

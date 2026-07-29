@@ -1,13 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Loader2, LogOut, Package, Store } from "lucide-react"
+import { Loader2, LogOut, Package, Pencil, Store } from "lucide-react"
 
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { StoreCreateForm } from "@/components/seller/store-create-form"
 import { ProductCreateForm } from "@/components/seller/product-create-form"
+import { ProductEditForm } from "@/components/seller/product-edit-form"
 import { Button } from "@/components/ui/button"
 import { getMyCatalogStores, getStoreCatalogProducts } from "@/lib/api/catalog"
 import { logoutFromAuth0 } from "@/lib/auth/auth0"
@@ -34,6 +35,7 @@ export function SellerDashboard({ profile }: SellerDashboardProps) {
   const [stores, setStores] = useState<StoreState>({ status: "loading" })
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null)
   const [products, setProducts] = useState<ProductState>({ status: "idle" })
+  const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null)
   const [signingOut, setSigningOut] = useState(false)
 
   useEffect(() => {
@@ -86,6 +88,7 @@ export function SellerDashboard({ profile }: SellerDashboardProps) {
 
   function selectStore(storeId: string) {
     setProducts({ status: "loading" })
+    setEditingProduct(null)
     setSelectedStoreId(storeId)
   }
 
@@ -104,6 +107,20 @@ export function SellerDashboard({ profile }: SellerDashboardProps) {
         },
       }
     })
+  }
+
+  function handleProductUpdated(product: CatalogProduct) {
+    setProducts((current) => {
+      if (current.status !== "ready") return current
+      return {
+        status: "ready",
+        products: {
+          ...current.products,
+          items: current.products.items.map((item) => item.id === product.id ? product : item),
+        },
+      }
+    })
+    setEditingProduct(product)
   }
 
   async function handleSignOut() {
@@ -193,9 +210,28 @@ export function SellerDashboard({ profile }: SellerDashboardProps) {
                     <article key={product.id} className="flex items-center justify-between gap-4 px-5 py-4">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-foreground">{product.name}</p>
-                        <p className="mt-1 truncate text-xs text-muted-foreground">{product.sku}</p>
+                        <p className="mt-1 truncate text-xs text-muted-foreground">
+                          {product.sku} · {[
+                            t.seller.draft,
+                            t.seller.active,
+                            t.seller.inactive,
+                            t.seller.archived,
+                          ][product.status]}
+                        </p>
                       </div>
-                      <p className="text-sm font-medium text-foreground">{product.price} {product.currency}</p>
+                      <div className="flex shrink-0 items-center gap-3">
+                        <p className="text-sm font-medium text-foreground">{product.price} {product.currency}</p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingProduct(product)}
+                          aria-label={`${t.seller.editProduct}: ${product.name}`}
+                        >
+                          <Pencil />
+                          <span className="hidden sm:inline">{t.seller.edit}</span>
+                        </Button>
+                      </div>
                     </article>
                   ))}
                 </div>
@@ -207,7 +243,14 @@ export function SellerDashboard({ profile }: SellerDashboardProps) {
 
           <aside className="space-y-6">
             <StoreCreateForm onCreated={handleStoreCreated} />
-            {selectedStore ? (
+            {editingProduct ? (
+              <ProductEditForm
+                key={editingProduct.id}
+                product={editingProduct}
+                onCancel={() => setEditingProduct(null)}
+                onUpdated={handleProductUpdated}
+              />
+            ) : selectedStore ? (
               <ProductCreateForm
                 store={selectedStore}
                 onCreated={handleProductCreated}

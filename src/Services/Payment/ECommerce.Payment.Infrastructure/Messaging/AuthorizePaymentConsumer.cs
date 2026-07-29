@@ -1,5 +1,7 @@
 using ECommerce.BuildingBlocks.Contracts.Commands;
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
+using ECommerce.Payment.Application.Commands.AuthorizePayment;
 using ECommerce.Payment.Application.Payments;
 using MassTransit;
 
@@ -7,21 +9,23 @@ namespace ECommerce.Payment.Infrastructure.Messaging;
 
 public sealed class AuthorizePaymentConsumer : IConsumer<AuthorizePayment>
 {
-    private readonly PaymentService paymentService;
+    private readonly ICommandHandler<AuthorizePaymentCommand, PaymentAuthorizationResult> commandHandler;
 
-    public AuthorizePaymentConsumer(PaymentService paymentService)
+    public AuthorizePaymentConsumer(
+        ICommandHandler<AuthorizePaymentCommand, PaymentAuthorizationResult> commandHandler)
     {
-        this.paymentService = paymentService;
+        this.commandHandler = commandHandler;
     }
 
     public async Task Consume(ConsumeContext<AuthorizePayment> context)
     {
-        PaymentAuthorizationResult result = await paymentService.AuthorizeAsync(
-            new PaymentAuthorizationRequest(
-                context.Message.OrderId,
-                context.Message.CustomerId,
-                context.Message.Amount,
-                context.Message.Currency),
+        PaymentAuthorizationResult result = await commandHandler.HandleAsync(
+            new AuthorizePaymentCommand(
+                new PaymentAuthorizationRequest(
+                    context.Message.OrderId,
+                    context.Message.CustomerId,
+                    context.Message.Amount,
+                    context.Message.Currency)),
             context.CancellationToken);
 
         if (result.Succeeded)

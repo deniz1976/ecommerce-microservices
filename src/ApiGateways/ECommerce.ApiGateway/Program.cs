@@ -12,6 +12,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.ApiGateway");
 builder.Services.AddOidcReadyAuthentication(builder.Configuration);
 builder.Services.AddGateway(builder.Configuration);
+builder.Services.AddGatewayRateLimiting(builder.Configuration);
 
 WebApplication app = builder.Build();
 
@@ -19,7 +20,17 @@ app.UseExceptionHandler();
 app.UseWebSockets();
 app.UseCors();
 app.UseECommerceAuthentication();
+app.UseGatewayRateLimiting();
 app.UseGatewayHealthChecks();
 
-await app.UseOcelot();
+OcelotPipelineConfiguration ocelotPipeline = new()
+{
+    PreErrorResponderMiddleware = async (context, next) =>
+    {
+        await next.Invoke();
+        await GatewayAuthorizationErrorResponseWriter.WriteIfNeededAsync(context);
+    }
+};
+
+await app.UseOcelot(ocelotPipeline);
 await app.RunAsync();

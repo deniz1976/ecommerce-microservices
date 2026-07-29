@@ -1,20 +1,30 @@
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Catalog.Application.Products;
 using ECommerce.Catalog.Domain;
 
 namespace ECommerce.ContractTests;
 
-internal sealed class FakeProductRepository : IProductRepository
+internal sealed class FakeProductRepository :
+    IRepository<Product, Guid>,
+    IUnitOfWork,
+    IProductSearchReader,
+    IProductReferenceReader
 {
     private Product? product;
+
+    public ProductListQuery? LastSearchQuery { get; private set; }
 
     public FakeProductRepository(Product? product = null)
     {
         this.product = product;
     }
 
-    public Task<PagedResult<Product>> SearchAsync(ProductListQuery query, CancellationToken cancellationToken) =>
-        Task.FromResult(new PagedResult<Product>([], 1, 20, 0));
+    public Task<PagedResult<Product>> SearchAsync(ProductListQuery query, CancellationToken cancellationToken)
+    {
+        LastSearchQuery = query;
+        return Task.FromResult(new PagedResult<Product>([], 1, 20, 0));
+    }
 
     public Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken) => Task.FromResult(product);
 

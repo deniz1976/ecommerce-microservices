@@ -1,6 +1,27 @@
 {
   "Routes": [
     {
+      "UpstreamPathTemplate": "/gateway/catalog/metrics",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/catalog-metrics",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "catalog-api", "Port": 8080 } ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/catalog/manage/products/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/products/manage/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "catalog-api", "Port": 8080 } ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/catalog/manage/products",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/products/manage",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "catalog-api", "Port": 8080 } ]
+    },
+    {
       "UpstreamPathTemplate": "/gateway/catalog/products",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/v1/products",
@@ -25,7 +46,7 @@
     },
     {
       "UpstreamPathTemplate": "/gateway/catalog/products/{everything}",
-      "UpstreamHttpMethod": [ "PUT" ],
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "DownstreamPathTemplate": "/api/v1/products/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [ { "Host": "catalog-api", "Port": 8080 } ]
@@ -92,11 +113,25 @@
       "AuthenticationOptions": { "AllowAnonymous": true }
     },
     {
+      "UpstreamPathTemplate": "/gateway/payments/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/payments/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "payment-api", "Port": 8080 } ]
+    },
+    {
       "UpstreamPathTemplate": "/gateway/inventory/{everything}",
       "UpstreamHttpMethod": [ "PUT" ],
       "DownstreamPathTemplate": "/api/v1/inventory/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [ { "Host": "inventory-api", "Port": 8080 } ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/users",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/users",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "identity-api", "Port": 8080 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/users",
@@ -119,6 +154,13 @@
       "DownstreamPathTemplate": "/api/v1/auth/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [ { "Host": "identity-api", "Port": 8080 } ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/notifications/{everything}",
+      "UpstreamHttpMethod": [ "GET", "PUT" ],
+      "DownstreamPathTemplate": "/api/v1/notifications/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "notification-api", "Port": 8080 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/hubs/notifications",

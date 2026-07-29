@@ -24,7 +24,9 @@ public sealed class IdentityAuthenticatedUserResolver : IAuthenticatedUserResolv
         this.logger = logger;
     }
 
-    public async Task<Guid?> ResolveUserIdAsync(CancellationToken cancellationToken)
+    public async Task<Guid?> ResolveUserIdAsync(
+        CancellationToken cancellationToken,
+        string? accessToken = null)
     {
         if (resolutionAttempted)
         {
@@ -33,12 +35,13 @@ public sealed class IdentityAuthenticatedUserResolver : IAuthenticatedUserResolv
 
         resolutionAttempted = true;
         HttpContext? httpContext = httpContextAccessor.HttpContext;
-        if (httpContext?.User.Identity?.IsAuthenticated != true)
+        if (string.IsNullOrWhiteSpace(accessToken) &&
+            httpContext?.User.Identity?.IsAuthenticated != true)
         {
             return null;
         }
 
-        string? accessToken = CustomerAccessTokenReader.Read(httpContext);
+        accessToken ??= CustomerAccessTokenReader.Read(httpContext);
         if (string.IsNullOrWhiteSpace(accessToken))
         {
             return null;

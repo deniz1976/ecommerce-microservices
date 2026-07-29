@@ -9,7 +9,15 @@ public sealed class Payment
         Currency = string.Empty;
     }
 
-    private Payment(Guid orderId, Guid customerId, decimal amount, string currency, PaymentStatus status, string? failureReason)
+    private Payment(
+        Guid orderId,
+        Guid customerId,
+        decimal amount,
+        string currency,
+        PaymentStatus status,
+        string providerName,
+        string? providerPaymentReference,
+        string? failureReason)
     {
         Id = Guid.NewGuid();
         OrderId = orderId;
@@ -17,6 +25,8 @@ public sealed class Payment
         Amount = amount;
         Currency = currency;
         Status = status;
+        ProviderName = providerName;
+        ProviderPaymentReference = providerPaymentReference;
         FailureReason = failureReason;
         CreatedAt = DateTimeOffset.UtcNow;
         UpdatedAt = CreatedAt;
@@ -34,6 +44,10 @@ public sealed class Payment
 
     public PaymentStatus Status { get; private set; }
 
+    public string? ProviderName { get; private set; }
+
+    public string? ProviderPaymentReference { get; private set; }
+
     public string? FailureReason { get; private set; }
 
     public DateTimeOffset CreatedAt { get; private set; }
@@ -42,21 +56,68 @@ public sealed class Payment
 
     public IReadOnlyCollection<PaymentTransaction> Transactions => transactions;
 
-    public static Payment CreateAuthorized(Guid orderId, Guid customerId, decimal amount, string currency)
+    public static Payment CreateAuthorized(
+        Guid orderId,
+        Guid customerId,
+        decimal amount,
+        string currency,
+        string providerName,
+        string providerPaymentReference,
+        string providerTransactionReference)
     {
-        Payment payment = new(orderId, customerId, amount, currency, PaymentStatus.Authorized, null);
-        payment.transactions.Add(new PaymentTransaction(payment.Id, PaymentTransactionType.Authorization, amount, currency, null));
+        Payment payment = new(
+            orderId,
+            customerId,
+            amount,
+            currency,
+            PaymentStatus.Authorized,
+            providerName,
+            providerPaymentReference,
+            null);
+        payment.transactions.Add(
+            new PaymentTransaction(
+                payment.Id,
+                PaymentTransactionType.Authorization,
+                amount,
+                currency,
+                providerTransactionReference,
+                null));
         return payment;
     }
 
-    public static Payment CreateFailed(Guid orderId, Guid customerId, decimal amount, string currency, string reason)
+    public static Payment CreateFailed(
+        Guid orderId,
+        Guid customerId,
+        decimal amount,
+        string currency,
+        string providerName,
+        string reason)
     {
-        Payment payment = new(orderId, customerId, amount, currency, PaymentStatus.Failed, reason);
-        payment.transactions.Add(new PaymentTransaction(payment.Id, PaymentTransactionType.Authorization, amount, currency, reason));
+        Payment payment = new(
+            orderId,
+            customerId,
+            amount,
+            currency,
+            PaymentStatus.Failed,
+            providerName,
+            null,
+            reason);
+        payment.transactions.Add(
+            new PaymentTransaction(
+                payment.Id,
+                PaymentTransactionType.Authorization,
+                amount,
+                currency,
+                null,
+                reason));
         return payment;
     }
 
-    public void MarkRefunded(decimal amount, string currency, string reason)
+    public void MarkRefunded(
+        decimal amount,
+        string currency,
+        string providerTransactionReference,
+        string reason)
     {
         if (Status == PaymentStatus.Refunded)
         {
@@ -66,6 +127,13 @@ public sealed class Payment
         Status = PaymentStatus.Refunded;
         FailureReason = null;
         UpdatedAt = DateTimeOffset.UtcNow;
-        transactions.Add(new PaymentTransaction(Id, PaymentTransactionType.Refund, amount, currency, reason));
+        transactions.Add(
+            new PaymentTransaction(
+                Id,
+                PaymentTransactionType.Refund,
+                amount,
+                currency,
+                providerTransactionReference,
+                reason));
     }
 }

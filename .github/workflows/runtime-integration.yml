@@ -10,9 +10,13 @@ on:
         type: choice
         options:
           - all
+          - basket-checkout
           - success
           - inventory-failure
           - payment-failure
+          - payment-decline
+          - notification-signalr
+          - seller-authorization
           - shipping-failure
       timeout_seconds:
         description: Per-scenario workflow timeout
@@ -126,6 +130,9 @@ jobs:
         run: ./scripts/run-migrations.ps1
 
       - name: Start application runtime
+        env:
+          CatalogClient__TimeoutSeconds: "15"
+          DemoPayment__Scenario: ${{ inputs.scenario == 'payment-decline' && 'Decline' || 'Success' }}
         run: docker compose up --build --detach api-gateway ordering-saga-worker
 
       - name: Wait for runtime readiness

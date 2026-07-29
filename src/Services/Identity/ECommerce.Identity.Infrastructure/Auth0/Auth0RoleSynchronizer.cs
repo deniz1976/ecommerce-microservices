@@ -29,14 +29,15 @@ public sealed class Auth0RoleSynchronizer : IExternalRoleSynchronizer
         this.logger = logger;
     }
 
-    public async Task<bool> SynchronizeSelfServiceRoleAsync(
+    public async Task<ExternalRoleSynchronizationResult> SynchronizeSelfServiceRoleAsync(
         string externalSubject,
         string role,
+        string? previousRole,
         CancellationToken cancellationToken)
     {
         if (!options.Enabled)
         {
-            return true;
+            return ExternalRoleSynchronizationResult.Succeeded;
         }
 
         string desiredRoleId = GetRoleId(role);
@@ -57,7 +58,7 @@ public sealed class Auth0RoleSynchronizer : IExternalRoleSynchronizer
                 logger.LogWarning(
                     "Auth0 rejected removal of the previous self-service role with status {StatusCode}.",
                     (int)removeResponse.StatusCode);
-                return false;
+                return ExternalRoleSynchronizationResult.FailedRestored;
             }
 
             using HttpRequestMessage assignRequest = CreateRoleRequest(HttpMethod.Post, userRolesPath, desiredRoleId, token);
@@ -67,26 +68,69 @@ public sealed class Auth0RoleSynchronizer : IExternalRoleSynchronizer
                 logger.LogWarning(
                     "Auth0 rejected assignment of the selected self-service role with status {StatusCode}.",
                     (int)assignResponse.StatusCode);
-                return false;
+                bool restored = await RestorePreviousRoleAsync(
+                    client,
+                    userRolesPath,
+                    previousRole,
+                    role,
+                    token,
+                    cancellationToken);
+                return restored
+                    ? ExternalRoleSynchronizationResult.FailedRestored
+                    : ExternalRoleSynchronizationResult.ReconciliationRequired;
             }
 
-            return true;
+            return ExternalRoleSynchronizationResult.Succeeded;
         }
         catch (HttpRequestException exception)
         {
             logger.LogWarning(exception, "Auth0 role synchronization failed because the Management API was unavailable.");
-            return false;
+            return ExternalRoleSynchronizationResult.FailedRestored;
         }
         catch (TaskCanceledException exception) when (!cancellationToken.IsCancellationRequested)
         {
             logger.LogWarning(exception, "Auth0 role synchronization exceeded its configured timeout.");
-            return false;
+            return ExternalRoleSynchronizationResult.FailedRestored;
         }
         catch (JsonException exception)
         {
             logger.LogWarning(exception, "Auth0 returned an invalid Management API token response.");
+            return ExternalRoleSynchronizationResult.FailedRestored;
+        }
+    }
+
+    private async Task<bool> RestorePreviousRoleAsync(
+        HttpClient client,
+        string userRolesPath,
+        string? previousRole,
+        string desiredRole,
+        string token,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(previousRole) ||
+            string.Equals(previousRole, desiredRole, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        string previousRoleId = GetRoleId(previousRole);
+        using HttpRequestMessage restoreRequest = CreateRoleRequest(
+            HttpMethod.Post,
+            userRolesPath,
+            previousRoleId,
+            token);
+        using HttpResponseMessage restoreResponse = await client.SendAsync(
+            restoreRequest,
+            cancellationToken);
+        if (!restoreResponse.IsSuccessStatusCode)
+        {
+            logger.LogCritical(
+                "Auth0 rejected restoration of the previous self-service role with status {StatusCode}. Durable reconciliation is required.",
+                (int)restoreResponse.StatusCode);
             return false;
         }
+
+        return true;
     }
 
     private string GetRoleId(string role)

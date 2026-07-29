@@ -29,10 +29,11 @@ export function isAuth0Configured(): boolean {
 
 export async function loginWithAuth0(options: LoginOptions = {}): Promise<void> {
   const client = await getAuth0Client()
+  const returnTo = normalizeLocalReturnPath(options.returnTo, "/")
 
   await client.loginWithRedirect({
     appState: {
-      returnTo: options.returnTo ?? "/",
+      returnTo,
     },
     authorizationParams: {
       audience: getAuth0Config().audience,
@@ -44,10 +45,11 @@ export async function loginWithAuth0(options: LoginOptions = {}): Promise<void> 
 
 export async function logoutFromAuth0(returnTo = "/login"): Promise<void> {
   const client = await getAuth0Client()
+  const localReturnTo = normalizeLocalReturnPath(returnTo, "/login")
 
   await client.logout({
     logoutParams: {
-      returnTo: `${window.location.origin}${returnTo}`,
+      returnTo: new URL(localReturnTo, window.location.origin).toString(),
     },
   })
 }
@@ -92,8 +94,9 @@ async function getAuth0Client(): Promise<Auth0Client> {
       audience: getAuth0Config().audience,
       redirect_uri: window.location.origin,
     },
-    cacheLocation: "localstorage",
+    cacheLocation: "memory",
     useRefreshTokens: true,
+    useRefreshTokensFallback: true,
   })
 
   return auth0ClientPromise
@@ -113,10 +116,7 @@ async function handleAuth0RedirectIfNeeded(client: Auth0Client): Promise<void> {
   const result = await client.handleRedirectCallback()
   redirectHandled = true
 
-  const returnTo =
-    typeof result.appState?.returnTo === "string"
-      ? result.appState.returnTo
-      : "/"
+  const returnTo = normalizeLocalReturnPath(result.appState?.returnTo, "/")
 
   if (returnTo !== window.location.pathname) {
     window.location.replace(returnTo)
@@ -124,4 +124,22 @@ async function handleAuth0RedirectIfNeeded(client: Auth0Client): Promise<void> {
   }
 
   window.history.replaceState({}, document.title, returnTo)
+}
+
+function normalizeLocalReturnPath(candidate: unknown, fallback: string): string {
+  if (
+    typeof candidate !== "string" ||
+    !candidate.startsWith("/") ||
+    candidate.startsWith("//") ||
+    candidate.includes("\\")
+  ) {
+    return fallback
+  }
+
+  const resolved = new URL(candidate, window.location.origin)
+  if (resolved.origin !== window.location.origin) {
+    return fallback
+  }
+
+  return `${resolved.pathname}${resolved.search}${resolved.hash}`
 }

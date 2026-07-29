@@ -1,20 +1,24 @@
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
-using ECommerce.OrderingSaga.Application.Workflows;
+using ECommerce.OrderingSaga.Application.Commands.ProcessWorkflowEvent;
 using MassTransit;
 
 namespace ECommerce.OrderingSaga.Worker.Messaging;
 
 public sealed class ShipmentCreatedConsumer : IConsumer<ShipmentCreated>
 {
-    private readonly OrderWorkflowService workflowService;
+    private readonly ICommandHandler<ProcessWorkflowEventCommand<ShipmentCreated>> commandHandler;
 
-    public ShipmentCreatedConsumer(OrderWorkflowService workflowService)
+    public ShipmentCreatedConsumer(
+        ICommandHandler<ProcessWorkflowEventCommand<ShipmentCreated>> commandHandler)
     {
-        this.workflowService = workflowService;
+        this.commandHandler = commandHandler;
     }
 
     public Task Consume(ConsumeContext<ShipmentCreated> context)
     {
-        return workflowService.HandleAsync(context.Message, context.CancellationToken);
+        return commandHandler.HandleAsync(
+            new ProcessWorkflowEventCommand<ShipmentCreated>(context.Message),
+            context.CancellationToken);
     }
 }

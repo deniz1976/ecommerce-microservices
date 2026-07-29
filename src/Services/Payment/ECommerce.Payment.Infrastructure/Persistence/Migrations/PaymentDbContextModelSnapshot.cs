@@ -36,7 +36,8 @@ namespace ECommerce.Payment.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -57,6 +58,16 @@ namespace ECommerce.Payment.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("order_id");
 
+                    b.Property<string>("ProviderName")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("provider_name");
+
+                    b.Property<string>("ProviderPaymentReference")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("provider_payment_reference");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -65,7 +76,8 @@ namespace ECommerce.Payment.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnName("updated_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.HasKey("Id");
 
@@ -78,7 +90,6 @@ namespace ECommerce.Payment.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("ECommerce.Payment.Domain.PaymentTransaction", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -89,7 +100,8 @@ namespace ECommerce.Payment.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -100,6 +112,11 @@ namespace ECommerce.Payment.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("PaymentId")
                         .HasColumnType("uuid")
                         .HasColumnName("payment_id");
+
+                    b.Property<string>("ProviderTransactionReference")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("provider_transaction_reference");
 
                     b.Property<string>("Reason")
                         .HasMaxLength(512)

@@ -60,4 +60,9 @@ public sealed class ProductImage
     {
         IsMain = false;
     }
+
+    public void MarkAsMain()
+    {
+        IsMain = true;
+    }
 }

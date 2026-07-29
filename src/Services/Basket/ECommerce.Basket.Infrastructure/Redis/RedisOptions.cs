@@ -4,7 +4,7 @@ public sealed class RedisOptions
 {
     public const string SectionName = "Redis";
 
-    public string? ConnectionString { get; init; }
+    public string? Endpoint { get; init; }
 
     public int BasketTtlHours { get; init; } = 72;
 }

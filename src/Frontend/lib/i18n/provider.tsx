@@ -12,12 +12,10 @@ import {
 import {
   defaultLocale,
   getDictionary,
-  locales,
   type Dictionary,
   type Locale,
 } from "@/lib/i18n/dictionaries"
-
-const STORAGE_KEY = "app.locale"
+import { getStoredLocale, storeLocale } from "@/lib/i18n/locale"
 
 interface I18nContextValue {
   locale: Locale
@@ -27,29 +25,11 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null)
 
-function isLocale(value: string | null): value is Locale {
-  return value !== null && (locales as readonly string[]).includes(value)
-}
-
-function getPreferredLocale(): Locale {
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (isLocale(stored)) {
-    return stored
-  }
-
-  const browser = navigator.language.slice(0, 2).toLowerCase()
-  if (isLocale(browser)) {
-    return browser
-  }
-
-  return defaultLocale
-}
-
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(defaultLocale)
 
   useEffect(() => {
-    const preferredLocale = getPreferredLocale()
+    const preferredLocale = getStoredLocale()
     queueMicrotask(() => setLocaleState(preferredLocale))
   }, [])
 
@@ -59,7 +39,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next)
-    localStorage.setItem(STORAGE_KEY, next)
+    storeLocale(next)
   }, [])
 
   const value = useMemo<I18nContextValue>(

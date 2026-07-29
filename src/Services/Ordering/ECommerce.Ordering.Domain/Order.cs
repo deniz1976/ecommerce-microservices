@@ -3,6 +3,7 @@ namespace ECommerce.Ordering.Domain;
 public sealed class Order
 {
     private readonly List<OrderItem> items = [];
+    private readonly List<OrderStatusHistory> statusHistory = [];
 
     private Order()
     {
@@ -27,6 +28,7 @@ public sealed class Order
         Status = OrderStatus.Submitted;
         CreatedAt = DateTimeOffset.UtcNow;
         UpdatedAt = CreatedAt;
+        statusHistory.Add(new OrderStatusHistory(Id, Status, CreatedAt, null));
     }
 
     public Guid Id { get; private set; }
@@ -55,6 +57,8 @@ public sealed class Order
 
     public IReadOnlyCollection<OrderItem> Items => items;
 
+    public IReadOnlyCollection<OrderStatusHistory> StatusHistory => statusHistory;
+
     public void AddItem(Guid productId, string productName, int quantity, decimal unitPrice, string currency)
     {
         items.Add(new OrderItem(Id, productId, productName, quantity, unitPrice, currency));
@@ -64,13 +68,49 @@ public sealed class Order
 
     public void MarkConfirmed()
     {
-        Status = OrderStatus.Confirmed;
-        UpdatedAt = DateTimeOffset.UtcNow;
+        AdvanceTo(OrderStatus.Confirmed);
     }
 
-    public void MarkCancelled()
+    public void MarkCancelled(string? reasonCode = null)
     {
+        if (Status is OrderStatus.Confirmed or OrderStatus.Cancelled)
+        {
+            return;
+        }
+
         Status = OrderStatus.Cancelled;
         UpdatedAt = DateTimeOffset.UtcNow;
+        statusHistory.Add(new OrderStatusHistory(Id, Status, UpdatedAt, reasonCode));
+    }
+
+    public void MarkInventoryReserved()
+    {
+        AdvanceTo(OrderStatus.InventoryReserved);
+    }
+
+    public void MarkPaymentAuthorized()
+    {
+        AdvanceTo(OrderStatus.PaymentAuthorized);
+    }
+
+    public void MarkShipmentCreated()
+    {
+        AdvanceTo(OrderStatus.ShipmentCreated);
+    }
+
+    private void AdvanceTo(OrderStatus next)
+    {
+        if (Status is OrderStatus.Confirmed or OrderStatus.Cancelled || next <= Status)
+        {
+            return;
+        }
+
+        UpdatedAt = DateTimeOffset.UtcNow;
+        for (int value = (int)Status + 1; value <= (int)next; value++)
+        {
+            statusHistory.Add(new OrderStatusHistory(Id, (OrderStatus)value, UpdatedAt, null));
+        }
+
+        Status = next;
     }
 }

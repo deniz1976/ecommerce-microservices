@@ -78,6 +78,57 @@ public sealed class GatewaySecurityConfigurationTests
         Assert.DoesNotContain("builder.Services.AddOidcReadySecurity(builder.Configuration);", program, StringComparison.Ordinal);
         Assert.Contains("app.UseECommerceAuthentication();", program, StringComparison.Ordinal);
         Assert.DoesNotContain("app.UseECommerceSecurity();", program, StringComparison.Ordinal);
+        Assert.Contains("PreErrorResponderMiddleware", program, StringComparison.Ordinal);
+        Assert.Contains(
+            "GatewayAuthorizationErrorResponseWriter.WriteIfNeededAsync(context)",
+            program,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HostAndDockerGatewayRoutesKeepTheSameSecuritySurface()
+    {
+        string gatewayRoot = Path.Combine(
+            FindRepositoryRoot(),
+            "src",
+            "ApiGateways",
+            "ECommerce.ApiGateway");
+
+        string[] hostRoutes = ReadRouteSecuritySurface(Path.Combine(gatewayRoot, "ocelot.json"));
+        string[] dockerRoutes = ReadRouteSecuritySurface(Path.Combine(gatewayRoot, "ocelot.Docker.json"));
+
+        Assert.Equal(hostRoutes, dockerRoutes);
+    }
+
+    private static string[] ReadRouteSecuritySurface(string path)
+    {
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+
+        return document.RootElement
+            .GetProperty("Routes")
+            .EnumerateArray()
+            .Select(route =>
+            {
+                string upstreamPath = route.GetProperty("UpstreamPathTemplate").GetString() ?? string.Empty;
+                string downstreamPath = route.GetProperty("DownstreamPathTemplate").GetString() ?? string.Empty;
+                string downstreamScheme = route.GetProperty("DownstreamScheme").GetString() ?? string.Empty;
+                string methods = string.Join(
+                    ",",
+                    route.GetProperty("UpstreamHttpMethod")
+                        .EnumerateArray()
+                        .Select(method => method.GetString() ?? string.Empty)
+                        .Order(StringComparer.Ordinal));
+                bool allowAnonymous = route.TryGetProperty("AuthenticationOptions", out JsonElement authentication) &&
+                    authentication.TryGetProperty("AllowAnonymous", out JsonElement allowAnonymousElement) &&
+                    allowAnonymousElement.GetBoolean();
+                int priority = route.TryGetProperty("Priority", out JsonElement priorityElement)
+                    ? priorityElement.GetInt32()
+                    : 0;
+
+                return $"{methods}|{upstreamPath}|{downstreamScheme}|{downstreamPath}|anonymous={allowAnonymous}|priority={priority}";
+            })
+            .Order(StringComparer.Ordinal)
+            .ToArray();
     }
 
     private static string FindRepositoryRoot()

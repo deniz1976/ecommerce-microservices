@@ -1,3 +1,4 @@
+using ECommerce.BuildingBlocks.Contracts.Errors;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Catalog.Application;
 using ECommerce.Catalog.Application.Products;
@@ -8,6 +9,198 @@ namespace ECommerce.ContractTests;
 
 public sealed class CatalogSellerOwnershipTests
 {
+    [Fact]
+    public async Task PublicProductSearchForcesActiveProductsAndPreservesStoreFilter()
+    {
+        FakeProductRepository products = new();
+        ProductService service = new(
+            products,
+            products,
+            products,
+            new ProductStoreAccessValidator(new FakeStoreRepository()),
+            new ProductReferenceValidator(products));
+        Guid storeId = Guid.NewGuid();
+        ProductListQuery query = new(
+            1,
+            20,
+            null,
+            null,
+            null,
+            storeId,
+            ProductStatus.Archived,
+            "createdAt",
+            true);
+
+        Result<PagedResult<ProductResponse>> result = await service.SearchPublicAsync(
+            query,
+            "en",
+            CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(ProductStatus.Active, products.LastSearchQuery?.Status);
+        Assert.Equal(storeId, products.LastSearchQuery?.StoreId);
+    }
+
+    [Fact]
+    public async Task SellerManagedSearchRequiresOwnedStore()
+    {
+        FakeProductRepository products = new();
+        ProductService service = new(
+            products,
+            products,
+            products,
+            new ProductStoreAccessValidator(new FakeStoreRepository()),
+            new ProductReferenceValidator(products));
+        ProductListQuery query = new(1, 20, null, null, null, null, null, "createdAt", true);
+
+        Result<PagedResult<ProductResponse>> result = await service.SearchManagedAsync(
+            query,
+            new ProductAccessContext(Guid.NewGuid(), IsAdmin: false),
+            "en",
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(CatalogErrorCodes.StoreRequired, result.Error?.Code);
+        Assert.Null(products.LastSearchQuery);
+    }
+
+    [Fact]
+    public async Task SellerManagedSearchRejectsAnotherOwnersStore()
+    {
+        Guid storeId = Guid.NewGuid();
+        FakeProductRepository products = new();
+        ProductService service = new(
+            products,
+            products,
+            products,
+            new ProductStoreAccessValidator(
+                new FakeStoreRepository(new Store(storeId, Guid.NewGuid(), "Other Store", "other-store"))),
+            new ProductReferenceValidator(products));
+        ProductListQuery query = new(1, 20, null, null, null, storeId, null, "createdAt", true);
+
+        Result<PagedResult<ProductResponse>> result = await service.SearchManagedAsync(
+            query,
+            new ProductAccessContext(Guid.NewGuid(), IsAdmin: false),
+            "en",
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(CatalogErrorCodes.StoreAccessDenied, result.Error?.Code);
+        Assert.Null(products.LastSearchQuery);
+    }
+
+    [Fact]
+    public async Task AdminManagedSearchCanSpanAllStores()
+    {
+        FakeProductRepository products = new();
+        ProductService service = new(
+            products,
+            products,
+            products,
+            new ProductStoreAccessValidator(new FakeStoreRepository()),
+            new ProductReferenceValidator(products));
+        ProductListQuery query = new(1, 20, null, null, null, null, null, "createdAt", true);
+
+        Result<PagedResult<ProductResponse>> result = await service.SearchManagedAsync(
+            query,
+            new ProductAccessContext(UserId: null, IsAdmin: true),
+            "en",
+            CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(products.LastSearchQuery);
+        Assert.Null(products.LastSearchQuery.StoreId);
+    }
+
+    [Fact]
+    public async Task PublicProductByIdHidesNonActiveProduct()
+    {
+        Product draft = new(
+            Guid.NewGuid(),
+            "DRAFT-1",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            10m,
+            "TRY",
+            ProductStatus.Draft);
+        FakeProductRepository products = new(draft);
+        ProductService service = new(
+            products,
+            products,
+            products,
+            new ProductStoreAccessValidator(new FakeStoreRepository()),
+            new ProductReferenceValidator(products));
+
+        Result<ProductResponse> result = await service.GetPublicByIdAsync(
+            draft.Id,
+            "en",
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorCodes.ProductNotFound, result.Error?.Code);
+    }
+
+    [Fact]
+    public async Task SellerCannotReadPlatformProductThroughManagementApi()
+    {
+        Product platformProduct = new(
+            Guid.NewGuid(),
+            "PLATFORM-READ-1",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            storeId: null,
+            10m,
+            "TRY",
+            ProductStatus.Draft);
+        FakeProductRepository products = new(platformProduct);
+        ProductService service = new(
+            products,
+            products,
+            products,
+            new ProductStoreAccessValidator(new FakeStoreRepository()),
+            new ProductReferenceValidator(products));
+
+        Result<ProductResponse> result = await service.GetManagedByIdAsync(
+            platformProduct.Id,
+            new ProductAccessContext(Guid.NewGuid(), IsAdmin: false),
+            "en",
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(CatalogErrorCodes.StoreAccessDenied, result.Error?.Code);
+    }
+
+    [Fact]
+    public async Task AdminCanReadPlatformProductThroughManagementApi()
+    {
+        Product platformProduct = new(
+            Guid.NewGuid(),
+            "PLATFORM-READ-2",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            storeId: null,
+            10m,
+            "TRY",
+            ProductStatus.Draft);
+        FakeProductRepository products = new(platformProduct);
+        ProductService service = new(
+            products,
+            products,
+            products,
+            new ProductStoreAccessValidator(new FakeStoreRepository()),
+            new ProductReferenceValidator(products));
+
+        Result<ProductResponse> result = await service.GetManagedByIdAsync(
+            platformProduct.Id,
+            new ProductAccessContext(UserId: null, IsAdmin: true),
+            "en",
+            CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(platformProduct.Id, result.Value?.Id);
+    }
+
     [Fact]
     public async Task SellerMustChooseAStoreWhenCreatingProduct()
     {
@@ -88,9 +281,10 @@ public sealed class CatalogSellerOwnershipTests
         FakeProductRepository products = new(platformProduct);
         ProductService service = new(
             products,
+            products,
+            products,
             new ProductStoreAccessValidator(new FakeStoreRepository()),
-            new ProductReferenceValidator(products),
-            new ProductImageAttacher(new AlwaysValidImageService()));
+            new ProductReferenceValidator(products));
 
         Result<ProductResponse> result = await service.UpdateAsync(
             platformProduct.Id,
@@ -126,9 +320,10 @@ public sealed class CatalogSellerOwnershipTests
         FakeProductRepository products = new(product);
         ProductService service = new(
             products,
+            products,
+            products,
             new ProductStoreAccessValidator(new FakeStoreRepository(otherStore)),
-            new ProductReferenceValidator(products),
-            new ProductImageAttacher(new AlwaysValidImageService()));
+            new ProductReferenceValidator(products));
 
         Result<ProductResponse> result = await service.UpdateAsync(
             product.Id,
@@ -152,7 +347,7 @@ public sealed class CatalogSellerOwnershipTests
     {
         Guid sellerId = Guid.NewGuid();
         FakeStoreRepository stores = new();
-        StoreService service = new(stores);
+        StoreService service = new(stores, stores, stores);
 
         Result<StoreResponse> result = await service.CreateAsync(
             sellerId,
@@ -164,14 +359,23 @@ public sealed class CatalogSellerOwnershipTests
         Assert.DoesNotContain(typeof(CreateStoreRequest).GetProperties(), property => property.Name == "OwnerUserId");
     }
 
+    [Fact]
+    public void ProductCreationDoesNotAcceptClientSuppliedImageMetadata()
+    {
+        Assert.DoesNotContain(
+            typeof(CreateProductRequest).GetProperties(),
+            property => property.Name == "Images");
+    }
+
     private static ProductService CreateService(FakeStoreRepository stores)
     {
         FakeProductRepository products = new();
         return new ProductService(
             products,
+            products,
+            products,
             new ProductStoreAccessValidator(stores),
-            new ProductReferenceValidator(products),
-            new ProductImageAttacher(new AlwaysValidImageService()));
+            new ProductReferenceValidator(products));
     }
 
     private static CreateProductRequest ProductRequest(Guid? storeId) => new(
@@ -182,7 +386,6 @@ public sealed class CatalogSellerOwnershipTests
         10m,
         "TRY",
         ProductStatus.Active,
-        [new ProductTranslationInput("en", "Product", "Description")],
-        []);
+        [new ProductTranslationInput("en", "Product", "Description")]);
 
 }

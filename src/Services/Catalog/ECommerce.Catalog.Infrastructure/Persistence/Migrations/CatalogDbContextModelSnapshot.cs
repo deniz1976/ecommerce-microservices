@@ -31,7 +31,8 @@ namespace ECommerce.Catalog.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
@@ -66,7 +67,8 @@ namespace ECommerce.Catalog.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
@@ -125,7 +127,8 @@ namespace ECommerce.Catalog.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -156,7 +159,8 @@ namespace ECommerce.Catalog.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnName("updated_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.HasKey("Id");
 
@@ -235,6 +239,42 @@ namespace ECommerce.Catalog.Infrastructure.Persistence.Migrations
                     b.ToTable("product_images", (string)null);
                 });
 
+            modelBuilder.Entity("ECommerce.Catalog.Domain.ProductImageDeletionJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_count");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
+
+                    b.Property<DateTimeOffset>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("public_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NextAttemptAt");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique();
+
+                    b.ToTable("product_image_deletion_jobs", (string)null);
+                });
+
             modelBuilder.Entity("ECommerce.Catalog.Domain.ProductTranslation", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -272,7 +312,8 @@ namespace ECommerce.Catalog.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -292,7 +333,8 @@ namespace ECommerce.Catalog.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnName("updated_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.HasKey("Id");
 

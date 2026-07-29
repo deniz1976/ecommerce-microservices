@@ -1,3 +1,4 @@
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,14 +16,18 @@ public sealed class PaymentConfiguration : IEntityTypeConfiguration<Domain.Payme
         builder.Property(x => x.Amount).HasColumnName("amount").HasPrecision(18, 2);
         builder.Property(x => x.Currency).HasColumnName("currency").HasMaxLength(3).IsRequired();
         builder.Property(x => x.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(32);
+        builder.Property(x => x.ProviderName).HasColumnName("provider_name").HasMaxLength(64);
+        builder.Property(x => x.ProviderPaymentReference).HasColumnName("provider_payment_reference").HasMaxLength(256);
         builder.Property(x => x.FailureReason).HasColumnName("failure_reason").HasMaxLength(512);
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
         builder.HasIndex(x => x.OrderId).IsUnique();
         builder.HasMany(x => x.Transactions)
             .WithOne()
             .HasForeignKey(x => x.PaymentId)
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation(x => x.Transactions).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(x => x.Transactions)
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .AutoInclude();
     }
 }

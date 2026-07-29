@@ -1,6 +1,11 @@
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
+using ECommerce.BuildingBlocks.Contracts.Errors;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.BuildingBlocks.Security;
+using ECommerce.Ordering.Application.Commands.CreateOrder;
 using ECommerce.Ordering.Application.Orders;
+using ECommerce.Ordering.Application.Queries.GetOrderById;
+using ECommerce.Ordering.Application.Queries.GetOrdersByCustomer;
 
 namespace ECommerce.Ordering.Api.Orders;
 
@@ -13,7 +18,8 @@ public static class OrderEndpoints
             .RequireAuthorization(AuthorizationPolicies.AuthenticatedUser);
 
         group.MapPost("/", CreateAsync)
-            .WithName("CreateOrder");
+            .WithName("CreateOrder")
+            .RequireAuthorization(AuthorizationPolicies.TrustedOrderWrite);
 
         group.MapGet("/{id:guid}", GetByIdAsync)
             .WithName("GetOrderById");
@@ -26,19 +32,21 @@ public static class OrderEndpoints
 
     private static async Task<IResult> CreateAsync(
         CreateOrderRequest request,
-        OrderService orderService,
+        ICommandHandler<CreateOrderCommand, Result<OrderResponse>> commandHandler,
         ICustomerOwnershipAuthorizer ownershipAuthorizer,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
         if (!await ownershipAuthorizer.CanAccessAsync(request.CustomerId, cancellationToken))
         {
-            return Results.Forbid();
+            return OrderResults.Forbidden(httpContext);
         }
 
         Guid correlationId = CorrelationReader.Read(httpContext);
         Guid? causationId = CausationReader.Read(httpContext);
-        Result<OrderResponse> result = await orderService.CreateAsync(request, correlationId, causationId, cancellationToken);
+        Result<OrderResponse> result = await commandHandler.HandleAsync(
+            new CreateOrderCommand(request, correlationId, causationId),
+            cancellationToken);
 
         return result.IsFailure
             ? OrderResults.FromResult(result, httpContext)
@@ -47,16 +55,19 @@ public static class OrderEndpoints
 
     private static async Task<IResult> GetByIdAsync(
         Guid id,
-        OrderService orderService,
+        IQueryHandler<GetOrderByIdQuery, Result<OrderResponse>> queryHandler,
         ICustomerOwnershipAuthorizer ownershipAuthorizer,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        Result<OrderResponse> result = await orderService.GetByIdAsync(id, cancellationToken);
+        Result<OrderResponse> result = await queryHandler.HandleAsync(
+            new GetOrderByIdQuery(id),
+            cancellationToken);
         if (!result.IsFailure &&
             !await ownershipAuthorizer.CanAccessAsync(result.Value!.CustomerId, cancellationToken))
         {
-            return Results.NotFound();
+            result = Result<OrderResponse>.Failure(
+                new Error(ErrorCodes.OrderNotFound, ErrorCodes.OrderNotFound));
         }
 
         return OrderResults.FromResult(result, httpContext);
@@ -64,17 +75,21 @@ public static class OrderEndpoints
 
     private static async Task<IResult> GetByCustomerIdAsync(
         Guid customerId,
-        OrderService orderService,
+        IQueryHandler<
+            GetOrdersByCustomerQuery,
+            Result<IReadOnlyCollection<OrderResponse>>> queryHandler,
         ICustomerOwnershipAuthorizer ownershipAuthorizer,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
         if (!await ownershipAuthorizer.CanAccessAsync(customerId, cancellationToken))
         {
-            return Results.Forbid();
+            return OrderResults.Forbidden(httpContext);
         }
 
-        Result<IReadOnlyCollection<OrderResponse>> result = await orderService.GetByCustomerIdAsync(customerId, cancellationToken);
+        Result<IReadOnlyCollection<OrderResponse>> result = await queryHandler.HandleAsync(
+            new GetOrdersByCustomerQuery(customerId),
+            cancellationToken);
         return OrderResults.FromResult(result, httpContext);
     }
 }

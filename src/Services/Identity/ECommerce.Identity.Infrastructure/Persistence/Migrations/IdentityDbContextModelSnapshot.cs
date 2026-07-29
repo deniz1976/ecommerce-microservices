@@ -22,6 +22,59 @@ namespace ECommerce.Identity.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ECommerce.Identity.Domain.RoleReconciliationJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_count");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
+
+                    b.Property<string>("CurrentExternalRole")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("current_external_role");
+
+                    b.Property<string>("DesiredRole")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("desired_role");
+
+                    b.Property<string>("ExternalSubject")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("external_subject");
+
+                    b.Property<DateTimeOffset>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompletedAt", "NextAttemptAt");
+
+                    b.HasIndex("ExternalSubject", "DesiredRole")
+                        .IsUnique()
+                        .HasFilter("completed_at IS NULL");
+
+                    b.ToTable("role_reconciliation_jobs", (string)null);
+                });
+
             modelBuilder.Entity("ECommerce.Identity.Domain.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -31,7 +84,8 @@ namespace ECommerce.Identity.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
@@ -57,7 +111,8 @@ namespace ECommerce.Identity.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset?>("OnboardingCompletedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("onboarding_completed_at");
+                        .HasColumnName("onboarding_completed_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -73,7 +128,8 @@ namespace ECommerce.Identity.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnName("updated_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.HasKey("Id");
 
@@ -95,7 +151,8 @@ namespace ECommerce.Identity.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<string>("Role")
                         .IsRequired()

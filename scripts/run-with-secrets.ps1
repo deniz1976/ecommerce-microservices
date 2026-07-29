@@ -38,3 +38,7 @@ if ($Command[0].EndsWith(".ps1", [StringComparison]::OrdinalIgnoreCase)) {
 $arguments += $Command
 
 & infisical @arguments
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Infisical command failed with exit code $LASTEXITCODE"
+}

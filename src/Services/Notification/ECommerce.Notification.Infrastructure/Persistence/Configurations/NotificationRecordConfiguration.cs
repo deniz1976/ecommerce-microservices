@@ -1,4 +1,5 @@
 using ECommerce.Notification.Domain;
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,10 +20,12 @@ public sealed class NotificationRecordConfiguration : IEntityTypeConfiguration<N
         builder.Property(x => x.Message).HasColumnName("message").HasMaxLength(1024).IsRequired();
         builder.Property(x => x.Culture).HasColumnName("culture").HasMaxLength(8).IsRequired();
         builder.Property(x => x.Channel).HasColumnName("channel").HasConversion<string>().HasMaxLength(32);
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
+        builder.Property(x => x.ReadAt).HasColumnName("read_at").IsUtcTimestamp();
         builder.HasIndex(x => x.CustomerId);
         builder.HasIndex(x => x.OrderId);
         builder.HasIndex(x => x.CreatedAt);
+        builder.HasIndex(x => new { x.CustomerId, x.ReadAt, x.CreatedAt });
         builder.HasIndex(x => new { x.SourceMessageId, x.Channel }).IsUnique();
     }
 }

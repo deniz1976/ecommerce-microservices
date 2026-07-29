@@ -35,7 +35,6 @@ public static class ApplicationBuilderExtensions
 
     private static bool IsConfigured(AuthOptions options)
     {
-        return !string.IsNullOrWhiteSpace(options.Authority) &&
-            !string.IsNullOrWhiteSpace(options.Audience);
+        return AuthConfigurationValidator.IsConfigured(options);
     }
 }

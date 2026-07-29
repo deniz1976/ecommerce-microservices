@@ -1,5 +1,6 @@
 using System.Text.Json;
 using ECommerce.Basket.Application.Baskets;
+using ECommerce.Basket.Domain;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using BasketEntity = ECommerce.Basket.Domain.Basket;
@@ -36,14 +37,16 @@ public sealed class RedisActiveBasketStore : IActiveBasketStore
             return null;
         }
 
-        BasketEntity basket = new(document.CustomerId, document.Currency);
+        BasketItem[] items = document.Items
+            .Select(item => new BasketItem(item.ProductId, item.ProductName, item.Quantity, item.UnitPrice, item.Currency))
+            .ToArray();
 
-        foreach (RedisBasketItemDocument item in document.Items)
-        {
-            basket.AddOrUpdateItem(item.ProductId, item.ProductName, item.Quantity, item.UnitPrice, item.Currency);
-        }
-
-        return basket;
+        return new BasketEntity(
+            document.CustomerId,
+            document.Currency,
+            document.CreatedAt,
+            document.UpdatedAt,
+            items);
     }
 
     public Task SaveAsync(BasketEntity basket, CancellationToken cancellationToken)

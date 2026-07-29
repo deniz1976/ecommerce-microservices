@@ -20,14 +20,16 @@ public static class DependencyInjection
         connectionString = PostgresConnectionString.Normalize(connectionString);
 
         PostgresOptions options = configuration.GetSection("Postgres").Get<PostgresOptions>() ?? new PostgresOptions();
+        services.AddSingleton<UtcTimestampSaveChangesInterceptor>();
 
-        services.AddDbContext<TDbContext>(builder =>
+        services.AddDbContext<TDbContext>((serviceProvider, builder) =>
         {
             builder.UseNpgsql(connectionString, npgsql =>
             {
                 npgsql.CommandTimeout(options.CommandTimeoutSeconds);
                 npgsql.EnableRetryOnFailure(options.MaxRetryCount, TimeSpan.FromSeconds(options.MaxRetryDelaySeconds), null);
             });
+            builder.AddInterceptors(serviceProvider.GetRequiredService<UtcTimestampSaveChangesInterceptor>());
 
             configureOptions?.Invoke(builder);
         });

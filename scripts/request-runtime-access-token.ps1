@@ -2,6 +2,8 @@ param()
 
 $ErrorActionPreference = "Stop"
 
+. "$PSScriptRoot/jwt-claim-validation.ps1"
+
 $authority = $env:Auth__Authority
 $audience = $env:Auth__Audience
 $clientId = $env:RuntimeChecks__Auth0ClientId
@@ -33,6 +35,11 @@ if ([string]::IsNullOrWhiteSpace($accessToken)) {
     throw "Auth0 token endpoint returned an empty access token"
 }
 
+Assert-RuntimeAccessTokenClaims `
+    -AccessToken $accessToken `
+    -Authority $authority `
+    -Audience $audience
+
 [Environment]::SetEnvironmentVariable("RuntimeChecks__AccessToken", $accessToken, "Process")
 
 if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_ENV)) {
@@ -40,4 +47,4 @@ if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_ENV)) {
     Add-Content -LiteralPath $env:GITHUB_ENV -Value "RuntimeChecks__AccessToken=$accessToken" -Encoding utf8
 }
 
-Write-Host "Runtime Auth0 access token acquired"
+Write-Host "Runtime Auth0 access token acquired with exact issuer, audience, expiration, and permissions"

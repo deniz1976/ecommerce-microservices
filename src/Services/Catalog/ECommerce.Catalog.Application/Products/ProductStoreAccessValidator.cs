@@ -1,15 +1,15 @@
 using ECommerce.BuildingBlocks.Contracts.Errors;
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.BuildingBlocks.Contracts.Results;
-using ECommerce.Catalog.Application.Stores;
 using ECommerce.Catalog.Domain;
 
 namespace ECommerce.Catalog.Application.Products;
 
 public sealed class ProductStoreAccessValidator : IProductStoreAccessValidator
 {
-    private readonly IStoreRepository storeRepository;
+    private readonly IRepository<Store, Guid> storeRepository;
 
-    public ProductStoreAccessValidator(IStoreRepository storeRepository)
+    public ProductStoreAccessValidator(IRepository<Store, Guid> storeRepository)
     {
         this.storeRepository = storeRepository;
     }

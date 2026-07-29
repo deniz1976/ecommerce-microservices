@@ -1,9 +1,13 @@
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.Catalog.Application.Stores;
 using ECommerce.Catalog.Domain;
 
 namespace ECommerce.ContractTests;
 
-internal sealed class FakeStoreRepository : IStoreRepository
+internal sealed class FakeStoreRepository :
+    IRepository<Store, Guid>,
+    IUnitOfWork,
+    IStoreReader
 {
     private readonly Dictionary<Guid, Store> stores;
 

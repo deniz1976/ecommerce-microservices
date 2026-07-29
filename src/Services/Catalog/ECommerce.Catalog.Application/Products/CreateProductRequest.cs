@@ -10,5 +10,4 @@ public sealed record CreateProductRequest(
     decimal Price,
     string Currency,
     ProductStatus Status,
-    IReadOnlyCollection<ProductTranslationInput> Translations,
-    IReadOnlyCollection<ProductImageInput> Images);
+    IReadOnlyCollection<ProductTranslationInput> Translations);

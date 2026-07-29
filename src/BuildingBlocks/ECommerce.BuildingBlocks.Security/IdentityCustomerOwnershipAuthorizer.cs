@@ -38,22 +38,16 @@ public sealed class IdentityCustomerOwnershipAuthorizer : ICustomerOwnershipAuth
         }
 
         if (principal.IsInRole(ApplicationRoles.Admin) ||
-            HasPermission(principal, ApplicationPermissions.ActAsCustomer))
+            ClaimsPrincipalPermissionEvaluator.HasPermission(
+                principal,
+                ApplicationPermissions.ActAsCustomer))
         {
             return true;
         }
 
-        Guid? currentCustomerId = await authenticatedUserResolver.ResolveUserIdAsync(cancellationToken);
+        Guid? currentCustomerId = await authenticatedUserResolver.ResolveUserIdAsync(
+            cancellationToken,
+            accessToken);
         return currentCustomerId == customerId;
-    }
-
-    private static bool HasPermission(ClaimsPrincipal principal, string permission)
-    {
-        return principal.Claims
-            .Where(claim => claim.Type is "permissions" or "scope")
-            .SelectMany(claim => claim.Value.Split(
-                ' ',
-                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            .Contains(permission, StringComparer.Ordinal);
     }
 }

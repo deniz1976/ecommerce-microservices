@@ -1,8 +1,22 @@
 @ECommerce.Catalog.Api_HostAddress = http://localhost:5283
+@access_token =
+
+GET {{ECommerce.Catalog.Api_HostAddress}}/api/v1/catalog-metrics
+Accept: application/json
+Authorization: Bearer {{access_token}}
+
+###
 
 GET {{ECommerce.Catalog.Api_HostAddress}}/api/v1/products
 Accept: application/json
 Accept-Language: en
+
+###
+
+GET {{ECommerce.Catalog.Api_HostAddress}}/api/v1/products/manage?pageNumber=1&pageSize=20
+Accept: application/json
+Accept-Language: en
+Authorization: Bearer {{access_token}}
 
 ###
 

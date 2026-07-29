@@ -1,0 +1,43 @@
+groups:
+  - name: ecommerce-messaging
+    rules:
+      - alert: ECommerceOutboxBacklogStale
+        expr: |
+          max by (service_name) (ecommerce_messaging_outbox_pending) > 0
+            and on (service_name)
+          max by (service_name) (ecommerce_messaging_outbox_oldest_age_seconds) >= 60
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Transactional outbox backlog is stale"
+          description: "{{ $labels.service_name }} has a non-empty outbox whose oldest message is at least 60 seconds old."
+      - alert: ECommerceOutboxPollingErrors
+        expr: |
+          sum by (service_name) (increase(ecommerce_messaging_outbox_poll_errors_total[5m])) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Transactional outbox monitoring is failing"
+          description: "{{ $labels.service_name }} recorded an outbox polling error during the last five minutes."
+      - alert: ECommerceIdentityRoleReconciliationBacklogStale
+        expr: |
+          max by (service_name) (ecommerce_identity_role_reconciliation_pending) > 0
+            and on (service_name)
+          max by (service_name) (ecommerce_identity_role_reconciliation_oldest_age_seconds) >= 300
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Identity role reconciliation backlog is stale"
+          description: "{{ $labels.service_name }} has an incomplete role reconciliation job that is at least five minutes old."
+      - alert: ECommerceIdentityRoleReconciliationFailures
+        expr: |
+          sum by (service_name) (increase(ecommerce_identity_role_reconciliation_failures_total[15m])) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Identity role reconciliation retry was scheduled"
+          description: "{{ $labels.service_name }} persisted a failed role reconciliation attempt during the last 15 minutes."

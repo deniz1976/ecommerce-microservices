@@ -13,7 +13,10 @@ public sealed class PaymentTrackingTests
             Guid.NewGuid(),
             Guid.NewGuid(),
             10.50m,
-            "USD");
+            "USD",
+            "TestProvider",
+            "payment-reference",
+            "authorization-reference");
 
         DbContextOptions<PaymentDbContext> options = new DbContextOptionsBuilder<PaymentDbContext>()
             .UseNpgsql("Host=localhost;Database=tracking_test")
@@ -21,7 +24,7 @@ public sealed class PaymentTrackingTests
         using PaymentDbContext dbContext = new(options);
         dbContext.Attach(payment);
 
-        payment.MarkRefunded(10.50m, "USD", "Shipment failed.");
+        payment.MarkRefunded(10.50m, "USD", "refund-reference", "Shipment failed.");
         dbContext.ChangeTracker.DetectChanges();
 
         PaymentTransaction refund = Assert.Single(

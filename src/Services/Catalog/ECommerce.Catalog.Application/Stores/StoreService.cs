@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using ECommerce.BuildingBlocks.Contracts.Errors;
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Catalog.Domain;
 
@@ -7,11 +8,18 @@ namespace ECommerce.Catalog.Application.Stores;
 
 public sealed partial class StoreService
 {
-    private readonly IStoreRepository repository;
+    private readonly IRepository<Store, Guid> repository;
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IStoreReader storeReader;
 
-    public StoreService(IStoreRepository repository)
+    public StoreService(
+        IRepository<Store, Guid> repository,
+        IUnitOfWork unitOfWork,
+        IStoreReader storeReader)
     {
         this.repository = repository;
+        this.unitOfWork = unitOfWork;
+        this.storeReader = storeReader;
     }
 
     public async Task<Result<StoreResponse>> CreateAsync(
@@ -27,14 +35,14 @@ public sealed partial class StoreService
             return Result<StoreResponse>.Failure(new Error(ErrorCodes.ValidationFailed, ErrorCodes.ValidationFailed));
         }
 
-        if (await repository.SlugExistsAsync(slug, cancellationToken))
+        if (await storeReader.SlugExistsAsync(slug, cancellationToken))
         {
             return Result<StoreResponse>.Failure(new Error(CatalogErrorCodes.StoreSlugConflict, CatalogErrorCodes.StoreSlugConflict));
         }
 
         Store store = new(Guid.NewGuid(), ownerUserId, name, slug);
         repository.Add(store);
-        await repository.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result<StoreResponse>.Success(ToResponse(store));
     }
 
@@ -50,7 +58,9 @@ public sealed partial class StoreService
         Guid ownerUserId,
         CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<Store> stores = await repository.GetByOwnerAsync(ownerUserId, cancellationToken);
+        IReadOnlyCollection<Store> stores = await storeReader.GetByOwnerAsync(
+            ownerUserId,
+            cancellationToken);
         return Result<IReadOnlyCollection<StoreResponse>>.Success(stores.Select(ToResponse).ToArray());
     }
 

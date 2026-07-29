@@ -1,4 +1,5 @@
 using ECommerce.Catalog.Domain;
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,8 +20,8 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(x => x.Price).HasColumnName("price").HasPrecision(18, 2);
         builder.Property(x => x.Currency).HasColumnName("currency").HasMaxLength(3).IsRequired();
         builder.Property(x => x.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(32);
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
 
         builder.HasIndex(x => x.Sku).IsUnique();
         builder.HasIndex(x => x.CategoryId);
@@ -43,7 +44,13 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasForeignKey(x => x.StoreId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Navigation(x => x.Translations).UsePropertyAccessMode(PropertyAccessMode.Field);
-        builder.Navigation(x => x.Images).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(x => x.Translations)
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .AutoInclude();
+        builder.Navigation(x => x.Images)
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .AutoInclude();
+        builder.Navigation(x => x.Category).AutoInclude();
+        builder.Navigation(x => x.Brand).AutoInclude();
     }
 }

@@ -81,6 +81,28 @@ public sealed class CustomerOwnershipAuthorizerTests
     }
 
     [Fact]
+    public async Task ExplicitHubAccessTokenIsForwardedWithoutAmbientRequestToken()
+    {
+        Guid customerId = Guid.NewGuid();
+        StubHttpMessageHandler handler = new(_ => JsonResponse(customerId));
+        ClaimsPrincipal principal = AuthenticatedPrincipal();
+        ICustomerOwnershipAuthorizer authorizer = CreateAuthorizer(
+            principal,
+            handler,
+            accessToken: null,
+            attachHttpContext: false);
+
+        bool allowed = await authorizer.CanAccessAsync(
+            customerId,
+            principal,
+            "explicit-hub-token",
+            CancellationToken.None);
+
+        Assert.True(allowed);
+        Assert.Equal("explicit-hub-token", handler.LastRequest?.Headers.Authorization?.Parameter);
+    }
+
+    [Fact]
     public async Task QueryTokenOutsideNotificationHubIsRejected()
     {
         StubHttpMessageHandler handler = new(_ => throw new InvalidOperationException("Identity should not be called."));
@@ -92,6 +114,28 @@ public sealed class CustomerOwnershipAuthorizerTests
             queryToken: "query-token");
 
         bool allowed = await authorizer.CanAccessAsync(Guid.NewGuid(), CancellationToken.None);
+
+        Assert.False(allowed);
+        Assert.Equal(0, handler.RequestCount);
+    }
+
+    [Fact]
+    public async Task UnauthenticatedPrincipalCannotUseAnExplicitAccessToken()
+    {
+        ClaimsPrincipal principal = new(new ClaimsIdentity());
+        StubHttpMessageHandler handler = new(
+            _ => throw new InvalidOperationException("Identity should not be called."));
+        ICustomerOwnershipAuthorizer authorizer = CreateAuthorizer(
+            principal,
+            handler,
+            accessToken: null,
+            attachHttpContext: false);
+
+        bool allowed = await authorizer.CanAccessAsync(
+            Guid.NewGuid(),
+            principal,
+            "explicit-token",
+            CancellationToken.None);
 
         Assert.False(allowed);
         Assert.Equal(0, handler.RequestCount);
@@ -111,6 +155,28 @@ public sealed class CustomerOwnershipAuthorizerTests
 
         Assert.True(allowed);
         Assert.Equal(0, handler.RequestCount);
+    }
+
+    [Theory]
+    [InlineData("permissions", "customer:act-extra")]
+    [InlineData("scope", "openid customer:activity")]
+    [InlineData("permissions", ApplicationPermissions.InventoryWrite)]
+    public async Task SimilarOrUnrelatedPermissionsCannotDelegateCustomerAccess(
+        string claimType,
+        string claimValue)
+    {
+        Guid resolvedCustomerId = Guid.NewGuid();
+        ClaimsPrincipal principal = AuthenticatedPrincipal(new Claim(claimType, claimValue));
+        StubHttpMessageHandler handler = new(_ => JsonResponse(resolvedCustomerId));
+        ICustomerOwnershipAuthorizer authorizer = CreateAuthorizer(
+            principal,
+            handler,
+            "owner-token");
+
+        bool allowed = await authorizer.CanAccessAsync(Guid.NewGuid(), CancellationToken.None);
+
+        Assert.False(allowed);
+        Assert.Equal(1, handler.RequestCount);
     }
 
     [Fact]
@@ -163,7 +229,8 @@ public sealed class CustomerOwnershipAuthorizerTests
         StubHttpMessageHandler handler,
         string? accessToken,
         string path = "/",
-        string? queryToken = null)
+        string? queryToken = null,
+        bool attachHttpContext = true)
     {
         DefaultHttpContext httpContext = new();
         httpContext.User = principal;
@@ -183,7 +250,10 @@ public sealed class CustomerOwnershipAuthorizerTests
             BaseAddress = new Uri("http://identity.test/")
         };
 
-        HttpContextAccessor accessor = new() { HttpContext = httpContext };
+        HttpContextAccessor accessor = new()
+        {
+            HttpContext = attachHttpContext ? httpContext : null
+        };
         IdentityAuthenticatedUserResolver resolver = new(
             httpClient,
             accessor,

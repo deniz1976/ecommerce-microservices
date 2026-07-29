@@ -1,3 +1,4 @@
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.BuildingBlocks.Persistence;
 using ECommerce.Shipping.Application.Shipments;
 using ECommerce.Shipping.Infrastructure.Persistence;
@@ -12,7 +13,12 @@ public static class DependencyInjection
     public static IServiceCollection AddShippingInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddPostgresDbContext<ShippingDbContext>(configuration, "ShippingDb");
-        services.AddScoped<IShipmentRepository, ShipmentRepository>();
+        services.AddScoped<IRepository<Domain.Shipment, Guid>>(serviceProvider =>
+            new EfRepository<Domain.Shipment, Guid>(
+                serviceProvider.GetRequiredService<ShippingDbContext>(),
+                shipment => shipment.Id));
+        services.AddScoped<IUnitOfWork, EfUnitOfWork<ShippingDbContext>>();
+        services.AddScoped<IShipmentIdentityReader, ShipmentIdentityReader>();
         services.Configure<MockShippingProviderOptions>(
             configuration.GetSection(MockShippingProviderOptions.SectionName));
         services.AddSingleton<IShippingProvider, MockShippingProvider>();

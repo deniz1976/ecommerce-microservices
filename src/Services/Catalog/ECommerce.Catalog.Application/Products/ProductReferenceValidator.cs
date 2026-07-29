@@ -11,11 +11,11 @@ public sealed class ProductReferenceValidator : IProductReferenceValidator
         "tr"
     };
 
-    private readonly IProductRepository repository;
+    private readonly IProductReferenceReader referenceReader;
 
-    public ProductReferenceValidator(IProductRepository repository)
+    public ProductReferenceValidator(IProductReferenceReader referenceReader)
     {
-        this.repository = repository;
+        this.referenceReader = referenceReader;
     }
 
     public async Task<Result> ValidateAsync(
@@ -24,12 +24,12 @@ public sealed class ProductReferenceValidator : IProductReferenceValidator
         IReadOnlyCollection<ProductTranslationInput> translations,
         CancellationToken cancellationToken)
     {
-        if (!await repository.CategoryExistsAsync(categoryId, cancellationToken))
+        if (!await referenceReader.CategoryExistsAsync(categoryId, cancellationToken))
         {
             return Result.Failure(new Error(CatalogErrorCodes.CategoryNotFound, CatalogErrorCodes.CategoryNotFound));
         }
 
-        if (!await repository.BrandExistsAsync(brandId, cancellationToken))
+        if (!await referenceReader.BrandExistsAsync(brandId, cancellationToken))
         {
             return Result.Failure(new Error(CatalogErrorCodes.BrandNotFound, CatalogErrorCodes.BrandNotFound));
         }

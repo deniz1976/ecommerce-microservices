@@ -1,4 +1,5 @@
 using ECommerce.Identity.Domain;
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,7 +14,7 @@ public sealed class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
         builder.Property(x => x.Id).HasColumnName("id");
         builder.Property(x => x.UserId).HasColumnName("user_id");
         builder.Property(x => x.Role).HasColumnName("role").HasMaxLength(128).IsRequired();
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
         builder.HasIndex(x => new { x.UserId, x.Role }).IsUnique();
     }
 }

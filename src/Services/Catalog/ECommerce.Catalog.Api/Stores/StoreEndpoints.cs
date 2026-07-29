@@ -1,8 +1,12 @@
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Errors;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.BuildingBlocks.Security;
 using ECommerce.Catalog.Api.Products;
 using ECommerce.Catalog.Application;
+using ECommerce.Catalog.Application.Commands.CreateStore;
+using ECommerce.Catalog.Application.Queries.GetStoreById;
+using ECommerce.Catalog.Application.Queries.GetStoresByOwner;
 using ECommerce.Catalog.Application.Stores;
 
 namespace ECommerce.Catalog.Api.Stores;
@@ -30,7 +34,7 @@ public static class StoreEndpoints
 
     private static async Task<IResult> CreateAsync(
         CreateStoreRequest request,
-        StoreService storeService,
+        ICommandHandler<CreateStoreCommand, Result<StoreResponse>> commandHandler,
         IAuthenticatedUserResolver userResolver,
         HttpContext httpContext,
         CancellationToken cancellationToken)
@@ -43,14 +47,18 @@ public static class StoreEndpoints
                 httpContext);
         }
 
-        Result<StoreResponse> result = await storeService.CreateAsync(ownerUserId.Value, request, cancellationToken);
+        Result<StoreResponse> result = await commandHandler.HandleAsync(
+            new CreateStoreCommand(ownerUserId.Value, request),
+            cancellationToken);
         return result.IsFailure
             ? CatalogResults.FromResult(result, httpContext)
             : Results.Created($"/api/v1/stores/{result.Value!.Id}", result.Value);
     }
 
     private static async Task<IResult> GetMineAsync(
-        StoreService storeService,
+        IQueryHandler<
+            GetStoresByOwnerQuery,
+            Result<IReadOnlyCollection<StoreResponse>>> queryHandler,
         IAuthenticatedUserResolver userResolver,
         HttpContext httpContext,
         CancellationToken cancellationToken)
@@ -64,17 +72,21 @@ public static class StoreEndpoints
                 httpContext);
         }
 
-        Result<IReadOnlyCollection<StoreResponse>> result = await storeService.GetMineAsync(ownerUserId.Value, cancellationToken);
+        Result<IReadOnlyCollection<StoreResponse>> result = await queryHandler.HandleAsync(
+            new GetStoresByOwnerQuery(ownerUserId.Value),
+            cancellationToken);
         return CatalogResults.FromResult(result, httpContext);
     }
 
     private static async Task<IResult> GetByIdAsync(
         Guid id,
-        StoreService storeService,
+        IQueryHandler<GetStoreByIdQuery, Result<StoreResponse>> queryHandler,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        Result<StoreResponse> result = await storeService.GetByIdAsync(id, cancellationToken);
+        Result<StoreResponse> result = await queryHandler.HandleAsync(
+            new GetStoreByIdQuery(id),
+            cancellationToken);
         return CatalogResults.FromResult(result, httpContext);
     }
 }

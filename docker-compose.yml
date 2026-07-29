@@ -1,6 +1,7 @@
 x-api-env: &api-env
   ASPNETCORE_ENVIRONMENT: Docker
   IdentityClient__BaseUrl: http://identity-api:8080
+  CatalogClient__BaseUrl: http://catalog-api:8080
 
 x-worker-env: &worker-env
   DOTNET_ENVIRONMENT: Docker
@@ -16,7 +17,6 @@ x-managed-env: &managed-env
   ConnectionStrings__NotificationDb: ${ConnectionStrings__NotificationDb:-}
   ConnectionStrings__IdentityDb: ${ConnectionStrings__IdentityDb:-}
   RabbitMq__ConnectionString: ${RabbitMq__ConnectionString:-}
-  Redis__ConnectionString: ${Redis__ConnectionString:-}
   Cloudinary__CloudName: ${Cloudinary__CloudName:-}
   Cloudinary__ApiKey: ${Cloudinary__ApiKey:-}
   Cloudinary__ApiSecret: ${Cloudinary__ApiSecret:-}
@@ -84,6 +84,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./deploy/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/observability/prometheus-rules:/etc/prometheus/rules:ro
       - prometheus-data:/prometheus
     ports:
       - "9090:9090"
@@ -131,7 +132,7 @@ services:
       <<: [*api-env, *managed-env]
     restart: unless-stopped
     ports:
-      - "5283:8080"
+      - "${CATALOG_API_HOST_PORT:-5283}:8080"
 
   basket-api:
     build:
@@ -142,7 +143,8 @@ services:
     env_file: *env-file
     environment:
       <<: [*api-env, *managed-env]
-      Redis__ConnectionString: ${Redis__ConnectionString:-redis:6379}
+      CatalogClient__TimeoutSeconds: ${CatalogClient__TimeoutSeconds:-5}
+      Redis__Endpoint: redis:6379
     restart: unless-stopped
     ports:
       - "5041:8080"
@@ -161,7 +163,7 @@ services:
       <<: [*api-env, *managed-env]
     restart: unless-stopped
     ports:
-      - "5265:8080"
+      - "${ORDERING_API_HOST_PORT:-5265}:8080"
 
   inventory-api:
     build:
@@ -185,6 +187,7 @@ services:
     env_file: *env-file
     environment:
       <<: [*api-env, *managed-env]
+      DemoPayment__Scenario: ${DemoPayment__Scenario:-Success}
     restart: unless-stopped
     ports:
       - "5004:8080"
@@ -200,7 +203,7 @@ services:
       <<: [*api-env, *managed-env]
     restart: unless-stopped
     ports:
-      - "5187:8080"
+      - "${SHIPPING_API_HOST_PORT:-5187}:8080"
 
   notification-api:
     build:
@@ -213,7 +216,7 @@ services:
       <<: [*api-env, *managed-env]
     restart: unless-stopped
     ports:
-      - "5234:8080"
+      - "${NOTIFICATION_API_HOST_PORT:-5234}:8080"
 
   identity-api:
     build:

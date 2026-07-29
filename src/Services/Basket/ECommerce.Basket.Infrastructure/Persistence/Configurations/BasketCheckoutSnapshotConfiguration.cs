@@ -1,4 +1,5 @@
 using ECommerce.Basket.Domain;
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,7 +16,12 @@ public sealed class BasketCheckoutSnapshotConfiguration : IEntityTypeConfigurati
         builder.Property(x => x.CustomerId).HasColumnName("customer_id");
         builder.Property(x => x.Currency).HasColumnName("currency").HasMaxLength(3).IsRequired();
         builder.Property(x => x.TotalAmount).HasColumnName("total_amount").HasPrecision(18, 2);
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+        builder.Property(x => x.RecipientName).HasColumnName("recipient_name").HasMaxLength(256).IsRequired();
+        builder.Property(x => x.AddressLine).HasColumnName("address_line").HasMaxLength(512).IsRequired();
+        builder.Property(x => x.City).HasColumnName("city").HasMaxLength(128).IsRequired();
+        builder.Property(x => x.CountryCode).HasColumnName("country_code").HasMaxLength(2).IsRequired();
+        builder.Property(x => x.PostalCode).HasColumnName("postal_code").HasMaxLength(32).IsRequired();
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
 
         builder.HasIndex(x => x.CustomerId);
         builder.HasIndex(x => x.CreatedAt);

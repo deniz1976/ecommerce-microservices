@@ -10,6 +10,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
@@ -20,12 +21,15 @@
     <ProjectReference Include="..\..\src\BuildingBlocks\ECommerce.BuildingBlocks.EventBus\ECommerce.BuildingBlocks.EventBus.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\ECommerce.BuildingBlocks.Observability\ECommerce.BuildingBlocks.Observability.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\ECommerce.BuildingBlocks.Security\ECommerce.BuildingBlocks.Security.csproj" />
+    <ProjectReference Include="..\..\src\ApiGateways\ECommerce.ApiGateway\ECommerce.ApiGateway.csproj" />
     <ProjectReference Include="..\..\src\Services\Basket\ECommerce.Basket.Api\ECommerce.Basket.Api.csproj" />
     <ProjectReference Include="..\..\src\Services\Catalog\ECommerce.Catalog.Api\ECommerce.Catalog.Api.csproj" />
     <ProjectReference Include="..\..\src\Services\Identity\ECommerce.Identity.Api\ECommerce.Identity.Api.csproj" />
     <ProjectReference Include="..\..\src\Services\Inventory\ECommerce.Inventory.Api\ECommerce.Inventory.Api.csproj" />
     <ProjectReference Include="..\..\src\Services\Notification\ECommerce.Notification.Api\ECommerce.Notification.Api.csproj" />
     <ProjectReference Include="..\..\src\Services\Ordering\ECommerce.Ordering.Api\ECommerce.Ordering.Api.csproj" />
+    <ProjectReference Include="..\..\src\Services\Payment\ECommerce.Payment.Api\ECommerce.Payment.Api.csproj" />
+    <ProjectReference Include="..\..\src\Services\Payment\ECommerce.Payment.Application\ECommerce.Payment.Application.csproj" />
     <ProjectReference Include="..\..\tools\ECommerce.RuntimeChecks\ECommerce.RuntimeChecks.csproj" />
   </ItemGroup>
 

@@ -1,23 +1,26 @@
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
-using ECommerce.Ordering.Application.Orders;
+using ECommerce.Ordering.Application.Commands.ChangeOrderStatus;
 using MassTransit;
 
 namespace ECommerce.Ordering.Infrastructure.Messaging;
 
 public sealed class OrderConfirmedConsumer : IConsumer<OrderConfirmed>
 {
-    private readonly OrderStatusService orderStatusService;
+    private readonly ICommandHandler<ChangeOrderStatusCommand> commandHandler;
 
-    public OrderConfirmedConsumer(OrderStatusService orderStatusService)
+    public OrderConfirmedConsumer(ICommandHandler<ChangeOrderStatusCommand> commandHandler)
     {
-        this.orderStatusService = orderStatusService;
+        this.commandHandler = commandHandler;
     }
 
     public Task Consume(ConsumeContext<OrderConfirmed> context)
     {
-        return orderStatusService.ConfirmAsync(
-            context.Message.OrderId,
-            context.Message.CustomerId,
+        return commandHandler.HandleAsync(
+            new ChangeOrderStatusCommand(
+                context.Message.OrderId,
+                context.Message.CustomerId,
+                OrderStatusChange.Confirm),
             context.CancellationToken);
     }
 }

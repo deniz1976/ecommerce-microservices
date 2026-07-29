@@ -101,4 +101,45 @@ public sealed class Product
         images.Add(image);
         UpdatedAt = DateTimeOffset.UtcNow;
     }
+
+    public void SetMainImage(Guid imageId)
+    {
+        ProductImage? selectedImage = images.FirstOrDefault(image => image.Id == imageId);
+        if (selectedImage is null)
+        {
+            return;
+        }
+
+        foreach (ProductImage image in images)
+        {
+            if (image.Id == imageId)
+            {
+                image.MarkAsMain();
+            }
+            else
+            {
+                image.MarkAsSecondary();
+            }
+        }
+
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public ProductImage? RemoveImage(Guid imageId)
+    {
+        ProductImage? image = images.FirstOrDefault(item => item.Id == imageId);
+        if (image is null)
+        {
+            return null;
+        }
+
+        images.Remove(image);
+        if (image.IsMain && images.Count > 0)
+        {
+            images.OrderBy(item => item.SortOrder).First().MarkAsMain();
+        }
+
+        UpdatedAt = DateTimeOffset.UtcNow;
+        return image;
+    }
 }

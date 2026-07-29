@@ -1,4 +1,5 @@
 import { getAccessToken } from "@/lib/auth/auth0"
+import { getStoredLocale } from "@/lib/i18n/locale"
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5080"
@@ -33,8 +34,10 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const requestHeaders = new Headers(headers)
   requestHeaders.set("Accept", "application/json")
+  requestHeaders.set("Accept-Language", getStoredLocale())
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData
 
-  if (body !== undefined) {
+  if (body !== undefined && !isFormData) {
     requestHeaders.set("Content-Type", "application/json")
   }
 
@@ -50,7 +53,11 @@ export async function apiRequest<T>(
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: requestHeaders,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: body === undefined
+      ? undefined
+      : isFormData
+        ? body
+        : JSON.stringify(body),
   })
 
   const isJson = response.headers

@@ -1,20 +1,24 @@
+using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
-using ECommerce.OrderingSaga.Application.Workflows;
+using ECommerce.OrderingSaga.Application.Commands.ProcessWorkflowEvent;
 using MassTransit;
 
 namespace ECommerce.OrderingSaga.Worker.Messaging;
 
 public sealed class ShipmentFailedConsumer : IConsumer<ShipmentFailed>
 {
-    private readonly OrderWorkflowService workflowService;
+    private readonly ICommandHandler<ProcessWorkflowEventCommand<ShipmentFailed>> commandHandler;
 
-    public ShipmentFailedConsumer(OrderWorkflowService workflowService)
+    public ShipmentFailedConsumer(
+        ICommandHandler<ProcessWorkflowEventCommand<ShipmentFailed>> commandHandler)
     {
-        this.workflowService = workflowService;
+        this.commandHandler = commandHandler;
     }
 
     public Task Consume(ConsumeContext<ShipmentFailed> context)
     {
-        return workflowService.HandleAsync(context.Message, context.CancellationToken);
+        return commandHandler.HandleAsync(
+            new ProcessWorkflowEventCommand<ShipmentFailed>(context.Message),
+            context.CancellationToken);
     }
 }

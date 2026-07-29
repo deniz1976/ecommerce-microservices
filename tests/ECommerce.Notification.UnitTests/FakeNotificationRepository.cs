@@ -1,9 +1,13 @@
+using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.Notification.Application.Notifications;
 using ECommerce.Notification.Domain;
 
 namespace ECommerce.Notification.UnitTests;
 
-internal sealed class FakeNotificationRepository : INotificationRepository
+internal sealed class FakeNotificationRepository :
+    IRepository<NotificationRecord, Guid>,
+    IUnitOfWork,
+    INotificationReader
 {
     public NotificationRecord? Notification { get; private set; }
 
@@ -26,6 +30,13 @@ internal sealed class FakeNotificationRepository : INotificationRepository
     public void Add(NotificationRecord notification)
     {
         Notification = notification;
+    }
+
+    public Task<NotificationRecord?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return Task.FromResult(Notification?.Id == id ? Notification : null);
     }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken)

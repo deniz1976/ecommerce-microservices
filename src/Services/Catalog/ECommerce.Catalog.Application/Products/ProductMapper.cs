@@ -24,8 +24,22 @@ public static class ProductMapper
             product.Status,
             product.Images
                 .OrderBy(x => x.SortOrder)
-                .Select(x => new ProductImageResponse(x.Id, x.PublicId, x.Url, x.SecureUrl, x.Width, x.Height, x.Format, x.SortOrder, x.IsMain))
+                .Select(x => x.ToResponse())
                 .ToArray());
+    }
+
+    public static ProductImageResponse ToResponse(this ProductImage image)
+    {
+        return new ProductImageResponse(
+            image.Id,
+            image.PublicId,
+            image.Url,
+            image.SecureUrl,
+            image.Width,
+            image.Height,
+            image.Format,
+            image.SortOrder,
+            image.IsMain);
     }
 
     private static ProductTranslation? SelectTranslation(IEnumerable<ProductTranslation> translations, string culture)

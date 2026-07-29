@@ -1,0 +1,5 @@
+namespace ECommerce.BuildingBlocks.Contracts.Cqrs;
+
+public interface ICommand
+{
+}

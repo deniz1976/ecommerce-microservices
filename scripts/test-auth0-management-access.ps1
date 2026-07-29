@@ -2,6 +2,8 @@ param()
 
 $ErrorActionPreference = "Stop"
 
+. "$PSScriptRoot/jwt-claim-validation.ps1"
+
 $enabled = $env:Auth0Management__Enabled
 $domain = $env:Auth0Management__Domain
 $clientId = $env:Auth0Management__ClientId
@@ -56,24 +58,15 @@ if ([string]::IsNullOrWhiteSpace($accessToken)) {
     throw "Auth0 Management token endpoint returned an empty access token"
 }
 
-$segments = $accessToken.Split('.')
-if ($segments.Length -lt 2) {
-    throw "Auth0 Management token is not a JWT and its granted scope cannot be verified"
-}
-
-$payloadSegment = $segments[1].Replace('-', '+').Replace('_', '/')
-$payloadSegment += '=' * ((4 - ($payloadSegment.Length % 4)) % 4)
-$payloadJson = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($payloadSegment))
-$claims = $payloadJson | ConvertFrom-Json
-
-$grantedScopes = @()
-if ($claims.scope -is [string]) {
-    $grantedScopes += @($claims.scope -split '\s+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
-}
-if ($null -ne $claims.permissions) {
-    $grantedScopes += @($claims.permissions)
-}
-$grantedScopes = @($grantedScopes | Sort-Object -Unique)
+$tokenName = "Auth0 Management token"
+$managementAudience = "https://$domain/api/v2/"
+$claims = Read-JwtPayloadClaims -AccessToken $accessToken -TokenName $tokenName
+Assert-JwtCoreClaims `
+    -Claims $claims `
+    -ExpectedIssuer "https://$domain/" `
+    -ExpectedAudience $managementAudience `
+    -TokenName $tokenName
+$grantedScopes = @(Get-JwtGrantedPermissions -Claims $claims)
 
 if ($grantedScopes.Count -ne 1 -or $grantedScopes[0] -cne "update:users") {
     throw "Auth0 Management token must contain exactly the update:users scope"

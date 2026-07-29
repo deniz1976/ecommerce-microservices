@@ -31,6 +31,26 @@ internal sealed class WorkflowScenarioContext
             cancellationToken);
     }
 
+    public Task<RuntimeBasketResponse> AddBasketItemAsync(
+        Guid customerId,
+        Guid productId,
+        int quantity,
+        CancellationToken cancellationToken)
+    {
+        return gatewayClient.AddBasketItemAsync(
+            customerId,
+            new RuntimeAddBasketItemRequest(productId, quantity),
+            cancellationToken);
+    }
+
+    public Task<RuntimeCheckoutBasketResponse> CheckoutBasketAsync(
+        Guid customerId,
+        RuntimeCheckoutBasketRequest request,
+        CancellationToken cancellationToken)
+    {
+        return gatewayClient.CheckoutBasketAsync(customerId, request, cancellationToken);
+    }
+
     public Task<OrderResponse> CreateOrderAsync(
         Guid customerId,
         Guid productId,
@@ -50,6 +70,52 @@ internal sealed class WorkflowScenarioContext
                 postalCode,
                 [new CreateOrderItemRequest(productId, $"Workflow Product {scenarioName}", 1, unitPrice, "USD")]),
             cancellationToken);
+    }
+
+    public async Task<OrderResponse> AssertOrderPresentationAsync(
+        Guid orderId,
+        Guid customerId,
+        RuntimeOrderStatus expectedStatus,
+        string expectedRecipientName,
+        string expectedPostalCode,
+        CancellationToken cancellationToken)
+    {
+        OrderResponse order = await gatewayClient.GetOrderAsync(orderId, cancellationToken);
+
+        if (order.CustomerId != customerId ||
+            order.Status != expectedStatus ||
+            !string.Equals(order.RecipientName, expectedRecipientName, StringComparison.Ordinal) ||
+            !string.Equals(order.AddressLine, "Runtime Avenue 1", StringComparison.Ordinal) ||
+            !string.Equals(order.City, "Istanbul", StringComparison.Ordinal) ||
+            !string.Equals(order.CountryCode, "TR", StringComparison.Ordinal) ||
+            !string.Equals(order.PostalCode, expectedPostalCode, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"Order {order.Id} presentation contract did not match the expected customer, status, or delivery address.");
+        }
+
+        if (order.CreatedAt.Offset != TimeSpan.Zero ||
+            order.UpdatedAt.Offset != TimeSpan.Zero ||
+            order.UpdatedAt < order.CreatedAt)
+        {
+            throw new InvalidOperationException(
+                $"Order {order.Id} presentation contract returned non-UTC or non-monotonic timestamps.");
+        }
+
+        RuntimeOrderStatusHistoryResponse[] history = order.StatusHistory
+            .OrderBy(entry => entry.OccurredAt)
+            .ToArray();
+        if (history.Length == 0 ||
+            history[0].Status != RuntimeOrderStatus.Submitted ||
+            history[^1].Status != expectedStatus ||
+            history.Any(entry => entry.OccurredAt.Offset != TimeSpan.Zero))
+        {
+            throw new InvalidOperationException(
+                $"Order {order.Id} presentation contract returned an incomplete or non-UTC status history.");
+        }
+
+        Console.WriteLine($"Runtime probe passed: order presentation contract ({expectedStatus})");
+        return order;
     }
 
     public Task WaitForExpectedValueAsync<T>(

@@ -51,4 +51,17 @@ public sealed class NotificationRecord
     public NotificationChannel Channel { get; private set; }
 
     public DateTimeOffset CreatedAt { get; private set; }
+
+    public DateTimeOffset? ReadAt { get; private set; }
+
+    public bool MarkRead(DateTimeOffset readAt)
+    {
+        if (ReadAt.HasValue)
+        {
+            return false;
+        }
+
+        ReadAt = readAt.ToUniversalTime();
+        return true;
+    }
 }

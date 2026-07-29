@@ -25,5 +25,6 @@ internal sealed class InventoryFailureWorkflowScenarioCheck : IWorkflowScenarioC
         await context.WaitForExpectedValueAsync("inventory-failure order cancellation", "ConnectionStrings__OrderingDb", "select status from orders where id = @order_id", order.Id, "Cancelled", deadline, cancellationToken);
         await context.WaitForExpectedValueAsync("inventory-failure saga cancellation", "ConnectionStrings__OrderingSagaDb", "select status from order_workflows where order_id = @order_id", order.Id, "Cancelled", deadline, cancellationToken);
         await context.WaitForExpectedValueAsync("failed inventory reservation", "ConnectionStrings__InventoryDb", "select status from stock_reservations where order_id = @order_id", order.Id, "Failed", deadline, cancellationToken);
+        await context.AssertOrderPresentationAsync(order.Id, customerId, RuntimeOrderStatus.Cancelled, "Workflow Check Inventory Failure", "34000", cancellationToken);
     }
 }

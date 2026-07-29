@@ -7,6 +7,11 @@ namespace ECommerce.Ordering.Api.Orders;
 
 public static class OrderResults
 {
+    public static IResult Forbidden(HttpContext httpContext) =>
+        FromResult(
+            Result<object>.Failure(new Error(ErrorCodes.AccessDenied, ErrorCodes.AccessDenied)),
+            httpContext);
+
     public static IResult FromResult<T>(Result<T> result, HttpContext httpContext)
     {
         if (result.IsSuccess)
@@ -27,6 +32,7 @@ public static class OrderResults
         return code switch
         {
             ErrorCodes.OrderNotFound => StatusCodes.Status404NotFound,
+            ErrorCodes.AccessDenied => StatusCodes.Status403Forbidden,
             ErrorCodes.ValidationFailed => StatusCodes.Status400BadRequest,
             _ => StatusCodes.Status500InternalServerError
         };

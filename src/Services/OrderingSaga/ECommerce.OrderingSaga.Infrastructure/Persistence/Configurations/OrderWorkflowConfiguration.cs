@@ -1,4 +1,5 @@
 using ECommerce.OrderingSaga.Domain;
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -22,14 +23,16 @@ public sealed class OrderWorkflowConfiguration : IEntityTypeConfiguration<OrderW
         builder.Property(x => x.PostalCode).HasColumnName("postal_code").HasMaxLength(32).IsRequired();
         builder.Property(x => x.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(64);
         builder.Property(x => x.CancellationReason).HasColumnName("cancellation_reason").HasMaxLength(512);
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
         builder.HasIndex(x => x.OrderId).IsUnique();
         builder.HasIndex(x => x.Status);
         builder.HasMany(x => x.Items)
             .WithOne()
             .HasForeignKey(x => x.WorkflowId)
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation(x => x.Items).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(x => x.Items)
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .AutoInclude();
     }
 }

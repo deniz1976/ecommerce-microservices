@@ -10,7 +10,7 @@ public sealed class ShipmentServiceTests
     {
         FakeShipmentRepository repository = new();
         StubShippingProvider provider = new(new ShippingProviderResult(true, "TRACK-123", null));
-        ShipmentService service = new(repository, provider);
+        ShipmentService service = new(repository, repository, repository, provider);
 
         CreateShipmentResult result = await service.CreateAsync(CreateValidRequest(), CancellationToken.None);
 
@@ -25,7 +25,7 @@ public sealed class ShipmentServiceTests
     {
         FakeShipmentRepository repository = new();
         StubShippingProvider provider = new(new ShippingProviderResult(false, null, "Postal code rejected."));
-        ShipmentService service = new(repository, provider);
+        ShipmentService service = new(repository, repository, repository, provider);
 
         CreateShipmentResult result = await service.CreateAsync(CreateValidRequest(), CancellationToken.None);
 
@@ -42,7 +42,7 @@ public sealed class ShipmentServiceTests
     {
         FakeShipmentRepository repository = new();
         StubShippingProvider provider = new(new ShippingProviderResult(true, "TRACK-123", null));
-        ShipmentService service = new(repository, provider);
+        ShipmentService service = new(repository, repository, repository, provider);
         CreateShipmentRequest request = CreateValidRequest() with { PostalCode = " " };
 
         CreateShipmentResult result = await service.CreateAsync(request, CancellationToken.None);

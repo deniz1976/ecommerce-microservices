@@ -1,4 +1,5 @@
 using ECommerce.Inventory.Domain;
+using ECommerce.BuildingBlocks.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -17,8 +18,8 @@ public sealed class StockReservationConfiguration : IEntityTypeConfiguration<Sto
         builder.Property(x => x.Quantity).HasColumnName("quantity");
         builder.Property(x => x.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(32);
         builder.Property(x => x.FailureReason).HasColumnName("failure_reason").HasMaxLength(1024);
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
 
         builder.HasIndex(x => new { x.OrderId, x.ProductId }).IsUnique();
         builder.HasIndex(x => x.Status);
