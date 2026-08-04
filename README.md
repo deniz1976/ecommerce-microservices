@@ -37,6 +37,8 @@ project rather than a production-ready commerce product.
 - Independent Admin-only category/brand list pages with database-side search,
   status filters, stable sorting, bounded pagination, and separate create/edit
   forms
+- Read-only cross-owner store directory with name/address search, exact owner
+  filtering, stable sorting, and bounded server pagination
 - Auth0 login with Customer, Seller, and Admin authorization boundaries
 - Resource ownership checks for customer and seller data
 - English and Turkish frontend content and localized API errors

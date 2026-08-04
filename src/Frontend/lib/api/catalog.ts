@@ -15,6 +15,7 @@ import type {
   ProductStatus,
   ManagedCatalogBrandReference,
   ManagedCatalogCategoryReference,
+  ManagedCatalogStore,
   UpdateCatalogBrandPayload,
   UpdateCatalogCategoryPayload,
   UpdateCatalogProductPayload,
@@ -49,6 +50,15 @@ export interface ManagedCatalogBrandQuery {
   isActive?: boolean
   sortBy: "name" | "slug" | "isActive"
   sortDescending: boolean
+}
+
+export interface ManagedCatalogStoreQuery {
+  pageNumber?: number
+  pageSize?: number
+  search?: string
+  ownerUserId?: string
+  sortBy?: "name" | "slug" | "createdAt" | "updatedAt"
+  sortDescending?: boolean
 }
 
 export function getCatalogProducts(pageSize = 5): Promise<PagedResult<CatalogProduct>> {
@@ -120,6 +130,25 @@ export function getCatalogMetrics(): Promise<CatalogMetrics> {
   return apiRequest<CatalogMetrics>("/gateway/catalog/metrics", {
     authenticated: true,
   })
+}
+
+export function getManagedCatalogStores(
+  query: ManagedCatalogStoreQuery,
+  signal?: AbortSignal,
+): Promise<PagedResult<ManagedCatalogStore>> {
+  const parameters = new URLSearchParams({
+    pageNumber: String(query.pageNumber ?? 1),
+    pageSize: String(query.pageSize ?? 20),
+    sortBy: query.sortBy ?? "name",
+    sortDescending: String(query.sortDescending ?? false),
+  })
+  if (query.search?.trim()) parameters.set("search", query.search.trim())
+  if (query.ownerUserId) parameters.set("ownerUserId", query.ownerUserId)
+
+  return apiRequest<PagedResult<ManagedCatalogStore>>(
+    `/gateway/catalog/stores/manage?${parameters.toString()}`,
+    { authenticated: true, signal },
+  )
 }
 
 export function getCatalogCategories(locale?: Locale): Promise<CatalogCategoryReference[]> {

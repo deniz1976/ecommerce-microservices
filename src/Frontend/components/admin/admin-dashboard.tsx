@@ -93,6 +93,10 @@ export function AdminDashboard({ profile, onOpenSellerWorkspace }: AdminDashboar
               <Tag className="size-4" />
               {t.admin.brands}
             </Link>
+            <Link href="/admin/stores" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
+              <Store className="size-4" />
+              {t.admin.stores}
+            </Link>
             <a href="#admin-users" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
               <Users className="size-4" />
               {t.admin.users}

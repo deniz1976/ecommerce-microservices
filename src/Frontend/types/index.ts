@@ -70,6 +70,15 @@ export interface CatalogStore {
   updatedAt: string
 }
 
+export interface ManagedCatalogStore {
+  id: string
+  ownerUserId: string
+  name: string
+  slug: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface CatalogMetrics {
   totalProducts: number
   activeProducts: number

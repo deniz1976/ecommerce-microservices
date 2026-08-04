@@ -124,6 +124,7 @@ export interface Dictionary {
     referenceNavigation: string
     categories: string
     brands: string
+    stores: string
     manageCategoriesDescription: string
     manageBrandsDescription: string
     openCategoryManagement: string
@@ -274,6 +275,19 @@ export interface Dictionary {
     shipmentsUnavailable: string
     noMatchingShipments: string
     shipmentPageStatus: string
+    manageStoresDescription: string
+    storeList: string
+    storeSearch: string
+    storeSearchPlaceholder: string
+    storeOwnerId: string
+    invalidOwnerId: string
+    storeSort: string
+    storeName: string
+    storeSlug: string
+    applyStoreFilters: string
+    storesUnavailable: string
+    noMatchingStores: string
+    storePageStatus: string
     userRole: Record<Role, string>
     status: Record<ProductStatusName, string>
   }
@@ -641,6 +655,7 @@ const en: Dictionary = {
     referenceNavigation: "Catalog reference navigation",
     categories: "Categories",
     brands: "Brands",
+    stores: "Stores",
     manageCategoriesDescription: "Search, sort, page through, create, and update every English/Turkish category pair.",
     manageBrandsDescription: "Search, sort, page through, create, and update every marketplace brand.",
     openCategoryManagement: "Manage categories",
@@ -791,6 +806,19 @@ const en: Dictionary = {
     shipmentsUnavailable: "Shipment data could not be loaded.",
     noMatchingShipments: "No shipments match the selected filters.",
     shipmentPageStatus: "Page {page} of {total} · {count} shipments",
+    manageStoresDescription: "Search and review stores across owners with bounded server-side sorting and pagination.",
+    storeList: "Marketplace stores",
+    storeSearch: "Search",
+    storeSearchPlaceholder: "Store name or address",
+    storeOwnerId: "Owner user ID",
+    invalidOwnerId: "Enter a valid owner GUID.",
+    storeSort: "Sort field",
+    storeName: "Store name",
+    storeSlug: "Store address",
+    applyStoreFilters: "Apply store filters",
+    storesUnavailable: "Store data could not be loaded.",
+    noMatchingStores: "No stores match the selected filters.",
+    storePageStatus: "Page {page} of {total} · {count} stores",
     userRole: {
       Customer: "Customer",
       Seller: "Seller",
@@ -1179,6 +1207,7 @@ const tr: Dictionary = {
     referenceNavigation: "Katalog referansı gezinmesi",
     categories: "Kategoriler",
     brands: "Markalar",
+    stores: "Mağazalar",
     manageCategoriesDescription: "Tüm İngilizce/Türkçe kategori eşleşmelerini arayın, sıralayın, sayfalayın, oluşturun ve güncelleyin.",
     manageBrandsDescription: "Tüm pazaryeri markalarını arayın, sıralayın, sayfalayın, oluşturun ve güncelleyin.",
     openCategoryManagement: "Kategorileri yönet",
@@ -1329,6 +1358,19 @@ const tr: Dictionary = {
     shipmentsUnavailable: "Gönderi verisi yüklenemedi.",
     noMatchingShipments: "Seçili filtrelerle eşleşen gönderi bulunamadı.",
     shipmentPageStatus: "Sayfa {page} / {total} · {count} gönderi",
+    manageStoresDescription: "Tüm mağazaları sahipleri genelinde sunucu sıralaması ve sayfalama ile arayıp inceleyin.",
+    storeList: "Pazaryeri mağazaları",
+    storeSearch: "Ara",
+    storeSearchPlaceholder: "Mağaza adı veya adresi",
+    storeOwnerId: "Sahip kullanıcı kimliği",
+    invalidOwnerId: "Geçerli bir sahip GUID değeri girin.",
+    storeSort: "Sıralama alanı",
+    storeName: "Mağaza adı",
+    storeSlug: "Mağaza adresi",
+    applyStoreFilters: "Mağaza filtrelerini uygula",
+    storesUnavailable: "Mağaza verisi yüklenemedi.",
+    noMatchingStores: "Seçili filtrelerle eşleşen mağaza bulunamadı.",
+    storePageStatus: "Sayfa {page} / {total} · {count} mağaza",
     userRole: {
       Customer: "Müşteri",
       Seller: "Satıcı",
