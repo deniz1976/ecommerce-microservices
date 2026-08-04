@@ -8,7 +8,14 @@ public sealed class BasketCheckoutSnapshotItem
         Currency = string.Empty;
     }
 
-    public BasketCheckoutSnapshotItem(Guid basketCheckoutSnapshotId, Guid productId, string productName, int quantity, decimal unitPrice, string currency)
+    public BasketCheckoutSnapshotItem(
+        Guid basketCheckoutSnapshotId,
+        Guid productId,
+        string productName,
+        int quantity,
+        decimal unitPrice,
+        string currency,
+        Guid? storeId = null)
     {
         Id = Guid.NewGuid();
         BasketCheckoutSnapshotId = basketCheckoutSnapshotId;
@@ -17,6 +24,7 @@ public sealed class BasketCheckoutSnapshotItem
         Quantity = quantity;
         UnitPrice = unitPrice;
         Currency = currency;
+        StoreId = storeId;
     }
 
     public Guid Id { get; private set; }
@@ -36,4 +44,6 @@ public sealed class BasketCheckoutSnapshotItem
     public decimal TotalPrice => Quantity * UnitPrice;
 
     public string Currency { get; private set; }
+
+    public Guid? StoreId { get; private set; }
 }

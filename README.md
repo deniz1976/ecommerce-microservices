@@ -28,6 +28,8 @@ project rather than a production-ready commerce product.
 - Customer order history, delivery details, status timeline, and payment summary
 - Ownership-protected, idempotent pre-payment order cancellation with saga compensation
 - Seller-owned store creation/editing, product and stock management, and Cloudinary-backed product images
+- Seller-scoped, paged order visibility that exposes only the selected store's
+  line items and totals without customer identity, address, or other-store data
 - Read-only administrator user directory, catalog-wide product management, and
   independent Admin-only category/brand list pages with database-side search,
   status filters, stable sorting, bounded pagination, and separate create/edit
@@ -101,7 +103,7 @@ remain focused read interfaces.
 | API Gateway | Ocelot routing, authentication boundary, localized authorization responses, and rate limiting |
 | Catalog | Products, translations, categories, brands, stores, lifecycle state, and product images |
 | Basket | Redis-backed active baskets, canonical catalog pricing, checkout snapshots, and checkout handoff |
-| Ordering | Orders, order items, delivery address, status history, paged customer history, and Admin operations reads |
+| Ordering | Orders, order items, delivery address, status history, paged customer/Seller views, and Admin operations reads |
 | Inventory | Seller-managed stock, reservations, releases, and Admin operations reads |
 | Payment | Provider-neutral authorization/refund workflow, customer-safe summaries, and Admin operations reads |
 | Shipping | Event-driven shipment creation, customer-safe tracking, and Admin operations reads |
@@ -115,7 +117,7 @@ scenarios are selected only through server configuration.
 
 ### Order workflow
 
-1. Basket resolves product name, price, currency, and availability from Catalog.
+1. Basket resolves product name, price, currency, availability, and server-owned store attribution from Catalog.
 2. Checkout persists an immutable snapshot and publishes `BasketCheckedOut`
    through the EF Core transactional outbox.
 3. Ordering creates the order idempotently and publishes `OrderSubmitted`.
@@ -390,6 +392,8 @@ amaçlı bir çalışmadır.
 - Sipariş geçmişi, teslimat bilgileri, durum zaman çizelgesi ve ödeme özeti
 - Sahiplik korumalı, idempotent ve saga telafili ödeme öncesi sipariş iptali
 - Satıcıya ait mağaza oluşturma/düzenleme, ürün ve stok yönetimi ile Cloudinary ürün görselleri
+- Müşteri kimliği, adresi veya diğer mağazaların verileri açığa çıkmadan yalnızca
+  seçili mağazanın kalemlerini ve toplamlarını sunan sayfalı satıcı sipariş görünümü
 - Salt okunur yönetici kullanıcı dizini, katalog genelinde ürün yönetimi ve
   veritabanı tarafında arama, durum filtresi, kararlı sıralama, sınırlı
   sayfalama ve ayrı ekleme/düzenleme formları sunan bağımsız Admin
@@ -421,7 +425,7 @@ odaklı read interface'lerinde kalır.
 | API Gateway | Ocelot routing, kimlik doğrulama sınırı, localized yetki hataları ve rate limiting |
 | Catalog | Ürünler, çeviriler, kategoriler, markalar, mağazalar, yaşam döngüsü ve görseller |
 | Basket | Redis sepetleri, katalogdan doğrulanan fiyatlar, checkout snapshot'ı ve handoff |
-| Ordering | Siparişler, kalemler, teslimat adresi, durum geçmişi, sayfalı müşteri geçmişi ve Admin operasyon okumaları |
+| Ordering | Siparişler, kalemler, teslimat adresi, durum geçmişi, sayfalı müşteri/Seller görünümleri ve Admin operasyon okumaları |
 | Inventory | Satıcı tarafından yönetilen stok, rezervasyon, stok serbest bırakma ve Admin operasyon okumaları |
 | Payment | Provider-neutral authorization/refund akışı, güvenli müşteri özeti ve Admin operasyon okumaları |
 | Shipping | Event-driven gönderi oluşturma, güvenli müşteri takibi ve Admin operasyon okumaları |
@@ -435,7 +439,8 @@ hata senaryoları yalnızca sunucu konfigürasyonundan seçilir.
 
 ### Sipariş akışı
 
-1. Basket; ürün adı, fiyat, para birimi ve kullanılabilirlik bilgisini
+1. Basket; ürün adı, fiyat, para birimi, kullanılabilirlik ve sunucunun sahip
+   olduğu mağaza eşlemesi bilgisini
    Catalog'dan doğrular.
 2. Checkout değiştirilemez bir snapshot kaydeder ve `BasketCheckedOut` eventini
    EF Core transactional outbox üzerinden yayımlar.

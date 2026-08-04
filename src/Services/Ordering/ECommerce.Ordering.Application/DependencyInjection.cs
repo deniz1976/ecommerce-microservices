@@ -8,6 +8,7 @@ using ECommerce.Ordering.Application.Orders;
 using ECommerce.Ordering.Application.Queries.GetOrderById;
 using ECommerce.Ordering.Application.Queries.GetOrdersByCustomer;
 using ECommerce.Ordering.Application.Queries.SearchManagedOrders;
+using ECommerce.Ordering.Application.Queries.SearchSellerOrders;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ECommerce.Ordering.Application;
@@ -43,6 +44,9 @@ public static class DependencyInjection
         services.AddScoped<
             IQueryHandler<SearchManagedOrdersQuery, Result<PagedResult<OrderSummaryResponse>>>,
             SearchManagedOrdersQueryHandler>();
+        services.AddScoped<
+            IQueryHandler<SearchSellerOrdersQuery, Result<PagedResult<SellerOrderSummaryResponse>>>,
+            SearchSellerOrdersQueryHandler>();
         return services;
     }
 }

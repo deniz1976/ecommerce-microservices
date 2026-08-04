@@ -5,4 +5,5 @@ public sealed record CatalogProductSnapshot(
     string Name,
     decimal Price,
     string Currency,
-    int Status);
+    int Status,
+    Guid? StoreId = null);

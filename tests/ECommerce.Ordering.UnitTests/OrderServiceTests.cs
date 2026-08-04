@@ -81,6 +81,7 @@ public sealed class OrderServiceTests
         FakeOrderSubmittedPublisher publisher = new(repository);
         OrderService service = new(repository, repository, publisher);
         Guid checkoutId = Guid.NewGuid();
+        Guid storeId = Guid.NewGuid();
         BasketCheckedOut checkout = new(
             Guid.NewGuid(),
             checkoutId,
@@ -96,7 +97,7 @@ public sealed class OrderServiceTests
             "Istanbul",
             "TR",
             "34000",
-            [new OrderLine(Guid.NewGuid(), "Test Product", 2, 12.50m, "USD")]);
+            [new OrderLine(Guid.NewGuid(), "Test Product", 2, 12.50m, "USD", storeId)]);
 
         var first = await service.CreateFromCheckoutAsync(checkout, CancellationToken.None);
         var duplicate = await service.CreateFromCheckoutAsync(checkout, CancellationToken.None);
@@ -105,8 +106,26 @@ public sealed class OrderServiceTests
         Assert.True(duplicate.IsSuccess);
         Assert.Equal(checkoutId, first.Value!.Id);
         Assert.Single(repository.Orders);
+        Assert.Equal(storeId, Assert.Single(repository.Orders[0].Items).StoreId);
         Assert.Equal(1, publisher.PublishCount);
         Assert.Equal(1, repository.SaveCount);
+    }
+
+    [Fact]
+    public async Task DirectCreateDoesNotAcceptSellerStoreAttribution()
+    {
+        OrderServiceFakeOrderRepository repository = new();
+        FakeOrderSubmittedPublisher publisher = new(repository);
+        OrderService service = new(repository, repository, publisher);
+
+        var result = await service.CreateAsync(
+            CreateValidRequest(),
+            Guid.NewGuid(),
+            null,
+            CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Null(Assert.Single(repository.Orders[0].Items).StoreId);
     }
 
     private static CreateOrderRequest CreateValidRequest()

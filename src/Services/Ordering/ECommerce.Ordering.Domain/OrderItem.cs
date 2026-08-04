@@ -8,7 +8,14 @@ public sealed class OrderItem
         Currency = string.Empty;
     }
 
-    public OrderItem(Guid orderId, Guid productId, string productName, int quantity, decimal unitPrice, string currency)
+    public OrderItem(
+        Guid orderId,
+        Guid productId,
+        string productName,
+        int quantity,
+        decimal unitPrice,
+        string currency,
+        Guid? storeId = null)
     {
         Id = Guid.NewGuid();
         OrderId = orderId;
@@ -17,6 +24,7 @@ public sealed class OrderItem
         Quantity = quantity;
         UnitPrice = unitPrice;
         Currency = currency;
+        StoreId = storeId;
     }
 
     public Guid Id { get; private set; }
@@ -26,6 +34,8 @@ public sealed class OrderItem
     public Order? Order { get; private set; }
 
     public Guid ProductId { get; private set; }
+
+    public Guid? StoreId { get; private set; }
 
     public string ProductName { get; private set; }
 

@@ -59,8 +59,21 @@ public sealed class BasketCheckoutSnapshot
 
     public IReadOnlyCollection<BasketCheckoutSnapshotItem> Items => items;
 
-    public void AddItem(Guid productId, string productName, int quantity, decimal unitPrice, string currency)
+    public void AddItem(
+        Guid productId,
+        string productName,
+        int quantity,
+        decimal unitPrice,
+        string currency,
+        Guid? storeId = null)
     {
-        items.Add(new BasketCheckoutSnapshotItem(Id, productId, productName, quantity, unitPrice, currency));
+        items.Add(new BasketCheckoutSnapshotItem(
+            Id,
+            productId,
+            productName,
+            quantity,
+            unitPrice,
+            currency,
+            storeId));
     }
 }

@@ -43,17 +43,29 @@ public sealed class Basket
 
     public decimal TotalAmount => items.Sum(x => x.TotalPrice);
 
-    public void AddOrUpdateItem(Guid productId, string productName, int quantity, decimal unitPrice, string currency)
+    public void AddOrUpdateItem(
+        Guid productId,
+        string productName,
+        int quantity,
+        decimal unitPrice,
+        string currency,
+        Guid? storeId = null)
     {
         BasketItem? item = items.FirstOrDefault(x => x.ProductId == productId);
 
         if (item is null)
         {
-            items.Add(new BasketItem(productId, productName, quantity, unitPrice, currency));
+            items.Add(new BasketItem(
+                productId,
+                productName,
+                quantity,
+                unitPrice,
+                currency,
+                storeId));
         }
         else
         {
-            item.Update(productName, quantity, unitPrice, currency);
+            item.Update(productName, quantity, unitPrice, currency, storeId);
         }
 
         Currency = currency;

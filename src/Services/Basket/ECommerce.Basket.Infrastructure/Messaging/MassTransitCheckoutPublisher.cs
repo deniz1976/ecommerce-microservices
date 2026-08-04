@@ -38,7 +38,8 @@ public sealed class MassTransitCheckoutPublisher : ICheckoutPublisher
                     item.ProductName,
                     item.Quantity,
                     item.UnitPrice,
-                    item.Currency)).ToArray());
+                    item.Currency,
+                    item.StoreId)).ToArray());
 
         return publishEndpoint.Publish(message, cancellationToken);
     }

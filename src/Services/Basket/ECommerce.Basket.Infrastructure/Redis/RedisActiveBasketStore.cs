@@ -38,7 +38,13 @@ public sealed class RedisActiveBasketStore : IActiveBasketStore
         }
 
         BasketItem[] items = document.Items
-            .Select(item => new BasketItem(item.ProductId, item.ProductName, item.Quantity, item.UnitPrice, item.Currency))
+            .Select(item => new BasketItem(
+                item.ProductId,
+                item.ProductName,
+                item.Quantity,
+                item.UnitPrice,
+                item.Currency,
+                item.StoreId))
             .ToArray();
 
         return new BasketEntity(
@@ -57,7 +63,13 @@ public sealed class RedisActiveBasketStore : IActiveBasketStore
             basket.Currency,
             basket.CreatedAt,
             basket.UpdatedAt,
-            basket.Items.Select(x => new RedisBasketItemDocument(x.ProductId, x.ProductName, x.Quantity, x.UnitPrice, x.Currency)).ToArray());
+            basket.Items.Select(x => new RedisBasketItemDocument(
+                x.ProductId,
+                x.ProductName,
+                x.Quantity,
+                x.UnitPrice,
+                x.Currency,
+                x.StoreId)).ToArray());
 
         string value = JsonSerializer.Serialize(document, JsonOptions);
 

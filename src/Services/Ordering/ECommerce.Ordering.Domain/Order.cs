@@ -59,9 +59,22 @@ public sealed class Order
 
     public IReadOnlyCollection<OrderStatusHistory> StatusHistory => statusHistory;
 
-    public void AddItem(Guid productId, string productName, int quantity, decimal unitPrice, string currency)
+    public void AddItem(
+        Guid productId,
+        string productName,
+        int quantity,
+        decimal unitPrice,
+        string currency,
+        Guid? storeId = null)
     {
-        items.Add(new OrderItem(Id, productId, productName, quantity, unitPrice, currency));
+        items.Add(new OrderItem(
+            Id,
+            productId,
+            productName,
+            quantity,
+            unitPrice,
+            currency,
+            storeId));
         Currency = currency;
         UpdatedAt = DateTimeOffset.UtcNow;
     }

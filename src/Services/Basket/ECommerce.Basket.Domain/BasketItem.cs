@@ -8,13 +8,20 @@ public sealed class BasketItem
         Currency = string.Empty;
     }
 
-    public BasketItem(Guid productId, string productName, int quantity, decimal unitPrice, string currency)
+    public BasketItem(
+        Guid productId,
+        string productName,
+        int quantity,
+        decimal unitPrice,
+        string currency,
+        Guid? storeId = null)
     {
         ProductId = productId;
         ProductName = productName;
         Quantity = quantity;
         UnitPrice = unitPrice;
         Currency = currency;
+        StoreId = storeId;
     }
 
     public Guid ProductId { get; private set; }
@@ -29,11 +36,19 @@ public sealed class BasketItem
 
     public string Currency { get; private set; }
 
-    public void Update(string productName, int quantity, decimal unitPrice, string currency)
+    public Guid? StoreId { get; private set; }
+
+    public void Update(
+        string productName,
+        int quantity,
+        decimal unitPrice,
+        string currency,
+        Guid? storeId)
     {
         ProductName = productName;
         Quantity = quantity;
         UnitPrice = unitPrice;
         Currency = currency;
+        StoreId = storeId;
     }
 }

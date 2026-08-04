@@ -8,6 +8,8 @@ namespace ECommerce.Ordering.Application.Orders;
 
 public sealed class OrderService
 {
+    private static readonly IReadOnlyDictionary<Guid, Guid?> NoStoreAttributions =
+        new Dictionary<Guid, Guid?>();
     private readonly IRepository<Order, Guid> repository;
     private readonly IUnitOfWork unitOfWork;
     private readonly IOrderSubmittedPublisher publisher;
@@ -24,7 +26,13 @@ public sealed class OrderService
 
     public async Task<Result<OrderResponse>> CreateAsync(CreateOrderRequest request, Guid correlationId, Guid? causationId, CancellationToken cancellationToken)
     {
-        return await CreateAsync(Guid.NewGuid(), request, correlationId, causationId, cancellationToken);
+        return await CreateAsync(
+            Guid.NewGuid(),
+            request,
+            NoStoreAttributions,
+            correlationId,
+            causationId,
+            cancellationToken);
     }
 
     public async Task<Result<OrderResponse>> CreateFromCheckoutAsync(
@@ -35,6 +43,14 @@ public sealed class OrderService
         if (existingOrder is not null)
         {
             return Result<OrderResponse>.Success(existingOrder.ToResponse());
+        }
+
+        if (checkout.Items
+            .GroupBy(item => item.ProductId)
+            .Any(group => group.Count() > 1))
+        {
+            return Result<OrderResponse>.Failure(
+                new Error(ErrorCodes.ValidationFailed, ErrorCodes.ValidationFailed));
         }
 
         CreateOrderRequest request = new(
@@ -53,6 +69,9 @@ public sealed class OrderService
                     item.UnitPrice,
                     item.Currency)).ToArray());
 
+        Dictionary<Guid, Guid?> storeAttributions = checkout.Items
+            .ToDictionary(item => item.ProductId, item => item.StoreId);
+
         decimal calculatedTotal = request.Items.Sum(item => item.Quantity * item.UnitPrice);
         if (calculatedTotal != checkout.TotalAmount ||
             request.Items.Any(item => !string.Equals(item.Currency, checkout.Currency, StringComparison.OrdinalIgnoreCase)))
@@ -63,6 +82,7 @@ public sealed class OrderService
         return await CreateAsync(
             checkout.CheckoutId,
             request,
+            storeAttributions,
             checkout.CorrelationId,
             checkout.MessageId,
             cancellationToken);
@@ -71,6 +91,7 @@ public sealed class OrderService
     private async Task<Result<OrderResponse>> CreateAsync(
         Guid orderId,
         CreateOrderRequest request,
+        IReadOnlyDictionary<Guid, Guid?> storeAttributions,
         Guid correlationId,
         Guid? causationId,
         CancellationToken cancellationToken)
@@ -93,6 +114,12 @@ public sealed class OrderService
             return Result<OrderResponse>.Failure(new Error(ErrorCodes.ValidationFailed, ErrorCodes.ValidationFailed));
         }
 
+        if (storeAttributions.Values.Any(storeId => storeId == Guid.Empty))
+        {
+            return Result<OrderResponse>.Failure(
+                new Error(ErrorCodes.ValidationFailed, ErrorCodes.ValidationFailed));
+        }
+
         Order order = new(
             orderId,
             request.CustomerId,
@@ -105,7 +132,14 @@ public sealed class OrderService
 
         foreach (CreateOrderItemRequest item in request.Items)
         {
-            order.AddItem(item.ProductId, item.ProductName, item.Quantity, item.UnitPrice, item.Currency);
+            storeAttributions.TryGetValue(item.ProductId, out Guid? storeId);
+            order.AddItem(
+                item.ProductId,
+                item.ProductName,
+                item.Quantity,
+                item.UnitPrice,
+                item.Currency,
+                storeId);
         }
 
         repository.Add(order);

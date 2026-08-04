@@ -5,4 +5,5 @@ public sealed record OrderLine(
     string ProductName,
     int Quantity,
     decimal UnitPrice,
-    string Currency);
+    string Currency,
+    Guid? StoreId = null);

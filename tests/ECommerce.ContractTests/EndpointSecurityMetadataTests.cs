@@ -193,6 +193,18 @@ public sealed class EndpointSecurityMetadataTests
     }
 
     [Fact]
+    public void SellerOrderSearchRequiresSellerOrAdmin()
+    {
+        using WebApplication app = BuildApplication();
+
+        AssertPolicy(
+            app,
+            "/api/v1/orders/store/{storeId:guid}",
+            "GET",
+            AuthorizationPolicies.SellerOrAdmin);
+    }
+
+    [Fact]
     public void ManagedPaymentSearchRequiresAdmin()
     {
         using WebApplication app = BuildApplication();

@@ -7,6 +7,7 @@ using ECommerce.Ordering.Application.Orders;
 using ECommerce.Ordering.Application.Queries.GetOrderById;
 using ECommerce.Ordering.Application.Queries.GetOrdersByCustomer;
 using ECommerce.Ordering.Application.Queries.SearchManagedOrders;
+using ECommerce.Ordering.Application.Queries.SearchSellerOrders;
 using ECommerce.Ordering.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -103,6 +104,33 @@ public sealed class OrdersController(
                 pageSize,
                 status,
                 sortDescending),
+            cancellationToken);
+        return OrderResults.FromResult(result, HttpContext);
+    }
+
+    [HttpGet("store/{storeId:guid}", Name = "SearchSellerOrders")]
+    [Authorize(Policy = AuthorizationPolicies.SellerOrAdmin)]
+    public async Task<IResult> SearchSellerAsync(
+        Guid storeId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] OrderStatus? status = null,
+        [FromQuery] bool sortDescending = true,
+        CancellationToken cancellationToken = default)
+    {
+        bool bypassStoreOwnership = User.IsInRole(ApplicationRoles.Admin);
+        Result<PagedResult<SellerOrderSummaryResponse>> result = await sender.Send(
+            new SearchSellerOrdersQuery(
+                storeId,
+                pageNumber,
+                pageSize,
+                status,
+                sortDescending,
+                new SellerOrderAccessContext(
+                    bypassStoreOwnership,
+                    bypassStoreOwnership
+                        ? null
+                        : CustomerAccessTokenReader.Read(HttpContext))),
             cancellationToken);
         return OrderResults.FromResult(result, HttpContext);
     }

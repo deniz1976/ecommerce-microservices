@@ -161,6 +161,7 @@ services:
     env_file: *env-file
     environment:
       <<: [*api-env, *managed-env]
+      CatalogClient__TimeoutSeconds: ${CatalogClient__TimeoutSeconds:-5}
     restart: unless-stopped
     ports:
       - "${ORDERING_API_HOST_PORT:-5265}:8080"

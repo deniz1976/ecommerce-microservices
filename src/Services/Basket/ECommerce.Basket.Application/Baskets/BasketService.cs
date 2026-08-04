@@ -59,7 +59,13 @@ public sealed class BasketService
             return Result<BasketResponse>.Failure(new Error(BasketErrorCodes.CurrencyMismatch, BasketErrorCodes.CurrencyMismatch));
         }
 
-        basket.AddOrUpdateItem(product.Id, product.Name, request.Quantity, product.Price, product.Currency);
+        basket.AddOrUpdateItem(
+            product.Id,
+            product.Name,
+            request.Quantity,
+            product.Price,
+            product.Currency,
+            product.StoreId);
 
         await activeBasketStore.SaveAsync(basket, cancellationToken);
 
@@ -149,7 +155,13 @@ public sealed class BasketService
 
         foreach (BasketItem item in basket.Items)
         {
-            snapshot.AddItem(item.ProductId, item.ProductName, item.Quantity, item.UnitPrice, item.Currency);
+            snapshot.AddItem(
+                item.ProductId,
+                item.ProductName,
+                item.Quantity,
+                item.UnitPrice,
+                item.Currency,
+                item.StoreId);
         }
 
         basketHistoryRepository.Add(snapshot);

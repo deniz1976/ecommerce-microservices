@@ -34,6 +34,7 @@ public static class OrderResults
             ErrorCodes.OrderNotFound => StatusCodes.Status404NotFound,
             ErrorCodes.OrderNotCancellable => StatusCodes.Status409Conflict,
             ErrorCodes.AccessDenied => StatusCodes.Status403Forbidden,
+            ErrorCodes.DependencyUnavailable => StatusCodes.Status503ServiceUnavailable,
             ErrorCodes.ValidationFailed => StatusCodes.Status400BadRequest,
             _ => StatusCodes.Status500InternalServerError
         };

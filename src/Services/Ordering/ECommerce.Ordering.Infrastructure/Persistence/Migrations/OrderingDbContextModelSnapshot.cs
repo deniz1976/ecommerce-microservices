@@ -49,7 +49,8 @@ namespace ECommerce.Ordering.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -81,7 +82,8 @@ namespace ECommerce.Ordering.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnName("updated_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.HasKey("Id");
 
@@ -125,6 +127,10 @@ namespace ECommerce.Ordering.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
+                    b.Property<Guid?>("StoreId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("store_id");
+
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
@@ -135,6 +141,8 @@ namespace ECommerce.Ordering.Infrastructure.Persistence.Migrations
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("StoreId", "OrderId");
 
                     b.ToTable("order_items", (string)null);
                 });
@@ -147,7 +155,8 @@ namespace ECommerce.Ordering.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("OccurredAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("occurred_at");
+                        .HasColumnName("occurred_at")
+                        .HasAnnotation("ECommerce:IsUtcTimestamp", true);
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid")
