@@ -96,6 +96,7 @@ export interface Dictionary {
     orders: string
     inventory: string
     payments: string
+    shipments: string
     openSellerWorkspace: string
     roleLabel: string
     welcome: string
@@ -259,6 +260,20 @@ export interface Dictionary {
     paymentsUnavailable: string
     noMatchingPayments: string
     paymentPageStatus: string
+    manageShipmentsDescription: string
+    shipmentList: string
+    shipmentStatus: string
+    allShipmentStatuses: string
+    shipmentSort: string
+    shipmentId: string
+    trackingNumber: string
+    shipmentCreated: string
+    shipmentFailed: string
+    notAvailable: string
+    applyShipmentFilters: string
+    shipmentsUnavailable: string
+    noMatchingShipments: string
+    shipmentPageStatus: string
     userRole: Record<Role, string>
     status: Record<ProductStatusName, string>
   }
@@ -598,6 +613,7 @@ const en: Dictionary = {
     orders: "Orders",
     inventory: "Inventory",
     payments: "Payments",
+    shipments: "Shipments",
     openSellerWorkspace: "Seller workspace",
     roleLabel: "Administrator",
     welcome: "Welcome back, {name}",
@@ -761,6 +777,20 @@ const en: Dictionary = {
     paymentsUnavailable: "Payment data could not be loaded.",
     noMatchingPayments: "No payments match the selected filters.",
     paymentPageStatus: "Page {page} of {total} · {count} payments",
+    manageShipmentsDescription: "Review safe shipment summaries across customers and orders with bounded server-side filters.",
+    shipmentList: "Shipment operations",
+    shipmentStatus: "Shipment status",
+    allShipmentStatuses: "All statuses",
+    shipmentSort: "Sort field",
+    shipmentId: "Shipment ID",
+    trackingNumber: "Tracking number",
+    shipmentCreated: "Created",
+    shipmentFailed: "Failed",
+    notAvailable: "Not available",
+    applyShipmentFilters: "Apply shipment filters",
+    shipmentsUnavailable: "Shipment data could not be loaded.",
+    noMatchingShipments: "No shipments match the selected filters.",
+    shipmentPageStatus: "Page {page} of {total} · {count} shipments",
     userRole: {
       Customer: "Customer",
       Seller: "Seller",
@@ -1121,6 +1151,7 @@ const tr: Dictionary = {
     orders: "Siparişler",
     inventory: "Stok",
     payments: "Ödemeler",
+    shipments: "Gönderiler",
     openSellerWorkspace: "Satıcı paneli",
     roleLabel: "Yönetici",
     welcome: "Tekrar hoş geldiniz, {name}",
@@ -1284,6 +1315,20 @@ const tr: Dictionary = {
     paymentsUnavailable: "Ödeme verisi yüklenemedi.",
     noMatchingPayments: "Seçili filtrelerle eşleşen ödeme bulunamadı.",
     paymentPageStatus: "Sayfa {page} / {total} · {count} ödeme",
+    manageShipmentsDescription: "Müşteri ve siparişler arasındaki güvenli gönderi özetlerini sınırlı sunucu filtreleriyle inceleyin.",
+    shipmentList: "Gönderi operasyonları",
+    shipmentStatus: "Gönderi durumu",
+    allShipmentStatuses: "Tüm durumlar",
+    shipmentSort: "Sıralama alanı",
+    shipmentId: "Gönderi kimliği",
+    trackingNumber: "Takip numarası",
+    shipmentCreated: "Oluşturuldu",
+    shipmentFailed: "Başarısız",
+    notAvailable: "Bulunmuyor",
+    applyShipmentFilters: "Gönderi filtrelerini uygula",
+    shipmentsUnavailable: "Gönderi verisi yüklenemedi.",
+    noMatchingShipments: "Seçili filtrelerle eşleşen gönderi bulunamadı.",
+    shipmentPageStatus: "Sayfa {page} / {total} · {count} gönderi",
     userRole: {
       Customer: "Müşteri",
       Seller: "Satıcı",

@@ -14,6 +14,7 @@ import {
   Store,
   Tag,
   Tags,
+  Truck,
   Users,
 } from "lucide-react"
 
@@ -107,6 +108,10 @@ export function AdminDashboard({ profile, onOpenSellerWorkspace }: AdminDashboar
             <Link href="/admin/payments" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
               <ReceiptText className="size-4" />
               {t.admin.payments}
+            </Link>
+            <Link href="/admin/shipments" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
+              <Truck className="size-4" />
+              {t.admin.shipments}
             </Link>
           </nav>
         </aside>

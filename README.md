@@ -33,7 +33,7 @@ project rather than a production-ready commerce product.
   without customer identity, address, or other-store data
 - Read-only administrator user directory, catalog-wide product management,
   server-paged cross-customer order operations, bounded inventory-level
-  monitoring, and safe payment-summary review
+  monitoring, safe payment-summary review, and bounded shipment tracking
 - Independent Admin-only category/brand list pages with database-side search,
   status filters, stable sorting, bounded pagination, and separate create/edit
   forms

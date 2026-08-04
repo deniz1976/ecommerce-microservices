@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import { AdminPageLayout } from "@/components/admin/admin-page-layout"
 import { ReferencePagination } from "@/components/admin/admin-reference-list-controls"
 import { Button } from "@/components/ui/button"
+import { isOptionalGuid } from "@/lib/admin/filters"
 import { getManagedOrders } from "@/lib/api/orders"
 import { useI18n } from "@/lib/i18n/provider"
 import { getOrderStatusName } from "@/lib/orders/status"
@@ -18,8 +19,6 @@ type OrderState =
   | { status: "unavailable" }
 
 const orderStatuses: readonly OrderStatus[] = [0, 1, 2, 3, 4, 5, 6]
-const guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-
 export function AdminOrderManagementPage() {
   const { locale, t } = useI18n()
   const [orders, setOrders] = useState<OrderState>({ status: "loading" })
@@ -31,7 +30,7 @@ export function AdminOrderManagementPage() {
   const [page, setPage] = useState(1)
 
   const normalizedCustomerInput = customerInput.trim()
-  const customerInputValid = normalizedCustomerInput === "" || guidPattern.test(normalizedCustomerInput)
+  const customerInputValid = isOptionalGuid(normalizedCustomerInput)
 
   useEffect(() => {
     const controller = new AbortController()

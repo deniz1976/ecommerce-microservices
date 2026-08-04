@@ -360,4 +360,16 @@ export interface PaymentTransaction {
   createdAt: string
 }
 
+export type ShipmentStatus = 1 | 2
+
+export interface ShipmentSummary {
+  id: string
+  orderId: string
+  customerId: string
+  trackingNumber: string | null
+  status: ShipmentStatus
+  createdAt: string
+  updatedAt: string
+}
+
 export const PUBLIC_ROLES: readonly PublicRole[] = ["Customer", "Seller"] as const

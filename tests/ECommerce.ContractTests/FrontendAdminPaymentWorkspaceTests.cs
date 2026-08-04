@@ -28,9 +28,9 @@ public sealed class FrontendAdminPaymentWorkspaceTests
         Assert.Contains("<AdminRouteGuard>", route, StringComparison.Ordinal);
         Assert.Contains("getManagedPayments(", workspace, StringComparison.Ordinal);
         Assert.Contains("new AbortController()", workspace, StringComparison.Ordinal);
-        Assert.Contains("guidPattern", workspace, StringComparison.Ordinal);
+        Assert.Contains("isOptionalGuid", workspace, StringComparison.Ordinal);
         Assert.Contains("dateRangeValid", workspace, StringComparison.Ordinal);
-        Assert.Contains("toISOString()", workspace, StringComparison.Ordinal);
+        Assert.Contains("toOptionalUtcIso", workspace, StringComparison.Ordinal);
         Assert.Contains("<ReferencePagination", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain(".items.slice(", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain("transactions", workspace, StringComparison.OrdinalIgnoreCase);

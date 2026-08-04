@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import { AdminPageLayout } from "@/components/admin/admin-page-layout"
 import { ReferencePagination } from "@/components/admin/admin-reference-list-controls"
 import { Button } from "@/components/ui/button"
+import { isOptionalGuid, isValidUtcRange, toOptionalUtcIso } from "@/lib/admin/filters"
 import { getManagedPayments, type ManagedPaymentsQuery } from "@/lib/api/payments"
 import { useI18n } from "@/lib/i18n/provider"
 import type { PagedResult, PaymentStatus, PaymentSummary } from "@/types"
@@ -24,8 +25,6 @@ interface AppliedFilters {
 }
 
 const paymentStatuses: readonly PaymentStatus[] = [1, 2, 3]
-const guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-
 export function AdminPaymentManagementPage() {
   const { locale, t } = useI18n()
   const [payments, setPayments] = useState<PaymentState>({ status: "loading" })
@@ -42,11 +41,11 @@ export function AdminPaymentManagementPage() {
 
   const customerId = customerInput.trim()
   const orderId = orderInput.trim()
-  const customerValid = customerId === "" || guidPattern.test(customerId)
-  const orderValid = orderId === "" || guidPattern.test(orderId)
-  const createdFrom = toUtc(createdFromInput)
-  const createdTo = toUtc(createdToInput)
-  const dateRangeValid = !createdFrom || !createdTo || createdFrom <= createdTo
+  const customerValid = isOptionalGuid(customerId)
+  const orderValid = isOptionalGuid(orderId)
+  const createdFrom = toOptionalUtcIso(createdFromInput)
+  const createdTo = toOptionalUtcIso(createdToInput)
+  const dateRangeValid = isValidUtcRange(createdFrom, createdTo)
   const filtersValid = customerValid && orderValid && dateRangeValid
 
   useEffect(() => {
@@ -169,10 +168,6 @@ function PaymentMessage({ message, loading = false }: { message: string; loading
 
 function paymentStatusLabel(status: PaymentStatus, labels: { authorized: string; failed: string; refunded: string }) {
   return status === 1 ? labels.authorized : status === 2 ? labels.failed : labels.refunded
-}
-
-function toUtc(value: string) {
-  return value ? new Date(value).toISOString() : undefined
 }
 
 function formatMoney(amount: number, currency: string, locale: "en" | "tr") {

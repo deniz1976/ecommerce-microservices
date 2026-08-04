@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import { AdminPageLayout } from "@/components/admin/admin-page-layout"
 import { ReferencePagination } from "@/components/admin/admin-reference-list-controls"
 import { Button } from "@/components/ui/button"
+import { isOptionalGuid } from "@/lib/admin/filters"
 import { getManagedInventory, type ManagedInventoryQuery } from "@/lib/api/inventory"
 import { useI18n } from "@/lib/i18n/provider"
 import type { InventoryItem, PagedResult } from "@/types"
@@ -15,8 +16,6 @@ type InventoryState =
   | { status: "loading" }
   | { status: "ready"; data: PagedResult<InventoryItem> }
   | { status: "unavailable" }
-
-const guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export function AdminInventoryManagementPage() {
   const { locale, t } = useI18n()
@@ -31,7 +30,7 @@ export function AdminInventoryManagementPage() {
   const [page, setPage] = useState(1)
 
   const normalizedProduct = productInput.trim()
-  const productValid = normalizedProduct === "" || guidPattern.test(normalizedProduct)
+  const productValid = isOptionalGuid(normalizedProduct)
   const normalizedMaximum = maximumInput.trim()
   const maximumValid = normalizedMaximum === "" || /^\d+$/.test(normalizedMaximum)
 
