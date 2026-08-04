@@ -28,3 +28,4 @@ output/
 # Keep development notes and agent documentation local.
 *.md
 !/README.md
+/docs/ai/
