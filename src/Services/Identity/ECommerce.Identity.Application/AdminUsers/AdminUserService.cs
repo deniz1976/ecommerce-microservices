@@ -1,4 +1,5 @@
 using ECommerce.BuildingBlocks.Contracts.Results;
+using ECommerce.BuildingBlocks.Contracts.Errors;
 using ECommerce.Identity.Application.Queries.SearchAdminUsers;
 
 namespace ECommerce.Identity.Application.AdminUsers;
@@ -23,6 +24,19 @@ public sealed class AdminUserService(IAdminUserReader userReader)
         };
 
         return userReader.SearchAsync(normalizedQuery, cancellationToken);
+    }
+
+    public async Task<Result<AdminUserResponse>> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        AdminUserResponse? user = await userReader.GetByIdAsync(id, cancellationToken);
+        return user is null
+            ? Result<AdminUserResponse>.Failure(
+                new Error(
+                    IdentityErrorCodes.UserNotFound,
+                    IdentityErrorCodes.UserNotFound))
+            : Result<AdminUserResponse>.Success(user);
     }
 
     private static string? NormalizeOptional(string? value, int maximumLength)

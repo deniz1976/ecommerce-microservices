@@ -33,7 +33,7 @@ public static class DependencyInjection
             ICommandHandler<SelectExternalUserRoleCommand, Result<UserResponse>>,
             SelectExternalUserRoleCommandHandler>();
         services.AddScoped<
-            IQueryHandler<GetUserByIdQuery, Result<UserResponse>>,
+            IQueryHandler<GetUserByIdQuery, Result<AdminUserResponse>>,
             GetUserByIdQueryHandler>();
         services.AddScoped<
             IQueryHandler<SearchAdminUsersQuery, PagedResult<AdminUserResponse>>,

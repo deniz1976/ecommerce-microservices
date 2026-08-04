@@ -8,6 +8,13 @@ internal sealed class TrackingAdminUserReader : IAdminUserReader
 {
     public SearchAdminUsersQuery? LastQuery { get; private set; }
 
+    public Task<AdminUserResponse?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return Task.FromResult<AdminUserResponse?>(null);
+    }
+
     public Task<PagedResult<AdminUserResponse>> SearchAsync(
         SearchAdminUsersQuery query,
         CancellationToken cancellationToken)

@@ -2,6 +2,7 @@
 
 import { type FormEvent, useEffect, useState } from "react"
 import { ChevronLeft, ChevronRight, Loader2, Search, UserRoundCheck, Users } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { getAdminUsers } from "@/lib/api/admin-users"
@@ -28,7 +29,7 @@ export function AdminUserWorkspace() {
   const [pageNumber, setPageNumber] = useState(1)
 
   useEffect(() => {
-    let active = true
+    const controller = new AbortController()
 
     getAdminUsers({
       pageNumber,
@@ -36,17 +37,17 @@ export function AdminUserWorkspace() {
       search,
       role: role === "all" ? undefined : role,
       status: status === "all" ? undefined : Number(status) as UserStatus,
-    })
+    }, controller.signal)
       .then((data) => {
-        if (active) setUsers({ status: "ready", data })
+        setUsers({ status: "ready", data })
       })
-      .catch(() => {
-        if (active) setUsers({ status: "unavailable" })
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          setUsers({ status: "unavailable" })
+        }
       })
 
-    return () => {
-      active = false
-    }
+    return () => controller.abort()
   }, [pageNumber, role, search, status])
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
@@ -131,6 +132,9 @@ export function AdminUserWorkspace() {
                     <p className="mt-1 text-xs text-muted-foreground">
                       {t.admin.joinedAt}: {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(user.createdAt))}
                     </p>
+                    <Link href={`/admin/users/${user.id}`} className="mt-2 inline-flex text-xs font-medium text-primary hover:underline">
+                      {t.admin.viewUserDetails}
+                    </Link>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {user.roles.length === 0 ? (

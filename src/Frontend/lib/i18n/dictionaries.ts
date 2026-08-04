@@ -203,6 +203,16 @@ export interface Dictionary {
     joinedAt: string
     userPageStatus: string
     usersReadOnlyNote: string
+    viewUserDetails: string
+    userDetails: string
+    userDetailsDescription: string
+    userDetailsUnavailable: string
+    userNotFound: string
+    userId: string
+    userRoles: string
+    onboardingStatus: string
+    onboardingComplete: string
+    backToUsers: string
     manageOrdersDescription: string
     orderList: string
     orderCustomerId: string
@@ -734,6 +744,16 @@ const en: Dictionary = {
     joinedAt: "Joined",
     userPageStatus: "Page {page} of {total} · {count} users",
     usersReadOnlyNote: "This view is read-only. Roles and Auth0 accounts cannot be changed here.",
+    viewUserDetails: "View details",
+    userDetails: "User details",
+    userDetailsDescription: "Review the safe local profile and account state. Identity-provider identifiers and credentials are excluded.",
+    userDetailsUnavailable: "User details could not be loaded.",
+    userNotFound: "The requested user could not be found.",
+    userId: "User ID",
+    userRoles: "Roles",
+    onboardingStatus: "Onboarding",
+    onboardingComplete: "Complete",
+    backToUsers: "Back to users",
     manageOrdersDescription: "Search and review marketplace orders across customers with bounded server pagination.",
     orderList: "Marketplace orders",
     orderCustomerId: "Customer ID",
@@ -1286,6 +1306,16 @@ const tr: Dictionary = {
     joinedAt: "Katılma tarihi",
     userPageStatus: "Sayfa {page} / {total} · {count} kullanıcı",
     usersReadOnlyNote: "Bu ekran salt okunurdur. Roller ve Auth0 hesapları buradan değiştirilemez.",
+    viewUserDetails: "Ayrıntıları görüntüle",
+    userDetails: "Kullanıcı ayrıntıları",
+    userDetailsDescription: "Güvenli yerel profili ve hesap durumunu inceleyin. Kimlik sağlayıcı tanımlayıcıları ve kimlik bilgileri gösterilmez.",
+    userDetailsUnavailable: "Kullanıcı ayrıntıları yüklenemedi.",
+    userNotFound: "İstenen kullanıcı bulunamadı.",
+    userId: "Kullanıcı kimliği",
+    userRoles: "Roller",
+    onboardingStatus: "İlk kurulum",
+    onboardingComplete: "Tamamlandı",
+    backToUsers: "Kullanıcılara dön",
     manageOrdersDescription: "Tüm müşterilerin pazaryeri siparişlerini sınırlı sunucu sayfalamasıyla arayın ve inceleyin.",
     orderList: "Pazaryeri siparişleri",
     orderCustomerId: "Müşteri kimliği",

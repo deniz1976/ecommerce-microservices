@@ -120,19 +120,6 @@ public sealed class UserService : IExternalUserProvisioningService
         return Result<UserResponse>.Success(user.ToResponse());
     }
 
-    public async Task<Result<UserResponse>> GetByIdAsync(
-        Guid id,
-        CancellationToken cancellationToken)
-    {
-        Domain.User? user = await repository.GetByIdAsync(id, cancellationToken);
-        return user is null
-            ? Result<UserResponse>.Failure(
-                new Error(
-                    IdentityErrorCodes.UserNotFound,
-                    IdentityErrorCodes.UserNotFound))
-            : Result<UserResponse>.Success(user.ToResponse());
-    }
-
     private static Result<UserResponse> ValidationFailure()
     {
         return Result<UserResponse>.Failure(

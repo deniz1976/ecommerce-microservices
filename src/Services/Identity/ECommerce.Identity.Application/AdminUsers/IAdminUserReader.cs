@@ -5,6 +5,10 @@ namespace ECommerce.Identity.Application.AdminUsers;
 
 public interface IAdminUserReader
 {
+    Task<AdminUserResponse?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken);
+
     Task<PagedResult<AdminUserResponse>> SearchAsync(
         SearchAdminUsersQuery query,
         CancellationToken cancellationToken);

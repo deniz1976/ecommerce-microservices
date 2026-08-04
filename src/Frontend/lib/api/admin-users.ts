@@ -9,7 +9,10 @@ export interface AdminUserQuery {
   status?: UserStatus
 }
 
-export function getAdminUsers(query: AdminUserQuery): Promise<PagedResult<AdminUser>> {
+export function getAdminUsers(
+  query: AdminUserQuery,
+  signal?: AbortSignal,
+): Promise<PagedResult<AdminUser>> {
   const parameters = new URLSearchParams({
     pageNumber: String(query.pageNumber ?? 1),
     pageSize: String(query.pageSize ?? 20),
@@ -21,5 +24,13 @@ export function getAdminUsers(query: AdminUserQuery): Promise<PagedResult<AdminU
 
   return apiRequest<PagedResult<AdminUser>>(`/gateway/users?${parameters.toString()}`, {
     authenticated: true,
+    signal,
+  })
+}
+
+export function getAdminUser(userId: string, signal?: AbortSignal): Promise<AdminUser> {
+  return apiRequest<AdminUser>(`/gateway/users/${userId}`, {
+    authenticated: true,
+    signal,
   })
 }

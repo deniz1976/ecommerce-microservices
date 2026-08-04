@@ -57,7 +57,7 @@ public sealed class UsersController(ISender sender) : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        Result<UserResponse> result = await sender.Send(
+        Result<AdminUserResponse> result = await sender.Send(
             new GetUserByIdQuery(id),
             cancellationToken);
         return IdentityResults.FromResult(result, HttpContext);

@@ -15,6 +15,14 @@ public sealed class AdminUserReader : IAdminUserReader
         this.dbContext = dbContext;
     }
 
+    public Task<AdminUserResponse?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return Project(dbContext.Users.AsNoTracking().Where(user => user.Id == id))
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<PagedResult<AdminUserResponse>> SearchAsync(
         SearchAdminUsersQuery query,
         CancellationToken cancellationToken)
@@ -41,12 +49,24 @@ public sealed class AdminUserReader : IAdminUserReader
         }
 
         long totalCount = await users.LongCountAsync(cancellationToken);
-        AdminUserResponse[] items = await users
+        IQueryable<User> orderedUsers = users
             .OrderByDescending(user => user.CreatedAt)
             .ThenBy(user => user.Email)
             .Skip((query.PageNumber - 1) * query.PageSize)
-            .Take(query.PageSize)
-            .Select(user => new AdminUserResponse(
+            .Take(query.PageSize);
+        AdminUserResponse[] items = await Project(orderedUsers)
+            .ToArrayAsync(cancellationToken);
+
+        return new PagedResult<AdminUserResponse>(
+            items,
+            query.PageNumber,
+            query.PageSize,
+            totalCount);
+    }
+
+    private static IQueryable<AdminUserResponse> Project(IQueryable<User> users)
+    {
+        return users.Select(user => new AdminUserResponse(
                 user.Id,
                 user.Email,
                 user.DisplayName,
@@ -57,13 +77,6 @@ public sealed class AdminUserReader : IAdminUserReader
                 user.Status,
                 user.OnboardingCompletedAt != null,
                 user.CreatedAt,
-                user.UpdatedAt))
-            .ToArrayAsync(cancellationToken);
-
-        return new PagedResult<AdminUserResponse>(
-            items,
-            query.PageNumber,
-            query.PageSize,
-            totalCount);
+                user.UpdatedAt));
     }
 }
