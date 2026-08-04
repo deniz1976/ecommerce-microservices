@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { PaymentSummary } from "@/components/customer/payment-summary"
+import { ShipmentSummary } from "@/components/customer/shipment-summary"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ApiError } from "@/lib/api/client"
 import { getOrder, requestOrderCancellation } from "@/lib/api/orders"
@@ -150,6 +151,14 @@ export function OrderDetail() {
               labels={t.orders.payment}
               retryWhenMissing={shouldRetryMissingPayment(state.order)}
             />
+            {shouldShowShipment(state.order) ? (
+              <ShipmentSummary
+                orderId={state.order.id}
+                locale={locale}
+                labels={t.orders.shipment}
+                retryWhenMissing={getOrderStatusName(state.order.status) !== "Cancelled"}
+              />
+            ) : null}
             <div className="divide-y divide-border">
               {state.order.items.map((item) => (
                 <div key={item.id} className="flex items-center justify-between gap-4 p-6">
@@ -271,4 +280,13 @@ function shouldRetryMissingPayment(order: Order) {
     (entry) => getOrderStatusName(entry.status) === "Cancelled",
   )
   return cancellation?.reasonCode !== "INSUFFICIENT_STOCK"
+}
+
+function shouldShowShipment(order: Order) {
+  if (order.status >= 2 && order.status <= 4) return true
+  if (getOrderStatusName(order.status) !== "Cancelled") return false
+
+  return order.statusHistory.some(
+    (entry) => getOrderStatusName(entry.status) === "Cancelled" && entry.reasonCode === "SHIPMENT_FAILED",
+  )
 }

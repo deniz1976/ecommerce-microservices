@@ -512,6 +512,16 @@ export interface Dictionary {
       refund: string
       status: Record<"authorized" | "failed" | "refunded", string>
     }
+    shipment: {
+      title: string
+      pending: string
+      unavailable: string
+      created: string
+      failed: string
+      trackingNumber: string
+      notAvailable: string
+      createdAt: string
+    }
   }
   notifications: {
     title: string
@@ -1074,6 +1084,16 @@ const en: Dictionary = {
         refunded: "Refunded",
       },
     },
+    shipment: {
+      title: "Shipment",
+      pending: "Shipment details are being prepared.",
+      unavailable: "Shipment details are temporarily unavailable.",
+      created: "Created",
+      failed: "Failed",
+      trackingNumber: "Tracking number",
+      notAvailable: "Not available",
+      createdAt: "Created",
+    },
   },
   notifications: {
     title: "Notifications",
@@ -1635,6 +1655,16 @@ const tr: Dictionary = {
         failed: "Başarısız",
         refunded: "İade edildi",
       },
+    },
+    shipment: {
+      title: "Gönderi",
+      pending: "Gönderi ayrıntıları hazırlanıyor.",
+      unavailable: "Gönderi ayrıntılarına geçici olarak ulaşılamıyor.",
+      created: "Oluşturuldu",
+      failed: "Başarısız",
+      trackingNumber: "Takip numarası",
+      notAvailable: "Bulunmuyor",
+      createdAt: "Oluşturulma",
     },
   },
   notifications: {

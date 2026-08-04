@@ -13,6 +13,16 @@ export interface ManagedShipmentsQuery {
   sortDescending?: boolean
 }
 
+export function getOrderShipment(
+  orderId: string,
+  signal?: AbortSignal,
+): Promise<ShipmentSummary> {
+  return apiRequest<ShipmentSummary>(`/gateway/shipments/order/${orderId}`, {
+    authenticated: true,
+    signal,
+  })
+}
+
 export function getManagedShipments(
   query: ManagedShipmentsQuery,
   signal?: AbortSignal,

@@ -25,7 +25,8 @@ project rather than a production-ready commerce product.
 - Durable checkout snapshots and transactional outbox delivery
 - Distributed inventory, payment, shipping, and notification workflow
 - Saga orchestration with idempotency and compensating actions
-- Customer order history, delivery details, status timeline, and payment summary
+- Customer order history, delivery details, status timeline, payment summary,
+  and ownership-protected shipment tracking
 - Ownership-protected, idempotent pre-payment order cancellation with saga compensation
 - Seller-owned store creation/editing, product and stock management, and Cloudinary-backed product images
 - A Seller order workspace with store/status filters, date sorting, bounded
