@@ -280,6 +280,19 @@ backend graph with secret injection:
 ./scripts/run-with-secrets.ps1 -Environment dev docker compose up --build --detach
 ```
 
+Apply database migrations to each isolated Infisical environment explicitly.
+The environment argument is mandatory so a migration cannot silently default
+to the wrong database set:
+
+```powershell
+./scripts/apply-migrations.ps1 -Environment dev -Service all
+./scripts/apply-migrations.ps1 -Environment staging -Service all
+```
+
+`dev` and `staging` use their own `ConnectionStrings__*Db` values. Updating one
+does not update the other; run both commands when both environments must share
+the same schema version.
+
 Wait for the Gateway and every downstream service to become ready:
 
 ```powershell
@@ -605,6 +618,19 @@ enjeksiyonu ile build edip başlatın:
 ```powershell
 ./scripts/run-with-secrets.ps1 -Environment dev docker compose up --build --detach
 ```
+
+Veritabanı migration'larını her izole Infisical ortamına açıkça uygulayın.
+Yanlış veritabanı grubunun sessizce seçilmemesi için ortam parametresi
+zorunludur:
+
+```powershell
+./scripts/apply-migrations.ps1 -Environment dev -Service all
+./scripts/apply-migrations.ps1 -Environment staging -Service all
+```
+
+`dev` ve `staging` kendi `ConnectionStrings__*Db` değerlerini kullanır. Birini
+güncellemek diğerini güncellemez; iki ortamın şeması eşitlenecekse iki komutu da
+çalıştırın.
 
 Gateway ve tüm servisler hazır olana kadar bekleyin:
 
