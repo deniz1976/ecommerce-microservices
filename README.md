@@ -32,7 +32,8 @@ project rather than a production-ready commerce product.
   server pagination, lightweight summaries, on-demand store items, and totals
   without customer identity, address, or other-store data
 - Read-only administrator user directory, catalog-wide product management, and
-  independent Admin-only category/brand list pages with database-side search,
+  a server-paged cross-customer order operations list
+- Independent Admin-only category/brand list pages with database-side search,
   status filters, stable sorting, bounded pagination, and separate create/edit
   forms
 - Auth0 login with Customer, Seller, and Admin authorization boundaries
@@ -411,8 +412,9 @@ amaçlı bir çalışmadır.
   veya diğer mağazaların verileri açığa çıkmadan yalnızca
   seçili mağazanın kalemlerini ve toplamlarını sunan Satıcı sipariş çalışma alanı
 - Salt okunur yönetici kullanıcı dizini, katalog genelinde ürün yönetimi ve
-  veritabanı tarafında arama, durum filtresi, kararlı sıralama, sınırlı
-  sayfalama ve ayrı ekleme/düzenleme formları sunan bağımsız Admin
+  sunucu sayfalı müşteriler arası sipariş operasyon listesi
+- Veritabanı tarafında arama, durum filtresi, kararlı sıralama, sınırlı
+  sayfalama ve ayrı ekleme/düzenleme formları sunan bağımsız, yalnızca Admin
   kategori/marka liste sayfaları
 - Customer, Seller ve Admin sınırlarıyla Auth0 kimlik doğrulaması
 - Müşteri ve satıcı kaynaklarında sahiplik kontrolleri

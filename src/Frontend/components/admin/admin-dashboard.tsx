@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import {
+  ClipboardList,
   LayoutDashboard,
   Loader2,
   LogOut,
@@ -93,6 +94,10 @@ export function AdminDashboard({ profile, onOpenSellerWorkspace }: AdminDashboar
               <Users className="size-4" />
               {t.admin.users}
             </a>
+            <Link href="/admin/orders" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
+              <ClipboardList className="size-4" />
+              {t.admin.orders}
+            </Link>
           </nav>
         </aside>
 

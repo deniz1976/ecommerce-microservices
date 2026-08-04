@@ -93,6 +93,7 @@ export interface Dictionary {
     overview: string
     catalog: string
     users: string
+    orders: string
     openSellerWorkspace: string
     roleLabel: string
     welcome: string
@@ -198,6 +199,24 @@ export interface Dictionary {
     joinedAt: string
     userPageStatus: string
     usersReadOnlyNote: string
+    manageOrdersDescription: string
+    orderList: string
+    orderCustomerId: string
+    orderCustomerIdPlaceholder: string
+    applyOrderFilter: string
+    invalidCustomerId: string
+    orderStatus: string
+    allOrderStatuses: string
+    orderSort: string
+    newestOrders: string
+    oldestOrders: string
+    ordersUnavailable: string
+    noMatchingOrders: string
+    orderNumber: string
+    orderTotal: string
+    orderCreatedAt: string
+    orderUpdatedAt: string
+    orderPageStatus: string
     userRole: Record<Role, string>
     status: Record<ProductStatusName, string>
   }
@@ -534,6 +553,7 @@ const en: Dictionary = {
     overview: "Overview",
     catalog: "Catalog",
     users: "Users",
+    orders: "Orders",
     openSellerWorkspace: "Seller workspace",
     roleLabel: "Administrator",
     welcome: "Welcome back, {name}",
@@ -639,6 +659,24 @@ const en: Dictionary = {
     joinedAt: "Joined",
     userPageStatus: "Page {page} of {total} · {count} users",
     usersReadOnlyNote: "This view is read-only. Roles and Auth0 accounts cannot be changed here.",
+    manageOrdersDescription: "Search and review marketplace orders across customers with bounded server pagination.",
+    orderList: "Marketplace orders",
+    orderCustomerId: "Customer ID",
+    orderCustomerIdPlaceholder: "Customer GUID or leave empty",
+    applyOrderFilter: "Apply customer filter",
+    invalidCustomerId: "Enter a valid customer GUID.",
+    orderStatus: "Order status",
+    allOrderStatuses: "All statuses",
+    orderSort: "Order",
+    newestOrders: "Newest first",
+    oldestOrders: "Oldest first",
+    ordersUnavailable: "Orders could not be loaded.",
+    noMatchingOrders: "No orders match the selected filters.",
+    orderNumber: "Order ID",
+    orderTotal: "Total",
+    orderCreatedAt: "Created",
+    orderUpdatedAt: "Updated",
+    orderPageStatus: "Page {page} of {total} · {count} orders",
     userRole: {
       Customer: "Customer",
       Seller: "Seller",
@@ -996,6 +1034,7 @@ const tr: Dictionary = {
     overview: "Genel bakış",
     catalog: "Katalog",
     users: "Kullanıcılar",
+    orders: "Siparişler",
     openSellerWorkspace: "Satıcı paneli",
     roleLabel: "Yönetici",
     welcome: "Tekrar hoş geldiniz, {name}",
@@ -1101,6 +1140,24 @@ const tr: Dictionary = {
     joinedAt: "Katılma tarihi",
     userPageStatus: "Sayfa {page} / {total} · {count} kullanıcı",
     usersReadOnlyNote: "Bu ekran salt okunurdur. Roller ve Auth0 hesapları buradan değiştirilemez.",
+    manageOrdersDescription: "Tüm müşterilerin pazaryeri siparişlerini sınırlı sunucu sayfalamasıyla arayın ve inceleyin.",
+    orderList: "Pazaryeri siparişleri",
+    orderCustomerId: "Müşteri kimliği",
+    orderCustomerIdPlaceholder: "Müşteri GUID değeri veya boş bırakın",
+    applyOrderFilter: "Müşteri filtresini uygula",
+    invalidCustomerId: "Geçerli bir müşteri GUID değeri girin.",
+    orderStatus: "Sipariş durumu",
+    allOrderStatuses: "Tüm durumlar",
+    orderSort: "Sıralama",
+    newestOrders: "En yeni önce",
+    oldestOrders: "En eski önce",
+    ordersUnavailable: "Siparişler yüklenemedi.",
+    noMatchingOrders: "Seçili filtrelerle eşleşen sipariş bulunamadı.",
+    orderNumber: "Sipariş kimliği",
+    orderTotal: "Toplam",
+    orderCreatedAt: "Oluşturulma",
+    orderUpdatedAt: "Güncellenme",
+    orderPageStatus: "Sayfa {page} / {total} · {count} sipariş",
     userRole: {
       Customer: "Müşteri",
       Seller: "Satıcı",

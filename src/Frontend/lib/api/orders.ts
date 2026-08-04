@@ -35,6 +35,35 @@ export function getOrder(orderId: string): Promise<Order> {
   })
 }
 
+export interface ManagedOrderQuery {
+  customerId?: string
+  pageNumber?: number
+  pageSize?: number
+  status?: OrderStatus
+  sortDescending?: boolean
+}
+
+export function getManagedOrders(
+  query: ManagedOrderQuery,
+  signal?: AbortSignal,
+): Promise<PagedResult<OrderSummary>> {
+  const parameters = new URLSearchParams({
+    pageNumber: String(query.pageNumber ?? 1),
+    pageSize: String(query.pageSize ?? 20),
+    sortDescending: String(query.sortDescending ?? true),
+  })
+  if (query.customerId) parameters.set("customerId", query.customerId)
+  if (query.status !== undefined) parameters.set("status", String(query.status))
+
+  return apiRequest<PagedResult<OrderSummary>>(
+    `/gateway/orders/manage?${parameters.toString()}`,
+    {
+      authenticated: true,
+      signal,
+    },
+  )
+}
+
 export interface SellerOrderQuery {
   pageNumber?: number
   pageSize?: number
