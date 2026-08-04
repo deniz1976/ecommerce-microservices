@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Boxes, Loader2, LogOut, Package, Pencil, ShieldCheck, Store } from "lucide-react"
+import { Boxes, ClipboardList, Loader2, LogOut, Package, Pencil, ShieldCheck, Store } from "lucide-react"
+import Link from "next/link"
 
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
@@ -11,10 +12,11 @@ import { StoreEditForm } from "@/components/seller/store-edit-form"
 import { ProductCreateForm } from "@/components/seller/product-create-form"
 import { ProductEditForm } from "@/components/seller/product-edit-form"
 import { ProductInventoryForm } from "@/components/seller/product-inventory-form"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { getMyCatalogStores, getStoreCatalogProducts } from "@/lib/api/catalog"
 import { logoutFromAuth0 } from "@/lib/auth/auth0"
 import { useI18n } from "@/lib/i18n/provider"
+import { cn } from "@/lib/utils"
 import type { CatalogProduct, CatalogStore, PagedResult, UserProfile } from "@/types"
 
 interface SellerDashboardProps {
@@ -154,6 +156,13 @@ export function SellerDashboard({ profile, onOpenAdminWorkspace }: SellerDashboa
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
         <Logo />
         <div className="flex items-center gap-2">
+          <Link
+            href="/seller/orders"
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            <ClipboardList />
+            <span className="hidden sm:inline">{t.seller.openOrders}</span>
+          </Link>
           {onOpenAdminWorkspace ? (
             <Button type="button" variant="outline" size="sm" onClick={onOpenAdminWorkspace}>
               <ShieldCheck />

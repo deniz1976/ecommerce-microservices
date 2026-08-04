@@ -28,8 +28,9 @@ project rather than a production-ready commerce product.
 - Customer order history, delivery details, status timeline, and payment summary
 - Ownership-protected, idempotent pre-payment order cancellation with saga compensation
 - Seller-owned store creation/editing, product and stock management, and Cloudinary-backed product images
-- Seller-scoped, paged order visibility that exposes only the selected store's
-  line items and totals without customer identity, address, or other-store data
+- A Seller order workspace with store/status filters, date sorting, bounded
+  server pagination, and only the selected store's line items and totals
+  without customer identity, address, or other-store data
 - Read-only administrator user directory, catalog-wide product management, and
   independent Admin-only category/brand list pages with database-side search,
   status filters, stable sorting, bounded pagination, and separate create/edit
@@ -392,8 +393,9 @@ amaçlı bir çalışmadır.
 - Sipariş geçmişi, teslimat bilgileri, durum zaman çizelgesi ve ödeme özeti
 - Sahiplik korumalı, idempotent ve saga telafili ödeme öncesi sipariş iptali
 - Satıcıya ait mağaza oluşturma/düzenleme, ürün ve stok yönetimi ile Cloudinary ürün görselleri
-- Müşteri kimliği, adresi veya diğer mağazaların verileri açığa çıkmadan yalnızca
-  seçili mağazanın kalemlerini ve toplamlarını sunan sayfalı satıcı sipariş görünümü
+- Mağaza/durum filtreleri, tarih sıralaması ve sınırlı sunucu sayfalamasıyla,
+  müşteri kimliği, adresi veya diğer mağazaların verileri açığa çıkmadan yalnızca
+  seçili mağazanın kalemlerini ve toplamlarını sunan Satıcı sipariş çalışma alanı
 - Salt okunur yönetici kullanıcı dizini, katalog genelinde ürün yönetimi ve
   veritabanı tarafında arama, durum filtresi, kararlı sıralama, sınırlı
   sayfalama ve ayrı ekleme/düzenleme formları sunan bağımsız Admin

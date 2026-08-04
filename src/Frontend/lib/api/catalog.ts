@@ -279,9 +279,10 @@ export function deleteCatalogProductImage(
   })
 }
 
-export function getMyCatalogStores(): Promise<CatalogStore[]> {
+export function getMyCatalogStores(signal?: AbortSignal): Promise<CatalogStore[]> {
   return apiRequest<CatalogStore[]>("/gateway/catalog/stores/mine", {
     authenticated: true,
+    signal,
   })
 }
 

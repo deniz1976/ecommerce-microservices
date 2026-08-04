@@ -286,6 +286,32 @@ export interface Dictionary {
     stockUpdateFailed: string
     stockInvalid: string
     closeStockEditor: string
+    openOrders: string
+    orderPageTitle: string
+    orderPageDescription: string
+    backToWorkspace: string
+    orderStore: string
+    orderStatus: string
+    allOrderStatuses: string
+    orderSort: string
+    newestOrders: string
+    oldestOrders: string
+    orderRowsPerPage: string
+    ordersLoadFailed: string
+    noOrders: string
+    orderCount: string
+    orderNumber: string
+    placedAt: string
+    lastUpdated: string
+    storeTotal: string
+    orderItems: string
+    orderProduct: string
+    orderQuantity: string
+    orderUnitPrice: string
+    orderLineTotal: string
+    orderPageStatus: string
+    previousOrderPage: string
+    nextOrderPage: string
   }
   customer: {
     roleLabel: string
@@ -707,6 +733,32 @@ const en: Dictionary = {
     stockUpdateFailed: "Stock could not be updated. Check your product access and try again.",
     stockInvalid: "Enter a whole number of zero or greater.",
     closeStockEditor: "Close stock editor",
+    openOrders: "Store orders",
+    orderPageTitle: "Store orders",
+    orderPageDescription: "Review the order lines and totals attributed to each store you own.",
+    backToWorkspace: "Back to seller workspace",
+    orderStore: "Store",
+    orderStatus: "Order status",
+    allOrderStatuses: "All statuses",
+    orderSort: "Order",
+    newestOrders: "Newest first",
+    oldestOrders: "Oldest first",
+    orderRowsPerPage: "Orders per page",
+    ordersLoadFailed: "Orders for this store could not be loaded.",
+    noOrders: "No attributed orders match the selected filters.",
+    orderCount: "{count} orders",
+    orderNumber: "Order",
+    placedAt: "Placed",
+    lastUpdated: "Last updated",
+    storeTotal: "Store total",
+    orderItems: "Store items",
+    orderProduct: "Product",
+    orderQuantity: "Quantity",
+    orderUnitPrice: "Unit price",
+    orderLineTotal: "Line total",
+    orderPageStatus: "Page {page} of {total} · {count} orders",
+    previousOrderPage: "Previous page",
+    nextOrderPage: "Next page",
   },
   customer: {
     roleLabel: "Customer",
@@ -1140,6 +1192,32 @@ const tr: Dictionary = {
     stockUpdateFailed: "Stok güncellenemedi. Ürün erişiminizi kontrol edip tekrar deneyin.",
     stockInvalid: "Sıfır veya daha büyük bir tam sayı girin.",
     closeStockEditor: "Stok düzenleyiciyi kapat",
+    openOrders: "Mağaza siparişleri",
+    orderPageTitle: "Mağaza siparişleri",
+    orderPageDescription: "Sahibi olduğunuz her mağazaya ait sipariş kalemlerini ve toplamları inceleyin.",
+    backToWorkspace: "Satıcı paneline dön",
+    orderStore: "Mağaza",
+    orderStatus: "Sipariş durumu",
+    allOrderStatuses: "Tüm durumlar",
+    orderSort: "Sıralama",
+    newestOrders: "En yeni önce",
+    oldestOrders: "En eski önce",
+    orderRowsPerPage: "Sayfa başına sipariş",
+    ordersLoadFailed: "Bu mağazanın siparişleri yüklenemedi.",
+    noOrders: "Seçili filtrelerle eşleşen mağaza siparişi bulunamadı.",
+    orderCount: "{count} sipariş",
+    orderNumber: "Sipariş",
+    placedAt: "Oluşturulma",
+    lastUpdated: "Son güncelleme",
+    storeTotal: "Mağaza toplamı",
+    orderItems: "Mağaza kalemleri",
+    orderProduct: "Ürün",
+    orderQuantity: "Miktar",
+    orderUnitPrice: "Birim fiyat",
+    orderLineTotal: "Kalem toplamı",
+    orderPageStatus: "Sayfa {page} / {total} · {count} sipariş",
+    previousOrderPage: "Önceki sayfa",
+    nextOrderPage: "Sonraki sayfa",
   },
   customer: {
     roleLabel: "Müşteri",

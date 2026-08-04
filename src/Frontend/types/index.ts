@@ -294,6 +294,27 @@ export interface OrderItem {
   currency: string
 }
 
+export interface SellerOrderItem {
+  id: string
+  productId: string
+  productName: string
+  quantity: number
+  unitPrice: number
+  totalPrice: number
+  currency: string
+}
+
+export interface SellerOrderSummary {
+  orderId: string
+  storeId: string
+  status: OrderStatus
+  currency: string
+  storeTotalAmount: number
+  createdAt: string
+  updatedAt: string
+  items: SellerOrderItem[]
+}
+
 export type PaymentStatus = 1 | 2 | 3
 export type PaymentTransactionType = 1 | 2
 
