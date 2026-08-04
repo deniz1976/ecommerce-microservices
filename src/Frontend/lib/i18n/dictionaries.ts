@@ -95,6 +95,7 @@ export interface Dictionary {
     users: string
     orders: string
     inventory: string
+    payments: string
     openSellerWorkspace: string
     roleLabel: string
     welcome: string
@@ -238,6 +239,26 @@ export interface Dictionary {
     inventoryUnavailable: string
     noMatchingInventory: string
     inventoryPageStatus: string
+    managePaymentsDescription: string
+    paymentList: string
+    paymentCustomerId: string
+    paymentOrderId: string
+    guidFilterPlaceholder: string
+    invalidOrderId: string
+    createdFrom: string
+    createdTo: string
+    invalidDateRange: string
+    paymentStatus: string
+    allPaymentStatuses: string
+    paymentSort: string
+    paymentAmount: string
+    paymentId: string
+    paymentCreatedAt: string
+    paymentUpdatedAt: string
+    applyPaymentFilters: string
+    paymentsUnavailable: string
+    noMatchingPayments: string
+    paymentPageStatus: string
     userRole: Record<Role, string>
     status: Record<ProductStatusName, string>
   }
@@ -576,6 +597,7 @@ const en: Dictionary = {
     users: "Users",
     orders: "Orders",
     inventory: "Inventory",
+    payments: "Payments",
     openSellerWorkspace: "Seller workspace",
     roleLabel: "Administrator",
     welcome: "Welcome back, {name}",
@@ -719,6 +741,26 @@ const en: Dictionary = {
     inventoryUnavailable: "Inventory data could not be loaded.",
     noMatchingInventory: "No inventory items match the selected filters.",
     inventoryPageStatus: "Page {page} of {total} · {count} inventory items",
+    managePaymentsDescription: "Review safe payment summaries across customers and orders with bounded server-side filters.",
+    paymentList: "Payment operations",
+    paymentCustomerId: "Customer ID",
+    paymentOrderId: "Order ID",
+    guidFilterPlaceholder: "GUID or leave empty",
+    invalidOrderId: "Enter a valid order GUID.",
+    createdFrom: "Created from",
+    createdTo: "Created to",
+    invalidDateRange: "The end date must be on or after the start date.",
+    paymentStatus: "Payment status",
+    allPaymentStatuses: "All statuses",
+    paymentSort: "Sort field",
+    paymentAmount: "Amount",
+    paymentId: "Payment ID",
+    paymentCreatedAt: "Created",
+    paymentUpdatedAt: "Updated",
+    applyPaymentFilters: "Apply payment filters",
+    paymentsUnavailable: "Payment data could not be loaded.",
+    noMatchingPayments: "No payments match the selected filters.",
+    paymentPageStatus: "Page {page} of {total} · {count} payments",
     userRole: {
       Customer: "Customer",
       Seller: "Seller",
@@ -1078,6 +1120,7 @@ const tr: Dictionary = {
     users: "Kullanıcılar",
     orders: "Siparişler",
     inventory: "Stok",
+    payments: "Ödemeler",
     openSellerWorkspace: "Satıcı paneli",
     roleLabel: "Yönetici",
     welcome: "Tekrar hoş geldiniz, {name}",
@@ -1221,6 +1264,26 @@ const tr: Dictionary = {
     inventoryUnavailable: "Stok verisi yüklenemedi.",
     noMatchingInventory: "Seçili filtrelerle eşleşen stok kaydı bulunamadı.",
     inventoryPageStatus: "Sayfa {page} / {total} · {count} stok kaydı",
+    managePaymentsDescription: "Müşteri ve siparişler arasındaki güvenli ödeme özetlerini sınırlı sunucu filtreleriyle inceleyin.",
+    paymentList: "Ödeme operasyonları",
+    paymentCustomerId: "Müşteri kimliği",
+    paymentOrderId: "Sipariş kimliği",
+    guidFilterPlaceholder: "GUID değeri veya boş bırakın",
+    invalidOrderId: "Geçerli bir sipariş GUID değeri girin.",
+    createdFrom: "Başlangıç tarihi",
+    createdTo: "Bitiş tarihi",
+    invalidDateRange: "Bitiş tarihi başlangıç tarihinden önce olamaz.",
+    paymentStatus: "Ödeme durumu",
+    allPaymentStatuses: "Tüm durumlar",
+    paymentSort: "Sıralama alanı",
+    paymentAmount: "Tutar",
+    paymentId: "Ödeme kimliği",
+    paymentCreatedAt: "Oluşturulma",
+    paymentUpdatedAt: "Güncellenme",
+    applyPaymentFilters: "Ödeme filtrelerini uygula",
+    paymentsUnavailable: "Ödeme verisi yüklenemedi.",
+    noMatchingPayments: "Seçili filtrelerle eşleşen ödeme bulunamadı.",
+    paymentPageStatus: "Sayfa {page} / {total} · {count} ödeme",
     userRole: {
       Customer: "Müşteri",
       Seller: "Satıcı",

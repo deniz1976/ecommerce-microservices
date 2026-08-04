@@ -9,6 +9,7 @@ import {
   LogOut,
   Package,
   PackageSearch,
+  ReceiptText,
   ShieldCheck,
   Store,
   Tag,
@@ -102,6 +103,10 @@ export function AdminDashboard({ profile, onOpenSellerWorkspace }: AdminDashboar
             <Link href="/admin/inventory" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
               <PackageSearch className="size-4" />
               {t.admin.inventory}
+            </Link>
+            <Link href="/admin/payments" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
+              <ReceiptText className="size-4" />
+              {t.admin.payments}
             </Link>
           </nav>
         </aside>

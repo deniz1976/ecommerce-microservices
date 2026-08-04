@@ -341,6 +341,17 @@ export interface Payment {
   transactions: PaymentTransaction[]
 }
 
+export interface PaymentSummary {
+  id: string
+  orderId: string
+  customerId: string
+  amount: number
+  currency: string
+  status: PaymentStatus
+  createdAt: string
+  updatedAt: string
+}
+
 export interface PaymentTransaction {
   id: string
   type: PaymentTransactionType

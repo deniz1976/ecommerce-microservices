@@ -32,8 +32,8 @@ project rather than a production-ready commerce product.
   server pagination, lightweight summaries, on-demand store items, and totals
   without customer identity, address, or other-store data
 - Read-only administrator user directory, catalog-wide product management,
-  server-paged cross-customer order operations, and bounded inventory-level
-  monitoring
+  server-paged cross-customer order operations, bounded inventory-level
+  monitoring, and safe payment-summary review
 - Independent Admin-only category/brand list pages with database-side search,
   status filters, stable sorting, bounded pagination, and separate create/edit
   forms
