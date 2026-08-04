@@ -10,7 +10,8 @@ public sealed class GetCustomerNotificationsQueryHandlerTests
     public async Task Query_clamps_paging_and_preserves_ownership_filter()
     {
         FakeNotificationHistoryReader reader = new();
-        GetCustomerNotificationsQueryHandler handler = new(reader);
+        GetCustomerNotificationsQueryHandler handler = new(
+            new NotificationHistoryService(reader));
         Guid customerId = Guid.NewGuid();
 
         PagedResult<NotificationMessage> result = await handler.HandleAsync(

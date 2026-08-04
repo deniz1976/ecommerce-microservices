@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api/client"
+import type { Locale } from "@/lib/i18n/dictionaries"
 import type {
   CatalogProduct,
   CatalogProductImage,
@@ -7,10 +8,17 @@ import type {
   CatalogMetrics,
   CatalogStore,
   CreateCatalogProductPayload,
+  CreateCatalogBrandPayload,
+  CreateCatalogCategoryPayload,
   CreateCatalogStorePayload,
   PagedResult,
   ProductStatus,
+  ManagedCatalogBrandReference,
+  ManagedCatalogCategoryReference,
+  UpdateCatalogBrandPayload,
+  UpdateCatalogCategoryPayload,
   UpdateCatalogProductPayload,
+  UpdateCatalogStorePayload,
 } from "@/types"
 
 export interface CatalogProductQuery {
@@ -23,6 +31,24 @@ export interface CatalogProductQuery {
   status?: ProductStatus
   sortBy?: "createdAt" | "price" | "sku"
   sortDescending?: boolean
+}
+
+export interface ManagedCatalogCategoryQuery {
+  pageNumber: number
+  pageSize: number
+  search?: string
+  isActive?: boolean
+  sortBy: "englishName" | "turkishName" | "slug" | "isActive"
+  sortDescending: boolean
+}
+
+export interface ManagedCatalogBrandQuery {
+  pageNumber: number
+  pageSize: number
+  search?: string
+  isActive?: boolean
+  sortBy: "name" | "slug" | "isActive"
+  sortDescending: boolean
 }
 
 export function getCatalogProducts(pageSize = 5): Promise<PagedResult<CatalogProduct>> {
@@ -96,12 +122,104 @@ export function getCatalogMetrics(): Promise<CatalogMetrics> {
   })
 }
 
-export function getCatalogCategories(): Promise<CatalogCategoryReference[]> {
-  return apiRequest<CatalogCategoryReference[]>("/gateway/catalog/references/categories")
+export function getCatalogCategories(locale?: Locale): Promise<CatalogCategoryReference[]> {
+  return apiRequest<CatalogCategoryReference[]>("/gateway/catalog/references/categories", {
+    locale,
+  })
 }
 
 export function getCatalogBrands(): Promise<CatalogBrandReference[]> {
   return apiRequest<CatalogBrandReference[]>("/gateway/catalog/references/brands")
+}
+
+export function createCatalogCategory(
+  payload: CreateCatalogCategoryPayload,
+): Promise<CatalogCategoryReference> {
+  return apiRequest<CatalogCategoryReference>("/gateway/catalog/references/categories", {
+    method: "POST",
+    authenticated: true,
+    body: payload,
+  })
+}
+
+export function createCatalogBrand(
+  payload: CreateCatalogBrandPayload,
+): Promise<CatalogBrandReference> {
+  return apiRequest<CatalogBrandReference>("/gateway/catalog/references/brands", {
+    method: "POST",
+    authenticated: true,
+    body: payload,
+  })
+}
+
+export function getManagedCatalogCategories(
+  query: ManagedCatalogCategoryQuery,
+  signal?: AbortSignal,
+): Promise<PagedResult<ManagedCatalogCategoryReference>> {
+  const parameters = createManagedReferenceParameters(query)
+  return apiRequest<PagedResult<ManagedCatalogCategoryReference>>(
+    `/gateway/catalog/references/manage/categories?${parameters.toString()}`,
+    { authenticated: true, signal },
+  )
+}
+
+export function getManagedCatalogBrands(
+  query: ManagedCatalogBrandQuery,
+  signal?: AbortSignal,
+): Promise<PagedResult<ManagedCatalogBrandReference>> {
+  const parameters = createManagedReferenceParameters(query)
+  return apiRequest<PagedResult<ManagedCatalogBrandReference>>(
+    `/gateway/catalog/references/manage/brands?${parameters.toString()}`,
+    { authenticated: true, signal },
+  )
+}
+
+function createManagedReferenceParameters(query: {
+  pageNumber: number
+  pageSize: number
+  search?: string
+  isActive?: boolean
+  sortBy: string
+  sortDescending: boolean
+}): URLSearchParams {
+  const parameters = new URLSearchParams({
+    pageNumber: String(query.pageNumber),
+    pageSize: String(query.pageSize),
+    sortBy: query.sortBy,
+    sortDescending: String(query.sortDescending),
+  })
+
+  if (query.search?.trim()) parameters.set("search", query.search.trim())
+  if (query.isActive !== undefined) parameters.set("isActive", String(query.isActive))
+  return parameters
+}
+
+export function updateCatalogCategory(
+  categoryId: string,
+  payload: UpdateCatalogCategoryPayload,
+): Promise<ManagedCatalogCategoryReference> {
+  return apiRequest<ManagedCatalogCategoryReference>(
+    `/gateway/catalog/references/categories/${categoryId}`,
+    {
+      method: "PUT",
+      authenticated: true,
+      body: payload,
+    },
+  )
+}
+
+export function updateCatalogBrand(
+  brandId: string,
+  payload: UpdateCatalogBrandPayload,
+): Promise<ManagedCatalogBrandReference> {
+  return apiRequest<ManagedCatalogBrandReference>(
+    `/gateway/catalog/references/brands/${brandId}`,
+    {
+      method: "PUT",
+      authenticated: true,
+      body: payload,
+    },
+  )
 }
 
 export function createCatalogProduct(
@@ -172,6 +290,17 @@ export function createCatalogStore(
 ): Promise<CatalogStore> {
   return apiRequest<CatalogStore>("/gateway/catalog/stores", {
     method: "POST",
+    authenticated: true,
+    body: payload,
+  })
+}
+
+export function updateCatalogStore(
+  storeId: string,
+  payload: UpdateCatalogStorePayload,
+): Promise<CatalogStore> {
+  return apiRequest<CatalogStore>(`/gateway/catalog/stores/${storeId}`, {
+    method: "PUT",
     authenticated: true,
     body: payload,
   })

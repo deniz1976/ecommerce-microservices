@@ -93,6 +93,7 @@ export interface Dictionary {
     overview: string
     catalog: string
     users: string
+    openSellerWorkspace: string
     roleLabel: string
     welcome: string
     description: string
@@ -113,6 +114,60 @@ export interface Dictionary {
     noProducts: string
     manageCatalog: string
     manageCatalogDescription: string
+    manageReferences: string
+    manageReferencesDescription: string
+    backToOverview: string
+    referenceNavigation: string
+    categories: string
+    brands: string
+    manageCategoriesDescription: string
+    manageBrandsDescription: string
+    openCategoryManagement: string
+    openBrandManagement: string
+    categoryList: string
+    categoryListDescription: string
+    brandList: string
+    brandListDescription: string
+    newCategory: string
+    newBrand: string
+    categoryEnglishName: string
+    categoryTurkishName: string
+    brandName: string
+    referenceSlug: string
+    referenceSlugHint: string
+    createCategory: string
+    creatingCategory: string
+    categoryCreated: string
+    categoryCreateFailed: string
+    createBrand: string
+    creatingBrand: string
+    brandCreated: string
+    brandCreateFailed: string
+    updateCategory: string
+    updateBrand: string
+    updatingReference: string
+    categoryUpdated: string
+    brandUpdated: string
+    referenceUpdateFailed: string
+    activeReference: string
+    inactiveReference: string
+    searchCategories: string
+    searchCategoriesPlaceholder: string
+    searchBrands: string
+    searchBrandsPlaceholder: string
+    referenceStatus: string
+    allReferenceStatuses: string
+    rowsPerPage: string
+    referenceActions: string
+    referencePageStatus: string
+    noMatchingCategories: string
+    noMatchingBrands: string
+    editCategory: string
+    editBrand: string
+    cancelReferenceForm: string
+    referencesUnavailable: string
+    noCategories: string
+    noBrands: string
     searchProducts: string
     searchProductsPlaceholder: string
     filterStatus: string
@@ -148,6 +203,7 @@ export interface Dictionary {
   }
   seller: {
     workspace: string
+    openAdminWorkspace: string
     roleLabel: string
     welcome: string
     description: string
@@ -161,6 +217,10 @@ export interface Dictionary {
     slugHint: string
     saveStore: string
     savingStore: string
+    editStore: string
+    updateStore: string
+    updatingStore: string
+    storeUpdateFailed: string
     noStores: string
     noStoresDescription: string
     storeLoadFailed: string
@@ -188,6 +248,8 @@ export interface Dictionary {
     productCreateFailed: string
     referencesUnavailable: string
     referencesEmpty: string
+    refreshReferences: string
+    refreshingReferences: string
     productCreated: string
     edit: string
     editProduct: string
@@ -211,6 +273,19 @@ export interface Dictionary {
     deleteImage: string
     imageDeleted: string
     imageDeleteFailed: string
+    manageStock: string
+    stockTitle: string
+    quantityOnHand: string
+    reservedQuantity: string
+    availableQuantity: string
+    stockNotCreated: string
+    saveStock: string
+    savingStock: string
+    stockUpdated: string
+    stockLoadFailed: string
+    stockUpdateFailed: string
+    stockInvalid: string
+    closeStockEditor: string
   }
   customer: {
     roleLabel: string
@@ -279,8 +354,11 @@ export interface Dictionary {
     loadFailed: string
     orderNumber: string
     placedAt: string
+    pageStatus: string
+    previousPage: string
+    nextPage: string
     status: Record<
-      "Submitted" | "InventoryReserved" | "PaymentAuthorized" | "ShipmentCreated" | "Confirmed" | "Cancelled",
+      "Submitted" | "InventoryReserved" | "PaymentAuthorized" | "ShipmentCreated" | "Confirmed" | "Cancelled" | "CancellationRequested",
       string
     >
     processing: string
@@ -288,8 +366,13 @@ export interface Dictionary {
     backToOrders: string
     shippingAddress: string
     cancellationReason: string
+    cancelOrder: string
+    cancellingOrder: string
+    cancellationRequested: string
+    cancellationFailed: string
+    orderNotCancellable: string
     cancellationReasons: Record<
-      "INSUFFICIENT_STOCK" | "PAYMENT_FAILED" | "SHIPMENT_FAILED" | "UNEXPECTED_ERROR",
+      "INSUFFICIENT_STOCK" | "PAYMENT_FAILED" | "SHIPMENT_FAILED" | "UNEXPECTED_ERROR" | "ORDER_CANCELLED_BY_CUSTOMER",
       string
     >
     payment: {
@@ -315,6 +398,8 @@ export interface Dictionary {
     loadFailed: string
     markRead: string
     markingRead: string
+    markAllRead: string
+    markingAllRead: string
     viewOrder: string
     previousPage: string
     nextPage: string
@@ -357,7 +442,7 @@ const en: Dictionary = {
     changeLanguage: "Change language",
   },
   aside: {
-    trustTitle: "Built for serious commerce",
+    trustTitle: "Shopping, made simpler",
     trustBody:
       "A premium platform connecting customers and sellers with speed, security, and clarity at every step.",
     point1: "Secure access for every account",
@@ -420,6 +505,7 @@ const en: Dictionary = {
     overview: "Overview",
     catalog: "Catalog",
     users: "Users",
+    openSellerWorkspace: "Seller workspace",
     roleLabel: "Administrator",
     welcome: "Welcome back, {name}",
     description: "Monitor the catalog and begin managing the marketplace from one operational workspace.",
@@ -440,6 +526,60 @@ const en: Dictionary = {
     noProducts: "No products have been created in the catalog yet.",
     manageCatalog: "Manage catalog",
     manageCatalogDescription: "Search, filter, page through, and update marketplace products across every store.",
+    manageReferences: "Categories and brands",
+    manageReferencesDescription: "Create the active catalog references sellers need before adding products.",
+    backToOverview: "Back to overview",
+    referenceNavigation: "Catalog reference navigation",
+    categories: "Categories",
+    brands: "Brands",
+    manageCategoriesDescription: "Search, sort, page through, create, and update every English/Turkish category pair.",
+    manageBrandsDescription: "Search, sort, page through, create, and update every marketplace brand.",
+    openCategoryManagement: "Manage categories",
+    openBrandManagement: "Manage brands",
+    categoryList: "All categories",
+    categoryListDescription: "Active and inactive categories are listed in one searchable table.",
+    brandList: "All brands",
+    brandListDescription: "Active and inactive brands are listed in one searchable table.",
+    newCategory: "New category",
+    newBrand: "New brand",
+    categoryEnglishName: "English category name",
+    categoryTurkishName: "Turkish category name",
+    brandName: "Brand name",
+    referenceSlug: "Address",
+    referenceSlugHint: "Use lowercase English letters, numbers, and single hyphens.",
+    createCategory: "Create category",
+    creatingCategory: "Creating category",
+    categoryCreated: "Category created successfully.",
+    categoryCreateFailed: "The category could not be created.",
+    createBrand: "Create brand",
+    creatingBrand: "Creating brand",
+    brandCreated: "Brand created successfully.",
+    brandCreateFailed: "The brand could not be created.",
+    updateCategory: "Update category",
+    updateBrand: "Update brand",
+    updatingReference: "Saving changes",
+    categoryUpdated: "Category updated successfully.",
+    brandUpdated: "Brand updated successfully.",
+    referenceUpdateFailed: "The catalog reference could not be updated.",
+    activeReference: "Active",
+    inactiveReference: "Inactive",
+    searchCategories: "Search categories",
+    searchCategoriesPlaceholder: "English name, Turkish name, or address",
+    searchBrands: "Search brands",
+    searchBrandsPlaceholder: "Brand name or address",
+    referenceStatus: "Status",
+    allReferenceStatuses: "All statuses",
+    rowsPerPage: "Rows per page",
+    referenceActions: "Actions",
+    referencePageStatus: "Page {page} of {total} · {count} results",
+    noMatchingCategories: "No categories match the current search and status filter.",
+    noMatchingBrands: "No brands match the current search and status filter.",
+    editCategory: "Edit category",
+    editBrand: "Edit brand",
+    cancelReferenceForm: "Close form",
+    referencesUnavailable: "Categories and brands could not be loaded.",
+    noCategories: "No active categories have been created.",
+    noBrands: "No active brands have been created.",
     searchProducts: "Search products",
     searchProductsPlaceholder: "Product name or SKU",
     filterStatus: "Status",
@@ -484,6 +624,7 @@ const en: Dictionary = {
   },
   seller: {
     workspace: "Seller workspace",
+    openAdminWorkspace: "Administrator workspace",
     roleLabel: "Seller",
     welcome: "Welcome back, {name}",
     description: "Manage stores you own and review the products assigned to each store.",
@@ -497,6 +638,10 @@ const en: Dictionary = {
     slugHint: "Use lowercase letters, numbers, and single hyphens.",
     saveStore: "Create store",
     savingStore: "Creating store",
+    editStore: "Edit store",
+    updateStore: "Save changes",
+    updatingStore: "Saving changes",
+    storeUpdateFailed: "The store could not be updated. Check the fields and try again.",
     noStores: "You do not have a store yet.",
     noStoresDescription: "Create your first store before adding products.",
     storeLoadFailed: "Your stores could not be loaded.",
@@ -523,7 +668,9 @@ const en: Dictionary = {
     savingProduct: "Creating product",
     productCreateFailed: "The product could not be created. Check the fields and try again.",
     referencesUnavailable: "Category and brand options could not be loaded.",
-    referencesEmpty: "At least one active category and brand must exist before a product can be created.",
+    referencesEmpty: "Products require an active category and brand. Only an Administrator can create them from Category and brand management.",
+    refreshReferences: "Reload categories and brands",
+    refreshingReferences: "Reloading categories and brands",
     productCreated: "Product created successfully.",
     edit: "Edit",
     editProduct: "Edit product",
@@ -547,6 +694,19 @@ const en: Dictionary = {
     deleteImage: "Delete image",
     imageDeleted: "Image deleted.",
     imageDeleteFailed: "The image could not be deleted.",
+    manageStock: "Stock",
+    stockTitle: "Manage stock",
+    quantityOnHand: "Quantity on hand",
+    reservedQuantity: "Reserved",
+    availableQuantity: "Available",
+    stockNotCreated: "No stock record exists yet. Saving will create it.",
+    saveStock: "Save stock",
+    savingStock: "Saving stock",
+    stockUpdated: "Stock updated successfully.",
+    stockLoadFailed: "Stock information could not be loaded.",
+    stockUpdateFailed: "Stock could not be updated. Check your product access and try again.",
+    stockInvalid: "Enter a whole number of zero or greater.",
+    closeStockEditor: "Close stock editor",
   },
   customer: {
     roleLabel: "Customer",
@@ -615,6 +775,9 @@ const en: Dictionary = {
     loadFailed: "Your orders could not be loaded.",
     orderNumber: "Order",
     placedAt: "Placed",
+    pageStatus: "Page {page} of {total}",
+    previousPage: "Previous page",
+    nextPage: "Next page",
     status: {
       Submitted: "Processing",
       InventoryReserved: "Stock reserved",
@@ -622,17 +785,24 @@ const en: Dictionary = {
       ShipmentCreated: "Shipment created",
       Confirmed: "Confirmed",
       Cancelled: "Cancelled",
+      CancellationRequested: "Cancellation requested",
     },
     processing: "Order is being prepared",
     processingNote: "The order handoff is durable. This page updates when processing completes.",
     backToOrders: "Back to orders",
     shippingAddress: "Shipping address",
     cancellationReason: "Cancellation reason",
+    cancelOrder: "Cancel order",
+    cancellingOrder: "Requesting cancellation",
+    cancellationRequested: "Cancellation requested. Compensation is being completed.",
+    cancellationFailed: "The cancellation request could not be completed.",
+    orderNotCancellable: "This order can no longer be cancelled.",
     cancellationReasons: {
       INSUFFICIENT_STOCK: "One or more products are out of stock.",
       PAYMENT_FAILED: "The payment could not be authorized.",
       SHIPMENT_FAILED: "The shipment could not be created.",
       UNEXPECTED_ERROR: "The order could not be completed.",
+      ORDER_CANCELLED_BY_CUSTOMER: "You cancelled this order.",
     },
     payment: {
       title: "Payment",
@@ -661,6 +831,8 @@ const en: Dictionary = {
     loadFailed: "Your notifications could not be loaded.",
     markRead: "Mark as read",
     markingRead: "Marking as read",
+    markAllRead: "Mark all as read",
+    markingAllRead: "Marking all as read",
     viewOrder: "View order",
     previousPage: "Previous",
     nextPage: "Next",
@@ -703,7 +875,7 @@ const tr: Dictionary = {
     changeLanguage: "Dili değiştir",
   },
   aside: {
-    trustTitle: "Ciddi ticaret için tasarlandı",
+    trustTitle: "Alışveriş, daha sade.",
     trustBody:
       "Müşterileri ve satıcıları hız, güvenlik ve netlikle buluşturan modern bir e-ticaret platformu.",
     point1: "Her hesap için güvenli erişim",
@@ -761,101 +933,161 @@ const tr: Dictionary = {
     role: "Roller",
   },
   admin: {
-    workspace: "Calisma alani",
-    navigation: "Yonetim gezinmesi",
-    overview: "Genel bakis",
+    workspace: "Çalışma alanı",
+    navigation: "Yönetim gezinmesi",
+    overview: "Genel bakış",
     catalog: "Katalog",
-    users: "Kullanicilar",
-    roleLabel: "Yonetici",
-    welcome: "Tekrar hos geldiniz, {name}",
-    description: "Katalogu izleyin ve pazaryerini tek bir operasyon alanindan yonetmeye baslayin.",
-    catalogSummary: "Katalog ozeti",
-    catalogSummaryDescription: "Korumali Katalog metrik API'sinden guncel pazaryeri toplamları.",
-    metricsUnavailable: "Katalog metrikleri su anda kullanilamiyor.",
-    totalProducts: "Toplam urun",
-    activeProducts: "Aktif urunler",
-    draftProducts: "Taslak urunler",
-    inactiveProducts: "Pasif urunler",
-    archivedProducts: "Arsivlenmis urunler",
-    totalStores: "Magazalar",
+    users: "Kullanıcılar",
+    openSellerWorkspace: "Satıcı paneli",
+    roleLabel: "Yönetici",
+    welcome: "Tekrar hoş geldiniz, {name}",
+    description: "Kataloğu izleyin ve pazaryerini tek bir operasyon alanından yönetmeye başlayın.",
+    catalogSummary: "Katalog özeti",
+    catalogSummaryDescription: "Korumalı Katalog metrik API'sinden güncel pazaryeri toplamları.",
+    metricsUnavailable: "Katalog metrikleri şu anda kullanılamıyor.",
+    totalProducts: "Toplam ürün",
+    activeProducts: "Aktif ürünler",
+    draftProducts: "Taslak ürünler",
+    inactiveProducts: "Pasif ürünler",
+    archivedProducts: "Arşivlenmiş ürünler",
+    totalStores: "Mağazalar",
     totalCategories: "Kategoriler",
     totalBrands: "Markalar",
-    recentProducts: "Son katalog urunleri",
-    recentProductsDescription: "Katalog servisinin dondurdugu en yeni urunler.",
-    catalogUnavailable: "Katalog verisi su anda kullanilamiyor. Gateway ve Catalog servisinin calistigini kontrol edin.",
-    noProducts: "Katalogda henuz urun olusturulmadi.",
-    manageCatalog: "Katalogu yonet",
-    manageCatalogDescription: "Tum magazalardaki urunleri arayin, filtreleyin, sayfalayin ve guncelleyin.",
-    searchProducts: "Urun ara",
-    searchProductsPlaceholder: "Urun adi veya stok kodu",
+    recentProducts: "Son katalog ürünleri",
+    recentProductsDescription: "Katalog servisinin döndürdüğü en yeni ürünler.",
+    catalogUnavailable: "Katalog verisi şu anda kullanılamıyor. Gateway ve Catalog servisinin çalıştığını kontrol edin.",
+    noProducts: "Katalogda henüz ürün oluşturulmadı.",
+    manageCatalog: "Kataloğu yönet",
+    manageCatalogDescription: "Tüm mağazalardaki ürünleri arayın, filtreleyin, sayfalayın ve güncelleyin.",
+    manageReferences: "Kategoriler ve markalar",
+    manageReferencesDescription: "Satıcıların ürün ekleyebilmesi için gereken aktif katalog referanslarını oluşturun.",
+    backToOverview: "Genel bakışa dön",
+    referenceNavigation: "Katalog referansı gezinmesi",
+    categories: "Kategoriler",
+    brands: "Markalar",
+    manageCategoriesDescription: "Tüm İngilizce/Türkçe kategori eşleşmelerini arayın, sıralayın, sayfalayın, oluşturun ve güncelleyin.",
+    manageBrandsDescription: "Tüm pazaryeri markalarını arayın, sıralayın, sayfalayın, oluşturun ve güncelleyin.",
+    openCategoryManagement: "Kategorileri yönet",
+    openBrandManagement: "Markaları yönet",
+    categoryList: "Tüm kategoriler",
+    categoryListDescription: "Aktif ve pasif kategoriler aranabilir tek tabloda listelenir.",
+    brandList: "Tüm markalar",
+    brandListDescription: "Aktif ve pasif markalar aranabilir tek tabloda listelenir.",
+    newCategory: "Yeni kategori",
+    newBrand: "Yeni marka",
+    categoryEnglishName: "İngilizce kategori adı",
+    categoryTurkishName: "Türkçe kategori adı",
+    brandName: "Marka adı",
+    referenceSlug: "Adres",
+    referenceSlugHint: "Küçük İngilizce harfler, rakamlar ve tek tire kullanın.",
+    createCategory: "Kategori oluştur",
+    creatingCategory: "Kategori oluşturuluyor",
+    categoryCreated: "Kategori başarıyla oluşturuldu.",
+    categoryCreateFailed: "Kategori oluşturulamadı.",
+    createBrand: "Marka oluştur",
+    creatingBrand: "Marka oluşturuluyor",
+    brandCreated: "Marka başarıyla oluşturuldu.",
+    brandCreateFailed: "Marka oluşturulamadı.",
+    updateCategory: "Kategoriyi güncelle",
+    updateBrand: "Markayı güncelle",
+    updatingReference: "Değişiklikler kaydediliyor",
+    categoryUpdated: "Kategori başarıyla güncellendi.",
+    brandUpdated: "Marka başarıyla güncellendi.",
+    referenceUpdateFailed: "Katalog referansı güncellenemedi.",
+    activeReference: "Aktif",
+    inactiveReference: "Pasif",
+    searchCategories: "Kategori ara",
+    searchCategoriesPlaceholder: "İngilizce ad, Türkçe ad veya adres",
+    searchBrands: "Marka ara",
+    searchBrandsPlaceholder: "Marka adı veya adres",
+    referenceStatus: "Durum",
+    allReferenceStatuses: "Tüm durumlar",
+    rowsPerPage: "Sayfa başına satır",
+    referenceActions: "İşlemler",
+    referencePageStatus: "Sayfa {page} / {total} · {count} sonuç",
+    noMatchingCategories: "Arama ve durum filtresiyle eşleşen kategori bulunamadı.",
+    noMatchingBrands: "Arama ve durum filtresiyle eşleşen marka bulunamadı.",
+    editCategory: "Kategoriyi düzenle",
+    editBrand: "Markayı düzenle",
+    cancelReferenceForm: "Formu kapat",
+    referencesUnavailable: "Kategoriler ve markalar yüklenemedi.",
+    noCategories: "Henüz aktif kategori oluşturulmadı.",
+    noBrands: "Henüz aktif marka oluşturulmadı.",
+    searchProducts: "Ürün ara",
+    searchProductsPlaceholder: "Ürün adı veya stok kodu",
     filterStatus: "Durum",
-    allStatuses: "Tum durumlar",
+    allStatuses: "Tüm durumlar",
     searchAction: "Ara",
-    noMatchingProducts: "Secili filtrelerle eslesen urun bulunamadi.",
-    sellerProduct: "Satici urunu",
-    platformProduct: "Platform urunu",
-    editProduct: "Urunu duzenle",
-    edit: "Duzenle",
+    noMatchingProducts: "Seçili filtrelerle eşleşen ürün bulunamadı.",
+    sellerProduct: "Satıcı ürünü",
+    platformProduct: "Platform ürünü",
+    editProduct: "Ürünü düzenle",
+    edit: "Düzenle",
     pageStatus: "Sayfa {page} / {total}",
-    previousPage: "Onceki sayfa",
+    previousPage: "Önceki sayfa",
     nextPage: "Sonraki sayfa",
-    selectProductToEdit: "Katalog bilgilerini, yasam dongusu durumunu veya gorsellerini guncellemek icin bir urun secin.",
-    manageUsers: "Kullanicilar",
-    manageUsersDescription: "Yerel olarak kayitli pazaryeri kimliklerini arayin ve inceleyin.",
-    searchUsers: "Kullanici ara",
+    selectProductToEdit: "Katalog bilgilerini, yaşam döngüsü durumunu veya görsellerini güncellemek için bir ürün seçin.",
+    manageUsers: "Kullanıcılar",
+    manageUsersDescription: "Yerel olarak kayıtlı pazaryeri kimliklerini arayın ve inceleyin.",
+    searchUsers: "Kullanıcı ara",
     searchUsersPlaceholder: "Ad veya e-posta adresi",
     filterRole: "Rol",
-    allRoles: "Tum roller",
+    allRoles: "Tüm roller",
     filterUserStatus: "Hesap durumu",
-    allUserStatuses: "Tum durumlar",
+    allUserStatuses: "Tüm durumlar",
     userActive: "Aktif",
-    userDisabled: "Devre disi",
-    usersUnavailable: "Kullanici verisi su anda kullanilamiyor.",
-    noMatchingUsers: "Secili filtrelerle eslesen kullanici bulunamadi.",
-    onboardingPending: "Rol secimi bekleniyor",
-    joinedAt: "Katilma tarihi",
-    userPageStatus: "Sayfa {page} / {total} · {count} kullanici",
-    usersReadOnlyNote: "Bu ekran salt okunurdur. Roller ve Auth0 hesaplari buradan degistirilemez.",
+    userDisabled: "Devre dışı",
+    usersUnavailable: "Kullanıcı verisi şu anda kullanılamıyor.",
+    noMatchingUsers: "Seçili filtrelerle eşleşen kullanıcı bulunamadı.",
+    onboardingPending: "Rol seçimi bekleniyor",
+    joinedAt: "Katılma tarihi",
+    userPageStatus: "Sayfa {page} / {total} · {count} kullanıcı",
+    usersReadOnlyNote: "Bu ekran salt okunurdur. Roller ve Auth0 hesapları buradan değiştirilemez.",
     userRole: {
-      Customer: "Musteri",
-      Seller: "Satici",
-      Admin: "Yonetici",
+      Customer: "Müşteri",
+      Seller: "Satıcı",
+      Admin: "Yönetici",
     },
     status: {
       Active: "Aktif",
       Draft: "Taslak",
       Inactive: "Pasif",
-      Archived: "Arsivlenmis",
+      Archived: "Arşivlenmiş",
     },
   },
   seller: {
-    workspace: "Satici calisma alani",
-    roleLabel: "Satici",
-    welcome: "Tekrar hos geldiniz, {name}",
-    description: "Sahibi oldugunuz magazalari yonetin ve her magazaya bagli urunleri inceleyin.",
-    stores: "Magazalariniz",
-    products: "Magaza urunleri",
-    createStore: "Magaza olustur",
-    storeName: "Magaza adi",
-    storeNamePlaceholder: "Ornek Magaza",
-    storeSlug: "Magaza adresi",
+    workspace: "Satıcı çalışma alanı",
+    openAdminWorkspace: "Yönetici paneli",
+    roleLabel: "Satıcı",
+    welcome: "Tekrar hoş geldiniz, {name}",
+    description: "Sahibi olduğunuz mağazaları yönetin ve her mağazaya bağlı ürünleri inceleyin.",
+    stores: "Mağazalarınız",
+    products: "Mağaza ürünleri",
+    createStore: "Mağaza oluştur",
+    storeName: "Mağaza adı",
+    storeNamePlaceholder: "Örnek Mağaza",
+    storeSlug: "Mağaza adresi",
     storeSlugPlaceholder: "ornek-magaza",
-    slugHint: "Kucuk harf, rakam ve tek tire kullanin.",
-    saveStore: "Magazayi olustur",
-    savingStore: "Magaza olusturuluyor",
-    noStores: "Henuz bir magazaniz yok.",
-    noStoresDescription: "Urun eklemeden once ilk magazanizi olusturun.",
-    storeLoadFailed: "Magazalariniz yuklenemedi.",
-    storeCreateFailed: "Magaza olusturulamadi. Alanlari kontrol edip tekrar deneyin.",
-    slugConflict: "Bu magaza adresi zaten kullaniliyor.",
-    selectStore: "Magaza secin",
-    productCount: "{count} urun",
-    noProducts: "Bu magazada henuz urun yok.",
-    productLoadFailed: "Bu magazanin urunleri yuklenemedi.",
-    createProduct: "Urun ekle",
+    slugHint: "Küçük harf, rakam ve tek tire kullanın.",
+    saveStore: "Mağazayı oluştur",
+    savingStore: "Mağaza oluşturuluyor",
+    editStore: "Mağazayı düzenle",
+    updateStore: "Değişiklikleri kaydet",
+    updatingStore: "Değişiklikler kaydediliyor",
+    storeUpdateFailed: "Mağaza güncellenemedi. Alanları kontrol edip tekrar deneyin.",
+    noStores: "Henüz bir mağazanız yok.",
+    noStoresDescription: "Ürün eklemeden önce ilk mağazanızı oluşturun.",
+    storeLoadFailed: "Mağazalarınız yüklenemedi.",
+    storeCreateFailed: "Mağaza oluşturulamadı. Alanları kontrol edip tekrar deneyin.",
+    slugConflict: "Bu mağaza adresi zaten kullanılıyor.",
+    selectStore: "Mağaza seçin",
+    productCount: "{count} ürün",
+    noProducts: "Bu mağazada henüz ürün yok.",
+    productLoadFailed: "Bu mağazanın ürünleri yüklenemedi.",
+    createProduct: "Ürün ekle",
     sku: "Stok kodu",
-    productName: "Urun adi",
-    productDescription: "Aciklama",
+    productName: "Ürün adı",
+    productDescription: "Açıklama",
     category: "Kategori",
     brand: "Marka",
     price: "Fiyat",
@@ -864,62 +1096,77 @@ const tr: Dictionary = {
     draft: "Taslak",
     active: "Aktif",
     inactive: "Pasif",
-    archived: "Arsivlenmis",
-    saveProduct: "Urunu olustur",
-    savingProduct: "Urun olusturuluyor",
-    productCreateFailed: "Urun olusturulamadi. Alanlari kontrol edip tekrar deneyin.",
-    referencesUnavailable: "Kategori ve marka secenekleri yuklenemedi.",
-    referencesEmpty: "Urun olusturmadan once en az bir aktif kategori ve marka bulunmalidir.",
-    productCreated: "Urun basariyla olusturuldu.",
-    edit: "Duzenle",
-    editProduct: "Urunu duzenle",
-    cancelEditing: "Urun duzenleyiciyi kapat",
-    saveChanges: "Degisiklikleri kaydet",
-    savingChanges: "Degisiklikler kaydediliyor",
-    productUpdated: "Urun basariyla guncellendi.",
-    productUpdateFailed: "Urun guncellenemedi. Alanlari ve magaza erisiminizi kontrol edin.",
-    currentImages: "Mevcut gorseller",
-    noImages: "Bu urune henuz gorsel eklenmemis.",
-    uploadImage: "Gorsel yukle",
-    uploadingImage: "Gorsel yukleniyor",
-    imageUploadHint: "JPEG, PNG, GIF veya WebP. En fazla 5 MB ve urun basina 8 gorsel.",
-    imageInvalid: "En fazla 5 MB boyutunda desteklenen bir gorsel secin.",
-    imageUploaded: "Gorsel basariyla yuklendi.",
-    imageUploadFailed: "Gorsel yuklenemedi. Dosyayi veya medya yapilandirmasini kontrol edin.",
+    archived: "Arşivlenmiş",
+    saveProduct: "Ürünü oluştur",
+    savingProduct: "Ürün oluşturuluyor",
+    productCreateFailed: "Ürün oluşturulamadı. Alanları kontrol edip tekrar deneyin.",
+    referencesUnavailable: "Kategori ve marka seçenekleri yüklenemedi.",
+    referencesEmpty: "Ürün eklemek için aktif bir kategori ve marka gerekir. Bunları yalnızca Yönetici, Kategori ve marka yönetimi bölümünden oluşturabilir.",
+    refreshReferences: "Kategori ve markaları yeniden yükle",
+    refreshingReferences: "Kategori ve markalar yeniden yükleniyor",
+    productCreated: "Ürün başarıyla oluşturuldu.",
+    edit: "Düzenle",
+    editProduct: "Ürünü düzenle",
+    cancelEditing: "Ürün düzenleyiciyi kapat",
+    saveChanges: "Değişiklikleri kaydet",
+    savingChanges: "Değişiklikler kaydediliyor",
+    productUpdated: "Ürün başarıyla güncellendi.",
+    productUpdateFailed: "Ürün güncellenemedi. Alanları ve mağaza erişiminizi kontrol edin.",
+    currentImages: "Mevcut görseller",
+    noImages: "Bu ürüne henüz görsel eklenmemiş.",
+    uploadImage: "Görsel yükle",
+    uploadingImage: "Görsel yükleniyor",
+    imageUploadHint: "JPEG, PNG, GIF veya WebP. En fazla 5 MB ve ürün başına 8 görsel.",
+    imageInvalid: "En fazla 5 MB boyutunda desteklenen bir görsel seçin.",
+    imageUploaded: "Görsel başarıyla yüklendi.",
+    imageUploadFailed: "Görsel yüklenemedi. Dosyayı veya medya yapılandırmasını kontrol edin.",
     mainImage: "Ana",
-    setMainImage: "Ana gorsel yap",
-    mainImageUpdated: "Ana gorsel guncellendi.",
-    imageUpdateFailed: "Gorsel guncellenemedi.",
-    deleteImage: "Gorseli sil",
-    imageDeleted: "Gorsel silindi.",
-    imageDeleteFailed: "Gorsel silinemedi.",
+    setMainImage: "Ana görsel yap",
+    mainImageUpdated: "Ana görsel güncellendi.",
+    imageUpdateFailed: "Görsel güncellenemedi.",
+    deleteImage: "Görseli sil",
+    imageDeleted: "Görsel silindi.",
+    imageDeleteFailed: "Görsel silinemedi.",
+    manageStock: "Stok",
+    stockTitle: "Stok yönetimi",
+    quantityOnHand: "Toplam stok miktarı",
+    reservedQuantity: "Rezerve",
+    availableQuantity: "Kullanılabilir",
+    stockNotCreated: "Henüz stok kaydı yok. Kaydettiğinizde oluşturulacak.",
+    saveStock: "Stoku kaydet",
+    savingStock: "Stok kaydediliyor",
+    stockUpdated: "Stok başarıyla güncellendi.",
+    stockLoadFailed: "Stok bilgisi yüklenemedi.",
+    stockUpdateFailed: "Stok güncellenemedi. Ürün erişiminizi kontrol edip tekrar deneyin.",
+    stockInvalid: "Sıfır veya daha büyük bir tam sayı girin.",
+    closeStockEditor: "Stok düzenleyiciyi kapat",
   },
   customer: {
-    roleLabel: "Musteri",
-    welcome: "Aradiginiz urunu bulun, {name}",
-    description: "Pazaryeri saticilarinin aktif urunlerini kesfedin. Urun adi veya stok koduyla arayin, kategori ve markaya gore filtreleyin.",
-    searchLabel: "Urun ara",
-    searchPlaceholder: "Urun adi veya stok kodu",
+    roleLabel: "Müşteri",
+    welcome: "Aradığınız ürünü bulun, {name}",
+    description: "Pazaryeri satıcılarının aktif ürünlerini keşfedin. Ürün adı veya stok koduyla arayın, kategori ve markaya göre filtreleyin.",
+    searchLabel: "Ürün ara",
+    searchPlaceholder: "Ürün adı veya stok kodu",
     searchAction: "Ara",
     category: "Kategori",
-    allCategories: "Tum kategoriler",
+    allCategories: "Tüm kategoriler",
     brand: "Marka",
-    allBrands: "Tum markalar",
-    sort: "Siralama",
+    allBrands: "Tüm markalar",
+    sort: "Sıralama",
     newest: "En yeni",
-    priceLowToHigh: "Fiyat: dusukten yuksege",
-    priceHighToLow: "Fiyat: yuksekten dusuge",
-    results: "{count} aktif urun",
-    noProducts: "Bu filtrelerle eslesen aktif urun bulunamadi.",
-    catalogUnavailable: "Katalog gecici olarak kullanilamiyor.",
-    filtersUnavailable: "Kategori ve marka filtreleri gecici olarak kullanilamiyor.",
-    previousPage: "Onceki",
+    priceLowToHigh: "Fiyat: düşükten yükseğe",
+    priceHighToLow: "Fiyat: yüksekten düşüğe",
+    results: "{count} aktif ürün",
+    noProducts: "Bu filtrelerle eşleşen aktif ürün bulunamadı.",
+    catalogUnavailable: "Katalog geçici olarak kullanılamıyor.",
+    filtersUnavailable: "Kategori ve marka filtreleri geçici olarak kullanılamıyor.",
+    previousPage: "Önceki",
     nextPage: "Sonraki",
     page: "Sayfa {current} / {total}",
-    viewProduct: "Urunu incele",
-    productUnavailable: "Bu urun kullanilamiyor veya artik aktif degil.",
-    backToCatalog: "Kataloga don",
-    productDetails: "Urun detaylari",
+    viewProduct: "Ürünü incele",
+    productUnavailable: "Bu ürün kullanılamıyor veya artık aktif değil.",
+    backToCatalog: "Kataloğa dön",
+    productDetails: "Ürün detayları",
   },
   basket: {
     title: "Sepetiniz",
@@ -961,6 +1208,9 @@ const tr: Dictionary = {
     loadFailed: "Siparişleriniz yüklenemedi.",
     orderNumber: "Sipariş",
     placedAt: "Oluşturulma",
+    pageStatus: "Sayfa {page} / {total}",
+    previousPage: "Önceki sayfa",
+    nextPage: "Sonraki sayfa",
     status: {
       Submitted: "İşleniyor",
       InventoryReserved: "Stok ayrıldı",
@@ -968,17 +1218,24 @@ const tr: Dictionary = {
       ShipmentCreated: "Gönderi oluşturuldu",
       Confirmed: "Onaylandı",
       Cancelled: "İptal edildi",
+      CancellationRequested: "İptal bekleniyor",
     },
     processing: "Sipariş hazırlanıyor",
     processingNote: "Sipariş aktarımı güvenli biçimde kaydedildi. İşlem tamamlandığında bu sayfa güncellenir.",
     backToOrders: "Siparişlere dön",
     shippingAddress: "Teslimat adresi",
     cancellationReason: "İptal nedeni",
+    cancelOrder: "Siparişi iptal et",
+    cancellingOrder: "İptal isteniyor",
+    cancellationRequested: "İptal isteği alındı. Telafi işlemleri tamamlanıyor.",
+    cancellationFailed: "İptal isteği tamamlanamadı.",
+    orderNotCancellable: "Bu sipariş artık iptal edilemez.",
     cancellationReasons: {
       INSUFFICIENT_STOCK: "Bir veya daha fazla ürün stokta bulunmuyor.",
       PAYMENT_FAILED: "Ödeme onaylanamadı.",
       SHIPMENT_FAILED: "Gönderi oluşturulamadı.",
       UNEXPECTED_ERROR: "Sipariş tamamlanamadı.",
+      ORDER_CANCELLED_BY_CUSTOMER: "Bu siparişi siz iptal ettiniz.",
     },
     payment: {
       title: "Ödeme",
@@ -1007,6 +1264,8 @@ const tr: Dictionary = {
     loadFailed: "Bildirimleriniz yüklenemedi.",
     markRead: "Okundu işaretle",
     markingRead: "İşaretleniyor",
+    markAllRead: "Tümünü okundu işaretle",
+    markingAllRead: "Tümü işaretleniyor",
     viewOrder: "Siparişi görüntüle",
     previousPage: "Önceki",
     nextPage: "Sonraki",

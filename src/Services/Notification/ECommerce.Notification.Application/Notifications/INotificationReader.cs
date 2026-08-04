@@ -8,4 +8,8 @@ public interface INotificationReader
         Guid sourceMessageId,
         NotificationChannel channel,
         CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<NotificationRecord>> GetUnreadByCustomerAsync(
+        Guid customerId,
+        CancellationToken cancellationToken);
 }

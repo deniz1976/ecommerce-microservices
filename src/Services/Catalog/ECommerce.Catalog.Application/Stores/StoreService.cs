@@ -64,6 +64,44 @@ public sealed partial class StoreService
         return Result<IReadOnlyCollection<StoreResponse>>.Success(stores.Select(ToResponse).ToArray());
     }
 
+    public async Task<Result<StoreResponse>> UpdateAsync(
+        Guid storeId,
+        UpdateStoreRequest request,
+        StoreAccessContext access,
+        CancellationToken cancellationToken)
+    {
+        Store? store = await repository.GetByIdAsync(storeId, cancellationToken);
+        if (store is null ||
+            (!access.IsAdmin && (access.UserId is null || store.OwnerUserId != access.UserId)))
+        {
+            return Result<StoreResponse>.Failure(
+                new Error(CatalogErrorCodes.StoreNotFound, CatalogErrorCodes.StoreNotFound));
+        }
+
+        string name = request.Name.Trim();
+        string slug = request.Slug.Trim().ToLowerInvariant();
+        if (name.Length is < 2 or > 160 ||
+            slug.Length is < 2 or > 160 ||
+            !StoreSlugRegex().IsMatch(slug))
+        {
+            return Result<StoreResponse>.Failure(
+                new Error(ErrorCodes.ValidationFailed, ErrorCodes.ValidationFailed));
+        }
+
+        if (!string.Equals(store.Slug, slug, StringComparison.Ordinal) &&
+            await storeReader.SlugExistsAsync(slug, cancellationToken))
+        {
+            return Result<StoreResponse>.Failure(
+                new Error(
+                    CatalogErrorCodes.StoreSlugConflict,
+                    CatalogErrorCodes.StoreSlugConflict));
+        }
+
+        store.Update(name, slug, DateTimeOffset.UtcNow);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result<StoreResponse>.Success(ToResponse(store));
+    }
+
     private static StoreResponse ToResponse(Store store) => new(
         store.Id,
         store.Name,

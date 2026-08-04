@@ -1,4 +1,5 @@
 import { getAccessToken } from "@/lib/auth/auth0"
+import type { Locale } from "@/lib/i18n/dictionaries"
 import { getStoredLocale } from "@/lib/i18n/locale"
 
 export const API_BASE_URL =
@@ -26,15 +27,16 @@ export class AuthenticationRequiredError extends Error {
 interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown
   authenticated?: boolean
+  locale?: Locale
 }
 
 export async function apiRequest<T>(
   path: string,
-  { body, authenticated = false, headers, ...init }: RequestOptions = {},
+  { body, authenticated = false, locale, headers, ...init }: RequestOptions = {},
 ): Promise<T> {
   const requestHeaders = new Headers(headers)
   requestHeaders.set("Accept", "application/json")
-  requestHeaders.set("Accept-Language", getStoredLocale())
+  requestHeaders.set("Accept-Language", locale ?? getStoredLocale())
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData
 
   if (body !== undefined && !isFormData) {

@@ -18,8 +18,12 @@ public static class DependencyInjection
             .Validate(
                 options => Enum.IsDefined(options.Scenario),
                 "DemoPayment:Scenario must be a supported demo payment scenario.")
+            .Validate(
+                options => options.AuthorizationDelayMilliseconds is >= 0 and <= 30_000,
+                "DemoPayment:AuthorizationDelayMilliseconds must be between 0 and 30000.")
             .ValidateOnStart();
         services.AddScoped<IPaymentIdentityReader, PaymentIdentityReader>();
+        services.AddScoped<IPaymentQueryReader, PaymentQueryReader>();
         services.AddScoped<IRepository<Domain.Payment, Guid>>(serviceProvider =>
             new EfRepository<Domain.Payment, Guid>(
                 serviceProvider.GetRequiredService<PaymentDbContext>(),

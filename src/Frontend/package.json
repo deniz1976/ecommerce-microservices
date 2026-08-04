@@ -12,7 +12,7 @@
     "check:notification-signalr": "node scripts/check-notification-signalr.mjs"
   },
   "dependencies": {
-    "@auth0/auth0-spa-js": "^2.23.0",
+    "@auth0/nextjs-auth0": "^4.26.0",
     "@base-ui/react": "^1.5.0",
     "@microsoft/signalr": "^10.0.0",
     "@vercel/analytics": "1.6.1",

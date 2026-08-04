@@ -30,6 +30,8 @@ public static class CatalogResults
             ErrorCodes.ProductNotFound => StatusCodes.Status404NotFound,
             CatalogErrorCodes.CategoryNotFound => StatusCodes.Status400BadRequest,
             CatalogErrorCodes.BrandNotFound => StatusCodes.Status400BadRequest,
+            CatalogErrorCodes.CategorySlugConflict => StatusCodes.Status409Conflict,
+            CatalogErrorCodes.BrandSlugConflict => StatusCodes.Status409Conflict,
             CatalogErrorCodes.InvalidProductTranslation => StatusCodes.Status400BadRequest,
             CatalogErrorCodes.StoreNotFound => StatusCodes.Status404NotFound,
             CatalogErrorCodes.StoreAccessDenied => StatusCodes.Status403Forbidden,
@@ -51,6 +53,8 @@ public static class CatalogResults
         {
             CatalogErrorCodes.CategoryNotFound => culture == "tr" ? "Kategori bulunamadı." : "Category was not found.",
             CatalogErrorCodes.BrandNotFound => culture == "tr" ? "Marka bulunamadı." : "Brand was not found.",
+            CatalogErrorCodes.CategorySlugConflict => culture == "tr" ? "Kategori adresi zaten kullanılıyor." : "The category slug is already in use.",
+            CatalogErrorCodes.BrandSlugConflict => culture == "tr" ? "Marka adresi zaten kullanılıyor." : "The brand slug is already in use.",
             CatalogErrorCodes.InvalidProductTranslation => culture == "tr" ? "Ürün çevirileri geçersiz." : "Product translations are invalid.",
             CatalogErrorCodes.StoreNotFound => culture == "tr" ? "Mağaza bulunamadı." : "Store was not found.",
             CatalogErrorCodes.StoreRequired => culture == "tr" ? "Satıcı ürünleri için mağaza zorunludur." : "A store is required for seller products.",

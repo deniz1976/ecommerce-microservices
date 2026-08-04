@@ -20,5 +20,9 @@ internal interface IGatewayWorkflowClient
 
     Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request, CancellationToken cancellationToken);
 
+    Task<OrderResponse> RequestOrderCancellationAsync(
+        Guid orderId,
+        CancellationToken cancellationToken);
+
     Task<OrderResponse> GetOrderAsync(Guid orderId, CancellationToken cancellationToken);
 }

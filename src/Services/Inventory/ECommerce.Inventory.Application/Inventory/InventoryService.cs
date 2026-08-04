@@ -1,5 +1,6 @@
 using ECommerce.BuildingBlocks.Contracts.Errors;
 using ECommerce.BuildingBlocks.Contracts.Persistence;
+using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Inventory.Domain;
 
 namespace ECommerce.Inventory.Application.Inventory;
@@ -10,17 +11,20 @@ public sealed class InventoryService
     private readonly IRepository<StockReservation, Guid> reservationRepository;
     private readonly IUnitOfWork unitOfWork;
     private readonly IStockReservationIdentityReader reservationIdentityReader;
+    private readonly IProductInventoryAccessAuthorizer productAccessAuthorizer;
 
     public InventoryService(
         IRepository<InventoryItem, Guid> itemRepository,
         IRepository<StockReservation, Guid> reservationRepository,
         IUnitOfWork unitOfWork,
-        IStockReservationIdentityReader reservationIdentityReader)
+        IStockReservationIdentityReader reservationIdentityReader,
+        IProductInventoryAccessAuthorizer productAccessAuthorizer)
     {
         this.itemRepository = itemRepository;
         this.reservationRepository = reservationRepository;
         this.unitOfWork = unitOfWork;
         this.reservationIdentityReader = reservationIdentityReader;
+        this.productAccessAuthorizer = productAccessAuthorizer;
     }
 
     public async Task<InventoryReservationResult> ReserveAsync(InventoryReservationRequest request, CancellationToken cancellationToken)
@@ -79,11 +83,39 @@ public sealed class InventoryService
         return new InventoryReservationResult(true, null, null);
     }
 
-    public async Task<InventoryItemResponse> UpsertAsync(UpsertInventoryItemRequest request, CancellationToken cancellationToken)
+    public async Task<Result<InventoryItemResponse>> UpsertAsync(
+        UpsertInventoryItemRequest request,
+        InventoryWriteAccess access,
+        CancellationToken cancellationToken)
     {
+        if (!access.BypassProductOwnership)
+        {
+            ProductInventoryAccessResult accessResult = await productAccessAuthorizer.AuthorizeAsync(
+                request.ProductId,
+                access.AccessToken,
+                cancellationToken);
+            if (accessResult == ProductInventoryAccessResult.Denied)
+            {
+                return Result<InventoryItemResponse>.Failure(
+                    new Error(ErrorCodes.ProductNotFound, ErrorCodes.ProductNotFound));
+            }
+
+            if (accessResult == ProductInventoryAccessResult.DependencyUnavailable)
+            {
+                return Result<InventoryItemResponse>.Failure(
+                    new Error(ErrorCodes.DependencyUnavailable, ErrorCodes.DependencyUnavailable));
+            }
+        }
+
         InventoryItem? item = await itemRepository.GetByIdAsync(
             request.ProductId,
             cancellationToken);
+
+        if (item is not null && request.QuantityOnHand < item.ReservedQuantity)
+        {
+            return Result<InventoryItemResponse>.Failure(
+                new Error(ErrorCodes.StockBelowReserved, ErrorCodes.StockBelowReserved));
+        }
 
         if (item is null)
         {
@@ -96,16 +128,13 @@ public sealed class InventoryService
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return new InventoryItemResponse(item.ProductId, item.QuantityOnHand, item.ReservedQuantity, item.AvailableQuantity, item.UpdatedAt);
-    }
-
-    public async Task<InventoryItemResponse?> GetItemAsync(Guid productId, CancellationToken cancellationToken)
-    {
-        InventoryItem? item = await itemRepository.GetByIdAsync(productId, cancellationToken);
-
-        return item is null
-            ? null
-            : new InventoryItemResponse(item.ProductId, item.QuantityOnHand, item.ReservedQuantity, item.AvailableQuantity, item.UpdatedAt);
+        return Result<InventoryItemResponse>.Success(
+            new InventoryItemResponse(
+                item.ProductId,
+                item.QuantityOnHand,
+                item.ReservedQuantity,
+                item.AvailableQuantity,
+                item.UpdatedAt));
     }
 
     public async Task ReleaseAsync(InventoryReleaseRequest request, CancellationToken cancellationToken)

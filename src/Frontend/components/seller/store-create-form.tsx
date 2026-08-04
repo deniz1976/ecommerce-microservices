@@ -47,8 +47,8 @@ export function StoreCreateForm({ onCreated }: StoreCreateFormProps) {
         <Plus className="size-4 text-primary" />
         <h2 className="font-heading text-lg font-semibold text-foreground">{t.seller.createStore}</h2>
       </div>
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-2 text-sm font-medium text-foreground">
+      <div className="mt-5 grid gap-4">
+        <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
           {t.seller.storeName}
           <input
             value={name}
@@ -57,10 +57,10 @@ export function StoreCreateForm({ onCreated }: StoreCreateFormProps) {
             minLength={2}
             maxLength={160}
             required
-            className="h-10 rounded-md border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring/40"
+            className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring/40"
           />
         </label>
-        <label className="grid gap-2 text-sm font-medium text-foreground">
+        <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
           {t.seller.storeSlug}
           <input
             value={slug}
@@ -70,7 +70,7 @@ export function StoreCreateForm({ onCreated }: StoreCreateFormProps) {
             minLength={2}
             maxLength={160}
             required
-            className="h-10 rounded-md border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring/40"
+            className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring/40"
           />
           <span className="text-xs font-normal text-muted-foreground">{t.seller.slugHint}</span>
         </label>

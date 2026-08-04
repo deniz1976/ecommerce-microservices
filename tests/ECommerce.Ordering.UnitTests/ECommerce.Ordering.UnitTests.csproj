@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Services\Ordering\ECommerce.Ordering.Application\ECommerce.Ordering.Application.csproj" />
+    <ProjectReference Include="..\..\src\Services\OrderingSaga\ECommerce.OrderingSaga.Application\ECommerce.OrderingSaga.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

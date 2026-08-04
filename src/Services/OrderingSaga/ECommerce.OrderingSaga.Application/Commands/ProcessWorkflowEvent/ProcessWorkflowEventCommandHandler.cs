@@ -30,6 +30,9 @@ public sealed class ProcessWorkflowEventCommandHandler<TEvent>
             PaymentFailed message => workflowService.HandleAsync(message, cancellationToken),
             ShipmentCreated message => workflowService.HandleAsync(message, cancellationToken),
             ShipmentFailed message => workflowService.HandleAsync(message, cancellationToken),
+            OrderCancellationRequested message => workflowService.HandleAsync(
+                message,
+                cancellationToken),
             _ => throw new ArgumentOutOfRangeException(
                 nameof(command),
                 typeof(TEvent).FullName,

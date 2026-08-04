@@ -7,5 +7,6 @@ public enum OrderStatus
     PaymentAuthorized = 2,
     ShipmentCreated = 3,
     Confirmed = 4,
-    Cancelled = 5
+    Cancelled = 5,
+    CancellationRequested = 6
 }

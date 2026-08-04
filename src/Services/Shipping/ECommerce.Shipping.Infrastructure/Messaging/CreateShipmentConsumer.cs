@@ -1,25 +1,24 @@
 using ECommerce.BuildingBlocks.Contracts.Commands;
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.Shipping.Application.Commands.CreateShipment;
 using ECommerce.Shipping.Application.Shipments;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.Shipping.Infrastructure.Messaging;
 
 public sealed class CreateShipmentConsumer : IConsumer<CreateShipment>
 {
-    private readonly ICommandHandler<CreateShipmentCommand, CreateShipmentResult> commandHandler;
+    private readonly ISender sender;
 
-    public CreateShipmentConsumer(
-        ICommandHandler<CreateShipmentCommand, CreateShipmentResult> commandHandler)
+    public CreateShipmentConsumer(ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public async Task Consume(ConsumeContext<CreateShipment> context)
     {
-        CreateShipmentResult result = await commandHandler.HandleAsync(
+        CreateShipmentResult result = await sender.Send(
             new CreateShipmentCommand(
                 new CreateShipmentRequest(
                     context.Message.OrderId,

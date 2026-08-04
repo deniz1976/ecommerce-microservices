@@ -20,9 +20,15 @@ using ECommerce.Ordering.Application.Queries.GetOrderById;
 using ECommerce.Ordering.Application.Queries.GetOrdersByCustomer;
 using ECommerce.Ordering.Domain;
 using ECommerce.Payment.Api.Payments;
+using ECommerce.Payment.Application;
 using ECommerce.Payment.Application.Payments;
 using ECommerce.Payment.Application.Queries.GetPaymentByOrderId;
 using ECommerce.Payment.Domain;
+using ECommerce.Shipping.Api.Shipments;
+using ECommerce.Shipping.Application;
+using ECommerce.Shipping.Application.Queries.GetShipmentByOrderId;
+using ECommerce.Shipping.Application.Shipments;
+using ECommerce.Shipping.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -40,7 +46,7 @@ public sealed class CustomerOwnershipEndpointExecutionTests
         await using WebApplication app = BuildApplication(
             handler,
             services => services.AddBasketApplication());
-        app.MapBasketEndpoints();
+        app.MapControllers();
 
         DefaultHttpContext context = await ExecuteAsync(
             app,
@@ -57,12 +63,12 @@ public sealed class CustomerOwnershipEndpointExecutionTests
     {
         StubQueryHandler<
             GetOrdersByCustomerQuery,
-            Result<IReadOnlyCollection<OrderResponse>>> handler = new(
+            Result<PagedResult<OrderSummaryResponse>>> handler = new(
                 _ => throw new InvalidOperationException("Query must not run after ownership denial."));
         await using WebApplication app = BuildApplication(
             handler,
             services => services.AddOrderingApplication());
-        app.MapOrderEndpoints();
+        app.MapControllers();
 
         DefaultHttpContext context = await ExecuteAsync(
             app,
@@ -84,7 +90,7 @@ public sealed class CustomerOwnershipEndpointExecutionTests
         await using WebApplication app = BuildApplication(
             handler,
             services => services.AddNotificationApplication());
-        app.MapNotificationEndpoints();
+        app.MapControllers();
 
         DefaultHttpContext context = await ExecuteAsync(
             app,
@@ -105,7 +111,7 @@ public sealed class CustomerOwnershipEndpointExecutionTests
         await using WebApplication app = BuildApplication(
             handler,
             services => services.AddOrderingApplication());
-        app.MapOrderEndpoints();
+        app.MapControllers();
 
         DefaultHttpContext context = await ExecuteAsync(
             app,
@@ -123,8 +129,10 @@ public sealed class CustomerOwnershipEndpointExecutionTests
         Guid orderId = Guid.NewGuid();
         StubQueryHandler<GetPaymentByOrderIdQuery, Result<PaymentResponse>> handler = new(
             _ => Result<PaymentResponse>.Success(CreatePayment(orderId, Guid.NewGuid())));
-        await using WebApplication app = BuildApplication(handler);
-        app.MapPaymentEndpoints();
+        await using WebApplication app = BuildApplication(
+            handler,
+            services => services.AddPaymentApplication());
+        app.MapControllers();
 
         DefaultHttpContext context = await ExecuteAsync(
             app,
@@ -136,6 +144,27 @@ public sealed class CustomerOwnershipEndpointExecutionTests
         Assert.Equal(1, handler.InvocationCount);
     }
 
+    [Fact]
+    public async Task ShipmentOwnershipMismatch_ReturnsLocalizedNotFound()
+    {
+        Guid orderId = Guid.NewGuid();
+        StubQueryHandler<GetShipmentByOrderIdQuery, Result<ShipmentResponse>> handler = new(
+            _ => Result<ShipmentResponse>.Success(CreateShipment(orderId, Guid.NewGuid())));
+        await using WebApplication app = BuildApplication(
+            handler,
+            services => services.AddShippingApplication());
+        app.MapControllers();
+
+        DefaultHttpContext context = await ExecuteAsync(
+            app,
+            "/api/v1/shipments/order/{orderId:guid}",
+            HttpMethods.Get,
+            new RouteValueDictionary { ["orderId"] = orderId.ToString() });
+
+        await AssertErrorAsync(context, 404, ErrorCodes.ShipmentNotFound);
+        Assert.Equal(1, handler.InvocationCount);
+    }
+
     private static WebApplication BuildApplication<TQuery, TResponse>(
         StubQueryHandler<TQuery, TResponse> handler,
         Action<IServiceCollection>? registerApplication = null)
@@ -143,11 +172,18 @@ public sealed class CustomerOwnershipEndpointExecutionTests
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
         builder.Services.AddRouting();
+        builder.Services.AddControllers()
+            .AddApplicationPart(typeof(BasketsController).Assembly)
+            .AddApplicationPart(typeof(NotificationsController).Assembly)
+            .AddApplicationPart(typeof(OrdersController).Assembly)
+            .AddApplicationPart(typeof(PaymentsController).Assembly)
+            .AddApplicationPart(typeof(ShipmentsController).Assembly);
         builder.Services.AddAuthorization();
         builder.Services.AddECommerceLocalization();
         builder.Services.AddSingleton<ICustomerOwnershipAuthorizer, RejectingCustomerOwnershipAuthorizer>();
         registerApplication?.Invoke(builder.Services);
         builder.Services.AddSingleton<IQueryHandler<TQuery, TResponse>>(handler);
+        builder.Services.AddSingleton<MediatR.IRequestHandler<TQuery, TResponse>>(handler);
         return builder.Build();
     }
 
@@ -162,7 +198,7 @@ public sealed class CustomerOwnershipEndpointExecutionTests
                 .SelectMany(source => source.Endpoints)
                 .OfType<RouteEndpoint>(),
             candidate =>
-                candidate.RoutePattern.RawText == routePattern &&
+                Normalize(candidate.RoutePattern.RawText) == Normalize(routePattern) &&
                 candidate.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods
                     .Contains(method, StringComparer.Ordinal) == true);
         DefaultHttpContext context = new()
@@ -176,6 +212,11 @@ public sealed class CustomerOwnershipEndpointExecutionTests
 
         await endpoint.RequestDelegate!(context);
         return context;
+    }
+
+    private static string Normalize(string? pattern)
+    {
+        return $"/{pattern?.Trim('/')}";
     }
 
     private static async Task AssertErrorAsync(
@@ -222,5 +263,17 @@ public sealed class CustomerOwnershipEndpointExecutionTests
             DateTimeOffset.UnixEpoch,
             DateTimeOffset.UnixEpoch,
             []);
+    }
+
+    private static ShipmentResponse CreateShipment(Guid orderId, Guid customerId)
+    {
+        return new ShipmentResponse(
+            Guid.NewGuid(),
+            orderId,
+            customerId,
+            "DEMO-TRACKING",
+            ShipmentStatus.Created,
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
     }
 }

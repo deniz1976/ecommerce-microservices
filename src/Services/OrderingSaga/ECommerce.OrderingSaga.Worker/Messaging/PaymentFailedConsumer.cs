@@ -1,23 +1,23 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.OrderingSaga.Application.Commands.ProcessWorkflowEvent;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.OrderingSaga.Worker.Messaging;
 
 public sealed class PaymentFailedConsumer : IConsumer<PaymentFailed>
 {
-    private readonly ICommandHandler<ProcessWorkflowEventCommand<PaymentFailed>> commandHandler;
+    private readonly ISender sender;
 
     public PaymentFailedConsumer(
-        ICommandHandler<ProcessWorkflowEventCommand<PaymentFailed>> commandHandler)
+        ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public Task Consume(ConsumeContext<PaymentFailed> context)
     {
-        return commandHandler.HandleAsync(
+        return sender.Send(
             new ProcessWorkflowEventCommand<PaymentFailed>(context.Message),
             context.CancellationToken);
     }

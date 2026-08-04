@@ -9,9 +9,9 @@ import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { PaymentSummary } from "@/components/customer/payment-summary"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ApiError } from "@/lib/api/client"
-import { getOrder } from "@/lib/api/orders"
+import { getOrder, requestOrderCancellation } from "@/lib/api/orders"
 import { useI18n } from "@/lib/i18n/provider"
 import { getOrderStatusName, orderProgress } from "@/lib/orders/status"
 import { cn } from "@/lib/utils"
@@ -26,6 +26,8 @@ export function OrderDetail() {
   const { locale, t } = useI18n()
   const params = useParams<{ id: string }>()
   const [state, setState] = useState<DetailState>({ status: "loading" })
+  const [cancelling, setCancelling] = useState(false)
+  const [cancellationMessage, setCancellationMessage] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
@@ -56,6 +58,26 @@ export function OrderDetail() {
       if (timer) clearTimeout(timer)
     }
   }, [params.id])
+
+  async function handleCancellation() {
+    if (state.status !== "ready") return
+
+    setCancelling(true)
+    setCancellationMessage(null)
+    try {
+      const order = await requestOrderCancellation(state.order.id)
+      setState({ status: "ready", order })
+      setCancellationMessage(t.orders.cancellationRequested)
+    } catch (error) {
+      setCancellationMessage(
+        error instanceof ApiError && error.status === 409
+          ? t.orders.orderNotCancellable
+          : t.orders.cancellationFailed,
+      )
+    } finally {
+      setCancelling(false)
+    }
+  }
 
   return (
     <div className="min-h-svh bg-muted/30">
@@ -90,10 +112,29 @@ export function OrderDetail() {
                 <h1 className="mt-1 font-mono text-lg font-semibold">{state.order.id.toUpperCase()}</h1>
                 <p className="mt-2 text-sm text-muted-foreground">{formatDate(state.order.createdAt, locale)}</p>
               </div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
-                <PackageCheck className="size-4" />
-                {t.orders.status[getOrderStatusName(state.order.status)]}
-              </span>
+              <div className="flex flex-col items-end gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
+                  <PackageCheck className="size-4" />
+                  {t.orders.status[getOrderStatusName(state.order.status)]}
+                </span>
+                {state.order.status <= 1 ? (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    disabled={cancelling}
+                    onClick={handleCancellation}
+                  >
+                    {cancelling ? <Loader2 className="animate-spin" /> : <X />}
+                    {cancelling ? t.orders.cancellingOrder : t.orders.cancelOrder}
+                  </Button>
+                ) : null}
+                {cancellationMessage ? (
+                  <p className="max-w-xs text-right text-xs text-muted-foreground">
+                    {cancellationMessage}
+                  </p>
+                ) : null}
+              </div>
             </div>
             <OrderProgress
               status={getOrderStatusName(state.order.status)}
@@ -158,15 +199,20 @@ function OrderProgress({
   locale: "en" | "tr"
 }) {
   const cancelled = status === "Cancelled"
+  const cancellationPending = status === "CancellationRequested"
   const currentIndex = orderProgress.indexOf(status)
-  const steps = cancelled ? ["Submitted", "Cancelled"] as const : orderProgress
+  const steps = cancelled
+    ? ["Submitted", "Cancelled"] as const
+    : cancellationPending
+      ? ["Submitted", "CancellationRequested"] as const
+      : orderProgress
   const cancellation = history.find((entry) => getOrderStatusName(entry.status) === "Cancelled")
 
   return (
     <div className="border-b border-border p-6">
       <ol className="grid gap-3 sm:grid-cols-5">
         {steps.map((step, index) => {
-          const complete = cancelled ? index === 0 : index <= currentIndex
+          const complete = cancelled || cancellationPending ? index === 0 : index <= currentIndex
           const active = step === status
           const entry = history.find((item) => getOrderStatusName(item.status) === step)
           return (
@@ -176,9 +222,9 @@ function OrderProgress({
                 complete || active
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border text-muted-foreground",
-                step === "Cancelled" && "border-destructive bg-destructive text-destructive-foreground",
+                (step === "Cancelled" || step === "CancellationRequested") && "border-destructive bg-destructive text-destructive-foreground",
               )}>
-                {step === "Cancelled" ? <X className="size-3.5" /> : complete ? <Check className="size-3.5" /> : index + 1}
+                {step === "Cancelled" || step === "CancellationRequested" ? <X className="size-3.5" /> : complete ? <Check className="size-3.5" /> : index + 1}
               </span>
               <span>
                 <span className={active ? "font-medium text-foreground" : "text-muted-foreground"}>

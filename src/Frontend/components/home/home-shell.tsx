@@ -28,6 +28,7 @@ export function HomeShell() {
   const { t } = useI18n()
   const router = useRouter()
   const [state, setState] = useState<AuthState>({ status: "loading" })
+  const [selectedWorkspace, setSelectedWorkspace] = useState<"Admin" | "Seller" | "Customer" | null>(null)
   const [signingOut, setSigningOut] = useState(false)
 
   useEffect(() => {
@@ -65,16 +66,40 @@ export function HomeShell() {
   }
 
   const { profile } = state
+  const activeWorkspace =
+    selectedWorkspace && profile.roles.includes(selectedWorkspace)
+      ? selectedWorkspace
+      : profile.roles.includes("Admin")
+        ? "Admin"
+        : profile.roles.includes("Seller")
+          ? "Seller"
+          : profile.roles.includes("Customer")
+            ? "Customer"
+            : null
 
-  if (profile.roles.includes("Admin")) {
-    return <AdminDashboard profile={profile} />
+  if (activeWorkspace === "Admin") {
+    return (
+      <AdminDashboard
+        profile={profile}
+        onOpenSellerWorkspace={profile.roles.includes("Seller")
+          ? () => setSelectedWorkspace("Seller")
+          : undefined}
+      />
+    )
   }
 
-  if (profile.roles.includes("Seller")) {
-    return <SellerDashboard profile={profile} />
+  if (activeWorkspace === "Seller") {
+    return (
+      <SellerDashboard
+        profile={profile}
+        onOpenAdminWorkspace={profile.roles.includes("Admin")
+          ? () => setSelectedWorkspace("Admin")
+          : undefined}
+      />
+    )
   }
 
-  if (profile.roles.includes("Customer")) {
+  if (activeWorkspace === "Customer") {
     return <CustomerDashboard profile={profile} />
   }
 

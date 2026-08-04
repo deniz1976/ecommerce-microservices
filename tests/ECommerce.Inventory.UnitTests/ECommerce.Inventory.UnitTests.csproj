@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Services\Inventory\ECommerce.Inventory.Application\ECommerce.Inventory.Application.csproj" />
     <ProjectReference Include="..\..\src\Services\Inventory\ECommerce.Inventory.Domain\ECommerce.Inventory.Domain.csproj" />
   </ItemGroup>
 

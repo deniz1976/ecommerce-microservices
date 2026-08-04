@@ -2,7 +2,6 @@ using ECommerce.BuildingBlocks.EventBus;
 using ECommerce.BuildingBlocks.Localization;
 using ECommerce.BuildingBlocks.Observability;
 using ECommerce.BuildingBlocks.Security;
-using ECommerce.Ordering.Api.Orders;
 using ECommerce.Ordering.Application;
 using ECommerce.Ordering.Infrastructure;
 using ECommerce.Ordering.Infrastructure.Messaging;
@@ -12,6 +11,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 const string serviceName = "ECommerce.Ordering.Api";
 
 builder.Services.AddProblemDetails();
+builder.Services.AddControllers();
 builder.Services.AddECommerceLocalization();
 builder.Services.AddECommerceObservability(builder.Configuration, serviceName);
 builder.Services.AddOidcReadySecurity(builder.Configuration);
@@ -32,6 +32,6 @@ app.UseECommerceSecurity();
 
 app.MapHealthChecks("/health/live").AllowAnonymous();
 app.MapHealthChecks("/health/ready").AllowAnonymous();
-app.MapOrderEndpoints();
+app.MapControllers();
 
 app.Run();

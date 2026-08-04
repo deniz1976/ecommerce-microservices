@@ -1,13 +1,11 @@
 using ECommerce.BuildingBlocks.Contracts.Persistence;
-using ECommerce.Ordering.Application.Orders;
 using ECommerce.Ordering.Domain;
 
 namespace ECommerce.Ordering.UnitTests;
 
 internal sealed class OrderServiceFakeOrderRepository :
     IRepository<Order, Guid>,
-    IUnitOfWork,
-    IOrderReader
+    IUnitOfWork
 {
     public List<Order> Orders { get; } = [];
 
@@ -15,12 +13,6 @@ internal sealed class OrderServiceFakeOrderRepository :
 
     public Task<Order?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         Task.FromResult(Orders.FirstOrDefault(x => x.Id == id));
-
-    public Task<IReadOnlyCollection<Order>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken)
-    {
-        IReadOnlyCollection<Order> orders = Orders.Where(x => x.CustomerId == customerId).ToArray();
-        return Task.FromResult(orders);
-    }
 
     public void Add(Order order) => Orders.Add(order);
 

@@ -1,23 +1,13 @@
 using ECommerce.Basket.Api.Baskets;
-using ECommerce.Basket.Application;
 using ECommerce.BuildingBlocks.Security;
-using ECommerce.Catalog.Api.Metrics;
 using ECommerce.Catalog.Api.Products;
-using ECommerce.Catalog.Application;
-using ECommerce.Catalog.Api.References;
-using ECommerce.Catalog.Api.Stores;
 using ECommerce.Identity.Api.Auth;
-using ECommerce.Identity.Api.Users;
-using ECommerce.Identity.Application;
 using ECommerce.Inventory.Api.Inventory;
-using ECommerce.Inventory.Application;
 using ECommerce.Notification.Api.Hubs;
 using ECommerce.Notification.Api.Notifications;
-using ECommerce.Notification.Application;
 using ECommerce.Ordering.Api.Orders;
-using ECommerce.Ordering.Application;
 using ECommerce.Payment.Api.Payments;
-using ECommerce.Payment.Application;
+using ECommerce.Shipping.Api.Shipments;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
@@ -31,7 +21,6 @@ public sealed class EndpointSecurityMetadataTests
     public void BasketRoutesRequireAuthenticatedUser()
     {
         using WebApplication app = BuildApplication();
-        app.MapBasketEndpoints();
 
         AssertPolicyOnEveryRoute(app, "/api/v1/baskets", AuthorizationPolicies.AuthenticatedUser);
     }
@@ -40,7 +29,6 @@ public sealed class EndpointSecurityMetadataTests
     public void OrderingRoutesRequireAuthenticatedUser()
     {
         using WebApplication app = BuildApplication();
-        app.MapOrderEndpoints();
 
         AssertPolicyOnEveryRoute(app, "/api/v1/orders", AuthorizationPolicies.AuthenticatedUser);
     }
@@ -49,22 +37,48 @@ public sealed class EndpointSecurityMetadataTests
     public void PaymentRoutesRequireAuthenticatedUser()
     {
         using WebApplication app = BuildApplication();
-        app.MapPaymentEndpoints();
 
         AssertPolicyOnEveryRoute(app, "/api/v1/payments", AuthorizationPolicies.AuthenticatedUser);
+    }
+
+    [Fact]
+    public void ShippingRoutesRequireAuthenticatedUser()
+    {
+        using WebApplication app = BuildApplication();
+
+        AssertPolicyOnEveryRoute(
+            app,
+            "/api/v1/shipments",
+            AuthorizationPolicies.AuthenticatedUser);
+        AssertPolicy(
+            app,
+            "/api/v1/shipments/manage",
+            "GET",
+            AuthorizationPolicies.Admin);
     }
 
     [Fact]
     public void DirectOrderCreationRequiresTrustedOrderWriter()
     {
         using WebApplication app = BuildApplication();
-        app.MapOrderEndpoints();
 
         AssertPolicy(
             app,
-            "/api/v1/orders/",
+            "/api/v1/orders",
             "POST",
             AuthorizationPolicies.TrustedOrderWrite);
+    }
+
+    [Fact]
+    public void OrderCancellationRequiresAuthenticatedUser()
+    {
+        using WebApplication app = BuildApplication();
+
+        AssertPolicy(
+            app,
+            "/api/v1/orders/{id:guid}/cancellation",
+            "PUT",
+            AuthorizationPolicies.AuthenticatedUser);
     }
 
     [Fact]
@@ -84,7 +98,6 @@ public sealed class EndpointSecurityMetadataTests
     public void NotificationHistoryRoutesRequireAuthenticatedUser()
     {
         using WebApplication app = BuildApplication();
-        app.MapNotificationEndpoints();
 
         AssertPolicyOnEveryRoute(
             app,
@@ -93,11 +106,11 @@ public sealed class EndpointSecurityMetadataTests
     }
 
     [Theory]
-    [InlineData("Basket", "ECommerce.Basket.Api", "Baskets", "BasketEndpoints.cs", 5)]
-    [InlineData("Ordering", "ECommerce.Ordering.Api", "Orders", "OrderEndpoints.cs", 3)]
-    [InlineData("Payment", "ECommerce.Payment.Api", "Payments", "PaymentEndpoints.cs", 1)]
+    [InlineData("Basket", "ECommerce.Basket.Api", "Baskets", "BasketsController.cs", 5)]
+    [InlineData("Ordering", "ECommerce.Ordering.Api", "Orders", "OrdersController.cs", 4)]
+    [InlineData("Payment", "ECommerce.Payment.Api", "Payments", "PaymentsController.cs", 1)]
     [InlineData("Notification", "ECommerce.Notification.Api", "Hubs", "NotificationsHub.cs", 1)]
-    [InlineData("Notification", "ECommerce.Notification.Api", "Notifications", "NotificationEndpoints.cs", 2)]
+    [InlineData("Notification", "ECommerce.Notification.Api", "Notifications", "NotificationsController.cs", 3)]
     public void CustomerResourceEndpointsEnforceOwnership(
         string service,
         string project,
@@ -121,14 +134,8 @@ public sealed class EndpointSecurityMetadataTests
     public void DocumentedPublicServiceRoutesExplicitlyAllowAnonymous()
     {
         using WebApplication app = BuildApplication();
-        app.MapProductEndpoints();
-        app.MapCatalogReferenceEndpoints();
-        app.MapStoreEndpoints();
-        app.MapInventoryEndpoints();
-        app.MapUserEndpoints();
-        app.MapAuthEndpoints();
 
-        AssertAnonymous(app, "/api/v1/products/", "GET");
+        AssertAnonymous(app, "/api/v1/products", "GET");
         AssertAnonymous(app, "/api/v1/products/{id:guid}", "GET");
         AssertAnonymous(app, "/api/v1/catalog-references/categories", "GET");
         AssertAnonymous(app, "/api/v1/catalog-references/brands", "GET");
@@ -141,16 +148,14 @@ public sealed class EndpointSecurityMetadataTests
     public void CatalogWritesRequireSellerOrAdmin()
     {
         using WebApplication app = BuildApplication();
-        app.MapProductEndpoints();
-        app.MapProductImageEndpoints();
-        app.MapStoreEndpoints();
 
-        AssertPolicy(app, "/api/v1/products/", "POST", AuthorizationPolicies.SellerOrAdmin);
+        AssertPolicy(app, "/api/v1/products", "POST", AuthorizationPolicies.SellerOrAdmin);
         AssertPolicy(app, "/api/v1/products/{id:guid}", "PUT", AuthorizationPolicies.SellerOrAdmin);
-        AssertPolicy(app, "/api/v1/products/{productId:guid}/images/", "POST", AuthorizationPolicies.SellerOrAdmin);
+        AssertPolicy(app, "/api/v1/products/{productId:guid}/images", "POST", AuthorizationPolicies.SellerOrAdmin);
         AssertPolicy(app, "/api/v1/products/{productId:guid}/images/{imageId:guid}/main", "PUT", AuthorizationPolicies.SellerOrAdmin);
         AssertPolicy(app, "/api/v1/products/{productId:guid}/images/{imageId:guid}", "DELETE", AuthorizationPolicies.SellerOrAdmin);
-        AssertPolicy(app, "/api/v1/stores/", "POST", AuthorizationPolicies.SellerOrAdmin);
+        AssertPolicy(app, "/api/v1/stores", "POST", AuthorizationPolicies.SellerOrAdmin);
+        AssertPolicy(app, "/api/v1/stores/{id:guid}", "PUT", AuthorizationPolicies.SellerOrAdmin);
         AssertPolicy(app, "/api/v1/stores/mine", "GET", AuthorizationPolicies.SellerOrAdmin);
     }
 
@@ -158,7 +163,6 @@ public sealed class EndpointSecurityMetadataTests
     public void CatalogManagementReadsRequireSellerOrAdmin()
     {
         using WebApplication app = BuildApplication();
-        app.MapProductEndpoints();
 
         AssertPolicy(app, "/api/v1/products/manage", "GET", AuthorizationPolicies.SellerOrAdmin);
         AssertPolicy(app, "/api/v1/products/manage/{id:guid}", "GET", AuthorizationPolicies.SellerOrAdmin);
@@ -168,41 +172,113 @@ public sealed class EndpointSecurityMetadataTests
     public void CatalogMetricsRequireAdmin()
     {
         using WebApplication app = BuildApplication();
-        app.MapCatalogMetricsEndpoints();
 
-        AssertPolicy(app, "/api/v1/catalog-metrics/", "GET", AuthorizationPolicies.Admin);
+        AssertPolicy(app, "/api/v1/catalog-metrics", "GET", AuthorizationPolicies.Admin);
+    }
+
+    [Fact]
+    public void ManagedStoreSearchRequiresAdmin()
+    {
+        using WebApplication app = BuildApplication();
+
+        AssertPolicy(app, "/api/v1/stores/manage", "GET", AuthorizationPolicies.Admin);
+    }
+
+    [Fact]
+    public void ManagedOrderSearchRequiresAdmin()
+    {
+        using WebApplication app = BuildApplication();
+
+        AssertPolicy(app, "/api/v1/orders/manage", "GET", AuthorizationPolicies.Admin);
+    }
+
+    [Fact]
+    public void ManagedPaymentSearchRequiresAdmin()
+    {
+        using WebApplication app = BuildApplication();
+
+        AssertPolicy(app, "/api/v1/payments/manage", "GET", AuthorizationPolicies.Admin);
+    }
+
+    [Fact]
+    public void InventoryWritesRequireInventoryManager()
+    {
+        using WebApplication app = BuildApplication();
+
+        AssertPolicy(
+            app,
+            "/api/v1/inventory/items/{productId:guid}",
+            "PUT",
+            AuthorizationPolicies.InventoryManage);
+    }
+
+    [Fact]
+    public void ManagedInventorySearchRequiresAdmin()
+    {
+        using WebApplication app = BuildApplication();
+
+        AssertPolicy(
+            app,
+            "/api/v1/inventory/items/manage",
+            "GET",
+            AuthorizationPolicies.Admin);
+    }
+
+    [Fact]
+    public void CatalogReferenceWritesRequireAdmin()
+    {
+        using WebApplication app = BuildApplication();
+
+        AssertPolicy(
+            app,
+            "/api/v1/catalog-references/categories",
+            "POST",
+            AuthorizationPolicies.Admin);
+        AssertPolicy(
+            app,
+            "/api/v1/catalog-references/brands",
+            "POST",
+            AuthorizationPolicies.Admin);
+        AssertPolicy(
+            app,
+            "/api/v1/catalog-references/manage/categories",
+            "GET",
+            AuthorizationPolicies.Admin);
+        AssertPolicy(
+            app,
+            "/api/v1/catalog-references/manage/brands",
+            "GET",
+            AuthorizationPolicies.Admin);
+        AssertPolicy(
+            app,
+            "/api/v1/catalog-references/categories/{id:guid}",
+            "PUT",
+            AuthorizationPolicies.Admin);
+        AssertPolicy(
+            app,
+            "/api/v1/catalog-references/brands/{id:guid}",
+            "PUT",
+            AuthorizationPolicies.Admin);
     }
 
     [Fact]
     public void UserReadsRequireAdminWhileRegistrationRemainsAnonymous()
     {
         using WebApplication app = BuildApplication();
-        app.MapUserEndpoints();
 
-        AssertPolicy(app, "/api/v1/users/", "GET", AuthorizationPolicies.Admin);
+        AssertPolicy(app, "/api/v1/users", "GET", AuthorizationPolicies.Admin);
         AssertPolicy(app, "/api/v1/users/{id:guid}", "GET", AuthorizationPolicies.Admin);
-        AssertAnonymous(app, "/api/v1/users/", "POST");
+        AssertAnonymous(app, "/api/v1/users", "POST");
     }
 
     [Fact]
     public void EveryServiceApiRouteHasExactlyOneExplicitAccessClassification()
     {
         using WebApplication app = BuildApplication();
-        app.MapBasketEndpoints();
-        app.MapProductEndpoints();
-        app.MapProductImageEndpoints();
-        app.MapCatalogReferenceEndpoints();
-        app.MapStoreEndpoints();
-        app.MapCatalogMetricsEndpoints();
-        app.MapAuthEndpoints();
-        app.MapUserEndpoints();
-        app.MapInventoryEndpoints();
-        app.MapNotificationEndpoints();
-        app.MapOrderEndpoints();
-        app.MapPaymentEndpoints();
 
         RouteEndpoint[] routes = Routes(app)
-            .Where(endpoint => endpoint.RoutePattern.RawText?.StartsWith("/api/v1/", StringComparison.Ordinal) == true)
+            .Where(endpoint => Normalize(endpoint.RoutePattern.RawText)
+                .StartsWith("/api/v1/", StringComparison.Ordinal))
             .ToArray();
 
         Assert.NotEmpty(routes);
@@ -224,22 +300,25 @@ public sealed class EndpointSecurityMetadataTests
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
         builder.Services.AddAuthorization();
-        builder.Services.AddBasketApplication();
-        builder.Services.AddCatalogApplication();
-        builder.Services.AddIdentityApplication();
-        builder.Services.AddInventoryApplication();
-        builder.Services.AddNotificationApplication();
-        builder.Services.AddOrderingApplication();
-        builder.Services.AddPaymentApplication();
-        builder.Services.AddSingleton<ICustomerOwnershipAuthorizer, AllowAllCustomerOwnershipAuthorizer>();
-        builder.Services.AddSingleton<IAuthenticatedUserResolver, FixedAuthenticatedUserResolver>();
-        return builder.Build();
+        builder.Services.AddControllers()
+            .AddApplicationPart(typeof(BasketsController).Assembly)
+            .AddApplicationPart(typeof(ProductsController).Assembly)
+            .AddApplicationPart(typeof(AuthController).Assembly)
+            .AddApplicationPart(typeof(InventoryController).Assembly)
+            .AddApplicationPart(typeof(NotificationsController).Assembly)
+            .AddApplicationPart(typeof(OrdersController).Assembly)
+            .AddApplicationPart(typeof(PaymentsController).Assembly)
+            .AddApplicationPart(typeof(ShipmentsController).Assembly);
+        WebApplication app = builder.Build();
+        app.MapControllers();
+        return app;
     }
 
     private static void AssertPolicyOnEveryRoute(WebApplication app, string prefix, string policy)
     {
         RouteEndpoint[] routes = Routes(app)
-            .Where(endpoint => endpoint.RoutePattern.RawText?.StartsWith(prefix, StringComparison.Ordinal) == true)
+            .Where(endpoint => Normalize(endpoint.RoutePattern.RawText)
+                .StartsWith(Normalize(prefix), StringComparison.Ordinal))
             .ToArray();
 
         Assert.NotEmpty(routes);
@@ -251,7 +330,7 @@ public sealed class EndpointSecurityMetadataTests
     private static void AssertAnonymous(WebApplication app, string pattern, string method)
     {
         RouteEndpoint route = Assert.Single(Routes(app), endpoint =>
-            endpoint.RoutePattern.RawText == pattern &&
+            Normalize(endpoint.RoutePattern.RawText) == Normalize(pattern) &&
             endpoint.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods.Contains(method, StringComparer.Ordinal) == true);
 
         Assert.NotNull(route.Metadata.GetMetadata<IAllowAnonymous>());
@@ -260,7 +339,7 @@ public sealed class EndpointSecurityMetadataTests
     private static void AssertPolicy(WebApplication app, string pattern, string method, string policy)
     {
         RouteEndpoint route = Assert.Single(Routes(app), endpoint =>
-            endpoint.RoutePattern.RawText == pattern &&
+            Normalize(endpoint.RoutePattern.RawText) == Normalize(pattern) &&
             endpoint.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods.Contains(method, StringComparer.Ordinal) == true);
 
         Assert.Contains(route.Metadata.GetOrderedMetadata<IAuthorizeData>(), metadata => metadata.Policy == policy);
@@ -271,6 +350,11 @@ public sealed class EndpointSecurityMetadataTests
         return ((IEndpointRouteBuilder)app).DataSources
             .SelectMany(source => source.Endpoints)
             .OfType<RouteEndpoint>();
+    }
+
+    private static string Normalize(string? pattern)
+    {
+        return $"/{pattern?.Trim('/')}";
     }
 
     private static string FindRepositoryRoot()

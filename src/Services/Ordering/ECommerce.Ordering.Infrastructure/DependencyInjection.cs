@@ -21,6 +21,9 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, OrderingUnitOfWork>();
         services.AddScoped<IOrderReader, OrderReader>();
         services.AddScoped<IOrderSubmittedPublisher, MassTransitOrderSubmittedPublisher>();
+        services.AddScoped<
+            IOrderCancellationRequestedPublisher,
+            MassTransitOrderCancellationRequestedPublisher>();
         return services;
     }
 }

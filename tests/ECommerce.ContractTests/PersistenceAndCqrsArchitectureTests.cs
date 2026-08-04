@@ -32,7 +32,7 @@ public sealed class PersistenceAndCqrsArchitectureTests
         string[] violations = Directory
             .EnumerateFiles(servicesRoot, "*.cs", SearchOption.AllDirectories)
             .Where(path =>
-                path.EndsWith("Endpoints.cs", StringComparison.Ordinal) ||
+                path.EndsWith("Controller.cs", StringComparison.Ordinal) ||
                 path.EndsWith("Consumer.cs", StringComparison.Ordinal))
             .Where(path => directServiceDependency.IsMatch(File.ReadAllText(path)))
             .Select(path => Path.GetRelativePath(servicesRoot, path))
@@ -58,6 +58,19 @@ public sealed class PersistenceAndCqrsArchitectureTests
     }
 
     [Fact]
+    public void ControllersAndConsumersDispatchThroughMediatR()
+    {
+        string servicesRoot = Path.Combine(FindRepositoryRoot(), "src", "Services");
+
+        string[] violations = EnumerateTransportEntryPoints(servicesRoot)
+            .Where(path => !File.ReadAllText(path).Contains("ISender", StringComparison.Ordinal))
+            .Select(path => Path.GetRelativePath(servicesRoot, path))
+            .ToArray();
+
+        Assert.Empty(violations);
+    }
+
+    [Fact]
     public void ApplicationProjectsDoNotDependOnEntityFrameworkCoreOrDbContext()
     {
         string servicesRoot = Path.Combine(FindRepositoryRoot(), "src", "Services");
@@ -67,6 +80,23 @@ public sealed class PersistenceAndCqrsArchitectureTests
 
         string[] violations = EnumerateApplicationFiles(servicesRoot)
             .Where(path => persistenceDependency.IsMatch(File.ReadAllText(path)))
+            .Select(path => Path.GetRelativePath(servicesRoot, path))
+            .ToArray();
+
+        Assert.Empty(violations);
+    }
+
+    [Fact]
+    public void CqrsHandlersDelegateWithoutPersistenceOrReaderPorts()
+    {
+        string servicesRoot = Path.Combine(FindRepositoryRoot(), "src", "Services");
+        Regex directPersistenceDependency = new(
+            @"\b(?:IRepository\s*<|IUnitOfWork\b|I\w+Reader\b|DbContext\b|DbSet\s*<)",
+            RegexOptions.CultureInvariant);
+
+        string[] violations = EnumerateApplicationFiles(servicesRoot)
+            .Where(path => path.EndsWith("Handler.cs", StringComparison.Ordinal))
+            .Where(path => directPersistenceDependency.IsMatch(File.ReadAllText(path)))
             .Select(path => Path.GetRelativePath(servicesRoot, path))
             .ToArray();
 
@@ -191,7 +221,7 @@ public sealed class PersistenceAndCqrsArchitectureTests
         return Directory
             .EnumerateFiles(servicesRoot, "*.cs", SearchOption.AllDirectories)
             .Where(path =>
-                path.EndsWith("Endpoints.cs", StringComparison.Ordinal) ||
+                path.EndsWith("Controller.cs", StringComparison.Ordinal) ||
                 path.EndsWith("Consumer.cs", StringComparison.Ordinal));
     }
 

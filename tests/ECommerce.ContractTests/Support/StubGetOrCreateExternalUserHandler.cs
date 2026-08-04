@@ -1,12 +1,10 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Results;
-using ECommerce.Identity.Application.Commands.GetOrCreateExternalUser;
 using ECommerce.Identity.Application.Users;
 
 namespace ECommerce.ContractTests;
 
 internal sealed class StubGetOrCreateExternalUserHandler
-    : ICommandHandler<GetOrCreateExternalUserCommand, Result<UserResponse>>
+    : IExternalUserProvisioningService
 {
     private readonly Result<UserResponse> result;
 
@@ -15,8 +13,8 @@ internal sealed class StubGetOrCreateExternalUserHandler
         this.result = result;
     }
 
-    public Task<Result<UserResponse>> HandleAsync(
-        GetOrCreateExternalUserCommand command,
+    public Task<Result<UserResponse>> GetOrCreateExternalAsync(
+        ExternalUserProfile profile,
         CancellationToken cancellationToken)
     {
         return Task.FromResult(result);

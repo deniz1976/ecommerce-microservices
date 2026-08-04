@@ -28,6 +28,10 @@ public sealed class ChangeOrderStatusCommandHandler
                 command.CustomerId,
                 command.ReasonCode,
                 cancellationToken),
+            OrderStatusChange.RejectCancellation => orderStatusService.RejectCancellationAsync(
+                command.OrderId,
+                command.CustomerId,
+                cancellationToken),
             OrderStatusChange.InventoryReserved => orderStatusService.InventoryReservedAsync(
                 command.OrderId,
                 command.CustomerId,

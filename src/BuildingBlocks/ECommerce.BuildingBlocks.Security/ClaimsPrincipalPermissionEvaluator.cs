@@ -2,7 +2,7 @@ using System.Security.Claims;
 
 namespace ECommerce.BuildingBlocks.Security;
 
-internal static class ClaimsPrincipalPermissionEvaluator
+public static class ClaimsPrincipalPermissionEvaluator
 {
     public static bool HasPermission(ClaimsPrincipal principal, string permission)
     {

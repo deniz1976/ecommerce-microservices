@@ -14,11 +14,16 @@ public sealed class DemoPaymentProvider : IPaymentProvider
 
     public string Name => "Demo";
 
-    public Task<PaymentProviderAuthorizationResult> AuthorizeAsync(
+    public async Task<PaymentProviderAuthorizationResult> AuthorizeAsync(
         PaymentProviderAuthorizationRequest request,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
+        if (options.AuthorizationDelayMilliseconds > 0)
+        {
+            await Task.Delay(options.AuthorizationDelayMilliseconds, cancellationToken);
+        }
 
         if (options.Scenario == DemoPaymentScenario.TransientFailure)
         {
@@ -28,21 +33,19 @@ public sealed class DemoPaymentProvider : IPaymentProvider
 
         if (options.Scenario == DemoPaymentScenario.Decline)
         {
-            return Task.FromResult(
-                new PaymentProviderAuthorizationResult(
-                    false,
-                    null,
-                    null,
-                    "The demo payment provider simulated a decline."));
+            return new PaymentProviderAuthorizationResult(
+                false,
+                null,
+                null,
+                "The demo payment provider simulated a decline.");
         }
 
         string orderReference = request.OrderId.ToString("N");
-        return Task.FromResult(
-            new PaymentProviderAuthorizationResult(
-                true,
-                $"demo_payment_{orderReference}",
-                $"demo_authorization_{orderReference}",
-                null));
+        return new PaymentProviderAuthorizationResult(
+            true,
+            $"demo_payment_{orderReference}",
+            $"demo_authorization_{orderReference}",
+            null);
     }
 
     public Task<PaymentProviderRefundResult> RefundAsync(

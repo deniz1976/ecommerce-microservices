@@ -67,7 +67,7 @@ services:
     ports:
       - "4317:4317"
       - "4318:4318"
-      - "13133:13133"
+      - "${OTEL_COLLECTOR_HEALTH_HOST_PORT:-14133}:13133"
       - "8889:8889"
     depends_on:
       jaeger:
@@ -174,6 +174,7 @@ services:
     env_file: *env-file
     environment:
       <<: [*api-env, *managed-env]
+      CatalogClient__TimeoutSeconds: ${CatalogClient__TimeoutSeconds:-5}
     restart: unless-stopped
     ports:
       - "5054:8080"
@@ -188,6 +189,7 @@ services:
     environment:
       <<: [*api-env, *managed-env]
       DemoPayment__Scenario: ${DemoPayment__Scenario:-Success}
+      DemoPayment__AuthorizationDelayMilliseconds: ${DemoPayment__AuthorizationDelayMilliseconds:-0}
     restart: unless-stopped
     ports:
       - "5004:8080"
@@ -265,6 +267,7 @@ services:
     env_file: *env-file
     environment:
       <<: [*api-env, *managed-env]
+      Cors__AllowedOrigins__0: ${CORS_ALLOWED_ORIGIN:-http://localhost:3000}
     restart: unless-stopped
     ports:
       - "5080:8080"

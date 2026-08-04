@@ -10,5 +10,6 @@ public enum WorkflowScenario
     PaymentDecline,
     NotificationSignalR,
     SellerAuthorization,
-    ShippingFailure
+    ShippingFailure,
+    CustomerCancellation
 }

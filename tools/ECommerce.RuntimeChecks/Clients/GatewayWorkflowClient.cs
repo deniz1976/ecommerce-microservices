@@ -56,6 +56,17 @@ internal sealed class GatewayWorkflowClient : IGatewayWorkflowClient
         return PostAsync<OrderResponse>("/gateway/orders", request, cancellationToken);
     }
 
+    public async Task<OrderResponse> RequestOrderCancellationAsync(
+        Guid orderId,
+        CancellationToken cancellationToken)
+    {
+        using HttpRequestMessage request = new(
+            HttpMethod.Put,
+            $"/gateway/orders/{orderId}/cancellation");
+        using HttpResponseMessage response = await httpClient.SendAsync(request, cancellationToken);
+        return await ReadSuccessResponseAsync<OrderResponse>(response, cancellationToken);
+    }
+
     public async Task<OrderResponse> GetOrderAsync(Guid orderId, CancellationToken cancellationToken)
     {
         string path = $"/gateway/orders/{orderId}";

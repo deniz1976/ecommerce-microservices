@@ -84,6 +84,29 @@ public sealed class NotificationServiceTests
         Assert.Equal(1, repository.SaveChangesCount);
     }
 
+    [Fact]
+    public async Task MarkAllReadAsyncMarksOwnedUnreadNotificationsOnce()
+    {
+        FakeNotificationRepository repository = new();
+        FakeLiveNotificationPublisher publisher = new();
+        NotificationService service = CreateService(repository, publisher);
+        NotificationMessage created = await service.CreateAsync(
+            CreateRequest(),
+            CancellationToken.None);
+
+        int first = await service.MarkAllReadAsync(
+            created.CustomerId,
+            CancellationToken.None);
+        int duplicate = await service.MarkAllReadAsync(
+            created.CustomerId,
+            CancellationToken.None);
+
+        Assert.Equal(1, first);
+        Assert.Equal(0, duplicate);
+        Assert.Equal(TimeSpan.Zero, repository.Notification!.ReadAt!.Value.Offset);
+        Assert.Equal(2, repository.SaveChangesCount);
+    }
+
     private static NotificationService CreateService(
         FakeNotificationRepository repository,
         FakeLiveNotificationPublisher publisher)

@@ -20,6 +20,8 @@ export function getOrderStatusName(status: OrderStatus): OrderStatusName {
       return "Confirmed"
     case 5:
       return "Cancelled"
+    case 6:
+      return "CancellationRequested"
     default:
       return "Submitted"
   }

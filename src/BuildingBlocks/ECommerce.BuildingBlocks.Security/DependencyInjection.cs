@@ -139,6 +139,16 @@ public static class DependencyInjection
                             context.User,
                             ApplicationPermissions.InventoryWrite)))
             .AddPolicy(
+                AuthorizationPolicies.InventoryManage,
+                policy => policy
+                    .RequireAuthenticatedUser()
+                    .RequireAssertion(context =>
+                        context.User.IsInRole(ApplicationRoles.Admin) ||
+                        context.User.IsInRole(ApplicationRoles.Seller) ||
+                        ClaimsPrincipalPermissionEvaluator.HasPermission(
+                            context.User,
+                            ApplicationPermissions.InventoryWrite)))
+            .AddPolicy(
                 AuthorizationPolicies.SellerOrAdmin,
                 policy => policy
                     .RequireAuthenticatedUser()

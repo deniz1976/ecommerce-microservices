@@ -47,4 +47,13 @@ public sealed class InventoryItemTests
         Assert.Equal(4, item.ReservedQuantity);
         Assert.Equal(8, item.AvailableQuantity);
     }
+
+    [Fact]
+    public void SetQuantityOnHand_rejects_quantity_below_reserved_stock()
+    {
+        InventoryItem item = new(Guid.NewGuid(), 10);
+        item.Reserve(4);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => item.SetQuantityOnHand(3));
+    }
 }

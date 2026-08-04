@@ -1,7 +1,6 @@
 using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Errors;
 using ECommerce.BuildingBlocks.Contracts.Results;
-using ECommerce.Identity.Application.Commands.GetOrCreateExternalUser;
 using ECommerce.Identity.Application.Users;
 using ECommerce.Identity.Domain;
 using Microsoft.Extensions.Logging;
@@ -11,20 +10,20 @@ namespace ECommerce.Identity.Application.Commands.SelectExternalUserRole;
 public sealed class SelectExternalUserRoleCommandHandler
     : ICommandHandler<SelectExternalUserRoleCommand, Result<UserResponse>>
 {
-    private readonly ICommandHandler<GetOrCreateExternalUserCommand, Result<UserResponse>> getOrCreateHandler;
+    private readonly IExternalUserProvisioningService userService;
     private readonly IExternalRoleSynchronizer externalRoleSynchronizer;
     private readonly ISelfServiceRoleWriter roleWriter;
     private readonly IRoleReconciliationQueue reconciliationQueue;
     private readonly ILogger<SelectExternalUserRoleCommandHandler> logger;
 
     public SelectExternalUserRoleCommandHandler(
-        ICommandHandler<GetOrCreateExternalUserCommand, Result<UserResponse>> getOrCreateHandler,
+        IExternalUserProvisioningService userService,
         IExternalRoleSynchronizer externalRoleSynchronizer,
         ISelfServiceRoleWriter roleWriter,
         IRoleReconciliationQueue reconciliationQueue,
         ILogger<SelectExternalUserRoleCommandHandler> logger)
     {
-        this.getOrCreateHandler = getOrCreateHandler;
+        this.userService = userService;
         this.externalRoleSynchronizer = externalRoleSynchronizer;
         this.roleWriter = roleWriter;
         this.reconciliationQueue = reconciliationQueue;
@@ -43,8 +42,8 @@ public sealed class SelectExternalUserRoleCommandHandler
         }
 
         string role = UserRoleNames.NormalizeSelfServiceRole(requestedRole);
-        Result<UserResponse> syncResult = await getOrCreateHandler.HandleAsync(
-            new GetOrCreateExternalUserCommand(command.Profile),
+        Result<UserResponse> syncResult = await userService.GetOrCreateExternalAsync(
+            command.Profile,
             cancellationToken);
         if (syncResult.IsFailure)
         {

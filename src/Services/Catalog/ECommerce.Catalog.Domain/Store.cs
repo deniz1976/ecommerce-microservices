@@ -29,4 +29,11 @@ public sealed class Store
     public DateTimeOffset CreatedAt { get; private set; }
 
     public DateTimeOffset UpdatedAt { get; private set; }
+
+    public void Update(string name, string slug, DateTimeOffset updatedAt)
+    {
+        Name = name.Trim();
+        Slug = slug.Trim().ToLowerInvariant();
+        UpdatedAt = updatedAt.ToUniversalTime();
+    }
 }

@@ -11,6 +11,7 @@ internal static class CustomerSafeCancellationReason
             ErrorCodes.InsufficientStock => ErrorCodes.InsufficientStock,
             ErrorCodes.PaymentFailed => ErrorCodes.PaymentFailed,
             ErrorCodes.ShipmentFailed => ErrorCodes.ShipmentFailed,
+            ErrorCodes.OrderCancelledByCustomer => ErrorCodes.OrderCancelledByCustomer,
             _ => ErrorCodes.UnexpectedError
         };
     }

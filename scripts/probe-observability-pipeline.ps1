@@ -10,6 +10,12 @@ $repositoryRoot = Split-Path $PSScriptRoot -Parent
 $probeServiceName = "ECommerce.ObservabilityProbe"
 $composeTouched = $false
 $probeSucceeded = $false
+$collectorHealthHostPort = if ($env:OTEL_COLLECTOR_HEALTH_HOST_PORT) {
+    $env:OTEL_COLLECTOR_HEALTH_HOST_PORT
+}
+else {
+    "14133"
+}
 $startTimeUnixNano = [string](
     [DateTimeOffset]::UtcNow.AddMinutes(-1).ToUnixTimeMilliseconds() * 1000000)
 
@@ -289,7 +295,7 @@ try {
 
     Wait-Until `
         -Description "OpenTelemetry Collector health" `
-        -Condition { Test-HttpOk "http://localhost:13133/" }
+        -Condition { Test-HttpOk "http://localhost:$collectorHealthHostPort/" }
     Wait-Until `
         -Description "Prometheus readiness" `
         -Condition { Test-HttpOk "http://localhost:9090/-/ready" }

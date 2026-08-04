@@ -60,7 +60,7 @@ export function AdminCatalogWorkspace() {
     return () => {
       active = false
     }
-  }, [pageNumber, search, statusFilter])
+  }, [locale, pageNumber, search, statusFilter])
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

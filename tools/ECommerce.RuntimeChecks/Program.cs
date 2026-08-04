@@ -33,7 +33,8 @@ try
         new PaymentDeclineWorkflowScenarioCheck(scenarioContext),
         new NotificationSignalRWorkflowScenarioCheck(scenarioContext, notificationLiveDeliveryProbe),
         new SellerAuthorizationWorkflowScenarioCheck(authorizationBoundaryProbe),
-        new ShippingFailureWorkflowScenarioCheck(scenarioContext)
+        new ShippingFailureWorkflowScenarioCheck(scenarioContext),
+        new CustomerCancellationWorkflowScenarioCheck(scenarioContext)
     ];
     WorkflowCheckRunner runner = new(gatewayClient, options, scenarioChecks);
 

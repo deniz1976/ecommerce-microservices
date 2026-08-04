@@ -1,25 +1,25 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.Notification.Application.Commands.CreateNotification;
 using ECommerce.Notification.Application.Notifications;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.Notification.Api.Messaging;
 
 public sealed class PaymentAuthorizedConsumer : IConsumer<PaymentAuthorized>
 {
-    private readonly ICommandHandler<CreateNotificationCommand, NotificationMessage> commandHandler;
+    private readonly ISender sender;
 
     public PaymentAuthorizedConsumer(
-        ICommandHandler<CreateNotificationCommand, NotificationMessage> commandHandler)
+        ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public Task Consume(ConsumeContext<PaymentAuthorized> context)
     {
         (string title, string message) = NotificationText.OrderStatus("payment.authorized", context.Message.OrderId, "Payment has been authorized.");
-        return commandHandler.HandleAsync(
+        return sender.Send(
             new CreateNotificationCommand(
                 new CreateNotificationRequest(
                     context.Message.MessageId,

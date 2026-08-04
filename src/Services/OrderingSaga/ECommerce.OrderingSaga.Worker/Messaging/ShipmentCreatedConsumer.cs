@@ -1,23 +1,23 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.OrderingSaga.Application.Commands.ProcessWorkflowEvent;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.OrderingSaga.Worker.Messaging;
 
 public sealed class ShipmentCreatedConsumer : IConsumer<ShipmentCreated>
 {
-    private readonly ICommandHandler<ProcessWorkflowEventCommand<ShipmentCreated>> commandHandler;
+    private readonly ISender sender;
 
     public ShipmentCreatedConsumer(
-        ICommandHandler<ProcessWorkflowEventCommand<ShipmentCreated>> commandHandler)
+        ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public Task Consume(ConsumeContext<ShipmentCreated> context)
     {
-        return commandHandler.HandleAsync(
+        return sender.Send(
             new ProcessWorkflowEventCommand<ShipmentCreated>(context.Message),
             context.CancellationToken);
     }

@@ -15,8 +15,9 @@ public static class WorkflowScenarios
             "notification-signalr" => WorkflowScenario.NotificationSignalR,
             "seller-authorization" => WorkflowScenario.SellerAuthorization,
             "shipping-failure" => WorkflowScenario.ShippingFailure,
+            "customer-cancellation" => WorkflowScenario.CustomerCancellation,
             _ => throw new ArgumentException(
-                "--scenario must be one of: all, basket-checkout, success, inventory-failure, payment-failure, payment-decline, notification-signalr, seller-authorization, shipping-failure.")
+                "--scenario must be one of: all, basket-checkout, success, inventory-failure, payment-failure, payment-decline, notification-signalr, seller-authorization, shipping-failure, customer-cancellation.")
         };
     }
 }

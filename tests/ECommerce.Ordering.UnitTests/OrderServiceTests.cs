@@ -14,7 +14,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, repository, repository, publisher);
+        OrderService service = new(repository, repository, publisher);
 
         CreateOrderRequest request = CreateValidRequest() with { CustomerId = Guid.Empty };
 
@@ -32,7 +32,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, repository, repository, publisher);
+        OrderService service = new(repository, repository, publisher);
 
         CreateOrderRequest request = CreateValidRequest() with
         {
@@ -59,7 +59,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, repository, repository, publisher);
+        OrderService service = new(repository, repository, publisher);
 
         Guid correlationId = Guid.NewGuid();
         Guid causationId = Guid.NewGuid();
@@ -79,7 +79,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, repository, repository, publisher);
+        OrderService service = new(repository, repository, publisher);
         Guid checkoutId = Guid.NewGuid();
         BasketCheckedOut checkout = new(
             Guid.NewGuid(),

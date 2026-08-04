@@ -72,6 +72,13 @@ internal sealed class WorkflowScenarioContext
             cancellationToken);
     }
 
+    public Task<OrderResponse> RequestOrderCancellationAsync(
+        Guid orderId,
+        CancellationToken cancellationToken)
+    {
+        return gatewayClient.RequestOrderCancellationAsync(orderId, cancellationToken);
+    }
+
     public async Task<OrderResponse> AssertOrderPresentationAsync(
         Guid orderId,
         Guid customerId,

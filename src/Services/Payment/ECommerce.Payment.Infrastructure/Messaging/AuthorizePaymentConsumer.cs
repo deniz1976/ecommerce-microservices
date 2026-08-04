@@ -1,25 +1,24 @@
 using ECommerce.BuildingBlocks.Contracts.Commands;
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.Payment.Application.Commands.AuthorizePayment;
 using ECommerce.Payment.Application.Payments;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.Payment.Infrastructure.Messaging;
 
 public sealed class AuthorizePaymentConsumer : IConsumer<AuthorizePayment>
 {
-    private readonly ICommandHandler<AuthorizePaymentCommand, PaymentAuthorizationResult> commandHandler;
+    private readonly ISender sender;
 
-    public AuthorizePaymentConsumer(
-        ICommandHandler<AuthorizePaymentCommand, PaymentAuthorizationResult> commandHandler)
+    public AuthorizePaymentConsumer(ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public async Task Consume(ConsumeContext<AuthorizePayment> context)
     {
-        PaymentAuthorizationResult result = await commandHandler.HandleAsync(
+        PaymentAuthorizationResult result = await sender.Send(
             new AuthorizePaymentCommand(
                 new PaymentAuthorizationRequest(
                     context.Message.OrderId,

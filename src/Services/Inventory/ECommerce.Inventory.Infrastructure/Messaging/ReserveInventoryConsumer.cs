@@ -1,20 +1,19 @@
 using ECommerce.BuildingBlocks.Contracts.Commands;
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.Inventory.Application.Commands.ReserveInventory;
 using ECommerce.Inventory.Application.Inventory;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.Inventory.Infrastructure.Messaging;
 
 public sealed class ReserveInventoryConsumer : IConsumer<ReserveInventory>
 {
-    private readonly ICommandHandler<ReserveInventoryCommand, InventoryReservationResult> commandHandler;
+    private readonly ISender sender;
 
-    public ReserveInventoryConsumer(
-        ICommandHandler<ReserveInventoryCommand, InventoryReservationResult> commandHandler)
+    public ReserveInventoryConsumer(ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public async Task Consume(ConsumeContext<ReserveInventory> context)
@@ -24,7 +23,7 @@ public sealed class ReserveInventoryConsumer : IConsumer<ReserveInventory>
             context.Message.CustomerId,
             context.Message.Items.Select(x => new InventoryReservationRequestItem(x.ProductId, x.Quantity)).ToArray());
 
-        InventoryReservationResult result = await commandHandler.HandleAsync(
+        InventoryReservationResult result = await sender.Send(
             new ReserveInventoryCommand(request),
             context.CancellationToken);
 

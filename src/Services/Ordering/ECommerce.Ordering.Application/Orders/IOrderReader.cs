@@ -1,10 +1,10 @@
-using ECommerce.Ordering.Domain;
+using ECommerce.BuildingBlocks.Contracts.Results;
 
 namespace ECommerce.Ordering.Application.Orders;
 
 public interface IOrderReader
 {
-    Task<IReadOnlyCollection<Order>> GetByCustomerIdAsync(
-        Guid customerId,
+    Task<PagedResult<OrderSummaryResponse>> SearchAsync(
+        OrderListCriteria criteria,
         CancellationToken cancellationToken);
 }

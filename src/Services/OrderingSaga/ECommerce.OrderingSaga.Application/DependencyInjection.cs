@@ -1,7 +1,7 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.OrderingSaga.Application.Commands.ProcessWorkflowEvent;
 using ECommerce.OrderingSaga.Application.Workflows;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ECommerce.OrderingSaga.Application;
@@ -10,28 +10,33 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddOrderingSagaApplication(this IServiceCollection services)
     {
+        services.AddMediatR(configuration =>
+            configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
         services.AddScoped<OrderWorkflowService>();
         services.AddScoped<
-            ICommandHandler<ProcessWorkflowEventCommand<OrderSubmitted>>,
+            IRequestHandler<ProcessWorkflowEventCommand<OrderSubmitted>>,
             ProcessWorkflowEventCommandHandler<OrderSubmitted>>();
         services.AddScoped<
-            ICommandHandler<ProcessWorkflowEventCommand<InventoryReserved>>,
+            IRequestHandler<ProcessWorkflowEventCommand<InventoryReserved>>,
             ProcessWorkflowEventCommandHandler<InventoryReserved>>();
         services.AddScoped<
-            ICommandHandler<ProcessWorkflowEventCommand<InventoryReservationFailed>>,
+            IRequestHandler<ProcessWorkflowEventCommand<InventoryReservationFailed>>,
             ProcessWorkflowEventCommandHandler<InventoryReservationFailed>>();
         services.AddScoped<
-            ICommandHandler<ProcessWorkflowEventCommand<PaymentAuthorized>>,
+            IRequestHandler<ProcessWorkflowEventCommand<PaymentAuthorized>>,
             ProcessWorkflowEventCommandHandler<PaymentAuthorized>>();
         services.AddScoped<
-            ICommandHandler<ProcessWorkflowEventCommand<PaymentFailed>>,
+            IRequestHandler<ProcessWorkflowEventCommand<PaymentFailed>>,
             ProcessWorkflowEventCommandHandler<PaymentFailed>>();
         services.AddScoped<
-            ICommandHandler<ProcessWorkflowEventCommand<ShipmentCreated>>,
+            IRequestHandler<ProcessWorkflowEventCommand<ShipmentCreated>>,
             ProcessWorkflowEventCommandHandler<ShipmentCreated>>();
         services.AddScoped<
-            ICommandHandler<ProcessWorkflowEventCommand<ShipmentFailed>>,
+            IRequestHandler<ProcessWorkflowEventCommand<ShipmentFailed>>,
             ProcessWorkflowEventCommandHandler<ShipmentFailed>>();
+        services.AddScoped<
+            IRequestHandler<ProcessWorkflowEventCommand<OrderCancellationRequested>>,
+            ProcessWorkflowEventCommandHandler<OrderCancellationRequested>>();
         return services;
     }
 }

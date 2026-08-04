@@ -25,6 +25,17 @@ public sealed class NotificationReader : INotificationReader, INotificationHisto
                 cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<NotificationRecord>> GetUnreadByCustomerAsync(
+        Guid customerId,
+        CancellationToken cancellationToken)
+    {
+        return await dbContext.Notifications
+            .Where(notification =>
+                notification.CustomerId == customerId &&
+                notification.ReadAt == null)
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task<NotificationHistoryPage> SearchByCustomerAsync(
         Guid customerId,
         int pageNumber,

@@ -27,6 +27,12 @@ public sealed class Category
 
     public IReadOnlyCollection<CategoryTranslation> Translations => translations;
 
+    public void Update(string slug, bool isActive)
+    {
+        Slug = slug;
+        IsActive = isActive;
+    }
+
     public void SetTranslation(string languageCode, string name)
     {
         CategoryTranslation? translation = translations.FirstOrDefault(x => x.LanguageCode == languageCode);

@@ -15,8 +15,14 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddIdentityApplication(this IServiceCollection services)
     {
+        services.AddMediatR(configuration =>
+            configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
         services.AddSingleton<IExternalRoleSynchronizer, DisabledExternalRoleSynchronizer>();
         services.AddSingleton<IRoleReconciliationQueue, DisabledRoleReconciliationQueue>();
+        services.AddScoped<UserService>();
+        services.AddScoped<IExternalUserProvisioningService>(
+            provider => provider.GetRequiredService<UserService>());
+        services.AddScoped<AdminUserService>();
         services.AddScoped<
             ICommandHandler<RegisterUserCommand, Result<UserResponse>>,
             RegisterUserCommandHandler>();

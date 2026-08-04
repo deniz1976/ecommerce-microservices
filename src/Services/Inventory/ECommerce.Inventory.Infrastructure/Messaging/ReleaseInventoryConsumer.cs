@@ -1,23 +1,23 @@
 using ECommerce.BuildingBlocks.Contracts.Commands;
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.Inventory.Application.Commands.ReleaseInventory;
 using ECommerce.Inventory.Application.Inventory;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.Inventory.Infrastructure.Messaging;
 
 public sealed class ReleaseInventoryConsumer : IConsumer<ReleaseInventory>
 {
-    private readonly ICommandHandler<ReleaseInventoryCommand> commandHandler;
+    private readonly ISender sender;
 
-    public ReleaseInventoryConsumer(ICommandHandler<ReleaseInventoryCommand> commandHandler)
+    public ReleaseInventoryConsumer(ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public Task Consume(ConsumeContext<ReleaseInventory> context)
     {
-        return commandHandler.HandleAsync(
+        return sender.Send(
             new ReleaseInventoryCommand(
                 new InventoryReleaseRequest(
                     context.Message.OrderId,

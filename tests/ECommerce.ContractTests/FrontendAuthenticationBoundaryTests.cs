@@ -3,15 +3,55 @@ namespace ECommerce.ContractTests;
 public sealed class FrontendAuthenticationBoundaryTests
 {
     [Fact]
-    public void Auth0TokensRemainInMemory()
+    public void Auth0SessionUsesTheServerSdkAndHardenedCookieSettings()
     {
-        string source = File.ReadAllText(GetFrontendPath("lib", "auth", "auth0.ts"));
+        string serverSource = File.ReadAllText(
+            GetFrontendPath("lib", "auth", "auth0-server.ts"));
+        string packageSource = File.ReadAllText(GetFrontendPath("package.json"));
 
-        Assert.Contains("cacheLocation: \"memory\"", source, StringComparison.Ordinal);
-        Assert.Contains("useRefreshTokens: true", source, StringComparison.Ordinal);
-        Assert.Contains("useRefreshTokensFallback: true", source, StringComparison.Ordinal);
-        Assert.DoesNotContain("cacheLocation: \"localstorage\"", source, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("cacheLocation: \"sessionstorage\"", source, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(
+            "@auth0/nextjs-auth0/server",
+            serverSource,
+            StringComparison.Ordinal);
+        Assert.Contains("sameSite: \"lax\"", serverSource, StringComparison.Ordinal);
+        Assert.Contains(
+            "secure: process.env.NODE_ENV === \"production\"",
+            serverSource,
+            StringComparison.Ordinal);
+        Assert.Contains("rolling: true", serverSource, StringComparison.Ordinal);
+        Assert.Contains("offline_access", serverSource, StringComparison.Ordinal);
+        Assert.Contains(
+            "\"@auth0/nextjs-auth0\"",
+            packageSource,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "\"@auth0/auth0-spa-js\"",
+            packageSource,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BrowserObtainsOnlyAnAccessTokenThroughTheBffEndpoint()
+    {
+        string clientSource = File.ReadAllText(
+            GetFrontendPath("lib", "auth", "auth0.ts"));
+        string serverSource = File.ReadAllText(
+            GetFrontendPath("lib", "auth", "auth0-server.ts"));
+
+        Assert.Contains(
+            "@auth0/nextjs-auth0/client",
+            clientSource,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "return await getBffAccessToken()",
+            clientSource,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "enableAccessTokenEndpoint: true",
+            serverSource,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain("refreshToken", clientSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("idToken", clientSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -48,10 +88,6 @@ public sealed class FrontendAuthenticationBoundaryTests
             "normalizeLocalReturnPath(returnTo, \"/login\")",
             source,
             StringComparison.Ordinal);
-        Assert.Contains(
-            "normalizeLocalReturnPath(result.appState?.returnTo, \"/\")",
-            source,
-            StringComparison.Ordinal);
         Assert.Contains("!candidate.startsWith(\"/\")", source, StringComparison.Ordinal);
         Assert.Contains("candidate.startsWith(\"//\")", source, StringComparison.Ordinal);
         Assert.Contains("candidate.includes(\"\\\\\")", source, StringComparison.Ordinal);
@@ -59,6 +95,36 @@ public sealed class FrontendAuthenticationBoundaryTests
             "resolved.origin !== window.location.origin",
             source,
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Auth0ProxyCoversApplicationRoutesForRollingSessions()
+    {
+        string source = File.ReadAllText(GetFrontendPath("proxy.ts"));
+
+        Assert.Contains(
+            "return auth0.middleware(request)",
+            source,
+            StringComparison.Ordinal);
+        Assert.Contains("_next/static", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ForcedTokenRefreshRequiresSameOriginPost()
+    {
+        string source = File.ReadAllText(
+            GetFrontendPath("app", "auth", "refresh-access-token", "route.ts"));
+
+        Assert.Contains(
+            "export async function POST",
+            source,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "origin === request.nextUrl.origin",
+            source,
+            StringComparison.Ordinal);
+        Assert.Contains("{ refresh: true }", source, StringComparison.Ordinal);
+        Assert.Contains("\"Cache-Control\": \"no-store\"", source, StringComparison.Ordinal);
     }
 
     private static bool ContainsBrowserStorageNearAuthenticationData(string source)

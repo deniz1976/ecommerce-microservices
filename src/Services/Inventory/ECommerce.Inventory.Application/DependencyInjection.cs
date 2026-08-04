@@ -1,9 +1,11 @@
 using ECommerce.BuildingBlocks.Contracts.Cqrs;
+using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Inventory.Application.Commands.ReleaseInventory;
 using ECommerce.Inventory.Application.Commands.ReserveInventory;
 using ECommerce.Inventory.Application.Commands.UpsertInventoryItem;
 using ECommerce.Inventory.Application.Inventory;
 using ECommerce.Inventory.Application.Queries.GetInventoryItem;
+using ECommerce.Inventory.Application.Queries.SearchManagedInventory;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ECommerce.Inventory.Application;
@@ -12,12 +14,18 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInventoryApplication(this IServiceCollection services)
     {
+        services.AddMediatR(configuration =>
+            configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
         services.AddScoped<InventoryService>();
+        services.AddScoped<InventoryQueryService>();
         services.AddScoped<
             IQueryHandler<GetInventoryItemQuery, InventoryItemResponse?>,
             GetInventoryItemQueryHandler>();
         services.AddScoped<
-            ICommandHandler<UpsertInventoryItemCommand, InventoryItemResponse>,
+            IQueryHandler<SearchManagedInventoryQuery, PagedResult<InventoryItemResponse>>,
+            SearchManagedInventoryQueryHandler>();
+        services.AddScoped<
+            ICommandHandler<UpsertInventoryItemCommand, Result<InventoryItemResponse>>,
             UpsertInventoryItemCommandHandler>();
         services.AddScoped<
             ICommandHandler<ReserveInventoryCommand, InventoryReservationResult>,

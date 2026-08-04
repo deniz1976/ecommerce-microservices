@@ -8,6 +8,8 @@ public static class AuthorizationPolicies
 
     public const string InventoryWrite = "InventoryWrite";
 
+    public const string InventoryManage = "InventoryManage";
+
     public const string SellerOrAdmin = "SellerOrAdmin";
 
     public const string CustomerOrAdmin = "CustomerOrAdmin";

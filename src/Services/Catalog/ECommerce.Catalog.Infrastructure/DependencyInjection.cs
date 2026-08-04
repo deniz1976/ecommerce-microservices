@@ -27,6 +27,14 @@ public static class DependencyInjection
             new EfRepository<Store, Guid>(
                 serviceProvider.GetRequiredService<CatalogDbContext>(),
                 store => store.Id));
+        services.AddScoped<IRepository<Category, Guid>>(serviceProvider =>
+            new EfRepository<Category, Guid>(
+                serviceProvider.GetRequiredService<CatalogDbContext>(),
+                category => category.Id));
+        services.AddScoped<IRepository<Brand, Guid>>(serviceProvider =>
+            new EfRepository<Brand, Guid>(
+                serviceProvider.GetRequiredService<CatalogDbContext>(),
+                brand => brand.Id));
         services.AddScoped<IUnitOfWork, EfUnitOfWork<CatalogDbContext>>();
         services.AddScoped<IProductImageDeletionQueue, ProductImageDeletionQueue>();
         services.AddScoped<ProductImageDeletionProcessor>();
@@ -39,8 +47,18 @@ public static class DependencyInjection
         services.AddScoped<IProductReferenceReader>(
             serviceProvider => serviceProvider.GetRequiredService<ProductReader>());
         services.AddScoped<ICatalogMetricsReader, CatalogMetricsReader>();
-        services.AddScoped<IStoreReader, StoreReader>();
-        services.AddScoped<ICatalogReferenceReader, CatalogReferenceReader>();
+        services.AddScoped<StoreReader>();
+        services.AddScoped<IStoreReader>(
+            serviceProvider => serviceProvider.GetRequiredService<StoreReader>());
+        services.AddScoped<IManagedStoreReader>(
+            serviceProvider => serviceProvider.GetRequiredService<StoreReader>());
+        services.AddScoped<CatalogReferenceReader>();
+        services.AddScoped<ICatalogReferenceReader>(
+            serviceProvider => serviceProvider.GetRequiredService<CatalogReferenceReader>());
+        services.AddScoped<ICatalogReferenceConflictReader>(
+            serviceProvider => serviceProvider.GetRequiredService<CatalogReferenceReader>());
+        services.AddScoped<ICatalogReferenceManagementReader>(
+            serviceProvider => serviceProvider.GetRequiredService<CatalogReferenceReader>());
         services.AddHttpClient<IProductImageStorage, CloudImageService>(client =>
         {
             client.Timeout = TimeSpan.FromSeconds(30);

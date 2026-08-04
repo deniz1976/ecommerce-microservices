@@ -1,25 +1,25 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.Notification.Application.Commands.CreateNotification;
 using ECommerce.Notification.Application.Notifications;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.Notification.Api.Messaging;
 
 public sealed class PaymentFailedConsumer : IConsumer<PaymentFailed>
 {
-    private readonly ICommandHandler<CreateNotificationCommand, NotificationMessage> commandHandler;
+    private readonly ISender sender;
 
     public PaymentFailedConsumer(
-        ICommandHandler<CreateNotificationCommand, NotificationMessage> commandHandler)
+        ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public Task Consume(ConsumeContext<PaymentFailed> context)
     {
         (string title, string message) = NotificationText.OrderStatus("payment.failed", context.Message.OrderId, $"Payment failed: {context.Message.Reason}");
-        return commandHandler.HandleAsync(
+        return sender.Send(
             new CreateNotificationCommand(
                 new CreateNotificationRequest(
                     context.Message.MessageId,

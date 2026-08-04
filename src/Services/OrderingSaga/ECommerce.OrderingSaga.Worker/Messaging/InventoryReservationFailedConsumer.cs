@@ -1,24 +1,23 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.OrderingSaga.Application.Commands.ProcessWorkflowEvent;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.OrderingSaga.Worker.Messaging;
 
 public sealed class InventoryReservationFailedConsumer : IConsumer<InventoryReservationFailed>
 {
-    private readonly ICommandHandler<
-        ProcessWorkflowEventCommand<InventoryReservationFailed>> commandHandler;
+    private readonly ISender sender;
 
     public InventoryReservationFailedConsumer(
-        ICommandHandler<ProcessWorkflowEventCommand<InventoryReservationFailed>> commandHandler)
+        ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public Task Consume(ConsumeContext<InventoryReservationFailed> context)
     {
-        return commandHandler.HandleAsync(
+        return sender.Send(
             new ProcessWorkflowEventCommand<InventoryReservationFailed>(context.Message),
             context.CancellationToken);
     }

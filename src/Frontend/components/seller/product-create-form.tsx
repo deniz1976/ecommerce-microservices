@@ -1,7 +1,7 @@
 "use client"
 
-import { type FormEvent, useEffect, useState } from "react"
-import { Loader2, PackagePlus } from "lucide-react"
+import { type FormEvent, useCallback, useEffect, useState } from "react"
+import { Loader2, PackagePlus, RefreshCcw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -40,11 +40,29 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
   const [currency, setCurrency] = useState("USD")
   const [status, setStatus] = useState<ProductStatus>(0)
   const [saving, setSaving] = useState(false)
+  const [refreshingReferences, setRefreshingReferences] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+
+  const loadReferences = useCallback(async (showProgress = false) => {
+    if (showProgress) setRefreshingReferences(true)
+    try {
+      const [categories, brands] = await Promise.all([
+        getCatalogCategories(locale),
+        getCatalogBrands(),
+      ])
+      setReferences({ status: "ready", categories, brands })
+      setCategoryId(categories[0]?.id ?? "")
+      setBrandId(brands[0]?.id ?? "")
+    } catch {
+      setReferences({ status: "unavailable" })
+    } finally {
+      if (showProgress) setRefreshingReferences(false)
+    }
+  }, [locale])
 
   useEffect(() => {
     let active = true
-    Promise.all([getCatalogCategories(), getCatalogBrands()])
+    Promise.all([getCatalogCategories(locale), getCatalogBrands()])
       .then(([categories, brands]) => {
         if (!active) return
         setReferences({ status: "ready", categories, brands })
@@ -58,7 +76,7 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
     return () => {
       active = false
     }
-  }, [])
+  }, [locale])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -106,9 +124,21 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
       {references.status === "loading" ? (
         <div className="flex min-h-24 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" /></div>
       ) : references.status === "unavailable" ? (
-        <p className="mt-5 text-sm text-destructive">{t.seller.referencesUnavailable}</p>
+        <ReferenceUnavailable
+          message={t.seller.referencesUnavailable}
+          action={t.seller.refreshReferences}
+          progress={t.seller.refreshingReferences}
+          refreshing={refreshingReferences}
+          onRefresh={() => loadReferences(true)}
+        />
       ) : !hasReferences ? (
-        <p className="mt-5 text-sm text-muted-foreground">{t.seller.referencesEmpty}</p>
+        <ReferenceUnavailable
+          message={t.seller.referencesEmpty}
+          action={t.seller.refreshReferences}
+          progress={t.seller.refreshingReferences}
+          refreshing={refreshingReferences}
+          onRefresh={() => loadReferences(true)}
+        />
       ) : (
         <div className="mt-5 grid gap-4">
           <Field label={t.seller.sku} value={sku} onChange={setSku} required />
@@ -116,13 +146,13 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
           <Field label={t.seller.productDescription} value={description} onChange={setDescription} required />
           <SelectField label={t.seller.category} value={categoryId} onChange={setCategoryId} options={references.categories} />
           <SelectField label={t.seller.brand} value={brandId} onChange={setBrandId} options={references.brands} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid min-w-0 grid-cols-2 gap-3">
             <Field label={t.seller.price} value={price} onChange={setPrice} type="number" min="0.01" step="0.01" required />
             <Field label={t.seller.currency} value={currency} onChange={setCurrency} minLength={3} maxLength={3} required />
           </div>
           <label className="grid gap-2 text-sm font-medium text-foreground">
             {t.seller.statusLabel}
-            <select value={status} onChange={(event) => setStatus(Number(event.target.value) as ProductStatus)} className="h-10 rounded-md border border-input bg-background px-3 font-normal">
+            <select value={status} onChange={(event) => setStatus(Number(event.target.value) as ProductStatus)} className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal">
               <option value={0}>{t.seller.draft}</option>
               <option value={1}>{t.seller.active}</option>
             </select>
@@ -141,6 +171,30 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
   )
 }
 
+function ReferenceUnavailable({
+  message,
+  action,
+  progress,
+  refreshing,
+  onRefresh,
+}: {
+  message: string
+  action: string
+  progress: string
+  refreshing: boolean
+  onRefresh: () => void
+}) {
+  return (
+    <div className="mt-5 grid gap-3">
+      <p className="text-sm text-muted-foreground">{message}</p>
+      <Button type="button" variant="outline" onClick={onRefresh} disabled={refreshing}>
+        {refreshing ? <Loader2 className="animate-spin" /> : <RefreshCcw />}
+        {refreshing ? progress : action}
+      </Button>
+    </div>
+  )
+}
+
 interface FieldProps {
   label: string
   value: string
@@ -155,9 +209,9 @@ interface FieldProps {
 
 function Field({ label, value, onChange, type = "text", ...inputProps }: FieldProps) {
   return (
-    <label className="grid gap-2 text-sm font-medium text-foreground">
+    <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
       {label}
-      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} {...inputProps} className="h-10 rounded-md border border-input bg-background px-3 font-normal" />
+      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} {...inputProps} className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal" />
     </label>
   )
 }
@@ -171,9 +225,9 @@ interface SelectFieldProps {
 
 function SelectField({ label, value, onChange, options }: SelectFieldProps) {
   return (
-    <label className="grid gap-2 text-sm font-medium text-foreground">
+    <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
       {label}
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3 font-normal">
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal">
         {options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
       </select>
     </label>

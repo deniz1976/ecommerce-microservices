@@ -26,4 +26,11 @@ public sealed class Brand
     public bool IsActive { get; private set; }
 
     public DateTimeOffset CreatedAt { get; private set; }
+
+    public void Update(string name, string slug, bool isActive)
+    {
+        Name = name;
+        Slug = slug;
+        IsActive = isActive;
+    }
 }

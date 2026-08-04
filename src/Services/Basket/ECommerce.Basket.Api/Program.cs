@@ -1,4 +1,3 @@
-using ECommerce.Basket.Api.Baskets;
 using ECommerce.Basket.Application;
 using ECommerce.Basket.Infrastructure;
 using ECommerce.Basket.Infrastructure.Persistence;
@@ -11,6 +10,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 const string serviceName = "ECommerce.Basket.Api";
 
 builder.Services.AddProblemDetails();
+builder.Services.AddControllers();
 builder.Services.AddECommerceLocalization();
 builder.Services.AddECommerceObservability(builder.Configuration, serviceName);
 builder.Services.AddOidcReadySecurity(builder.Configuration);
@@ -31,6 +31,6 @@ app.UseECommerceSecurity();
 
 app.MapHealthChecks("/health/live").AllowAnonymous();
 app.MapHealthChecks("/health/ready").AllowAnonymous();
-app.MapBasketEndpoints();
+app.MapControllers();
 
 app.Run();

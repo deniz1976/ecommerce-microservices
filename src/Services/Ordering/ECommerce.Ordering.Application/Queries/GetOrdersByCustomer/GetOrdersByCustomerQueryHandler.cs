@@ -5,19 +5,26 @@ using ECommerce.Ordering.Application.Orders;
 namespace ECommerce.Ordering.Application.Queries.GetOrdersByCustomer;
 
 public sealed class GetOrdersByCustomerQueryHandler
-    : IQueryHandler<GetOrdersByCustomerQuery, Result<IReadOnlyCollection<OrderResponse>>>
+    : IQueryHandler<GetOrdersByCustomerQuery, Result<PagedResult<OrderSummaryResponse>>>
 {
-    private readonly OrderService orderService;
+    private readonly OrderQueryService queryService;
 
-    public GetOrdersByCustomerQueryHandler(OrderService orderService)
+    public GetOrdersByCustomerQueryHandler(OrderQueryService queryService)
     {
-        this.orderService = orderService;
+        this.queryService = queryService;
     }
 
-    public Task<Result<IReadOnlyCollection<OrderResponse>>> HandleAsync(
+    public Task<Result<PagedResult<OrderSummaryResponse>>> HandleAsync(
         GetOrdersByCustomerQuery query,
         CancellationToken cancellationToken)
     {
-        return orderService.GetByCustomerIdAsync(query.CustomerId, cancellationToken);
+        return queryService.SearchAsync(
+            new OrderListCriteria(
+                query.CustomerId,
+                query.PageNumber,
+                query.PageSize,
+                query.Status,
+                query.SortDescending),
+            cancellationToken);
     }
 }

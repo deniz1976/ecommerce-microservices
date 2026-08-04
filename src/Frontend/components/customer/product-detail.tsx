@@ -45,7 +45,7 @@ export function ProductDetail() {
     return () => {
       active = false
     }
-  }, [params.id])
+  }, [locale, params.id])
 
   useEffect(() => {
     let active = true

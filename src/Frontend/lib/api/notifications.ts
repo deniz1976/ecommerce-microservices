@@ -31,3 +31,15 @@ export function markCustomerNotificationRead(
     },
   )
 }
+
+export function markAllCustomerNotificationsRead(
+  customerId: string,
+): Promise<{ changedCount: number }> {
+  return apiRequest<{ changedCount: number }>(
+    `/gateway/notifications/customer/${customerId}/read`,
+    {
+      method: "PUT",
+      authenticated: true,
+    },
+  )
+}

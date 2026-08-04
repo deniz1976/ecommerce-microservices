@@ -4,6 +4,7 @@ public enum OrderStatusChange
 {
     Confirm,
     Cancel,
+    RejectCancellation,
     InventoryReserved,
     PaymentAuthorized,
     ShipmentCreated

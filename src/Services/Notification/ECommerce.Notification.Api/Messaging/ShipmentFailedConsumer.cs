@@ -1,25 +1,25 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.Notification.Application.Commands.CreateNotification;
 using ECommerce.Notification.Application.Notifications;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.Notification.Api.Messaging;
 
 public sealed class ShipmentFailedConsumer : IConsumer<ShipmentFailed>
 {
-    private readonly ICommandHandler<CreateNotificationCommand, NotificationMessage> commandHandler;
+    private readonly ISender sender;
 
     public ShipmentFailedConsumer(
-        ICommandHandler<CreateNotificationCommand, NotificationMessage> commandHandler)
+        ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public Task Consume(ConsumeContext<ShipmentFailed> context)
     {
         (string title, string message) = NotificationText.OrderStatus("shipment.failed", context.Message.OrderId, $"Shipment failed: {context.Message.Reason}");
-        return commandHandler.HandleAsync(
+        return sender.Send(
             new CreateNotificationCommand(
                 new CreateNotificationRequest(
                     context.Message.MessageId,

@@ -114,4 +114,20 @@ public sealed class MassTransitWorkflowCommandPublisher : IWorkflowCommandPublis
             reasonCode,
             reason), cancellationToken);
     }
+
+    public Task RejectOrderCancellationAsync(
+        OrderWorkflow workflow,
+        Guid correlationId,
+        Guid? causationId,
+        CancellationToken cancellationToken)
+    {
+        return publishEndpoint.Publish(new OrderCancellationRejected(
+            Guid.NewGuid(),
+            correlationId,
+            causationId,
+            DateTimeOffset.UtcNow,
+            ECommerce.BuildingBlocks.Contracts.Messaging.MessageDefaults.CurrentVersion,
+            workflow.OrderId,
+            workflow.CustomerId), cancellationToken);
+    }
 }

@@ -9,6 +9,7 @@ using ECommerce.Inventory.Api.Errors;
 using ECommerce.Notification.Api.Notifications;
 using ECommerce.Ordering.Api.Orders;
 using ECommerce.Payment.Api.Payments;
+using ECommerce.Shipping.Api.Shipments;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -101,6 +102,21 @@ public sealed class LocalizedApiErrorTests
         using JsonDocument response = await ReadResponseAsync(context);
         Assert.Equal(StatusCodes.Status404NotFound, context.Response.StatusCode);
         Assert.Equal("Ödeme bulunamadı.", response.RootElement.GetProperty("message").GetString());
+    }
+
+    [Fact]
+    public async Task ShipmentNotFoundUsesRequestedTurkishCulture()
+    {
+        await using ServiceProvider services = CreateServices();
+        DefaultHttpContext context = CreateContext(services, "tr");
+        Result<object> failure = Result<object>.Failure(
+            new Error(ErrorCodes.ShipmentNotFound, ErrorCodes.ShipmentNotFound));
+
+        await ShippingResults.FromResult(failure, context).ExecuteAsync(context);
+
+        using JsonDocument response = await ReadResponseAsync(context);
+        Assert.Equal(StatusCodes.Status404NotFound, context.Response.StatusCode);
+        Assert.Equal("Kargo kaydı bulunamadı.", response.RootElement.GetProperty("message").GetString());
     }
 
     [Theory]

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import {
   LayoutDashboard,
   Loader2,
@@ -8,10 +9,13 @@ import {
   Package,
   ShieldCheck,
   Store,
+  Tag,
+  Tags,
   Users,
 } from "lucide-react"
 
 import { AdminCatalogWorkspace } from "@/components/admin/admin-catalog-workspace"
+import { AdminCatalogReferenceWorkspace } from "@/components/admin/admin-catalog-reference-workspace"
 import { AdminOverviewMetrics } from "@/components/admin/admin-overview-metrics"
 import { AdminUserWorkspace } from "@/components/admin/admin-user-workspace"
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
@@ -24,9 +28,10 @@ import type { UserProfile } from "@/types"
 
 interface AdminDashboardProps {
   profile: UserProfile
+  onOpenSellerWorkspace?: () => void
 }
 
-export function AdminDashboard({ profile }: AdminDashboardProps) {
+export function AdminDashboard({ profile, onOpenSellerWorkspace }: AdminDashboardProps) {
   const { t } = useI18n()
   const [signingOut, setSigningOut] = useState(false)
 
@@ -40,6 +45,12 @@ export function AdminDashboard({ profile }: AdminDashboardProps) {
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
         <Logo />
         <div className="flex items-center gap-2">
+          {onOpenSellerWorkspace ? (
+            <Button type="button" variant="outline" size="sm" onClick={onOpenSellerWorkspace}>
+              <Store />
+              <span className="hidden sm:inline">{t.admin.openSellerWorkspace}</span>
+            </Button>
+          ) : null}
           <LanguageSwitcher />
           <ThemeToggle />
           <Button
@@ -70,6 +81,14 @@ export function AdminDashboard({ profile }: AdminDashboardProps) {
               <Package className="size-4" />
               {t.admin.catalog}
             </a>
+            <Link href="/admin/categories" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
+              <Tags className="size-4" />
+              {t.admin.categories}
+            </Link>
+            <Link href="/admin/brands" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
+              <Tag className="size-4" />
+              {t.admin.brands}
+            </Link>
             <a href="#admin-users" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
               <Users className="size-4" />
               {t.admin.users}
@@ -103,6 +122,7 @@ export function AdminDashboard({ profile }: AdminDashboardProps) {
           </div>
 
           <AdminOverviewMetrics />
+          <AdminCatalogReferenceWorkspace />
           <AdminCatalogWorkspace />
           <AdminUserWorkspace />
         </main>

@@ -1,22 +1,22 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.Ordering.Application.Commands.ChangeOrderStatus;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.Ordering.Infrastructure.Messaging;
 
 public sealed class OrderCancelledConsumer : IConsumer<OrderCancelled>
 {
-    private readonly ICommandHandler<ChangeOrderStatusCommand> commandHandler;
+    private readonly ISender sender;
 
-    public OrderCancelledConsumer(ICommandHandler<ChangeOrderStatusCommand> commandHandler)
+    public OrderCancelledConsumer(ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public Task Consume(ConsumeContext<OrderCancelled> context)
     {
-        return commandHandler.HandleAsync(
+        return sender.Send(
             new ChangeOrderStatusCommand(
                 context.Message.OrderId,
                 context.Message.CustomerId,

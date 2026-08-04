@@ -1,129 +1,55 @@
-import { createAuth0Client, type Auth0Client } from "@auth0/auth0-spa-js"
+"use client"
 
-export interface Auth0Config {
-  domain: string
-  clientId: string
-  audience: string
-}
+import { getAccessToken as getBffAccessToken } from "@auth0/nextjs-auth0/client"
 
 export interface LoginOptions {
   returnTo?: string
   screenHint?: "login" | "signup"
 }
 
-let auth0ClientPromise: Promise<Auth0Client> | null = null
-let redirectHandled = false
-
-export function getAuth0Config(): Auth0Config {
-  return {
-    domain: process.env.NEXT_PUBLIC_AUTH0_DOMAIN ?? "",
-    clientId: process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID ?? "",
-    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE ?? "",
-  }
-}
-
-export function isAuth0Configured(): boolean {
-  const { domain, clientId, audience } = getAuth0Config()
-  return domain.length > 0 && clientId.length > 0 && audience.length > 0
-}
-
-export async function loginWithAuth0(options: LoginOptions = {}): Promise<void> {
-  const client = await getAuth0Client()
+export async function loginWithAuth0(
+  options: LoginOptions = {},
+): Promise<void> {
   const returnTo = normalizeLocalReturnPath(options.returnTo, "/")
+  const query = new URLSearchParams({ returnTo })
 
-  await client.loginWithRedirect({
-    appState: {
-      returnTo,
-    },
-    authorizationParams: {
-      audience: getAuth0Config().audience,
-      redirect_uri: window.location.origin,
-      screen_hint: options.screenHint === "signup" ? "signup" : undefined,
-    },
-  })
+  if (options.screenHint === "signup") {
+    query.set("screen_hint", "signup")
+  }
+
+  window.location.assign(`/auth/login?${query.toString()}`)
 }
 
 export async function logoutFromAuth0(returnTo = "/login"): Promise<void> {
-  const client = await getAuth0Client()
   const localReturnTo = normalizeLocalReturnPath(returnTo, "/login")
+  const absoluteReturnTo = new URL(localReturnTo, window.location.origin)
 
-  await client.logout({
-    logoutParams: {
-      returnTo: new URL(localReturnTo, window.location.origin).toString(),
-    },
-  })
+  window.location.assign(
+    `/auth/logout?returnTo=${encodeURIComponent(absoluteReturnTo.toString())}`,
+  )
 }
 
 export async function getAccessToken(): Promise<string | null> {
-  const client = await getAuth0Client()
-  await handleAuth0RedirectIfNeeded(client)
-
-  const isAuthenticated = await client.isAuthenticated()
-  if (!isAuthenticated) {
+  try {
+    return await getBffAccessToken()
+  } catch {
     return null
   }
-
-  return client.getTokenSilently({
-    authorizationParams: {
-      audience: getAuth0Config().audience,
-    },
-  })
 }
 
 export async function refreshAccessToken(): Promise<string> {
-  const client = await getAuth0Client()
-  await handleAuth0RedirectIfNeeded(client)
-
-  return client.getTokenSilently({
-    authorizationParams: {
-      audience: getAuth0Config().audience,
+  const response = await fetch("/auth/refresh-access-token", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
     },
-    cacheMode: "off",
-  })
-}
-
-async function getAuth0Client(): Promise<Auth0Client> {
-  if (!isAuth0Configured()) {
-    throw new Error("Auth0 public environment variables are not configured.")
-  }
-
-  auth0ClientPromise ??= createAuth0Client({
-    domain: getAuth0Config().domain,
-    clientId: getAuth0Config().clientId,
-    authorizationParams: {
-      audience: getAuth0Config().audience,
-      redirect_uri: window.location.origin,
-    },
-    cacheLocation: "memory",
-    useRefreshTokens: true,
-    useRefreshTokensFallback: true,
   })
 
-  return auth0ClientPromise
-}
-
-async function handleAuth0RedirectIfNeeded(client: Auth0Client): Promise<void> {
-  if (redirectHandled || typeof window === "undefined") {
-    return
+  if (!response.ok) {
+    throw new Error("Access token refresh failed.")
   }
 
-  const params = new URLSearchParams(window.location.search)
-  if (!params.has("code") || !params.has("state")) {
-    redirectHandled = true
-    return
-  }
-
-  const result = await client.handleRedirectCallback()
-  redirectHandled = true
-
-  const returnTo = normalizeLocalReturnPath(result.appState?.returnTo, "/")
-
-  if (returnTo !== window.location.pathname) {
-    window.location.replace(returnTo)
-    return
-  }
-
-  window.history.replaceState({}, document.title, returnTo)
+  return getBffAccessToken()
 }
 
 function normalizeLocalReturnPath(candidate: unknown, fallback: string): string {

@@ -28,8 +28,10 @@
     <ProjectReference Include="..\..\src\Services\Inventory\ECommerce.Inventory.Api\ECommerce.Inventory.Api.csproj" />
     <ProjectReference Include="..\..\src\Services\Notification\ECommerce.Notification.Api\ECommerce.Notification.Api.csproj" />
     <ProjectReference Include="..\..\src\Services\Ordering\ECommerce.Ordering.Api\ECommerce.Ordering.Api.csproj" />
+    <ProjectReference Include="..\..\src\Services\OrderingSaga\ECommerce.OrderingSaga.Application\ECommerce.OrderingSaga.Application.csproj" />
     <ProjectReference Include="..\..\src\Services\Payment\ECommerce.Payment.Api\ECommerce.Payment.Api.csproj" />
     <ProjectReference Include="..\..\src\Services\Payment\ECommerce.Payment.Application\ECommerce.Payment.Application.csproj" />
+    <ProjectReference Include="..\..\src\Services\Shipping\ECommerce.Shipping.Api\ECommerce.Shipping.Api.csproj" />
     <ProjectReference Include="..\..\tools\ECommerce.RuntimeChecks\ECommerce.RuntimeChecks.csproj" />
   </ItemGroup>
 

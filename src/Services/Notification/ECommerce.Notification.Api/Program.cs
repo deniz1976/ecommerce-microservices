@@ -3,7 +3,6 @@ using ECommerce.BuildingBlocks.Localization;
 using ECommerce.BuildingBlocks.Observability;
 using ECommerce.BuildingBlocks.Security;
 using ECommerce.Notification.Api.Hubs;
-using ECommerce.Notification.Api.Notifications;
 using ECommerce.Notification.Application;
 using ECommerce.Notification.Application.Notifications;
 using ECommerce.Notification.Infrastructure;
@@ -13,6 +12,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 const string serviceName = "ECommerce.Notification.Api";
 
 builder.Services.AddProblemDetails();
+builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddECommerceLocalization();
 builder.Services.AddECommerceObservability(builder.Configuration, serviceName);
@@ -37,6 +37,6 @@ app.MapHealthChecks("/health/live").AllowAnonymous();
 app.MapHealthChecks("/health/ready").AllowAnonymous();
 app.MapHub<NotificationsHub>("/hubs/notifications")
     .RequireAuthorization(AuthorizationPolicies.AuthenticatedUser);
-app.MapNotificationEndpoints();
+app.MapControllers();
 
 app.Run();

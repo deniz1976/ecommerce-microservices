@@ -81,4 +81,30 @@ public sealed class NotificationService
         return Result<NotificationMessage>.Success(
             NotificationMapper.ToMessage(notification));
     }
+
+    public async Task<int> MarkAllReadAsync(
+        Guid customerId,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyCollection<NotificationRecord> notifications =
+            await notificationReader.GetUnreadByCustomerAsync(
+                customerId,
+                cancellationToken);
+        DateTimeOffset readAt = timeProvider.GetUtcNow();
+        int changedCount = 0;
+        foreach (NotificationRecord notification in notifications)
+        {
+            if (notification.MarkRead(readAt))
+            {
+                changedCount++;
+            }
+        }
+
+        if (changedCount > 0)
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        return changedCount;
+    }
 }

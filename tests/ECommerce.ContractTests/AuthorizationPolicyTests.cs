@@ -181,6 +181,36 @@ public sealed class AuthorizationPolicyTests
     }
 
     [Theory]
+    [InlineData(AuthOptions.DefaultRoleClaimType, ApplicationRoles.Admin)]
+    [InlineData(AuthOptions.DefaultRoleClaimType, ApplicationRoles.Seller)]
+    [InlineData("permissions", ApplicationPermissions.InventoryWrite)]
+    [InlineData("scope", "openid inventory:write")]
+    public async Task InventoryManagePolicyAcceptsAdminSellerOrInventoryPermission(
+        string claimType,
+        string claimValue)
+    {
+        bool authorized = await AuthorizeAsync(
+            AuthorizationPolicies.InventoryManage,
+            new Claim(claimType, claimValue));
+
+        Assert.True(authorized);
+    }
+
+    [Theory]
+    [InlineData(AuthOptions.DefaultRoleClaimType, ApplicationRoles.Customer)]
+    [InlineData("permissions", ApplicationPermissions.ActAsCustomer)]
+    public async Task InventoryManagePolicyRejectsCustomerAndUnrelatedPermission(
+        string claimType,
+        string claimValue)
+    {
+        bool authorized = await AuthorizeAsync(
+            AuthorizationPolicies.InventoryManage,
+            new Claim(claimType, claimValue));
+
+        Assert.False(authorized);
+    }
+
+    [Theory]
     [InlineData(AuthOptions.DefaultRoleClaimType, ApplicationRoles.Admin, true)]
     [InlineData("permissions", ApplicationPermissions.ActAsCustomer, true)]
     [InlineData("scope", "openid customer:act", true)]

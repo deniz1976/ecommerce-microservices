@@ -54,6 +54,14 @@ export interface CatalogProduct {
   images: CatalogProductImage[]
 }
 
+export interface InventoryItem {
+  productId: string
+  quantityOnHand: number
+  reservedQuantity: number
+  availableQuantity: number
+  updatedAt: string
+}
+
 export interface CatalogStore {
   id: string
   name: string
@@ -78,6 +86,11 @@ export interface CreateCatalogStorePayload {
   slug: string
 }
 
+export interface UpdateCatalogStorePayload {
+  name: string
+  slug: string
+}
+
 export interface CatalogCategoryReference {
   id: string
   name: string
@@ -88,6 +101,40 @@ export interface CatalogBrandReference {
   id: string
   name: string
   slug: string
+}
+
+export interface ManagedCatalogCategoryReference {
+  id: string
+  englishName: string
+  turkishName: string
+  slug: string
+  isActive: boolean
+}
+
+export interface ManagedCatalogBrandReference {
+  id: string
+  name: string
+  slug: string
+  isActive: boolean
+}
+
+export interface CreateCatalogCategoryPayload {
+  slug: string
+  englishName: string
+  turkishName: string
+}
+
+export interface CreateCatalogBrandPayload {
+  name: string
+  slug: string
+}
+
+export interface UpdateCatalogCategoryPayload extends CreateCatalogCategoryPayload {
+  isActive: boolean
+}
+
+export interface UpdateCatalogBrandPayload extends CreateCatalogBrandPayload {
+  isActive: boolean
 }
 
 export interface CreateCatalogProductPayload {
@@ -187,7 +234,7 @@ export interface CheckoutBasketPayload {
   postalCode: string
 }
 
-export type OrderStatus = 0 | 1 | 2 | 3 | 4 | 5
+export type OrderStatus = 0 | 1 | 2 | 3 | 4 | 5 | 6
 export type OrderStatusName =
   | "Submitted"
   | "InventoryReserved"
@@ -195,12 +242,14 @@ export type OrderStatusName =
   | "ShipmentCreated"
   | "Confirmed"
   | "Cancelled"
+  | "CancellationRequested"
 
 export type OrderCancellationReasonCode =
   | "INSUFFICIENT_STOCK"
   | "PAYMENT_FAILED"
   | "SHIPMENT_FAILED"
   | "UNEXPECTED_ERROR"
+  | "ORDER_CANCELLED_BY_CUSTOMER"
 
 export interface OrderStatusHistory {
   status: OrderStatus
@@ -223,6 +272,16 @@ export interface Order {
   updatedAt: string
   items: OrderItem[]
   statusHistory: OrderStatusHistory[]
+}
+
+export interface OrderSummary {
+  id: string
+  customerId: string
+  currency: string
+  status: OrderStatus
+  totalAmount: number
+  createdAt: string
+  updatedAt: string
 }
 
 export interface OrderItem {

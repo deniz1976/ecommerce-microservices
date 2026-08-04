@@ -12,6 +12,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { getProfile } from "@/lib/api/auth"
 import {
   getCustomerNotifications,
+  markAllCustomerNotificationsRead,
   markCustomerNotificationRead,
 } from "@/lib/api/notifications"
 import { useI18n } from "@/lib/i18n/provider"
@@ -33,6 +34,7 @@ export function NotificationCenter() {
   const [pageNumber, setPageNumber] = useState(1)
   const [unreadOnly, setUnreadOnly] = useState(false)
   const [markingId, setMarkingId] = useState<string | null>(null)
+  const [markingAll, setMarkingAll] = useState(false)
   const [refreshVersion, setRefreshVersion] = useState(0)
 
   useEffect(() => {
@@ -89,6 +91,21 @@ export function NotificationCenter() {
     }
   }
 
+  async function markAllRead() {
+    if (state.status !== "ready") return
+
+    setMarkingAll(true)
+    try {
+      await markAllCustomerNotificationsRead(state.customerId)
+      setPageNumber(1)
+      setRefreshVersion((current) => current + 1)
+    } catch {
+      setState({ status: "unavailable" })
+    } finally {
+      setMarkingAll(false)
+    }
+  }
+
   const totalPages = state.status === "ready"
     ? Math.max(1, state.data.totalPages)
     : 1
@@ -132,23 +149,40 @@ export function NotificationCenter() {
             </div>
           </div>
 
-          <div className="flex rounded-lg border border-border bg-background p-1">
-            <Button
-              type="button"
-              size="sm"
-              variant={unreadOnly ? "ghost" : "secondary"}
-              onClick={() => changeFilter(false)}
-            >
-              {t.notifications.all}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={unreadOnly ? "secondary" : "ghost"}
-              onClick={() => changeFilter(true)}
-            >
-              {t.notifications.unread}
-            </Button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {state.status === "ready" &&
+            state.data.items.some((notification) => notification.readAt === null) ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={markAllRead}
+                disabled={markingAll}
+              >
+                {markingAll ? <Loader2 className="animate-spin" /> : <Check />}
+                {markingAll
+                  ? t.notifications.markingAllRead
+                  : t.notifications.markAllRead}
+              </Button>
+            ) : null}
+            <div className="flex rounded-lg border border-border bg-background p-1">
+              <Button
+                type="button"
+                size="sm"
+                variant={unreadOnly ? "ghost" : "secondary"}
+                onClick={() => changeFilter(false)}
+              >
+                {t.notifications.all}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={unreadOnly ? "secondary" : "ghost"}
+                onClick={() => changeFilter(true)}
+              >
+                {t.notifications.unread}
+              </Button>
+            </div>
           </div>
         </div>
 

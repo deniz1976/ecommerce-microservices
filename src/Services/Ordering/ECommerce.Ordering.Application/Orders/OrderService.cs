@@ -10,18 +10,15 @@ public sealed class OrderService
 {
     private readonly IRepository<Order, Guid> repository;
     private readonly IUnitOfWork unitOfWork;
-    private readonly IOrderReader orderReader;
     private readonly IOrderSubmittedPublisher publisher;
 
     public OrderService(
         IRepository<Order, Guid> repository,
         IUnitOfWork unitOfWork,
-        IOrderReader orderReader,
         IOrderSubmittedPublisher publisher)
     {
         this.repository = repository;
         this.unitOfWork = unitOfWork;
-        this.orderReader = orderReader;
         this.publisher = publisher;
     }
 
@@ -127,11 +124,4 @@ public sealed class OrderService
             : Result<OrderResponse>.Success(order.ToResponse());
     }
 
-    public async Task<Result<IReadOnlyCollection<OrderResponse>>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken)
-    {
-        IReadOnlyCollection<Order> orders = await orderReader.GetByCustomerIdAsync(
-            customerId,
-            cancellationToken);
-        return Result<IReadOnlyCollection<OrderResponse>>.Success(orders.Select(x => x.ToResponse()).ToArray());
-    }
 }

@@ -4,15 +4,15 @@ import test from "node:test"
 test("production headers restrict browser capabilities and external origins", async () => {
   process.env.NODE_ENV = "production"
   process.env.NEXT_PUBLIC_API_BASE_URL = "https://api.example.test/gateway"
-  process.env.NEXT_PUBLIC_AUTH0_DOMAIN = "tenant.auth0.test"
 
   const config = await import("../next.config.mjs?security-headers=production")
   const headers = await readHeaders(config.default)
   const csp = headers.get("Content-Security-Policy")
 
   assert.match(csp, /default-src 'self'/)
-  assert.match(csp, /connect-src 'self' https:\/\/api\.example\.test wss:\/\/api\.example\.test https:\/\/tenant\.auth0\.test/)
-  assert.match(csp, /frame-src 'self' https:\/\/tenant\.auth0\.test/)
+  assert.match(csp, /connect-src 'self' https:\/\/api\.example\.test wss:\/\/api\.example\.test/)
+  assert.doesNotMatch(csp, /auth0\.test/)
+  assert.match(csp, /frame-src 'self'/)
   assert.match(csp, /worker-src 'self' blob:/)
   assert.match(csp, /object-src 'none'/)
   assert.match(csp, /frame-ancestors 'none'/)
@@ -34,7 +34,6 @@ test("production headers restrict browser capabilities and external origins", as
 test("development headers preserve local Next.js debugging without HSTS", async () => {
   process.env.NODE_ENV = "development"
   process.env.NEXT_PUBLIC_API_BASE_URL = "http://localhost:5080"
-  process.env.NEXT_PUBLIC_AUTH0_DOMAIN = ""
 
   const config = await import("../next.config.mjs?security-headers=development")
   const headers = await readHeaders(config.default)
@@ -49,19 +48,10 @@ test("development headers preserve local Next.js debugging without HSTS", async 
 test("invalid public origins fail closed during configuration", async () => {
   process.env.NODE_ENV = "production"
   process.env.NEXT_PUBLIC_API_BASE_URL = "https://user:secret@api.example.test"
-  process.env.NEXT_PUBLIC_AUTH0_DOMAIN = "tenant.auth0.test"
 
   await assert.rejects(
     import("../next.config.mjs?security-headers=invalid-api"),
     /without credentials/,
-  )
-
-  process.env.NEXT_PUBLIC_API_BASE_URL = "https://api.example.test"
-  process.env.NEXT_PUBLIC_AUTH0_DOMAIN = "tenant.auth0.test/path"
-
-  await assert.rejects(
-    import("../next.config.mjs?security-headers=invalid-auth0"),
-    /must be a host name/,
   )
 })
 

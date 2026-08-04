@@ -4,6 +4,8 @@ public static class CatalogErrorCodes
 {
     public const string CategoryNotFound = "CATEGORY_NOT_FOUND";
     public const string BrandNotFound = "BRAND_NOT_FOUND";
+    public const string CategorySlugConflict = "CATEGORY_SLUG_CONFLICT";
+    public const string BrandSlugConflict = "BRAND_SLUG_CONFLICT";
     public const string InvalidProductTranslation = "INVALID_PRODUCT_TRANSLATION";
     public const string StoreNotFound = "STORE_NOT_FOUND";
     public const string StoreRequired = "STORE_REQUIRED";

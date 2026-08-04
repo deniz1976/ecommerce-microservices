@@ -7,30 +7,22 @@ namespace ECommerce.Notification.Application.Queries.GetCustomerNotifications;
 public sealed class GetCustomerNotificationsQueryHandler
     : IQueryHandler<GetCustomerNotificationsQuery, PagedResult<NotificationMessage>>
 {
-    private readonly INotificationHistoryReader reader;
+    private readonly NotificationHistoryService historyService;
 
-    public GetCustomerNotificationsQueryHandler(INotificationHistoryReader reader)
+    public GetCustomerNotificationsQueryHandler(NotificationHistoryService historyService)
     {
-        this.reader = reader;
+        this.historyService = historyService;
     }
 
     public async Task<PagedResult<NotificationMessage>> HandleAsync(
         GetCustomerNotificationsQuery query,
         CancellationToken cancellationToken)
     {
-        int pageNumber = Math.Clamp(query.PageNumber, 1, 10_000);
-        int pageSize = Math.Clamp(query.PageSize, 1, 50);
-        NotificationHistoryPage page = await reader.SearchByCustomerAsync(
+        return await historyService.GetAsync(
             query.CustomerId,
-            pageNumber,
-            pageSize,
+            query.PageNumber,
+            query.PageSize,
             query.UnreadOnly,
             cancellationToken);
-
-        return new PagedResult<NotificationMessage>(
-            page.Items.Select(NotificationMapper.ToMessage).ToArray(),
-            pageNumber,
-            pageSize,
-            page.TotalCount);
     }
 }

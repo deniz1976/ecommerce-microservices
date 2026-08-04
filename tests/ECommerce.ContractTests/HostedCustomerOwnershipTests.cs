@@ -23,6 +23,7 @@ using ECommerce.Ordering.Application.Queries.GetOrderById;
 using ECommerce.Ordering.Application.Queries.GetOrdersByCustomer;
 using ECommerce.Ordering.Domain;
 using ECommerce.Payment.Api.Payments;
+using ECommerce.Payment.Application;
 using ECommerce.Payment.Application.Payments;
 using ECommerce.Payment.Application.Queries.GetPaymentByOrderId;
 using ECommerce.Payment.Domain;
@@ -49,7 +50,7 @@ public sealed class HostedCustomerOwnershipTests
         await using WebApplication app = await StartAsync(
             handler,
             services => services.AddBasketApplication(),
-            endpoints => endpoints.MapBasketEndpoints());
+            endpoints => endpoints.MapControllers());
         using HttpClient client = CreateClient(app, authenticated: false);
 
         using HttpResponseMessage response = await client.GetAsync(
@@ -73,7 +74,7 @@ public sealed class HostedCustomerOwnershipTests
         await using WebApplication app = await StartAsync(
             handler,
             services => services.AddBasketApplication(),
-            endpoints => endpoints.MapBasketEndpoints());
+            endpoints => endpoints.MapControllers());
         using HttpClient client = CreateClient(app);
 
         using HttpResponseMessage response = await client.GetAsync(
@@ -88,12 +89,12 @@ public sealed class HostedCustomerOwnershipTests
     {
         StubQueryHandler<
             GetOrdersByCustomerQuery,
-            Result<IReadOnlyCollection<OrderResponse>>> handler = new(
+            Result<PagedResult<OrderSummaryResponse>>> handler = new(
                 _ => throw new InvalidOperationException("Query must not run after ownership denial."));
         await using WebApplication app = await StartAsync(
             handler,
             services => services.AddOrderingApplication(),
-            endpoints => endpoints.MapOrderEndpoints());
+            endpoints => endpoints.MapControllers());
         using HttpClient client = CreateClient(app);
 
         using HttpResponseMessage response = await client.GetAsync(
@@ -113,7 +114,7 @@ public sealed class HostedCustomerOwnershipTests
         await using WebApplication app = await StartAsync(
             handler,
             services => services.AddNotificationApplication(),
-            endpoints => endpoints.MapNotificationEndpoints());
+            endpoints => endpoints.MapControllers());
         using HttpClient client = CreateClient(app);
 
         using HttpResponseMessage response = await client.GetAsync(
@@ -132,7 +133,7 @@ public sealed class HostedCustomerOwnershipTests
         await using WebApplication app = await StartAsync(
             handler,
             services => services.AddOrderingApplication(),
-            endpoints => endpoints.MapOrderEndpoints());
+            endpoints => endpoints.MapControllers());
         using HttpClient client = CreateClient(app);
 
         using HttpResponseMessage response = await client.GetAsync($"/api/v1/orders/{orderId}");
@@ -149,8 +150,8 @@ public sealed class HostedCustomerOwnershipTests
             _ => Result<PaymentResponse>.Success(CreatePayment(orderId, Guid.NewGuid())));
         await using WebApplication app = await StartAsync(
             handler,
-            registerApplication: null,
-            endpoints => endpoints.MapPaymentEndpoints());
+            services => services.AddPaymentApplication(),
+            endpoints => endpoints.MapControllers());
         using HttpClient client = CreateClient(app);
 
         using HttpResponseMessage response = await client.GetAsync(
@@ -212,6 +213,7 @@ public sealed class HostedCustomerOwnershipTests
         {
             registerApplication?.Invoke(services);
             services.AddSingleton<IQueryHandler<TQuery, TResponse>>(handler);
+            services.AddSingleton<MediatR.IRequestHandler<TQuery, TResponse>>(handler);
         });
         app.UseAuthentication();
         app.UseAuthorization();
@@ -227,6 +229,11 @@ public sealed class HostedCustomerOwnershipTests
         builder.WebHost.ConfigureKestrel(options =>
             options.Listen(IPAddress.Loopback, 0));
         builder.Services.AddRouting();
+        builder.Services.AddControllers()
+            .AddApplicationPart(typeof(BasketsController).Assembly)
+            .AddApplicationPart(typeof(NotificationsController).Assembly)
+            .AddApplicationPart(typeof(OrdersController).Assembly)
+            .AddApplicationPart(typeof(PaymentsController).Assembly);
         builder.Services.AddECommerceLocalization();
         builder.Services
             .AddAuthentication(HeaderAuthenticationHandler.AuthenticationScheme)

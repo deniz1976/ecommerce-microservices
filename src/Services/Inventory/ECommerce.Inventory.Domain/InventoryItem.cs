@@ -8,6 +8,7 @@ public sealed class InventoryItem
 
     public InventoryItem(Guid productId, int quantityOnHand)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(quantityOnHand);
         ProductId = productId;
         QuantityOnHand = quantityOnHand;
         ReservedQuantity = 0;
@@ -49,6 +50,13 @@ public sealed class InventoryItem
 
     public void SetQuantityOnHand(int quantityOnHand)
     {
+        if (quantityOnHand < ReservedQuantity)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(quantityOnHand),
+                "Quantity on hand cannot be lower than the reserved quantity.");
+        }
+
         QuantityOnHand = quantityOnHand;
         UpdatedAt = DateTimeOffset.UtcNow;
     }

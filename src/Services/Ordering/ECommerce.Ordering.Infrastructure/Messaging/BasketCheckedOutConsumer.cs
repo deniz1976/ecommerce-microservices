@@ -1,27 +1,24 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Ordering.Application.Commands.CreateOrderFromCheckout;
 using ECommerce.Ordering.Application.Orders;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.Ordering.Infrastructure.Messaging;
 
 public sealed class BasketCheckedOutConsumer : IConsumer<BasketCheckedOut>
 {
-    private readonly ICommandHandler<
-        CreateOrderFromCheckoutCommand,
-        Result<OrderResponse>> commandHandler;
+    private readonly ISender sender;
 
-    public BasketCheckedOutConsumer(
-        ICommandHandler<CreateOrderFromCheckoutCommand, Result<OrderResponse>> commandHandler)
+    public BasketCheckedOutConsumer(ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public async Task Consume(ConsumeContext<BasketCheckedOut> context)
     {
-        Result<OrderResponse> result = await commandHandler.HandleAsync(
+        Result<OrderResponse> result = await sender.Send(
             new CreateOrderFromCheckoutCommand(context.Message),
             context.CancellationToken);
 

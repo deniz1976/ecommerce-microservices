@@ -65,12 +65,34 @@ public sealed class DemoPaymentProviderTests
         Assert.Null(result.TransactionReference);
     }
 
-    private static DemoPaymentProvider CreateProvider(DemoPaymentScenario scenario)
+    [Fact]
+    public async Task ConfiguredAuthorizationDelayObservesCancellation()
+    {
+        DemoPaymentProvider provider = CreateProvider(
+            DemoPaymentScenario.Success,
+            authorizationDelayMilliseconds: 1_000);
+        using CancellationTokenSource cancellationSource = new(
+            TimeSpan.FromMilliseconds(25));
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => provider.AuthorizeAsync(
+                new PaymentProviderAuthorizationRequest(
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    25m,
+                    "TRY"),
+                cancellationSource.Token));
+    }
+
+    private static DemoPaymentProvider CreateProvider(
+        DemoPaymentScenario scenario,
+        int authorizationDelayMilliseconds = 0)
     {
         return new DemoPaymentProvider(
             Options.Create(new DemoPaymentOptions
             {
-                Scenario = scenario
+                Scenario = scenario,
+                AuthorizationDelayMilliseconds = authorizationDelayMilliseconds
             }));
     }
 }

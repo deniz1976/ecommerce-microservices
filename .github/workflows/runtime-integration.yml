@@ -18,6 +18,7 @@ on:
           - notification-signalr
           - seller-authorization
           - shipping-failure
+          - customer-cancellation
       timeout_seconds:
         description: Per-scenario workflow timeout
         required: true
@@ -133,6 +134,7 @@ jobs:
         env:
           CatalogClient__TimeoutSeconds: "15"
           DemoPayment__Scenario: ${{ inputs.scenario == 'payment-decline' && 'Decline' || 'Success' }}
+          DemoPayment__AuthorizationDelayMilliseconds: ${{ (inputs.scenario == 'all' || inputs.scenario == 'customer-cancellation') && '5000' || '0' }}
         run: docker compose up --build --detach api-gateway ordering-saga-worker
 
       - name: Wait for runtime readiness

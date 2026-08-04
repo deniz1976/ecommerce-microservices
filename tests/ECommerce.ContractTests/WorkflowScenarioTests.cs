@@ -15,6 +15,7 @@ public sealed class WorkflowScenarioTests
     [InlineData("notification-signalr", WorkflowScenario.NotificationSignalR)]
     [InlineData("seller-authorization", WorkflowScenario.SellerAuthorization)]
     [InlineData("shipping-failure", WorkflowScenario.ShippingFailure)]
+    [InlineData("customer-cancellation", WorkflowScenario.CustomerCancellation)]
     public void ParseMapsDocumentedScenarioName(string? value, WorkflowScenario expected)
     {
         Assert.Equal(expected, WorkflowScenarios.Parse(value));
@@ -72,6 +73,47 @@ public sealed class WorkflowScenarioTests
     }
 
     [Fact]
+    public void SellerMediaProbeUsesOnlyProcessTokenAndCleansTemporaryImages()
+    {
+        string script = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "scripts",
+            "check-seller-media.ps1"));
+        string launcher = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "scripts",
+            "run-seller-media-check.ps1"));
+
+        Assert.Contains("SellerChecks__AccessToken", script, StringComparison.Ordinal);
+        Assert.Contains(
+            "Add-Type -AssemblyName System.Net.Http",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("Assert-JwtCoreClaims", script, StringComparison.Ordinal);
+        Assert.Contains("does not contain the Seller role", script, StringComparison.Ordinal);
+        Assert.Contains("must not contain the Admin role", script, StringComparison.Ordinal);
+        Assert.Contains("/gateway/catalog/stores/mine", script, StringComparison.Ordinal);
+        Assert.Contains("/gateway/catalog/manage/products", script, StringComparison.Ordinal);
+        Assert.Contains("Invoke-UploadImage", script, StringComparison.Ordinal);
+        Assert.Contains("Invoke-SetMainImage", script, StringComparison.Ordinal);
+        Assert.Contains("Invoke-DeleteImage", script, StringComparison.Ordinal);
+        Assert.Contains("finally", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("WriteAllText", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Set-Content", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Write-Host $accessToken", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("RuntimeChecks__AccessToken", script, StringComparison.Ordinal);
+        Assert.Contains("Read-Host", launcher, StringComparison.Ordinal);
+        Assert.Contains("-AsSecureString", launcher, StringComparison.Ordinal);
+        Assert.Contains("run-with-secrets.ps1", launcher, StringComparison.Ordinal);
+        Assert.Contains("check-seller-media.ps1", launcher, StringComparison.Ordinal);
+        Assert.Contains(
+            "Remove-Item \"Env:\\SellerChecks__AccessToken\"",
+            launcher,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain("Write-Host $env:SellerChecks", launcher, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void RuntimeContainerCheckRemapsOnlyDiagnosticHostPorts()
     {
         string repositoryRoot = FindRepositoryRoot();
@@ -92,6 +134,10 @@ public sealed class WorkflowScenarioTests
         Assert.Contains("${SHIPPING_API_HOST_PORT:-5187}:8080", compose, StringComparison.Ordinal);
         Assert.Contains("${NOTIFICATION_API_HOST_PORT:-5234}:8080", compose, StringComparison.Ordinal);
         Assert.Contains("\"5080:8080\"", compose, StringComparison.Ordinal);
+        Assert.Contains(
+            "Cors__AllowedOrigins__0: ${CORS_ALLOWED_ORIGIN:-http://localhost:3000}",
+            compose,
+            StringComparison.Ordinal);
     }
 
     [Fact]
@@ -132,9 +178,18 @@ public sealed class WorkflowScenarioTests
             "DemoPayment__Scenario: ${DemoPayment__Scenario:-Success}",
             compose,
             StringComparison.Ordinal);
+        Assert.Contains(
+            "DemoPayment__AuthorizationDelayMilliseconds: ${DemoPayment__AuthorizationDelayMilliseconds:-0}",
+            compose,
+            StringComparison.Ordinal);
         Assert.Contains("- payment-decline", workflow, StringComparison.Ordinal);
+        Assert.Contains("- customer-cancellation", workflow, StringComparison.Ordinal);
         Assert.Contains(
             "inputs.scenario == 'payment-decline' && 'Decline' || 'Success'",
+            workflow,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "inputs.scenario == 'all' || inputs.scenario == 'customer-cancellation'",
             workflow,
             StringComparison.Ordinal);
         Assert.Contains(

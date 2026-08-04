@@ -58,7 +58,7 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
 
   useEffect(() => {
     let active = true
-    Promise.all([getCatalogCategories(), getCatalogBrands()])
+    Promise.all([getCatalogCategories(locale), getCatalogBrands()])
       .then(([categories, brands]) => {
         if (active) setReferences({ status: "ready", categories, brands })
       })
@@ -68,7 +68,7 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
     return () => {
       active = false
     }
-  }, [])
+  }, [locale])
 
   useEffect(() => {
     let active = true
@@ -82,7 +82,7 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
     return () => {
       active = false
     }
-  }, [query])
+  }, [locale, query])
 
   function updateQuery(change: Partial<CatalogProductQuery>) {
     setCatalog({ status: "loading" })

@@ -27,6 +27,19 @@ internal sealed class FakeNotificationRepository :
         return Task.FromResult(notification);
     }
 
+    public Task<IReadOnlyCollection<NotificationRecord>> GetUnreadByCustomerAsync(
+        Guid customerId,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyCollection<NotificationRecord> notifications =
+            Notification is not null &&
+            Notification.CustomerId == customerId &&
+            Notification.ReadAt is null
+                ? [Notification]
+                : [];
+        return Task.FromResult(notifications);
+    }
+
     public void Add(NotificationRecord notification)
     {
         Notification = notification;

@@ -1,5 +1,7 @@
+using MediatR;
+
 namespace ECommerce.BuildingBlocks.Contracts.Cqrs;
 
-public interface ICommand
+public interface ICommand : IRequest
 {
 }

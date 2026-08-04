@@ -9,7 +9,8 @@ param(
         "payment-decline",
         "notification-signalr",
         "seller-authorization",
-        "shipping-failure")]
+        "shipping-failure",
+        "customer-cancellation")]
     [string]$Scenario = "all",
     [ValidateRange(30, 600)]
     [int]$TimeoutSeconds = 180,
@@ -54,6 +55,14 @@ try {
     }
     else {
         "Success"
+    }
+    $env:DemoPayment__AuthorizationDelayMilliseconds = if (
+        $Scenario -in @("all", "customer-cancellation")
+    ) {
+        "5000"
+    }
+    else {
+        "0"
     }
 
     if ($IncludeObservability) {

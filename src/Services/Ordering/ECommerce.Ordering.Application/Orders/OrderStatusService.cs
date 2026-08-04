@@ -34,6 +34,18 @@ public sealed class OrderStatusService
         return UpdateAsync(orderId, customerId, order => order.MarkInventoryReserved(), cancellationToken);
     }
 
+    public Task RejectCancellationAsync(
+        Guid orderId,
+        Guid customerId,
+        CancellationToken cancellationToken)
+    {
+        return UpdateAsync(
+            orderId,
+            customerId,
+            order => order.MarkCancellationRejected(),
+            cancellationToken);
+    }
+
     public Task PaymentAuthorizedAsync(Guid orderId, Guid customerId, CancellationToken cancellationToken)
     {
         return UpdateAsync(orderId, customerId, order => order.MarkPaymentAuthorized(), cancellationToken);

@@ -3,14 +3,12 @@ const apiOrigin = readHttpOrigin(
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5080",
   "NEXT_PUBLIC_API_BASE_URL",
 )
-const auth0Origin = readAuth0Origin(process.env.NEXT_PUBLIC_AUTH0_DOMAIN)
 const websocketOrigin = toWebSocketOrigin(apiOrigin)
 
 const connectSources = [
   "'self'",
   apiOrigin,
   websocketOrigin,
-  auth0Origin,
 ].filter(Boolean)
 
 const contentSecurityPolicy = [
@@ -20,7 +18,7 @@ const contentSecurityPolicy = [
   "img-src 'self' blob: data: https://res.cloudinary.com",
   "font-src 'self' data:",
   `connect-src ${connectSources.join(" ")}`,
-  `frame-src 'self'${auth0Origin ? ` ${auth0Origin}` : ""}`,
+  "frame-src 'self'",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
@@ -97,26 +95,6 @@ function readHttpOrigin(value, variableName) {
   }
 
   return parsed.origin
-}
-
-function readAuth0Origin(domain) {
-  if (!domain) {
-    return ""
-  }
-
-  if (
-    domain.includes("/") ||
-    domain.includes("\\") ||
-    domain.includes("@") ||
-    domain.includes("?") ||
-    domain.includes("#")
-  ) {
-    throw new Error(
-      "NEXT_PUBLIC_AUTH0_DOMAIN must be a host name without scheme, path, credentials, query, or fragment.",
-    )
-  }
-
-  return readHttpOrigin(`https://${domain}`, "NEXT_PUBLIC_AUTH0_DOMAIN")
 }
 
 function toWebSocketOrigin(origin) {

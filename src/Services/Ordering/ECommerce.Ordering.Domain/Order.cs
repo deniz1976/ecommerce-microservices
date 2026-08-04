@@ -71,6 +71,33 @@ public sealed class Order
         AdvanceTo(OrderStatus.Confirmed);
     }
 
+    public void MarkCancellationRequested()
+    {
+        if (Status is OrderStatus.Confirmed or
+            OrderStatus.Cancelled or
+            OrderStatus.CancellationRequested or
+            OrderStatus.ShipmentCreated)
+        {
+            return;
+        }
+
+        Status = OrderStatus.CancellationRequested;
+        UpdatedAt = DateTimeOffset.UtcNow;
+        statusHistory.Add(new OrderStatusHistory(Id, Status, UpdatedAt, null));
+    }
+
+    public void MarkCancellationRejected()
+    {
+        if (Status != OrderStatus.CancellationRequested)
+        {
+            return;
+        }
+
+        Status = OrderStatus.Confirmed;
+        UpdatedAt = DateTimeOffset.UtcNow;
+        statusHistory.Add(new OrderStatusHistory(Id, Status, UpdatedAt, null));
+    }
+
     public void MarkCancelled(string? reasonCode = null)
     {
         if (Status is OrderStatus.Confirmed or OrderStatus.Cancelled)

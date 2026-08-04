@@ -51,7 +51,7 @@ export function ProductEditForm({ product, onCancel, onUpdated }: ProductEditFor
 
   useEffect(() => {
     let active = true
-    Promise.all([getCatalogCategories(), getCatalogBrands()])
+    Promise.all([getCatalogCategories(locale), getCatalogBrands()])
       .then(([categories, brands]) => {
         if (active) setReferences({ status: "ready", categories, brands })
       })
@@ -62,7 +62,7 @@ export function ProductEditForm({ product, onCancel, onUpdated }: ProductEditFor
     return () => {
       active = false
     }
-  }, [])
+  }, [locale])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -177,13 +177,13 @@ export function ProductEditForm({ product, onCancel, onUpdated }: ProductEditFor
           <Field label={t.seller.productDescription} value={description} onChange={setDescription} required />
           <SelectField label={t.seller.category} value={categoryId} onChange={setCategoryId} options={references.categories} />
           <SelectField label={t.seller.brand} value={brandId} onChange={setBrandId} options={references.brands} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid min-w-0 grid-cols-2 gap-3">
             <Field label={t.seller.price} value={price} onChange={setPrice} type="number" min="0.01" step="0.01" required />
             <Field label={t.seller.currency} value={currency} onChange={setCurrency} minLength={3} maxLength={3} required />
           </div>
           <label className="grid gap-2 text-sm font-medium text-foreground">
             {t.seller.statusLabel}
-            <select value={status} onChange={(event) => setStatus(Number(event.target.value) as ProductStatus)} className="h-10 rounded-md border border-input bg-background px-3 font-normal">
+            <select value={status} onChange={(event) => setStatus(Number(event.target.value) as ProductStatus)} className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal">
               <option value={0}>{t.seller.draft}</option>
               <option value={1}>{t.seller.active}</option>
               <option value={2}>{t.seller.inactive}</option>
@@ -278,9 +278,9 @@ interface FieldProps {
 
 function Field({ label, value, onChange, type = "text", ...inputProps }: FieldProps) {
   return (
-    <label className="grid gap-2 text-sm font-medium text-foreground">
+    <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
       {label}
-      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} {...inputProps} className="h-10 rounded-md border border-input bg-background px-3 font-normal" />
+      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} {...inputProps} className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal" />
     </label>
   )
 }
@@ -294,9 +294,9 @@ interface SelectFieldProps {
 
 function SelectField({ label, value, onChange, options }: SelectFieldProps) {
   return (
-    <label className="grid gap-2 text-sm font-medium text-foreground">
+    <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
       {label}
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3 font-normal">
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal">
         {options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
       </select>
     </label>

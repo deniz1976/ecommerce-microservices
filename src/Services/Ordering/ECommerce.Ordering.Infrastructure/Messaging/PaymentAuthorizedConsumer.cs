@@ -1,22 +1,22 @@
-using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.Ordering.Application.Commands.ChangeOrderStatus;
 using MassTransit;
+using MediatR;
 
 namespace ECommerce.Ordering.Infrastructure.Messaging;
 
 public sealed class PaymentAuthorizedConsumer : IConsumer<PaymentAuthorized>
 {
-    private readonly ICommandHandler<ChangeOrderStatusCommand> commandHandler;
+    private readonly ISender sender;
 
-    public PaymentAuthorizedConsumer(ICommandHandler<ChangeOrderStatusCommand> commandHandler)
+    public PaymentAuthorizedConsumer(ISender sender)
     {
-        this.commandHandler = commandHandler;
+        this.sender = sender;
     }
 
     public Task Consume(ConsumeContext<PaymentAuthorized> context)
     {
-        return commandHandler.HandleAsync(
+        return sender.Send(
             new ChangeOrderStatusCommand(
                 context.Message.OrderId,
                 context.Message.CustomerId,

@@ -19,6 +19,7 @@ public static class DependencyInjection
                 shipment => shipment.Id));
         services.AddScoped<IUnitOfWork, EfUnitOfWork<ShippingDbContext>>();
         services.AddScoped<IShipmentIdentityReader, ShipmentIdentityReader>();
+        services.AddScoped<IShipmentQueryReader, ShipmentQueryReader>();
         services.Configure<MockShippingProviderOptions>(
             configuration.GetSection(MockShippingProviderOptions.SectionName));
         services.AddSingleton<IShippingProvider, MockShippingProvider>();

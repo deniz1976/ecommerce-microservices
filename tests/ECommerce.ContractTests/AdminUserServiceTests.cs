@@ -1,4 +1,5 @@
 using ECommerce.ContractTests.Support;
+using ECommerce.Identity.Application.AdminUsers;
 using ECommerce.Identity.Application.Queries.SearchAdminUsers;
 
 namespace ECommerce.ContractTests;
@@ -9,7 +10,7 @@ public sealed class SearchAdminUsersQueryHandlerTests
     public async Task SearchNormalizesPagingAndOptionalFilters()
     {
         TrackingAdminUserReader reader = new();
-        SearchAdminUsersQueryHandler handler = new(reader);
+        SearchAdminUsersQueryHandler handler = new(new AdminUserService(reader));
 
         await handler.HandleAsync(
             new SearchAdminUsersQuery(0, 500, "  example  ", "  Seller  "),
@@ -26,7 +27,7 @@ public sealed class SearchAdminUsersQueryHandlerTests
     public async Task SearchBoundsDeepPagingAndInputLength()
     {
         TrackingAdminUserReader reader = new();
-        SearchAdminUsersQueryHandler handler = new(reader);
+        SearchAdminUsersQueryHandler handler = new(new AdminUserService(reader));
 
         await handler.HandleAsync(
             new SearchAdminUsersQuery(int.MaxValue, 20, new string('a', 200), new string('b', 100)),
