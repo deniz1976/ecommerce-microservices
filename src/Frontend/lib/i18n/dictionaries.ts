@@ -94,6 +94,7 @@ export interface Dictionary {
     catalog: string
     users: string
     orders: string
+    inventory: string
     openSellerWorkspace: string
     roleLabel: string
     welcome: string
@@ -217,6 +218,26 @@ export interface Dictionary {
     orderCreatedAt: string
     orderUpdatedAt: string
     orderPageStatus: string
+    manageInventoryDescription: string
+    inventoryList: string
+    inventoryProductId: string
+    inventoryProductIdPlaceholder: string
+    invalidProductId: string
+    maximumAvailable: string
+    maximumAvailablePlaceholder: string
+    invalidMaximumAvailable: string
+    inventorySort: string
+    inventoryDirection: string
+    descending: string
+    ascending: string
+    quantityOnHand: string
+    reservedQuantity: string
+    availableQuantity: string
+    inventoryUpdatedAt: string
+    applyInventoryFilters: string
+    inventoryUnavailable: string
+    noMatchingInventory: string
+    inventoryPageStatus: string
     userRole: Record<Role, string>
     status: Record<ProductStatusName, string>
   }
@@ -554,6 +575,7 @@ const en: Dictionary = {
     catalog: "Catalog",
     users: "Users",
     orders: "Orders",
+    inventory: "Inventory",
     openSellerWorkspace: "Seller workspace",
     roleLabel: "Administrator",
     welcome: "Welcome back, {name}",
@@ -677,6 +699,26 @@ const en: Dictionary = {
     orderCreatedAt: "Created",
     orderUpdatedAt: "Updated",
     orderPageStatus: "Page {page} of {total} · {count} orders",
+    manageInventoryDescription: "Review stock levels across products with bounded server-side filters and sorting.",
+    inventoryList: "Inventory operations",
+    inventoryProductId: "Product ID",
+    inventoryProductIdPlaceholder: "Product GUID or leave empty",
+    invalidProductId: "Enter a valid product GUID.",
+    maximumAvailable: "Maximum available",
+    maximumAvailablePlaceholder: "Optional whole number",
+    invalidMaximumAvailable: "Enter zero or a positive whole number.",
+    inventorySort: "Sort field",
+    inventoryDirection: "Direction",
+    descending: "Descending",
+    ascending: "Ascending",
+    quantityOnHand: "On hand",
+    reservedQuantity: "Reserved",
+    availableQuantity: "Available",
+    inventoryUpdatedAt: "Last updated",
+    applyInventoryFilters: "Apply inventory filters",
+    inventoryUnavailable: "Inventory data could not be loaded.",
+    noMatchingInventory: "No inventory items match the selected filters.",
+    inventoryPageStatus: "Page {page} of {total} · {count} inventory items",
     userRole: {
       Customer: "Customer",
       Seller: "Seller",
@@ -1035,6 +1077,7 @@ const tr: Dictionary = {
     catalog: "Katalog",
     users: "Kullanıcılar",
     orders: "Siparişler",
+    inventory: "Stok",
     openSellerWorkspace: "Satıcı paneli",
     roleLabel: "Yönetici",
     welcome: "Tekrar hoş geldiniz, {name}",
@@ -1158,6 +1201,26 @@ const tr: Dictionary = {
     orderCreatedAt: "Oluşturulma",
     orderUpdatedAt: "Güncellenme",
     orderPageStatus: "Sayfa {page} / {total} · {count} sipariş",
+    manageInventoryDescription: "Tüm ürünlerin stok seviyelerini sınırlı sunucu filtreleri ve sıralamayla inceleyin.",
+    inventoryList: "Stok operasyonları",
+    inventoryProductId: "Ürün kimliği",
+    inventoryProductIdPlaceholder: "Ürün GUID değeri veya boş bırakın",
+    invalidProductId: "Geçerli bir ürün GUID değeri girin.",
+    maximumAvailable: "En fazla kullanılabilir",
+    maximumAvailablePlaceholder: "İsteğe bağlı tam sayı",
+    invalidMaximumAvailable: "Sıfır veya pozitif bir tam sayı girin.",
+    inventorySort: "Sıralama alanı",
+    inventoryDirection: "Yön",
+    descending: "Azalan",
+    ascending: "Artan",
+    quantityOnHand: "Eldeki",
+    reservedQuantity: "Ayrılmış",
+    availableQuantity: "Kullanılabilir",
+    inventoryUpdatedAt: "Son güncelleme",
+    applyInventoryFilters: "Stok filtrelerini uygula",
+    inventoryUnavailable: "Stok verisi yüklenemedi.",
+    noMatchingInventory: "Seçili filtrelerle eşleşen stok kaydı bulunamadı.",
+    inventoryPageStatus: "Sayfa {page} / {total} · {count} stok kaydı",
     userRole: {
       Customer: "Müşteri",
       Seller: "Satıcı",

@@ -8,6 +8,7 @@ import {
   Loader2,
   LogOut,
   Package,
+  PackageSearch,
   ShieldCheck,
   Store,
   Tag,
@@ -97,6 +98,10 @@ export function AdminDashboard({ profile, onOpenSellerWorkspace }: AdminDashboar
             <Link href="/admin/orders" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
               <ClipboardList className="size-4" />
               {t.admin.orders}
+            </Link>
+            <Link href="/admin/inventory" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
+              <PackageSearch className="size-4" />
+              {t.admin.inventory}
             </Link>
           </nav>
         </aside>

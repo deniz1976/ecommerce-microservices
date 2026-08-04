@@ -31,8 +31,9 @@ project rather than a production-ready commerce product.
 - A Seller order workspace with store/status filters, date sorting, bounded
   server pagination, lightweight summaries, on-demand store items, and totals
   without customer identity, address, or other-store data
-- Read-only administrator user directory, catalog-wide product management, and
-  a server-paged cross-customer order operations list
+- Read-only administrator user directory, catalog-wide product management,
+  server-paged cross-customer order operations, and bounded inventory-level
+  monitoring
 - Independent Admin-only category/brand list pages with database-side search,
   status filters, stable sorting, bounded pagination, and separate create/edit
   forms
