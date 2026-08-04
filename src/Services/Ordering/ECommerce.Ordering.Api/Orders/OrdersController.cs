@@ -6,6 +6,7 @@ using ECommerce.Ordering.Application.Commands.RequestOrderCancellation;
 using ECommerce.Ordering.Application.Orders;
 using ECommerce.Ordering.Application.Queries.GetOrderById;
 using ECommerce.Ordering.Application.Queries.GetOrdersByCustomer;
+using ECommerce.Ordering.Application.Queries.GetSellerOrderById;
 using ECommerce.Ordering.Application.Queries.SearchManagedOrders;
 using ECommerce.Ordering.Application.Queries.SearchSellerOrders;
 using ECommerce.Ordering.Domain;
@@ -126,6 +127,27 @@ public sealed class OrdersController(
                 pageSize,
                 status,
                 sortDescending,
+                new SellerOrderAccessContext(
+                    bypassStoreOwnership,
+                    bypassStoreOwnership
+                        ? null
+                        : CustomerAccessTokenReader.Read(HttpContext))),
+            cancellationToken);
+        return OrderResults.FromResult(result, HttpContext);
+    }
+
+    [HttpGet("store/{storeId:guid}/{orderId:guid}", Name = "GetSellerOrderById")]
+    [Authorize(Policy = AuthorizationPolicies.SellerOrAdmin)]
+    public async Task<IResult> GetSellerOrderByIdAsync(
+        Guid storeId,
+        Guid orderId,
+        CancellationToken cancellationToken)
+    {
+        bool bypassStoreOwnership = User.IsInRole(ApplicationRoles.Admin);
+        Result<SellerOrderDetailResponse> result = await sender.Send(
+            new GetSellerOrderByIdQuery(
+                storeId,
+                orderId,
                 new SellerOrderAccessContext(
                     bypassStoreOwnership,
                     bypassStoreOwnership

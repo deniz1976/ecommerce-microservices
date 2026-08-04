@@ -31,28 +31,67 @@ public sealed class OrderQueryService
         SellerOrderAccessContext accessContext,
         CancellationToken cancellationToken)
     {
-        if (!accessContext.BypassStoreOwnership)
+        Error? authorizationError = await GetSellerStoreAuthorizationErrorAsync(
+            criteria.StoreId,
+            accessContext,
+            cancellationToken);
+        if (authorizationError is not null)
         {
-            StoreOrderAccessResult accessResult = await storeAccessAuthorizer.AuthorizeAsync(
-                criteria.StoreId,
-                accessContext.AccessToken,
-                cancellationToken);
-            if (accessResult == StoreOrderAccessResult.DependencyUnavailable)
-            {
-                return Result<PagedResult<SellerOrderSummaryResponse>>.Failure(
-                    new Error(ErrorCodes.DependencyUnavailable, ErrorCodes.DependencyUnavailable));
-            }
-
-            if (accessResult != StoreOrderAccessResult.Granted)
-            {
-                return Result<PagedResult<SellerOrderSummaryResponse>>.Failure(
-                    new Error(ErrorCodes.AccessDenied, ErrorCodes.AccessDenied));
-            }
+            return Result<PagedResult<SellerOrderSummaryResponse>>.Failure(authorizationError);
         }
 
         PagedResult<SellerOrderSummaryResponse> page = await orderReader.SearchSellerAsync(
             criteria,
             cancellationToken);
         return Result<PagedResult<SellerOrderSummaryResponse>>.Success(page);
+    }
+
+    public async Task<Result<SellerOrderDetailResponse>> GetSellerAsync(
+        Guid storeId,
+        Guid orderId,
+        SellerOrderAccessContext accessContext,
+        CancellationToken cancellationToken)
+    {
+        Error? authorizationError = await GetSellerStoreAuthorizationErrorAsync(
+            storeId,
+            accessContext,
+            cancellationToken);
+        if (authorizationError is not null)
+        {
+            return Result<SellerOrderDetailResponse>.Failure(authorizationError);
+        }
+
+        SellerOrderDetailResponse? order = await orderReader.GetSellerAsync(
+            storeId,
+            orderId,
+            cancellationToken);
+        return order is null
+            ? Result<SellerOrderDetailResponse>.Failure(
+                new Error(ErrorCodes.OrderNotFound, ErrorCodes.OrderNotFound))
+            : Result<SellerOrderDetailResponse>.Success(order);
+    }
+
+    private async Task<Error?> GetSellerStoreAuthorizationErrorAsync(
+        Guid storeId,
+        SellerOrderAccessContext accessContext,
+        CancellationToken cancellationToken)
+    {
+        if (accessContext.BypassStoreOwnership)
+        {
+            return null;
+        }
+
+        StoreOrderAccessResult accessResult = await storeAccessAuthorizer.AuthorizeAsync(
+            storeId,
+            accessContext.AccessToken,
+            cancellationToken);
+        return accessResult switch
+        {
+            StoreOrderAccessResult.Granted => null,
+            StoreOrderAccessResult.DependencyUnavailable => new Error(
+                ErrorCodes.DependencyUnavailable,
+                ErrorCodes.DependencyUnavailable),
+            _ => new Error(ErrorCodes.AccessDenied, ErrorCodes.AccessDenied)
+        };
     }
 }

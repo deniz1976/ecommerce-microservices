@@ -29,7 +29,7 @@ project rather than a production-ready commerce product.
 - Ownership-protected, idempotent pre-payment order cancellation with saga compensation
 - Seller-owned store creation/editing, product and stock management, and Cloudinary-backed product images
 - A Seller order workspace with store/status filters, date sorting, bounded
-  server pagination, and only the selected store's line items and totals
+  server pagination, lightweight summaries, on-demand store items, and totals
   without customer identity, address, or other-store data
 - Read-only administrator user directory, catalog-wide product management, and
   independent Admin-only category/brand list pages with database-side search,
@@ -407,7 +407,8 @@ amaçlı bir çalışmadır.
 - Sahiplik korumalı, idempotent ve saga telafili ödeme öncesi sipariş iptali
 - Satıcıya ait mağaza oluşturma/düzenleme, ürün ve stok yönetimi ile Cloudinary ürün görselleri
 - Mağaza/durum filtreleri, tarih sıralaması ve sınırlı sunucu sayfalamasıyla,
-  müşteri kimliği, adresi veya diğer mağazaların verileri açığa çıkmadan yalnızca
+  hafif özetler ve isteğe bağlı kalem detayları sunarak müşteri kimliği, adresi
+  veya diğer mağazaların verileri açığa çıkmadan yalnızca
   seçili mağazanın kalemlerini ve toplamlarını sunan Satıcı sipariş çalışma alanı
 - Salt okunur yönetici kullanıcı dizini, katalog genelinde ürün yönetimi ve
   veritabanı tarafında arama, durum filtresi, kararlı sıralama, sınırlı

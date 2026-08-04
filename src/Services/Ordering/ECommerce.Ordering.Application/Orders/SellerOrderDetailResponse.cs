@@ -2,12 +2,12 @@ using ECommerce.Ordering.Domain;
 
 namespace ECommerce.Ordering.Application.Orders;
 
-public sealed record SellerOrderSummaryResponse(
+public sealed record SellerOrderDetailResponse(
     Guid OrderId,
     Guid StoreId,
     OrderStatus Status,
     string Currency,
     decimal StoreTotalAmount,
-    int ItemCount,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    IReadOnlyCollection<SellerOrderItemResponse> Items);

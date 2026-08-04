@@ -6,6 +6,7 @@ using ECommerce.Ordering.Application.Commands.CreateOrderFromCheckout;
 using ECommerce.Ordering.Application.Commands.RequestOrderCancellation;
 using ECommerce.Ordering.Application.Orders;
 using ECommerce.Ordering.Application.Queries.GetOrderById;
+using ECommerce.Ordering.Application.Queries.GetSellerOrderById;
 using ECommerce.Ordering.Application.Queries.GetOrdersByCustomer;
 using ECommerce.Ordering.Application.Queries.SearchManagedOrders;
 using ECommerce.Ordering.Application.Queries.SearchSellerOrders;
@@ -47,6 +48,9 @@ public static class DependencyInjection
         services.AddScoped<
             IQueryHandler<SearchSellerOrdersQuery, Result<PagedResult<SellerOrderSummaryResponse>>>,
             SearchSellerOrdersQueryHandler>();
+        services.AddScoped<
+            IQueryHandler<GetSellerOrderByIdQuery, Result<SellerOrderDetailResponse>>,
+            GetSellerOrderByIdQueryHandler>();
         return services;
     }
 }

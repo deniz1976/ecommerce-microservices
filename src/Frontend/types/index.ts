@@ -310,6 +310,17 @@ export interface SellerOrderSummary {
   status: OrderStatus
   currency: string
   storeTotalAmount: number
+  itemCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SellerOrderDetail {
+  orderId: string
+  storeId: string
+  status: OrderStatus
+  currency: string
+  storeTotalAmount: number
   createdAt: string
   updatedAt: string
   items: SellerOrderItem[]

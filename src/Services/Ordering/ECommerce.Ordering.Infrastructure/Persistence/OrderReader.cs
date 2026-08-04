@@ -96,10 +96,39 @@ public sealed class OrderReader : IOrderReader
                 order.Items
                     .Where(item => item.StoreId == criteria.StoreId)
                     .Sum(item => item.Quantity * item.UnitPrice),
+                order.Items.Count(item => item.StoreId == criteria.StoreId),
+                order.CreatedAt,
+                order.UpdatedAt))
+            .ToArrayAsync(cancellationToken);
+
+        return new PagedResult<SellerOrderSummaryResponse>(
+            items,
+            pageNumber,
+            pageSize,
+            totalCount);
+    }
+
+    public Task<SellerOrderDetailResponse?> GetSellerAsync(
+        Guid storeId,
+        Guid orderId,
+        CancellationToken cancellationToken)
+    {
+        return dbContext.Orders
+            .AsNoTracking()
+            .Where(order => order.Id == orderId)
+            .Where(order => order.Items.Any(item => item.StoreId == storeId))
+            .Select(order => new SellerOrderDetailResponse(
+                order.Id,
+                storeId,
+                order.Status,
+                order.Currency,
+                order.Items
+                    .Where(item => item.StoreId == storeId)
+                    .Sum(item => item.Quantity * item.UnitPrice),
                 order.CreatedAt,
                 order.UpdatedAt,
                 order.Items
-                    .Where(item => item.StoreId == criteria.StoreId)
+                    .Where(item => item.StoreId == storeId)
                     .OrderBy(item => item.Id)
                     .Select(item => new SellerOrderItemResponse(
                         item.Id,
@@ -110,12 +139,6 @@ public sealed class OrderReader : IOrderReader
                         item.Quantity * item.UnitPrice,
                         item.Currency))
                     .ToArray()))
-            .ToArrayAsync(cancellationToken);
-
-        return new PagedResult<SellerOrderSummaryResponse>(
-            items,
-            pageNumber,
-            pageSize,
-            totalCount);
+            .SingleOrDefaultAsync(cancellationToken);
     }
 }

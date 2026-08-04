@@ -305,6 +305,9 @@ export interface Dictionary {
     lastUpdated: string
     storeTotal: string
     orderItems: string
+    showOrderItems: string
+    hideOrderItems: string
+    orderItemsLoadFailed: string
     orderProduct: string
     orderQuantity: string
     orderUnitPrice: string
@@ -752,6 +755,9 @@ const en: Dictionary = {
     lastUpdated: "Last updated",
     storeTotal: "Store total",
     orderItems: "Store items",
+    showOrderItems: "Show {count} items",
+    hideOrderItems: "Hide items",
+    orderItemsLoadFailed: "The items for this order could not be loaded.",
     orderProduct: "Product",
     orderQuantity: "Quantity",
     orderUnitPrice: "Unit price",
@@ -1211,6 +1217,9 @@ const tr: Dictionary = {
     lastUpdated: "Son güncelleme",
     storeTotal: "Mağaza toplamı",
     orderItems: "Mağaza kalemleri",
+    showOrderItems: "{count} kalemi göster",
+    hideOrderItems: "Kalemleri gizle",
+    orderItemsLoadFailed: "Bu siparişin kalemleri yüklenemedi.",
     orderProduct: "Ürün",
     orderQuantity: "Miktar",
     orderUnitPrice: "Birim fiyat",

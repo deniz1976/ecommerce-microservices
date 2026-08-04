@@ -11,4 +11,9 @@ public interface IOrderReader
     Task<PagedResult<SellerOrderSummaryResponse>> SearchSellerAsync(
         SellerOrderListCriteria criteria,
         CancellationToken cancellationToken);
+
+    Task<SellerOrderDetailResponse?> GetSellerAsync(
+        Guid storeId,
+        Guid orderId,
+        CancellationToken cancellationToken);
 }

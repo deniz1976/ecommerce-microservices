@@ -8,6 +8,8 @@ public sealed class FrontendSellerOrderWorkspaceTests
         string api = ReadFrontendFile("lib", "api", "orders.ts");
 
         Assert.Contains("getSellerOrders(", api, StringComparison.Ordinal);
+        Assert.Contains("getSellerOrder(", api, StringComparison.Ordinal);
+        Assert.Contains("/gateway/orders/store/${storeId}/${orderId}", api, StringComparison.Ordinal);
         Assert.Contains("/gateway/orders/store/${storeId}", api, StringComparison.Ordinal);
         Assert.Contains("pageNumber: String(query.pageNumber", api, StringComparison.Ordinal);
         Assert.Contains("pageSize: String(query.pageSize", api, StringComparison.Ordinal);
@@ -28,6 +30,8 @@ public sealed class FrontendSellerOrderWorkspaceTests
         Assert.Contains("role === \"Seller\" || role === \"Admin\"", guard, StringComparison.Ordinal);
         Assert.Contains("new AbortController()", workspace, StringComparison.Ordinal);
         Assert.Contains("getSellerOrders(", workspace, StringComparison.Ordinal);
+        Assert.Contains("getSellerOrder(", workspace, StringComparison.Ordinal);
+        Assert.Contains("aria-expanded={expanded}", workspace, StringComparison.Ordinal);
         Assert.Contains("setPageSize", workspace, StringComparison.Ordinal);
         Assert.Contains("setStatus", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain(".items.slice(", workspace, StringComparison.Ordinal);

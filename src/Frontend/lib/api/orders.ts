@@ -4,6 +4,7 @@ import type {
   OrderStatus,
   OrderSummary,
   PagedResult,
+  SellerOrderDetail,
   SellerOrderSummary,
 } from "@/types"
 
@@ -55,6 +56,20 @@ export function getSellerOrders(
 
   return apiRequest<PagedResult<SellerOrderSummary>>(
     `/gateway/orders/store/${storeId}?${parameters.toString()}`,
+    {
+      authenticated: true,
+      signal,
+    },
+  )
+}
+
+export function getSellerOrder(
+  storeId: string,
+  orderId: string,
+  signal?: AbortSignal,
+): Promise<SellerOrderDetail> {
+  return apiRequest<SellerOrderDetail>(
+    `/gateway/orders/store/${storeId}/${orderId}`,
     {
       authenticated: true,
       signal,

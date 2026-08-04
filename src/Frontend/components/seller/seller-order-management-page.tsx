@@ -3,6 +3,8 @@
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   ClipboardList,
   Loader2,
   PackageOpen,
@@ -10,14 +12,14 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import type { ReactNode } from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { getMyCatalogStores } from "@/lib/api/catalog"
-import { getSellerOrders } from "@/lib/api/orders"
+import { getSellerOrder, getSellerOrders } from "@/lib/api/orders"
 import { useI18n } from "@/lib/i18n/provider"
 import { getOrderStatusName } from "@/lib/orders/status"
 import { cn } from "@/lib/utils"
@@ -25,6 +27,7 @@ import type {
   CatalogStore,
   OrderStatus,
   PagedResult,
+  SellerOrderDetail,
   SellerOrderSummary,
 } from "@/types"
 
@@ -233,6 +236,38 @@ export function SellerOrderManagementPage() {
 
 function SellerOrderCard({ order }: { order: SellerOrderSummary }) {
   const { locale, t } = useI18n()
+  const [expanded, setExpanded] = useState(false)
+  const detailAbortController = useRef<AbortController | null>(null)
+  const [detail, setDetail] = useState<
+    | { status: "idle" }
+    | { status: "loading" }
+    | { status: "ready"; data: SellerOrderDetail }
+    | { status: "unavailable" }
+  >({ status: "idle" })
+
+  useEffect(() => () => detailAbortController.current?.abort(), [])
+
+  const toggleDetails = () => {
+    if (expanded) {
+      detailAbortController.current?.abort()
+      setExpanded(false)
+      return
+    }
+
+    setExpanded(true)
+    if (detail.status === "ready") return
+
+    detailAbortController.current?.abort()
+    const controller = new AbortController()
+    detailAbortController.current = controller
+    setDetail({ status: "loading" })
+    getSellerOrder(order.storeId, order.orderId, controller.signal)
+      .then((data) => setDetail({ status: "ready", data }))
+      .catch((error: unknown) => {
+        if (!isAbortError(error)) setDetail({ status: "unavailable" })
+      })
+  }
+
   return (
     <article className="overflow-hidden rounded-xl border border-border bg-background">
       <div className="grid gap-4 border-b border-border bg-muted/25 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -247,9 +282,39 @@ function SellerOrderCard({ order }: { order: SellerOrderSummary }) {
           <p className="mt-1 text-xs font-medium text-primary">
             {t.orders.status[getOrderStatusName(order.status)]}
           </p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mt-2"
+            onClick={toggleDetails}
+            aria-expanded={expanded}
+          >
+            {expanded ? <ChevronUp /> : <ChevronDown />}
+            {expanded
+              ? t.seller.hideOrderItems
+              : t.seller.showOrderItems.replace("{count}", String(order.itemCount))}
+          </Button>
         </div>
       </div>
-      <div className="overflow-x-auto">
+      {expanded && detail.status === "loading" ? (
+        <div className="flex min-h-28 items-center justify-center">
+          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          <span className="sr-only">{t.common.loading}</span>
+        </div>
+      ) : expanded && detail.status === "unavailable" ? (
+        <p className="px-5 py-6 text-sm text-destructive">{t.seller.orderItemsLoadFailed}</p>
+      ) : expanded && detail.status === "ready" ? (
+        <SellerOrderItemsTable order={detail.data} />
+      ) : null}
+    </article>
+  )
+}
+
+function SellerOrderItemsTable({ order }: { order: SellerOrderDetail }) {
+  const { locale, t } = useI18n()
+  return (
+    <div className="overflow-x-auto">
         <table className="w-full min-w-[42rem] border-collapse text-left text-sm">
           <caption className="sr-only">{t.seller.orderItems}</caption>
           <thead className="text-xs text-muted-foreground">
@@ -276,7 +341,6 @@ function SellerOrderCard({ order }: { order: SellerOrderSummary }) {
           </tbody>
         </table>
       </div>
-    </article>
   )
 }
 
