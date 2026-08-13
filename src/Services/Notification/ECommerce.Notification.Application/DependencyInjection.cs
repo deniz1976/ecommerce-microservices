@@ -14,7 +14,8 @@ public static class DependencyInjection
     {
         services.AddMediatR(configuration =>
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
-        services.AddScoped<NotificationService>();
+        services.AddScoped<NotificationCreationService>();
+        services.AddScoped<NotificationReadStateService>();
         services.AddScoped<NotificationHistoryService>();
         services.AddScoped<
             ICommandHandler<CreateNotificationCommand, NotificationMessage>,

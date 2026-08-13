@@ -6,17 +6,18 @@ namespace ECommerce.Notification.Application.Commands.CreateNotification;
 public sealed class CreateNotificationCommandHandler
     : ICommandHandler<CreateNotificationCommand, NotificationMessage>
 {
-    private readonly NotificationService notificationService;
+    private readonly NotificationCreationService notificationCreationService;
 
-    public CreateNotificationCommandHandler(NotificationService notificationService)
+    public CreateNotificationCommandHandler(
+        NotificationCreationService notificationCreationService)
     {
-        this.notificationService = notificationService;
+        this.notificationCreationService = notificationCreationService;
     }
 
     public Task<NotificationMessage> HandleAsync(
         CreateNotificationCommand command,
         CancellationToken cancellationToken)
     {
-        return notificationService.CreateAsync(command.Request, cancellationToken);
+        return notificationCreationService.CreateAsync(command.Request, cancellationToken);
     }
 }

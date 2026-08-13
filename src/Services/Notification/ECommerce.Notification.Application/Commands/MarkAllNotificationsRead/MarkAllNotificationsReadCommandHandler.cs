@@ -6,18 +6,19 @@ namespace ECommerce.Notification.Application.Commands.MarkAllNotificationsRead;
 public sealed class MarkAllNotificationsReadCommandHandler
     : ICommandHandler<MarkAllNotificationsReadCommand, int>
 {
-    private readonly NotificationService notificationService;
+    private readonly NotificationReadStateService notificationReadStateService;
 
-    public MarkAllNotificationsReadCommandHandler(NotificationService notificationService)
+    public MarkAllNotificationsReadCommandHandler(
+        NotificationReadStateService notificationReadStateService)
     {
-        this.notificationService = notificationService;
+        this.notificationReadStateService = notificationReadStateService;
     }
 
     public Task<int> HandleAsync(
         MarkAllNotificationsReadCommand command,
         CancellationToken cancellationToken)
     {
-        return notificationService.MarkAllReadAsync(
+        return notificationReadStateService.MarkAllReadAsync(
             command.CustomerId,
             cancellationToken);
     }

@@ -113,7 +113,7 @@ remain focused read interfaces.
 | Inventory | Seller-managed stock, aggregate-enforced reservations, releases, atomic UTC movement audit, and Admin operations reads |
 | Payment | Provider-neutral authorization/refund workflow with aggregate-enforced refund identity/amount/currency integrity, customer-safe summaries, and Admin operations reads |
 | Shipping | Event-driven shipment creation with a canonical address value object, customer-safe tracking, and Admin operations reads |
-| Notification | Persisted notifications, unread state, and SignalR delivery |
+| Notification | Persisted notifications with focused creation/live-delivery and read-state application services |
 | Identity | Local user profiles, roles, Auth0 subject mapping, and role reconciliation |
 | Ordering Saga | Durable order orchestration and compensation |
 
@@ -453,7 +453,7 @@ odaklı read interface'lerinde kalır.
 | Inventory | Satıcı tarafından yönetilen stok, aggregate tarafından korunan rezervasyonlar, stok serbest bırakma, atomik UTC hareket geçmişi ve Admin operasyon okumaları |
 | Payment | Aggregate tarafından korunan müşteri/tutar/para birimi bütünlüğüne sahip provider-neutral yetkilendirme/iade akışı, güvenli müşteri özeti ve Admin operasyon okumaları |
 | Shipping | Canonical adres value object'iyle event-driven gönderi oluşturma, güvenli müşteri takibi ve Admin operasyon okumaları |
-| Notification | Kalıcı bildirimler, okunmamış durumu ve SignalR teslimi |
+| Notification | Oluşturma/canlı teslim ve okuma durumu için ayrılmış Application servisleriyle kalıcı bildirimler |
 | Identity | Yerel kullanıcı profili, roller, Auth0 subject eşlemesi ve rol uzlaştırma |
 | Ordering Saga | Kalıcı sipariş orkestrasyonu ve compensation |
 

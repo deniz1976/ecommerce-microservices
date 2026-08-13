@@ -7,9 +7,9 @@ namespace ECommerce.Notification.Application.Commands.MarkNotificationRead;
 public sealed class MarkNotificationReadCommandHandler
     : ICommandHandler<MarkNotificationReadCommand, Result<NotificationMessage>>
 {
-    private readonly NotificationService service;
+    private readonly NotificationReadStateService service;
 
-    public MarkNotificationReadCommandHandler(NotificationService service)
+    public MarkNotificationReadCommandHandler(NotificationReadStateService service)
     {
         this.service = service;
     }
