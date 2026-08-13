@@ -12,11 +12,6 @@ public sealed class OrderingSagaMediatRRegistrationTests
     [Fact]
     public void CancellationWorkflowHasAFocusedApplicationService()
     {
-        Assert.DoesNotContain(
-            typeof(OrderWorkflowService).GetMethods(),
-            method => method.GetParameters().Any(parameter =>
-                parameter.ParameterType == typeof(OrderCancellationRequested)));
-
         Assert.Contains(
             typeof(OrderWorkflowCancellationService).GetMethods(),
             method => method.GetParameters().Any(parameter =>
@@ -44,7 +39,7 @@ public sealed class OrderingSagaMediatRRegistrationTests
         where TEvent : class
     {
         Type serviceType = typeof(IRequestHandler<ProcessWorkflowEventCommand<TEvent>>);
-        Type implementationType = typeof(ProcessWorkflowEventCommandHandler<TEvent>);
+        Type implementationType = ExpectedHandlerType(typeof(TEvent));
 
         ServiceDescriptor descriptor = Assert.Single(
             services,
@@ -52,6 +47,19 @@ public sealed class OrderingSagaMediatRRegistrationTests
                 candidate.ServiceType == serviceType &&
                 candidate.ImplementationType == implementationType);
 
-        Assert.Equal(ServiceLifetime.Scoped, descriptor.Lifetime);
+        Assert.Equal(ServiceLifetime.Transient, descriptor.Lifetime);
+    }
+
+    private static Type ExpectedHandlerType(Type eventType)
+    {
+        if (eventType == typeof(OrderSubmitted)) return typeof(OrderSubmittedCommandHandler);
+        if (eventType == typeof(InventoryReserved)) return typeof(InventoryReservedCommandHandler);
+        if (eventType == typeof(InventoryReservationFailed)) return typeof(InventoryReservationFailedCommandHandler);
+        if (eventType == typeof(PaymentAuthorized)) return typeof(PaymentAuthorizedCommandHandler);
+        if (eventType == typeof(PaymentFailed)) return typeof(PaymentFailedCommandHandler);
+        if (eventType == typeof(ShipmentCreated)) return typeof(ShipmentCreatedCommandHandler);
+        if (eventType == typeof(ShipmentFailed)) return typeof(ShipmentFailedCommandHandler);
+        if (eventType == typeof(OrderCancellationRequested)) return typeof(OrderCancellationRequestedCommandHandler);
+        throw new ArgumentOutOfRangeException(nameof(eventType), eventType, "Unsupported workflow event.");
     }
 }

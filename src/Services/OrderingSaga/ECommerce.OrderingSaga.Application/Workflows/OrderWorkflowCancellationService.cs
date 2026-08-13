@@ -6,21 +6,17 @@ using ECommerce.OrderingSaga.Domain;
 namespace ECommerce.OrderingSaga.Application.Workflows;
 
 public sealed class OrderWorkflowCancellationService(
-    IRepository<OrderWorkflow, Guid> repository,
     IUnitOfWork unitOfWork,
-    IOrderWorkflowIdentityReader identityReader,
+    OrderWorkflowLoader loader,
     IWorkflowCommandPublisher publisher)
 {
     public async Task HandleAsync(
         OrderCancellationRequested message,
         CancellationToken cancellationToken)
     {
-        Guid? workflowId = await identityReader.FindIdByOrderIdAsync(
+        OrderWorkflow? workflow = await loader.LoadByOrderIdAsync(
             message.OrderId,
             cancellationToken);
-        OrderWorkflow? workflow = workflowId is null
-            ? null
-            : await repository.GetByIdAsync(workflowId.Value, cancellationToken);
         if (workflow is null)
         {
             throw new OrderWorkflowNotReadyException(message.OrderId);

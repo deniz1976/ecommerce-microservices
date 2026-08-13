@@ -26,10 +26,10 @@ public sealed class OrderWorkflowCancellationTests
     public async Task Missing_workflow_uses_specific_not_ready_exception()
     {
         OrderWorkflowFakeRepository repository = new();
+        OrderWorkflowLoader loader = new(repository, repository);
         OrderWorkflowCancellationService service = new(
             repository,
-            repository,
-            repository,
+            loader,
             new FakeWorkflowCommandPublisher());
         OrderCancellationRequested request = new(
             Guid.NewGuid(),
@@ -102,9 +102,9 @@ public sealed class OrderWorkflowCancellationTests
             CreateService();
         await cancellationService.HandleAsync(CreateRequest(workflow), CancellationToken.None);
 
-        OrderWorkflowService service = CreateWorkflowService(workflow, publisher);
+        InventoryWorkflowService service = CreateInventoryService(workflow, publisher);
 
-        await service.HandleAsync(
+        await service.HandleReservedAsync(
             new InventoryReserved(
                 Guid.NewGuid(),
                 Guid.NewGuid(),
@@ -128,9 +128,9 @@ public sealed class OrderWorkflowCancellationTests
             CreateService();
         await cancellationService.HandleAsync(CreateRequest(workflow), CancellationToken.None);
 
-        OrderWorkflowService service = CreateWorkflowService(workflow, publisher);
+        PaymentWorkflowService service = CreatePaymentService(workflow, publisher);
 
-        await service.HandleAsync(
+        await service.HandleAuthorizedAsync(
             new PaymentAuthorized(
                 Guid.NewGuid(),
                 Guid.NewGuid(),
@@ -171,21 +171,32 @@ public sealed class OrderWorkflowCancellationTests
         OrderWorkflowFakeRepository repository = new();
         repository.Add(workflow);
         FakeWorkflowCommandPublisher publisher = new();
+        OrderWorkflowLoader loader = new(repository, repository);
         OrderWorkflowCancellationService service = new(
             repository,
-            repository,
-            repository,
+            loader,
             publisher);
         return (workflow, service, publisher);
     }
 
-    private static OrderWorkflowService CreateWorkflowService(
+    private static InventoryWorkflowService CreateInventoryService(
         OrderWorkflow workflow,
         FakeWorkflowCommandPublisher publisher)
     {
         OrderWorkflowFakeRepository repository = new();
         repository.Add(workflow);
-        return new OrderWorkflowService(repository, repository, repository, publisher);
+        return new InventoryWorkflowService(
+            new OrderWorkflowLoader(repository, repository), repository, publisher);
+    }
+
+    private static PaymentWorkflowService CreatePaymentService(
+        OrderWorkflow workflow,
+        FakeWorkflowCommandPublisher publisher)
+    {
+        OrderWorkflowFakeRepository repository = new();
+        repository.Add(workflow);
+        return new PaymentWorkflowService(
+            new OrderWorkflowLoader(repository, repository), repository, publisher);
     }
 
     private static OrderCancellationRequested CreateRequest(OrderWorkflow workflow)
