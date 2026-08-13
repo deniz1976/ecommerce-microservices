@@ -9,10 +9,14 @@ public sealed class ProcessWorkflowEventCommandHandler<TEvent>
     where TEvent : class
 {
     private readonly OrderWorkflowService workflowService;
+    private readonly OrderWorkflowTimeoutOptions timeoutOptions;
 
-    public ProcessWorkflowEventCommandHandler(OrderWorkflowService workflowService)
+    public ProcessWorkflowEventCommandHandler(
+        OrderWorkflowService workflowService,
+        OrderWorkflowTimeoutOptions timeoutOptions)
     {
         this.workflowService = workflowService;
+        this.timeoutOptions = timeoutOptions;
     }
 
     public Task HandleAsync(
@@ -21,12 +25,24 @@ public sealed class ProcessWorkflowEventCommandHandler<TEvent>
     {
         return command.Event switch
         {
-            OrderSubmitted message => workflowService.HandleAsync(message, cancellationToken),
-            InventoryReserved message => workflowService.HandleAsync(message, cancellationToken),
+            OrderSubmitted message => workflowService.HandleAsync(
+                message,
+                DateTimeOffset.UtcNow,
+                timeoutOptions.InventoryTimeout,
+                cancellationToken),
+            InventoryReserved message => workflowService.HandleAsync(
+                message,
+                DateTimeOffset.UtcNow,
+                timeoutOptions.PaymentTimeout,
+                cancellationToken),
             InventoryReservationFailed message => workflowService.HandleAsync(
                 message,
                 cancellationToken),
-            PaymentAuthorized message => workflowService.HandleAsync(message, cancellationToken),
+            PaymentAuthorized message => workflowService.HandleAsync(
+                message,
+                DateTimeOffset.UtcNow,
+                timeoutOptions.ShippingTimeout,
+                cancellationToken),
             PaymentFailed message => workflowService.HandleAsync(message, cancellationToken),
             ShipmentCreated message => workflowService.HandleAsync(message, cancellationToken),
             ShipmentFailed message => workflowService.HandleAsync(message, cancellationToken),

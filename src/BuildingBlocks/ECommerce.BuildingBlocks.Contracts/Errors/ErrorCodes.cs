@@ -7,6 +7,9 @@ public static class ErrorCodes
     public const string OrderNotFound = "ORDER_NOT_FOUND";
     public const string OrderNotCancellable = "ORDER_NOT_CANCELLABLE";
     public const string OrderCancelledByCustomer = "ORDER_CANCELLED_BY_CUSTOMER";
+    public const string InventoryTimeout = "INVENTORY_TIMEOUT";
+    public const string PaymentTimeout = "PAYMENT_TIMEOUT";
+    public const string ShipmentTimeout = "SHIPMENT_TIMEOUT";
     public const string PaymentNotFound = "PAYMENT_NOT_FOUND";
     public const string ShipmentNotFound = "SHIPMENT_NOT_FOUND";
     public const string NotificationNotFound = "NOTIFICATION_NOT_FOUND";

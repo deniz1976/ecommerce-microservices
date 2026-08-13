@@ -10,6 +10,7 @@ const string serviceName = "ECommerce.OrderingSaga.Worker";
 builder.Services.AddECommerceObservability(builder.Configuration, serviceName);
 builder.Services.AddOrderingSagaApplication();
 builder.Services.AddOrderingSagaInfrastructure(builder.Configuration);
+builder.Services.AddHostedService<ECommerce.OrderingSaga.Worker.OrderWorkflowTimeoutHostedService>();
 builder.Services.AddECommerceMassTransit<OrderingSagaDbContext>(
     builder.Configuration,
     serviceName,

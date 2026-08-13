@@ -6,6 +6,8 @@ namespace ECommerce.Ordering.UnitTests;
 
 public sealed class OrderWorkflowCancellationTests
 {
+    private static readonly DateTimeOffset TestNow = new(2026, 8, 13, 12, 0, 0, TimeSpan.Zero);
+
     [Fact]
     public async Task Submitted_workflow_cancels_without_compensation()
     {
@@ -25,7 +27,7 @@ public sealed class OrderWorkflowCancellationTests
     {
         (OrderWorkflow workflow, OrderWorkflowService service, FakeWorkflowCommandPublisher publisher) =
             CreateService();
-        workflow.MarkInventoryReserved();
+        workflow.MarkInventoryReserved(TestNow.AddMinutes(2));
 
         await service.HandleAsync(CreateRequest(workflow), CancellationToken.None);
 
@@ -40,8 +42,8 @@ public sealed class OrderWorkflowCancellationTests
     {
         (OrderWorkflow workflow, OrderWorkflowService service, FakeWorkflowCommandPublisher publisher) =
             CreateService();
-        workflow.MarkInventoryReserved();
-        workflow.MarkPaymentAuthorized();
+        workflow.MarkInventoryReserved(TestNow.AddMinutes(2));
+        workflow.MarkPaymentAuthorized(TestNow.AddMinutes(4));
 
         await service.HandleAsync(CreateRequest(workflow), CancellationToken.None);
 
@@ -57,8 +59,8 @@ public sealed class OrderWorkflowCancellationTests
     {
         (OrderWorkflow workflow, OrderWorkflowService service, FakeWorkflowCommandPublisher publisher) =
             CreateService();
-        workflow.MarkInventoryReserved();
-        workflow.MarkPaymentAuthorized();
+        workflow.MarkInventoryReserved(TestNow.AddMinutes(2));
+        workflow.MarkPaymentAuthorized(TestNow.AddMinutes(4));
         workflow.MarkShipmentCreated();
         workflow.MarkCompleted();
 
@@ -87,6 +89,8 @@ public sealed class OrderWorkflowCancellationTests
                 1,
                 workflow.OrderId,
                 workflow.CustomerId),
+            TestNow,
+            TimeSpan.FromMinutes(2),
             CancellationToken.None);
 
         Assert.Equal(1, publisher.ReleaseCount);
@@ -112,6 +116,8 @@ public sealed class OrderWorkflowCancellationTests
                 Guid.NewGuid(),
                 workflow.TotalAmount,
                 workflow.Currency),
+            TestNow,
+            TimeSpan.FromMinutes(2),
             CancellationToken.None);
 
         Assert.Equal(1, publisher.ReleaseCount);
@@ -132,7 +138,9 @@ public sealed class OrderWorkflowCancellationTests
             "Address",
             "Istanbul",
             "TR",
-            "34000");
+            "34000",
+            Guid.NewGuid(),
+            TestNow.AddMinutes(1));
         workflow.AddItem(Guid.NewGuid(), 1);
         OrderWorkflowFakeRepository repository = new();
         repository.Add(workflow);

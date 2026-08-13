@@ -250,6 +250,11 @@ services:
     env_file: *env-file
     environment:
       <<: [*worker-env, *managed-env]
+      OrderWorkflowTimeouts__InventorySeconds: ${ORDER_WORKFLOW_INVENTORY_TIMEOUT_SECONDS:-120}
+      OrderWorkflowTimeouts__PaymentSeconds: ${ORDER_WORKFLOW_PAYMENT_TIMEOUT_SECONDS:-120}
+      OrderWorkflowTimeouts__ShippingSeconds: ${ORDER_WORKFLOW_SHIPPING_TIMEOUT_SECONDS:-180}
+      OrderWorkflowTimeouts__PollIntervalSeconds: ${ORDER_WORKFLOW_TIMEOUT_POLL_INTERVAL_SECONDS:-5}
+      OrderWorkflowTimeouts__BatchSize: ${ORDER_WORKFLOW_TIMEOUT_BATCH_SIZE:-25}
     restart: unless-stopped
     depends_on:
       inventory-api:

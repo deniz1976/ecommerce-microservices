@@ -21,12 +21,19 @@ public sealed class OrderWorkflowConfiguration : IEntityTypeConfiguration<OrderW
         builder.Property(x => x.City).HasColumnName("city").HasMaxLength(128).IsRequired();
         builder.Property(x => x.CountryCode).HasColumnName("country_code").HasMaxLength(2).IsRequired();
         builder.Property(x => x.PostalCode).HasColumnName("postal_code").HasMaxLength(32).IsRequired();
+        builder.Property(x => x.CorrelationId).HasColumnName("correlation_id");
         builder.Property(x => x.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(64);
         builder.Property(x => x.CancellationReason).HasColumnName("cancellation_reason").HasMaxLength(512);
+        builder.Property(x => x.StepDeadlineAt).HasColumnName("step_deadline_at").IsUtcTimestamp();
+        builder.Property(x => x.TimeoutHandledAt).HasColumnName("timeout_handled_at").IsUtcTimestamp();
+        builder.Property(x => x.ConcurrencyVersion)
+            .HasColumnName("concurrency_version")
+            .IsConcurrencyToken();
         builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
         builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
         builder.HasIndex(x => x.OrderId).IsUnique();
         builder.HasIndex(x => x.Status);
+        builder.HasIndex(x => new { x.Status, x.StepDeadlineAt });
         builder.HasMany(x => x.Items)
             .WithOne()
             .HasForeignKey(x => x.WorkflowId)

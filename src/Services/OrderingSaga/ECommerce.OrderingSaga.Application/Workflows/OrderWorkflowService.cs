@@ -24,7 +24,11 @@ public sealed class OrderWorkflowService
         this.publisher = publisher;
     }
 
-    public async Task HandleAsync(OrderSubmitted message, CancellationToken cancellationToken)
+    public async Task HandleAsync(
+        OrderSubmitted message,
+        DateTimeOffset now,
+        TimeSpan inventoryTimeout,
+        CancellationToken cancellationToken)
     {
         OrderWorkflow? existing = await FindByOrderIdAsync(message.OrderId, cancellationToken);
         if (existing is not null)
@@ -41,7 +45,9 @@ public sealed class OrderWorkflowService
             message.AddressLine,
             message.City,
             message.CountryCode,
-            message.PostalCode);
+            message.PostalCode,
+            message.CorrelationId,
+            now.Add(inventoryTimeout));
 
         foreach (ECommerce.BuildingBlocks.Contracts.Orders.OrderLine item in message.Items)
         {
@@ -53,7 +59,11 @@ public sealed class OrderWorkflowService
         await publisher.ReserveInventoryAsync(workflow, message.CorrelationId, message.MessageId, cancellationToken);
     }
 
-    public async Task HandleAsync(InventoryReserved message, CancellationToken cancellationToken)
+    public async Task HandleAsync(
+        InventoryReserved message,
+        DateTimeOffset now,
+        TimeSpan paymentTimeout,
+        CancellationToken cancellationToken)
     {
         OrderWorkflow? workflow = await FindByOrderIdAsync(message.OrderId, cancellationToken);
         if (workflow is null)
@@ -61,7 +71,7 @@ public sealed class OrderWorkflowService
             return;
         }
 
-        if (IsCustomerCancellation(workflow))
+        if (workflow.Status == OrderWorkflowStatus.Cancelled)
         {
             const string reason = "Customer requested order cancellation.";
             await publisher.ReleaseInventoryAsync(
@@ -78,7 +88,7 @@ public sealed class OrderWorkflowService
             return;
         }
 
-        workflow.MarkInventoryReserved();
+        workflow.MarkInventoryReserved(now.Add(paymentTimeout));
         await unitOfWork.SaveChangesAsync(cancellationToken);
         await publisher.AuthorizePaymentAsync(workflow, message.CorrelationId, message.MessageId, cancellationToken);
     }
@@ -96,7 +106,11 @@ public sealed class OrderWorkflowService
         await publisher.CancelOrderAsync(workflow, message.CorrelationId, message.MessageId, message.ReasonCode, message.Reason, cancellationToken);
     }
 
-    public async Task HandleAsync(PaymentAuthorized message, CancellationToken cancellationToken)
+    public async Task HandleAsync(
+        PaymentAuthorized message,
+        DateTimeOffset now,
+        TimeSpan shippingTimeout,
+        CancellationToken cancellationToken)
     {
         OrderWorkflow? workflow = await FindByOrderIdAsync(message.OrderId, cancellationToken);
         if (workflow is null)
@@ -104,7 +118,7 @@ public sealed class OrderWorkflowService
             return;
         }
 
-        if (IsCustomerCancellation(workflow))
+        if (workflow.Status == OrderWorkflowStatus.Cancelled)
         {
             const string reason = "Customer requested order cancellation.";
             await publisher.RefundPaymentAsync(
@@ -127,7 +141,7 @@ public sealed class OrderWorkflowService
             return;
         }
 
-        workflow.MarkPaymentAuthorized();
+        workflow.MarkPaymentAuthorized(now.Add(shippingTimeout));
         await unitOfWork.SaveChangesAsync(cancellationToken);
         await publisher.CreateShipmentAsync(workflow, message.CorrelationId, message.MessageId, cancellationToken);
     }
@@ -225,15 +239,6 @@ public sealed class OrderWorkflowService
             ErrorCodes.OrderCancelledByCustomer,
             reason,
             cancellationToken);
-    }
-
-    private static bool IsCustomerCancellation(OrderWorkflow workflow)
-    {
-        return workflow.Status == OrderWorkflowStatus.Cancelled &&
-            string.Equals(
-                workflow.CancellationReason,
-                ErrorCodes.OrderCancelledByCustomer,
-                StringComparison.Ordinal);
     }
 
     private async Task<OrderWorkflow?> FindByOrderIdAsync(

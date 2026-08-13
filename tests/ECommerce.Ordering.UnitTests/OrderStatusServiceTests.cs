@@ -1,5 +1,6 @@
 using ECommerce.Ordering.Application.Orders;
 using ECommerce.Ordering.Domain;
+using ECommerce.BuildingBlocks.Contracts.Errors;
 
 namespace ECommerce.Ordering.UnitTests;
 
@@ -114,6 +115,22 @@ public sealed class OrderStatusServiceTests
 
         Assert.Equal("UNEXPECTED_ERROR", order.StatusHistory.Last().ReasonCode);
         Assert.All(order.StatusHistory, entry => Assert.Equal(TimeSpan.Zero, entry.OccurredAt.Offset));
+    }
+
+    [Theory]
+    [InlineData(ErrorCodes.InventoryTimeout)]
+    [InlineData(ErrorCodes.PaymentTimeout)]
+    [InlineData(ErrorCodes.ShipmentTimeout)]
+    public async Task CancelAsync_preserves_allow_listed_timeout_reason(string reasonCode)
+    {
+        OrderStatusFakeOrderRepository repository = new();
+        Order order = CreateOrder();
+        repository.Add(order);
+        OrderStatusService service = new(repository, repository);
+
+        await service.CancelAsync(order.Id, order.CustomerId, reasonCode, CancellationToken.None);
+
+        Assert.Equal(reasonCode, order.StatusHistory.Last().ReasonCode);
     }
 
     private static Order CreateOrder()

@@ -20,7 +20,26 @@ public static class DependencyInjection
                 workflow => workflow.Id));
         services.AddScoped<IUnitOfWork, EfUnitOfWork<OrderingSagaDbContext>>();
         services.AddScoped<IOrderWorkflowIdentityReader, OrderWorkflowIdentityReader>();
+        services.AddScoped<IOrderWorkflowTimeoutReader, OrderWorkflowTimeoutReader>();
         services.AddScoped<IWorkflowCommandPublisher, MassTransitWorkflowCommandPublisher>();
+        OrderWorkflowTimeoutOptions timeoutOptions = configuration
+            .GetSection(OrderWorkflowTimeoutOptions.SectionName)
+            .Get<OrderWorkflowTimeoutOptions>() ?? new OrderWorkflowTimeoutOptions();
+        ValidateTimeoutOptions(timeoutOptions);
+        services.AddSingleton(timeoutOptions);
         return services;
+    }
+
+    private static void ValidateTimeoutOptions(OrderWorkflowTimeoutOptions options)
+    {
+        if (options.InventorySeconds is < 5 or > 3600 ||
+            options.PaymentSeconds is < 5 or > 3600 ||
+            options.ShippingSeconds is < 5 or > 3600 ||
+            options.PollIntervalSeconds is < 1 or > 60 ||
+            options.BatchSize is < 1 or > 100)
+        {
+            throw new InvalidOperationException(
+                $"{OrderWorkflowTimeoutOptions.SectionName} configuration is outside the supported bounds.");
+        }
     }
 }

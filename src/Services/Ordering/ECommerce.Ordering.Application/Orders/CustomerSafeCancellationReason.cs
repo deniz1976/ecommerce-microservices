@@ -12,6 +12,9 @@ internal static class CustomerSafeCancellationReason
             ErrorCodes.PaymentFailed => ErrorCodes.PaymentFailed,
             ErrorCodes.ShipmentFailed => ErrorCodes.ShipmentFailed,
             ErrorCodes.OrderCancelledByCustomer => ErrorCodes.OrderCancelledByCustomer,
+            ErrorCodes.InventoryTimeout => ErrorCodes.InventoryTimeout,
+            ErrorCodes.PaymentTimeout => ErrorCodes.PaymentTimeout,
+            ErrorCodes.ShipmentTimeout => ErrorCodes.ShipmentTimeout,
             _ => ErrorCodes.UnexpectedError
         };
     }

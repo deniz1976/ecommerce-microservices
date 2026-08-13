@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddMediatR(configuration =>
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
         services.AddScoped<OrderWorkflowService>();
+        services.AddScoped<OrderWorkflowTimeoutService>();
         services.AddScoped<
             IRequestHandler<ProcessWorkflowEventCommand<OrderSubmitted>>,
             ProcessWorkflowEventCommandHandler<OrderSubmitted>>();

@@ -23,7 +23,9 @@ public sealed class OrderWorkflow
         string addressLine,
         string city,
         string countryCode,
-        string postalCode)
+        string postalCode,
+        Guid correlationId,
+        DateTimeOffset inventoryDeadlineAt)
     {
         Id = Guid.NewGuid();
         OrderId = orderId;
@@ -35,7 +37,9 @@ public sealed class OrderWorkflow
         City = city;
         CountryCode = countryCode;
         PostalCode = postalCode;
+        CorrelationId = correlationId;
         Status = OrderWorkflowStatus.Submitted;
+        StepDeadlineAt = inventoryDeadlineAt;
         CreatedAt = DateTimeOffset.UtcNow;
         UpdatedAt = CreatedAt;
     }
@@ -60,9 +64,17 @@ public sealed class OrderWorkflow
 
     public string PostalCode { get; private set; }
 
+    public Guid CorrelationId { get; private set; }
+
     public OrderWorkflowStatus Status { get; private set; }
 
     public string? CancellationReason { get; private set; }
+
+    public DateTimeOffset? StepDeadlineAt { get; private set; }
+
+    public DateTimeOffset? TimeoutHandledAt { get; private set; }
+
+    public long ConcurrencyVersion { get; private set; }
 
     public DateTimeOffset CreatedAt { get; private set; }
 
@@ -76,20 +88,24 @@ public sealed class OrderWorkflow
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 
-    public void MarkInventoryReserved()
+    public void MarkInventoryReserved(DateTimeOffset paymentDeadlineAt)
     {
         if (Status == OrderWorkflowStatus.Submitted)
         {
             Status = OrderWorkflowStatus.InventoryReserved;
+            StepDeadlineAt = paymentDeadlineAt;
+            ConcurrencyVersion++;
             UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 
-    public void MarkPaymentAuthorized()
+    public void MarkPaymentAuthorized(DateTimeOffset shipmentDeadlineAt)
     {
         if (Status == OrderWorkflowStatus.InventoryReserved)
         {
             Status = OrderWorkflowStatus.PaymentAuthorized;
+            StepDeadlineAt = shipmentDeadlineAt;
+            ConcurrencyVersion++;
             UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
@@ -99,6 +115,8 @@ public sealed class OrderWorkflow
         if (Status == OrderWorkflowStatus.PaymentAuthorized)
         {
             Status = OrderWorkflowStatus.ShipmentCreated;
+            StepDeadlineAt = null;
+            ConcurrencyVersion++;
             UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
@@ -108,6 +126,8 @@ public sealed class OrderWorkflow
         if (Status == OrderWorkflowStatus.ShipmentCreated)
         {
             Status = OrderWorkflowStatus.Completed;
+            StepDeadlineAt = null;
+            ConcurrencyVersion++;
             UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
@@ -121,6 +141,33 @@ public sealed class OrderWorkflow
 
         Status = OrderWorkflowStatus.Cancelled;
         CancellationReason = reason;
+        StepDeadlineAt = null;
+        ConcurrencyVersion++;
         UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public bool IsTimeoutDue(DateTimeOffset now)
+    {
+        return (Status is OrderWorkflowStatus.Submitted or
+                OrderWorkflowStatus.InventoryReserved or
+                OrderWorkflowStatus.PaymentAuthorized) &&
+            StepDeadlineAt.HasValue &&
+            StepDeadlineAt.Value <= now &&
+            !TimeoutHandledAt.HasValue;
+    }
+
+    public void MarkTimedOut(string reasonCode, DateTimeOffset handledAt)
+    {
+        if (!IsTimeoutDue(handledAt))
+        {
+            return;
+        }
+
+        Status = OrderWorkflowStatus.Cancelled;
+        CancellationReason = reasonCode;
+        StepDeadlineAt = null;
+        TimeoutHandledAt = handledAt;
+        ConcurrencyVersion++;
+        UpdatedAt = handledAt;
     }
 }
