@@ -145,6 +145,7 @@ services:
       <<: [*api-env, *managed-env]
       CatalogClient__TimeoutSeconds: ${CatalogClient__TimeoutSeconds:-5}
       Redis__Endpoint: redis:6379
+      Redis__BasketTtlHours: ${Redis__BasketTtlHours:-72}
     restart: unless-stopped
     ports:
       - "5041:8080"

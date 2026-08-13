@@ -6,6 +6,22 @@ namespace ECommerce.ContractTests;
 public sealed class BasketTimestampTests
 {
     [Fact]
+    public void RemovingMissingItemDoesNotAdvanceMutationInstant()
+    {
+        DateTimeOffset updatedAt = new(2026, 8, 13, 12, 0, 0, TimeSpan.Zero);
+        BasketEntity basket = new(
+            Guid.NewGuid(),
+            "TRY",
+            updatedAt.AddHours(-1),
+            updatedAt,
+            Array.Empty<BasketItem>());
+
+        basket.RemoveItem(Guid.NewGuid());
+
+        Assert.Equal(updatedAt, basket.UpdatedAt);
+    }
+
+    [Fact]
     public void RestoredBasketPreservesInstantsAndNormalizesOffsetsToUtc()
     {
         DateTimeOffset createdAt = new(2026, 7, 25, 12, 0, 0, TimeSpan.FromHours(3));

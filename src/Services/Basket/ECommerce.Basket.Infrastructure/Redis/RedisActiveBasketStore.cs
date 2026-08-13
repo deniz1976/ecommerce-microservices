@@ -1,7 +1,6 @@
 using System.Text.Json;
 using ECommerce.Basket.Application.Baskets;
 using ECommerce.Basket.Domain;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using BasketEntity = ECommerce.Basket.Domain.Basket;
 
@@ -12,21 +11,29 @@ public sealed class RedisActiveBasketStore : IActiveBasketStore
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private readonly IConnectionMultiplexer connectionMultiplexer;
-    private readonly RedisOptions options;
+    private readonly BasketExpirationPolicy expirationPolicy;
+    private readonly BasketStoreMetrics metrics;
 
-    public RedisActiveBasketStore(IConnectionMultiplexer connectionMultiplexer, IOptions<RedisOptions> options)
+    public RedisActiveBasketStore(
+        IConnectionMultiplexer connectionMultiplexer,
+        BasketExpirationPolicy expirationPolicy,
+        BasketStoreMetrics metrics)
     {
         this.connectionMultiplexer = connectionMultiplexer;
-        this.options = options.Value;
+        this.expirationPolicy = expirationPolicy;
+        this.metrics = metrics;
     }
 
     public async Task<BasketEntity?> GetAsync(Guid customerId, CancellationToken cancellationToken)
     {
         IDatabase database = connectionMultiplexer.GetDatabase();
-        RedisValue value = await database.StringGetAsync(CreateKey(customerId));
+        RedisValue value = await database
+            .StringGetAsync(CreateKey(customerId))
+            .WaitAsync(cancellationToken);
 
         if (value.IsNullOrEmpty)
         {
+            metrics.RecordReadMiss();
             return null;
         }
 
@@ -34,8 +41,11 @@ public sealed class RedisActiveBasketStore : IActiveBasketStore
 
         if (document is null)
         {
+            metrics.RecordReadMiss();
             return null;
         }
+
+        metrics.RecordReadHit();
 
         BasketItem[] items = document.Items
             .Select(item => new BasketItem(
@@ -55,9 +65,20 @@ public sealed class RedisActiveBasketStore : IActiveBasketStore
             items);
     }
 
-    public Task SaveAsync(BasketEntity basket, CancellationToken cancellationToken)
+    public async Task SaveAsync(BasketEntity basket, CancellationToken cancellationToken)
     {
         IDatabase database = connectionMultiplexer.GetDatabase();
+        TimeSpan? remainingLifetime = expirationPolicy.GetRemainingLifetime(basket);
+
+        if (remainingLifetime is null)
+        {
+            await database
+                .KeyDeleteAsync(CreateKey(basket.CustomerId))
+                .WaitAsync(cancellationToken);
+            metrics.RecordExpiredBeforeSave();
+            return;
+        }
+
         RedisBasketDocument document = new(
             basket.CustomerId,
             basket.Currency,
@@ -73,13 +94,29 @@ public sealed class RedisActiveBasketStore : IActiveBasketStore
 
         string value = JsonSerializer.Serialize(document, JsonOptions);
 
-        return database.StringSetAsync(CreateKey(basket.CustomerId), value, TimeSpan.FromHours(options.BasketTtlHours));
+        bool saved = await database
+            .StringSetAsync(CreateKey(basket.CustomerId), value, remainingLifetime.Value)
+            .WaitAsync(cancellationToken);
+
+        if (!saved)
+        {
+            throw new InvalidOperationException("Redis did not persist the active basket.");
+        }
+
+        metrics.RecordWrite();
     }
 
-    public Task DeleteAsync(Guid customerId, CancellationToken cancellationToken)
+    public async Task DeleteAsync(Guid customerId, CancellationToken cancellationToken)
     {
         IDatabase database = connectionMultiplexer.GetDatabase();
-        return database.KeyDeleteAsync(CreateKey(customerId));
+        bool deleted = await database
+            .KeyDeleteAsync(CreateKey(customerId))
+            .WaitAsync(cancellationToken);
+
+        if (deleted)
+        {
+            metrics.RecordDelete();
+        }
     }
 
     private static string CreateKey(Guid customerId)

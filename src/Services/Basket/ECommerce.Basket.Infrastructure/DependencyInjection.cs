@@ -8,6 +8,7 @@ using ECommerce.BuildingBlocks.Persistence;
 using ECommerce.Basket.Domain;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
@@ -45,9 +46,13 @@ public static class DependencyInjection
                 options => !string.IsNullOrWhiteSpace(options.Endpoint),
                 "Redis:Endpoint is required.")
             .Validate(
-                options => options.BasketTtlHours > 0,
-                "Redis:BasketTtlHours must be greater than zero.")
+                options => RedisOptions.IsBasketTtlValid(options.BasketTtlHours),
+                $"Redis:BasketTtlHours must be between {RedisOptions.MinimumBasketTtlHours} and {RedisOptions.MaximumBasketTtlHours} hours.")
             .ValidateOnStart();
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<BasketExpirationPolicy>();
+        services.AddSingleton<BasketStoreMetrics>();
 
         services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
         {

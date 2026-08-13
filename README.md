@@ -20,7 +20,7 @@ project rather than a production-ready commerce product.
 ### Main capabilities
 
 - Public catalog search, filtering, sorting, pagination, and product details
-- Customer baskets backed by local Redis
+- Customer baskets backed by local Redis with a configurable mutation-based expiration policy
 - Server-authoritative product pricing during basket operations
 - Durable checkout snapshots and transactional outbox delivery
 - Distributed inventory, payment, shipping, and notification workflow
@@ -108,7 +108,7 @@ remain focused read interfaces.
 | --- | --- |
 | API Gateway | Ocelot routing, authentication boundary, localized authorization responses, and rate limiting |
 | Catalog | Products, translations, categories, brands, stores, lifecycle state, and product images |
-| Basket | Redis-backed active baskets, canonical catalog pricing, checkout snapshots, and checkout handoff |
+| Basket | Redis-backed active baskets with bounded sliding-on-mutation expiration, canonical catalog pricing, checkout snapshots, and checkout handoff |
 | Ordering | Orders, order items, delivery address, status history, paged customer/Seller views, and Admin operations reads |
 | Inventory | Seller-managed stock, reservations, releases, atomic UTC movement audit, and Admin operations reads |
 | Payment | Provider-neutral authorization/refund workflow, customer-safe summaries, and Admin operations reads |
@@ -405,7 +405,7 @@ amaçlı bir çalışmadır.
 ### Temel özellikler
 
 - Herkese açık katalog arama, filtreleme, sıralama ve sayfalama
-- Yerel Redis üzerinde tutulan müşteri sepetleri
+- Yapılandırılabilir mutasyon-temelli süre sonuna sahip yerel Redis müşteri sepetleri
 - Sepet işlemlerinde sunucu tarafından doğrulanan katalog fiyatları
 - Kalıcı checkout snapshot'ı ve transactional outbox ile güvenilir aktarım
 - Dağıtık stok, ödeme, kargo ve bildirim iş akışı
@@ -448,7 +448,7 @@ odaklı read interface'lerinde kalır.
 | --- | --- |
 | API Gateway | Ocelot routing, kimlik doğrulama sınırı, localized yetki hataları ve rate limiting |
 | Catalog | Ürünler, çeviriler, kategoriler, markalar, mağazalar, yaşam döngüsü ve görseller |
-| Basket | Redis sepetleri, katalogdan doğrulanan fiyatlar, checkout snapshot'ı ve handoff |
+| Basket | Sınırlandırılmış mutasyon-temelli süre sonuna sahip Redis sepetleri, katalogdan doğrulanan fiyatlar, checkout snapshot'ı ve handoff |
 | Ordering | Siparişler, kalemler, teslimat adresi, durum geçmişi, sayfalı müşteri/Seller görünümleri ve Admin operasyon okumaları |
 | Inventory | Satıcı tarafından yönetilen stok, rezervasyon, stok serbest bırakma, atomik UTC hareket geçmişi ve Admin operasyon okumaları |
 | Payment | Provider-neutral authorization/refund akışı, güvenli müşteri özeti ve Admin operasyon okumaları |
