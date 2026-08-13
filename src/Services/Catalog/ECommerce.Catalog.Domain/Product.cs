@@ -2,6 +2,8 @@ namespace ECommerce.Catalog.Domain;
 
 public sealed class Product
 {
+    public const int MaximumImageCount = 8;
+
     private readonly List<ProductTranslation> translations = [];
     private readonly List<ProductImage> images = [];
 
@@ -63,6 +65,8 @@ public sealed class Product
 
     public IReadOnlyCollection<ProductImage> Images => images;
 
+    public bool CanAddImage => images.Count < MaximumImageCount;
+
     public void UpdateDetails(Guid categoryId, Guid brandId, decimal price, string currency, ProductStatus status)
     {
         CategoryId = categoryId;
@@ -88,8 +92,23 @@ public sealed class Product
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 
-    public void AddImage(ProductImage image)
+    public ProductImageMutationResult AddImage(ProductImage image)
     {
+        if (image.ProductId != Id)
+        {
+            return ProductImageMutationResult.InvalidImage;
+        }
+
+        if (images.Any(existingImage => existingImage.Id == image.Id))
+        {
+            return ProductImageMutationResult.DuplicateImage;
+        }
+
+        if (!CanAddImage)
+        {
+            return ProductImageMutationResult.LimitExceeded;
+        }
+
         if (image.IsMain)
         {
             foreach (ProductImage existingImage in images)
@@ -100,6 +119,7 @@ public sealed class Product
 
         images.Add(image);
         UpdatedAt = DateTimeOffset.UtcNow;
+        return ProductImageMutationResult.Applied;
     }
 
     public void SetMainImage(Guid imageId)

@@ -1,4 +1,5 @@
 using ECommerce.Catalog.Application.Images;
+using ECommerce.Catalog.Application;
 using ECommerce.Catalog.Application.Products;
 using ECommerce.Catalog.Domain;
 using ECommerce.BuildingBlocks.Contracts.Results;
@@ -44,6 +45,42 @@ public sealed class ProductImageServiceTests
         Assert.True(result.Value?.IsMain);
         Assert.StartsWith("ecommerce/products/", result.Value?.PublicId);
         Assert.Equal(1, storage.UploadCount);
+    }
+
+    [Fact]
+    public async Task UploadAsync_rejects_aggregate_image_limit_before_provider_upload()
+    {
+        (Product product, ProductImageService service, TestProductImageStorage storage, _) = CreateService();
+        for (int index = 0; index < Product.MaximumImageCount; index++)
+        {
+            ProductImage image = new(
+                Guid.NewGuid(),
+                product.Id,
+                $"existing-{index}",
+                $"http://example.com/existing-{index}.png",
+                $"https://example.com/existing-{index}.png",
+                100,
+                100,
+                "png",
+                index,
+                index == 0);
+            Assert.Equal(ProductImageMutationResult.Applied, product.AddImage(image));
+        }
+
+        await using MemoryStream content = new(
+        [
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x00
+        ]);
+
+        Result<ProductImageResponse> result = await service.UploadAsync(
+            product.Id,
+            new ProductImageUpload(content, "ninth.png", "image/png", content.Length),
+            new ProductAccessContext(TestSellerId, IsAdmin: false),
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(CatalogErrorCodes.ProductImageLimitExceeded, result.Error?.Code);
+        Assert.Equal(0, storage.UploadCount);
     }
 
     [Fact]

@@ -9,8 +9,6 @@ namespace ECommerce.Catalog.Application.Products;
 
 public sealed class ProductImageService
 {
-    private const int MaximumImageCount = 8;
-
     private readonly IRepository<Product, Guid> repository;
     private readonly IUnitOfWork unitOfWork;
     private readonly IProductStoreAccessValidator storeAccessValidator;
@@ -50,7 +48,7 @@ public sealed class ProductImageService
         }
 
         Product product = productResult.Value!;
-        if (product.Images.Count >= MaximumImageCount)
+        if (!product.CanAddImage)
         {
             return Failure(CatalogErrorCodes.ProductImageLimitExceeded);
         }
@@ -79,7 +77,15 @@ public sealed class ProductImageService
             product.Images.Count,
             product.Images.Count == 0);
 
-        product.AddImage(image);
+        ProductImageMutationResult mutationResult = product.AddImage(image);
+        if (mutationResult != ProductImageMutationResult.Applied)
+        {
+            await imageStorage.DeleteAsync(storedImage.PublicId, cancellationToken);
+            return Failure(mutationResult == ProductImageMutationResult.LimitExceeded
+                ? CatalogErrorCodes.ProductImageLimitExceeded
+                : CatalogErrorCodes.InvalidProductImage);
+        }
+
         try
         {
             await unitOfWork.SaveChangesAsync(cancellationToken);
