@@ -12,7 +12,7 @@ public sealed class ProductImageServiceTests
     [Fact]
     public async Task UploadAsync_rejects_content_type_that_does_not_match_file_signature()
     {
-        (Product product, ProductImageService service, TestProductImageStorage storage, _) = CreateService();
+        (Product product, ProductImageUploadService service, _, TestProductImageStorage storage, _) = CreateServices();
         await using MemoryStream content = new("not-an-image"u8.ToArray());
 
         Result<ProductImageResponse> result = await service.UploadAsync(
@@ -29,7 +29,7 @@ public sealed class ProductImageServiceTests
     [Fact]
     public async Task UploadAsync_uses_provider_metadata_and_marks_first_image_as_main()
     {
-        (Product product, ProductImageService service, TestProductImageStorage storage, _) = CreateService();
+        (Product product, ProductImageUploadService service, _, TestProductImageStorage storage, _) = CreateServices();
         await using MemoryStream content = new(
         [
             0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x00
@@ -50,7 +50,7 @@ public sealed class ProductImageServiceTests
     [Fact]
     public async Task UploadAsync_rejects_aggregate_image_limit_before_provider_upload()
     {
-        (Product product, ProductImageService service, TestProductImageStorage storage, _) = CreateService();
+        (Product product, ProductImageUploadService service, _, TestProductImageStorage storage, _) = CreateServices();
         for (int index = 0; index < Product.MaximumImageCount; index++)
         {
             ProductImage image = new(
@@ -88,9 +88,10 @@ public sealed class ProductImageServiceTests
     {
         (
             Product product,
-            ProductImageService service,
+            _,
+            ProductImageDeletionService service,
             TestProductImageStorage storage,
-            FakeProductImageDeletionQueue deletionQueue) = CreateService();
+            FakeProductImageDeletionQueue deletionQueue) = CreateServices();
         ProductImage image = new(
             Guid.NewGuid(),
             product.Id,
@@ -121,9 +122,10 @@ public sealed class ProductImageServiceTests
     {
         (
             Product product,
-            ProductImageService service,
+            _,
+            ProductImageDeletionService service,
             TestProductImageStorage storage,
-            FakeProductImageDeletionQueue deletionQueue) = CreateService();
+            FakeProductImageDeletionQueue deletionQueue) = CreateServices();
         storage.DeleteSucceeds = false;
         ProductImage image = new(
             Guid.NewGuid(),
@@ -153,9 +155,10 @@ public sealed class ProductImageServiceTests
 
     private static (
         Product Product,
-        ProductImageService Service,
+        ProductImageUploadService UploadService,
+        ProductImageDeletionService DeletionService,
         TestProductImageStorage Storage,
-        FakeProductImageDeletionQueue DeletionQueue) CreateService()
+        FakeProductImageDeletionQueue DeletionQueue) CreateServices()
     {
         Guid storeId = Guid.NewGuid();
         Product product = new(
@@ -171,14 +174,20 @@ public sealed class ProductImageServiceTests
         FakeStoreRepository stores = new(new Store(storeId, TestSellerId, "Image Store", "image-store"));
         TestProductImageStorage storage = new();
         FakeProductImageDeletionQueue deletionQueue = new();
-        ProductImageService service = new(
+        ProductImageAccessService accessService = new(
             products,
+            new ProductStoreAccessValidator(stores));
+        ProductImageUploadService uploadService = new(
             products,
-            new ProductStoreAccessValidator(stores),
+            accessService,
             new ProductImageUploadValidator(),
+            storage);
+        ProductImageDeletionService deletionService = new(
+            products,
+            accessService,
             storage,
             deletionQueue,
-            NullLogger<ProductImageService>.Instance);
-        return (product, service, storage, deletionQueue);
+            NullLogger<ProductImageDeletionService>.Instance);
+        return (product, uploadService, deletionService, storage, deletionQueue);
     }
 }

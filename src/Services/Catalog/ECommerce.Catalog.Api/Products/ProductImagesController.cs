@@ -51,11 +51,7 @@ public sealed class ProductImagesController(
         await using Stream content = file.OpenReadStream();
         ProductImageUpload upload = new(content, file.FileName, file.ContentType, file.Length);
         Result<ProductImageResponse> result = await sender.Send(
-            new ManageProductImageCommand(
-                productId,
-                ProductImageOperation.Upload,
-                access,
-                Upload: upload),
+            new UploadProductImageCommand(productId, upload, access),
             cancellationToken);
 
         return result.IsFailure
@@ -73,11 +69,7 @@ public sealed class ProductImagesController(
     {
         ProductAccessContext access = await ResolveAccessAsync(cancellationToken);
         Result<ProductImageResponse> result = await sender.Send(
-            new ManageProductImageCommand(
-                productId,
-                ProductImageOperation.SetMain,
-                access,
-                ImageId: imageId),
+            new SetMainProductImageCommand(productId, imageId, access),
             cancellationToken);
         return CatalogResults.FromResult(result, HttpContext);
     }
@@ -90,11 +82,7 @@ public sealed class ProductImagesController(
     {
         ProductAccessContext access = await ResolveAccessAsync(cancellationToken);
         Result<ProductImageResponse> result = await sender.Send(
-            new ManageProductImageCommand(
-                productId,
-                ProductImageOperation.Delete,
-                access,
-                ImageId: imageId),
+            new DeleteProductImageCommand(productId, imageId, access),
             cancellationToken);
         return result.IsFailure
             ? CatalogResults.FromResult(result, HttpContext)

@@ -107,7 +107,7 @@ remain focused read interfaces.
 | Service | Responsibility |
 | --- | --- |
 | API Gateway | Ocelot routing, authentication boundary, localized authorization responses, and rate limiting |
-| Catalog | Products with separated query/management orchestration, translations, references, stores, lifecycle state, and aggregate-enforced image ownership/limits |
+| Catalog | Products with focused query/management and image upload/main/deletion orchestration, references, stores, and aggregate-enforced image invariants |
 | Basket | Redis-backed active baskets with bounded sliding-on-mutation expiration, aggregate-enforced item/currency invariants, canonical catalog pricing, checkout snapshots, and checkout handoff |
 | Ordering | Focused creation/detail-query orchestration, aggregate-enforced item/currency integrity, status history, and paged customer/Seller/Admin reads |
 | Inventory | Focused stock management and order-reservation orchestration, aggregate-enforced reservations, atomic UTC movement audit, and Admin reads |
@@ -447,7 +447,7 @@ odaklı read interface'lerinde kalır.
 | Servis | Sorumluluk |
 | --- | --- |
 | API Gateway | Ocelot routing, kimlik doğrulama sınırı, localized yetki hataları ve rate limiting |
-| Catalog | Ayrılmış sorgu/yönetim orkestrasyonuna sahip ürünler, çeviriler, referanslar, mağazalar, yaşam döngüsü ve aggregate tarafından korunan görsel sahipliği/limitleri |
+| Catalog | Odaklı sorgu/yönetim ve görsel yükleme/ana görsel/silme orkestrasyonuna sahip ürünler, referanslar, mağazalar ve aggregate görsel kuralları |
 | Basket | Sınırlandırılmış mutasyon-temelli süre sonuna sahip Redis sepetleri, aggregate tarafından korunan ürün/para birimi kuralları, katalogdan doğrulanan fiyatlar, checkout snapshot'ı ve handoff |
 | Ordering | Ayrılmış oluşturma/detay sorgu orkestrasyonu, aggregate tarafından korunan kalem/para birimi bütünlüğü, durum geçmişi ve sayfalı müşteri/Seller/Admin okumaları |
 | Inventory | Ayrılmış stok yönetimi ve sipariş rezervasyon orkestrasyonu, aggregate tarafından korunan rezervasyonlar, atomik UTC hareket geçmişi ve Admin okumaları |

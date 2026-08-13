@@ -35,7 +35,10 @@ public static class DependencyInjection
         services.AddScoped<ProductQueryService>();
         services.AddScoped<ProductManagementService>();
         services.AddScoped<CatalogMetricsService>();
-        services.AddScoped<ProductImageService>();
+        services.AddScoped<ProductImageAccessService>();
+        services.AddScoped<ProductImageUploadService>();
+        services.AddScoped<ProductImageMainService>();
+        services.AddScoped<ProductImageDeletionService>();
         services.AddScoped<IProductStoreAccessValidator, ProductStoreAccessValidator>();
         services.AddScoped<IProductReferenceValidator, ProductReferenceValidator>();
         services.AddScoped<ProductImageUploadValidator>();
@@ -57,8 +60,14 @@ public static class DependencyInjection
             ICommandHandler<UpdateProductCommand, Result<ProductResponse>>,
             UpdateProductCommandHandler>();
         services.AddScoped<
-            ICommandHandler<ManageProductImageCommand, Result<ProductImageResponse>>,
-            ManageProductImageCommandHandler>();
+            ICommandHandler<UploadProductImageCommand, Result<ProductImageResponse>>,
+            UploadProductImageCommandHandler>();
+        services.AddScoped<
+            ICommandHandler<SetMainProductImageCommand, Result<ProductImageResponse>>,
+            SetMainProductImageCommandHandler>();
+        services.AddScoped<
+            ICommandHandler<DeleteProductImageCommand, Result<ProductImageResponse>>,
+            DeleteProductImageCommandHandler>();
         services.AddScoped<
             ICommandHandler<CreateStoreCommand, Result<StoreResponse>>,
             CreateStoreCommandHandler>();
