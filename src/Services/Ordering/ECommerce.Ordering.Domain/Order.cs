@@ -19,7 +19,7 @@ public sealed class Order
     {
         Id = id;
         CustomerId = customerId;
-        Currency = currency;
+        Currency = currency.Trim().ToUpperInvariant();
         RecipientName = recipientName;
         AddressLine = addressLine;
         City = city;
@@ -59,7 +59,7 @@ public sealed class Order
 
     public IReadOnlyCollection<OrderStatusHistory> StatusHistory => statusHistory;
 
-    public void AddItem(
+    public OrderItemMutationResult AddItem(
         Guid productId,
         string productName,
         int quantity,
@@ -67,16 +67,36 @@ public sealed class Order
         string currency,
         Guid? storeId = null)
     {
+        if (productId == Guid.Empty ||
+            string.IsNullOrWhiteSpace(productName) ||
+            quantity <= 0 ||
+            unitPrice < 0 ||
+            string.IsNullOrWhiteSpace(currency) ||
+            storeId == Guid.Empty)
+        {
+            return OrderItemMutationResult.InvalidItem;
+        }
+
+        if (!string.Equals(Currency, currency.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            return OrderItemMutationResult.CurrencyMismatch;
+        }
+
+        if (items.Any(item => item.ProductId == productId))
+        {
+            return OrderItemMutationResult.DuplicateProduct;
+        }
+
         items.Add(new OrderItem(
             Id,
             productId,
-            productName,
+            productName.Trim(),
             quantity,
             unitPrice,
-            currency,
+            Currency,
             storeId));
-        Currency = currency;
         UpdatedAt = DateTimeOffset.UtcNow;
+        return OrderItemMutationResult.Applied;
     }
 
     public void MarkConfirmed()

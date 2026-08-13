@@ -109,7 +109,7 @@ remain focused read interfaces.
 | API Gateway | Ocelot routing, authentication boundary, localized authorization responses, and rate limiting |
 | Catalog | Products, translations, categories, brands, stores, lifecycle state, and aggregate-enforced product image ownership/limits |
 | Basket | Redis-backed active baskets with bounded sliding-on-mutation expiration, aggregate-enforced item/currency invariants, canonical catalog pricing, checkout snapshots, and checkout handoff |
-| Ordering | Orders, order items, delivery address, status history, paged customer/Seller views, and Admin operations reads |
+| Ordering | Orders with aggregate-enforced item/currency integrity, delivery address, status history, paged customer/Seller views, and Admin operations reads |
 | Inventory | Seller-managed stock, aggregate-enforced reservations, releases, atomic UTC movement audit, and Admin operations reads |
 | Payment | Provider-neutral authorization/refund workflow with aggregate-enforced refund identity/amount/currency integrity, customer-safe summaries, and Admin operations reads |
 | Shipping | Event-driven shipment creation with a canonical address value object, customer-safe tracking, and Admin operations reads |
@@ -449,7 +449,7 @@ odaklı read interface'lerinde kalır.
 | API Gateway | Ocelot routing, kimlik doğrulama sınırı, localized yetki hataları ve rate limiting |
 | Catalog | Ürünler, çeviriler, kategoriler, markalar, mağazalar, yaşam döngüsü ve aggregate tarafından korunan görsel sahipliği/limitleri |
 | Basket | Sınırlandırılmış mutasyon-temelli süre sonuna sahip Redis sepetleri, aggregate tarafından korunan ürün/para birimi kuralları, katalogdan doğrulanan fiyatlar, checkout snapshot'ı ve handoff |
-| Ordering | Siparişler, kalemler, teslimat adresi, durum geçmişi, sayfalı müşteri/Seller görünümleri ve Admin operasyon okumaları |
+| Ordering | Aggregate tarafından korunan kalem/para birimi bütünlüğüne sahip siparişler, teslimat adresi, durum geçmişi, sayfalı müşteri/Seller görünümleri ve Admin operasyon okumaları |
 | Inventory | Satıcı tarafından yönetilen stok, aggregate tarafından korunan rezervasyonlar, stok serbest bırakma, atomik UTC hareket geçmişi ve Admin operasyon okumaları |
 | Payment | Aggregate tarafından korunan müşteri/tutar/para birimi bütünlüğüne sahip provider-neutral yetkilendirme/iade akışı, güvenli müşteri özeti ve Admin operasyon okumaları |
 | Shipping | Canonical adres value object'iyle event-driven gönderi oluşturma, güvenli müşteri takibi ve Admin operasyon okumaları |

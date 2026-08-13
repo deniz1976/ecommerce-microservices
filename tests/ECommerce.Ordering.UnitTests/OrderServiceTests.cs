@@ -128,6 +128,28 @@ public sealed class OrderServiceTests
         Assert.Null(Assert.Single(repository.Orders[0].Items).StoreId);
     }
 
+    [Fact]
+    public async Task CreateAsyncRejectsDuplicateProductsBeforePublishing()
+    {
+        OrderServiceFakeOrderRepository repository = new();
+        FakeOrderSubmittedPublisher publisher = new(repository);
+        OrderService service = new(repository, repository, publisher);
+        CreateOrderRequest validRequest = CreateValidRequest();
+        CreateOrderItemRequest item = Assert.Single(validRequest.Items);
+        CreateOrderRequest request = validRequest with { Items = [item, item] };
+
+        var result = await service.CreateAsync(
+            request,
+            Guid.NewGuid(),
+            null,
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Empty(repository.Orders);
+        Assert.Equal(0, publisher.PublishCount);
+        Assert.Equal(0, repository.SaveCount);
+    }
+
     private static CreateOrderRequest CreateValidRequest()
     {
         return new CreateOrderRequest(

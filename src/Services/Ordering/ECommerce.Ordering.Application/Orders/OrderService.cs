@@ -109,7 +109,17 @@ public sealed class OrderService
             return Result<OrderResponse>.Failure(new Error(ErrorCodes.ValidationFailed, ErrorCodes.ValidationFailed));
         }
 
-        if (request.Items.Any(x => x.ProductId == Guid.Empty || x.Quantity <= 0 || x.UnitPrice < 0 || string.IsNullOrWhiteSpace(x.Currency)))
+        if (request.Items.Any(x =>
+                x.ProductId == Guid.Empty ||
+                string.IsNullOrWhiteSpace(x.ProductName) ||
+                x.Quantity <= 0 ||
+                x.UnitPrice < 0 ||
+                string.IsNullOrWhiteSpace(x.Currency) ||
+                !string.Equals(
+                    x.Currency.Trim(),
+                    request.Currency.Trim(),
+                    StringComparison.OrdinalIgnoreCase)) ||
+            request.Items.GroupBy(x => x.ProductId).Any(group => group.Count() > 1))
         {
             return Result<OrderResponse>.Failure(new Error(ErrorCodes.ValidationFailed, ErrorCodes.ValidationFailed));
         }
@@ -133,13 +143,18 @@ public sealed class OrderService
         foreach (CreateOrderItemRequest item in request.Items)
         {
             storeAttributions.TryGetValue(item.ProductId, out Guid? storeId);
-            order.AddItem(
+            OrderItemMutationResult mutationResult = order.AddItem(
                 item.ProductId,
                 item.ProductName,
                 item.Quantity,
                 item.UnitPrice,
                 item.Currency,
                 storeId);
+            if (mutationResult != OrderItemMutationResult.Applied)
+            {
+                return Result<OrderResponse>.Failure(
+                    new Error(ErrorCodes.ValidationFailed, ErrorCodes.ValidationFailed));
+            }
         }
 
         repository.Add(order);
