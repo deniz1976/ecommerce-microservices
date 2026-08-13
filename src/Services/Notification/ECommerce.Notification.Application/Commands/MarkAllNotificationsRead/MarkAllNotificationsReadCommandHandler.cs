@@ -6,10 +6,10 @@ namespace ECommerce.Notification.Application.Commands.MarkAllNotificationsRead;
 public sealed class MarkAllNotificationsReadCommandHandler
     : ICommandHandler<MarkAllNotificationsReadCommand, int>
 {
-    private readonly NotificationReadStateService notificationReadStateService;
+    private readonly BulkNotificationReadService notificationReadStateService;
 
     public MarkAllNotificationsReadCommandHandler(
-        NotificationReadStateService notificationReadStateService)
+        BulkNotificationReadService notificationReadStateService)
     {
         this.notificationReadStateService = notificationReadStateService;
     }

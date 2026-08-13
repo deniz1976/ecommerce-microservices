@@ -11,7 +11,7 @@ public sealed class NotificationReadStateServiceTests
     public async Task MarkReadAsyncSetsUtcTimestampOnce()
     {
         FakeNotificationRepository repository = CreateRepositoryWithNotification();
-        NotificationReadStateService service = CreateService(repository);
+        NotificationReadService service = CreateReadService(repository);
 
         Result<NotificationMessage> first = await service.MarkReadAsync(
             repository.Notification!.CustomerId,
@@ -32,7 +32,7 @@ public sealed class NotificationReadStateServiceTests
     public async Task MarkReadAsyncHidesNotificationOwnedByAnotherCustomer()
     {
         FakeNotificationRepository repository = CreateRepositoryWithNotification();
-        NotificationReadStateService service = CreateService(repository);
+        NotificationReadService service = CreateReadService(repository);
 
         Result<NotificationMessage> result = await service.MarkReadAsync(
             Guid.NewGuid(),
@@ -49,7 +49,7 @@ public sealed class NotificationReadStateServiceTests
     public async Task MarkAllReadAsyncMarksOwnedUnreadNotificationsOnce()
     {
         FakeNotificationRepository repository = CreateRepositoryWithNotification();
-        NotificationReadStateService service = CreateService(repository);
+        BulkNotificationReadService service = CreateBulkService(repository);
 
         int first = await service.MarkAllReadAsync(
             repository.Notification!.CustomerId,
@@ -64,15 +64,18 @@ public sealed class NotificationReadStateServiceTests
         Assert.Equal(1, repository.SaveChangesCount);
     }
 
-    private static NotificationReadStateService CreateService(
+    private static NotificationReadService CreateReadService(
         FakeNotificationRepository repository)
     {
-        return new NotificationReadStateService(
-            repository,
+        return new NotificationReadService(
             repository,
             repository,
             TimeProvider.System);
     }
+
+    private static BulkNotificationReadService CreateBulkService(
+        FakeNotificationRepository repository) =>
+        new(repository, repository, TimeProvider.System);
 
     private static FakeNotificationRepository CreateRepositoryWithNotification()
     {
