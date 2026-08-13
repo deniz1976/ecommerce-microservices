@@ -7,17 +7,17 @@ namespace ECommerce.Basket.Application.Commands.ClearBasket;
 public sealed class ClearBasketCommandHandler
     : ICommandHandler<ClearBasketCommand, Result>
 {
-    private readonly BasketService basketService;
+    private readonly BasketMutationService basketMutationService;
 
-    public ClearBasketCommandHandler(BasketService basketService)
+    public ClearBasketCommandHandler(BasketMutationService basketMutationService)
     {
-        this.basketService = basketService;
+        this.basketMutationService = basketMutationService;
     }
 
     public Task<Result> HandleAsync(
         ClearBasketCommand command,
         CancellationToken cancellationToken)
     {
-        return basketService.ClearAsync(command.CustomerId, cancellationToken);
+        return basketMutationService.ClearAsync(command.CustomerId, cancellationToken);
     }
 }

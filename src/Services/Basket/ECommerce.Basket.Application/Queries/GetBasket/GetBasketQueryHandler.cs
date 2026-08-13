@@ -7,17 +7,17 @@ namespace ECommerce.Basket.Application.Queries.GetBasket;
 public sealed class GetBasketQueryHandler
     : IQueryHandler<GetBasketQuery, Result<BasketResponse>>
 {
-    private readonly BasketService basketService;
+    private readonly BasketQueryService basketQueryService;
 
-    public GetBasketQueryHandler(BasketService basketService)
+    public GetBasketQueryHandler(BasketQueryService basketQueryService)
     {
-        this.basketService = basketService;
+        this.basketQueryService = basketQueryService;
     }
 
     public Task<Result<BasketResponse>> HandleAsync(
         GetBasketQuery query,
         CancellationToken cancellationToken)
     {
-        return basketService.GetAsync(query.CustomerId, cancellationToken);
+        return basketQueryService.GetAsync(query.CustomerId, cancellationToken);
     }
 }

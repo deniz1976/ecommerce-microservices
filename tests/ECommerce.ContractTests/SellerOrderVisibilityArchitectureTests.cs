@@ -36,7 +36,7 @@ public sealed class SellerOrderVisibilityArchitectureTests
     {
         string basketService = ReadRepositoryFile(
             "src", "Services", "Basket", "ECommerce.Basket.Application",
-            "Baskets", "BasketService.cs");
+            "Baskets", "BasketMutationService.cs");
         string orderService = ReadRepositoryFile(
             "src", "Services", "Ordering", "ECommerce.Ordering.Application",
             "Orders", "OrderService.cs");

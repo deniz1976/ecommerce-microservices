@@ -7,18 +7,18 @@ namespace ECommerce.Basket.Application.Commands.RemoveBasketItem;
 public sealed class RemoveBasketItemCommandHandler
     : ICommandHandler<RemoveBasketItemCommand, Result<BasketResponse>>
 {
-    private readonly BasketService basketService;
+    private readonly BasketMutationService basketMutationService;
 
-    public RemoveBasketItemCommandHandler(BasketService basketService)
+    public RemoveBasketItemCommandHandler(BasketMutationService basketMutationService)
     {
-        this.basketService = basketService;
+        this.basketMutationService = basketMutationService;
     }
 
     public Task<Result<BasketResponse>> HandleAsync(
         RemoveBasketItemCommand command,
         CancellationToken cancellationToken)
     {
-        return basketService.RemoveItemAsync(
+        return basketMutationService.RemoveItemAsync(
             command.CustomerId,
             command.ProductId,
             cancellationToken);

@@ -16,7 +16,9 @@ public static class DependencyInjection
     {
         services.AddMediatR(configuration =>
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
-        services.AddScoped<BasketService>();
+        services.AddScoped<BasketQueryService>();
+        services.AddScoped<BasketMutationService>();
+        services.AddScoped<BasketCheckoutService>();
         services.AddScoped<
             IQueryHandler<GetBasketQuery, Result<BasketResponse>>,
             GetBasketQueryHandler>();

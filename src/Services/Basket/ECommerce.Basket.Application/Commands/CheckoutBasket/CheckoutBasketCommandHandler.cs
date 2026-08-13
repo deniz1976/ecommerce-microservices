@@ -7,18 +7,18 @@ namespace ECommerce.Basket.Application.Commands.CheckoutBasket;
 public sealed class CheckoutBasketCommandHandler
     : ICommandHandler<CheckoutBasketCommand, Result<CheckoutBasketResponse>>
 {
-    private readonly BasketService basketService;
+    private readonly BasketCheckoutService basketCheckoutService;
 
-    public CheckoutBasketCommandHandler(BasketService basketService)
+    public CheckoutBasketCommandHandler(BasketCheckoutService basketCheckoutService)
     {
-        this.basketService = basketService;
+        this.basketCheckoutService = basketCheckoutService;
     }
 
     public Task<Result<CheckoutBasketResponse>> HandleAsync(
         CheckoutBasketCommand command,
         CancellationToken cancellationToken)
     {
-        return basketService.CheckoutAsync(
+        return basketCheckoutService.CheckoutAsync(
             command.CustomerId,
             command.Request,
             cancellationToken);

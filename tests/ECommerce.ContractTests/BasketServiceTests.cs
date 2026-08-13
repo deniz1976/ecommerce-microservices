@@ -16,8 +16,7 @@ public sealed class BasketServiceTests
         StubProductCatalogReader catalogReader = new(
             Result<CatalogProductSnapshot>.Success(
                 new CatalogProductSnapshot(productId, "Canonical product", 149.90m, "TRY", 1)));
-        StubBasketHistoryRepository history = new();
-        BasketService service = new(store, history, history, catalogReader, new StubCheckoutPublisher());
+        BasketMutationService service = new(store, catalogReader);
 
         Result<BasketResponse> result = await service.AddItemAsync(
             customerId,
@@ -40,8 +39,7 @@ public sealed class BasketServiceTests
             Result<CatalogProductSnapshot>.Failure(
                 new Error(BasketErrorCodes.ProductCatalogUnavailable, BasketErrorCodes.ProductCatalogUnavailable)));
         InMemoryActiveBasketStore store = new();
-        StubBasketHistoryRepository history = new();
-        BasketService service = new(store, history, history, catalogReader, new StubCheckoutPublisher());
+        BasketMutationService service = new(store, catalogReader);
 
         Result<BasketResponse> result = await service.AddItemAsync(
             Guid.NewGuid(),
@@ -66,8 +64,7 @@ public sealed class BasketServiceTests
         StubProductCatalogReader catalogReader = new(
             Result<CatalogProductSnapshot>.Success(
                 new CatalogProductSnapshot(newProductId, "Foreign currency product", 10m, "USD", 1)));
-        StubBasketHistoryRepository history = new();
-        BasketService service = new(store, history, history, catalogReader, new StubCheckoutPublisher());
+        BasketMutationService service = new(store, catalogReader);
 
         Result<BasketResponse> result = await service.AddItemAsync(
             customerId,
@@ -90,13 +87,10 @@ public sealed class BasketServiceTests
         await store.SaveAsync(basket, CancellationToken.None);
         StubBasketHistoryRepository history = new();
         StubCheckoutPublisher publisher = new();
-        BasketService service = new(
+        BasketCheckoutService service = new(
             store,
             history,
             history,
-            new StubProductCatalogReader(
-                Result<CatalogProductSnapshot>.Failure(
-                    new Error(ErrorCodes.UnexpectedError, ErrorCodes.UnexpectedError))),
             publisher);
 
         CheckoutBasketRequest request = new(

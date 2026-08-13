@@ -43,7 +43,7 @@ public sealed class Basket
 
     public decimal TotalAmount => items.Sum(x => x.TotalPrice);
 
-    public void AddOrUpdateItem(
+    public BasketItemMutationResult AddOrUpdateItem(
         Guid productId,
         string productName,
         int quantity,
@@ -51,6 +51,21 @@ public sealed class Basket
         string currency,
         Guid? storeId = null)
     {
+        if (productId == Guid.Empty ||
+            string.IsNullOrWhiteSpace(productName) ||
+            quantity <= 0 ||
+            unitPrice < 0 ||
+            string.IsNullOrWhiteSpace(currency))
+        {
+            return BasketItemMutationResult.InvalidItem;
+        }
+
+        if (items.Count > 0 &&
+            !string.Equals(Currency, currency, StringComparison.OrdinalIgnoreCase))
+        {
+            return BasketItemMutationResult.CurrencyMismatch;
+        }
+
         BasketItem? item = items.FirstOrDefault(x => x.ProductId == productId);
 
         if (item is null)
@@ -70,6 +85,7 @@ public sealed class Basket
 
         Currency = currency;
         UpdatedAt = DateTimeOffset.UtcNow;
+        return BasketItemMutationResult.Applied;
     }
 
     public void RemoveItem(Guid productId)
