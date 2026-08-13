@@ -7,9 +7,9 @@ namespace ECommerce.Inventory.Application.Commands.UpsertInventoryItem;
 public sealed class UpsertInventoryItemCommandHandler
     : ICommandHandler<UpsertInventoryItemCommand, Result<InventoryItemResponse>>
 {
-    private readonly InventoryService inventoryService;
+    private readonly InventoryManagementService inventoryService;
 
-    public UpsertInventoryItemCommandHandler(InventoryService inventoryService)
+    public UpsertInventoryItemCommandHandler(InventoryManagementService inventoryService)
     {
         this.inventoryService = inventoryService;
     }

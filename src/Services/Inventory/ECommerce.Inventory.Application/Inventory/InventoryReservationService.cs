@@ -1,30 +1,26 @@
 using ECommerce.BuildingBlocks.Contracts.Errors;
 using ECommerce.BuildingBlocks.Contracts.Persistence;
-using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Inventory.Domain;
 
 namespace ECommerce.Inventory.Application.Inventory;
 
-public sealed class InventoryService
+public sealed class InventoryReservationService
 {
     private readonly IRepository<InventoryItem, Guid> itemRepository;
     private readonly IRepository<StockReservation, Guid> reservationRepository;
     private readonly IUnitOfWork unitOfWork;
     private readonly IStockReservationIdentityReader reservationIdentityReader;
-    private readonly IProductInventoryAccessAuthorizer productAccessAuthorizer;
 
-    public InventoryService(
+    public InventoryReservationService(
         IRepository<InventoryItem, Guid> itemRepository,
         IRepository<StockReservation, Guid> reservationRepository,
         IUnitOfWork unitOfWork,
-        IStockReservationIdentityReader reservationIdentityReader,
-        IProductInventoryAccessAuthorizer productAccessAuthorizer)
+        IStockReservationIdentityReader reservationIdentityReader)
     {
         this.itemRepository = itemRepository;
         this.reservationRepository = reservationRepository;
         this.unitOfWork = unitOfWork;
         this.reservationIdentityReader = reservationIdentityReader;
-        this.productAccessAuthorizer = productAccessAuthorizer;
     }
 
     public async Task<InventoryReservationResult> ReserveAsync(InventoryReservationRequest request, CancellationToken cancellationToken)
@@ -131,60 +127,6 @@ public sealed class InventoryService
             reason));
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return new InventoryReservationResult(false, ErrorCodes.InsufficientStock, reason);
-    }
-
-    public async Task<Result<InventoryItemResponse>> UpsertAsync(
-        UpsertInventoryItemRequest request,
-        InventoryWriteAccess access,
-        CancellationToken cancellationToken)
-    {
-        if (!access.BypassProductOwnership)
-        {
-            ProductInventoryAccessResult accessResult = await productAccessAuthorizer.AuthorizeAsync(
-                request.ProductId,
-                access.AccessToken,
-                cancellationToken);
-            if (accessResult == ProductInventoryAccessResult.Denied)
-            {
-                return Result<InventoryItemResponse>.Failure(
-                    new Error(ErrorCodes.ProductNotFound, ErrorCodes.ProductNotFound));
-            }
-
-            if (accessResult == ProductInventoryAccessResult.DependencyUnavailable)
-            {
-                return Result<InventoryItemResponse>.Failure(
-                    new Error(ErrorCodes.DependencyUnavailable, ErrorCodes.DependencyUnavailable));
-            }
-        }
-
-        InventoryItem? item = await itemRepository.GetByIdAsync(
-            request.ProductId,
-            cancellationToken);
-
-        if (item is not null && request.QuantityOnHand < item.ReservedQuantity)
-        {
-            return Result<InventoryItemResponse>.Failure(
-                new Error(ErrorCodes.StockBelowReserved, ErrorCodes.StockBelowReserved));
-        }
-
-        if (item is null)
-        {
-            item = new InventoryItem(request.ProductId, request.QuantityOnHand);
-            itemRepository.Add(item);
-        }
-        else
-        {
-            item.SetQuantityOnHand(request.QuantityOnHand);
-        }
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result<InventoryItemResponse>.Success(
-            new InventoryItemResponse(
-                item.ProductId,
-                item.QuantityOnHand,
-                item.ReservedQuantity,
-                item.AvailableQuantity,
-                item.UpdatedAt));
     }
 
     public async Task ReleaseAsync(InventoryReleaseRequest request, CancellationToken cancellationToken)

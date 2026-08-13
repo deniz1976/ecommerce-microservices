@@ -5,9 +5,9 @@ namespace ECommerce.Inventory.Application.Commands.ReleaseInventory;
 
 public sealed class ReleaseInventoryCommandHandler : ICommandHandler<ReleaseInventoryCommand>
 {
-    private readonly InventoryService inventoryService;
+    private readonly InventoryReservationService inventoryService;
 
-    public ReleaseInventoryCommandHandler(InventoryService inventoryService)
+    public ReleaseInventoryCommandHandler(InventoryReservationService inventoryService)
     {
         this.inventoryService = inventoryService;
     }
