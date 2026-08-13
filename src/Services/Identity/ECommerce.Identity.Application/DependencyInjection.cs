@@ -19,9 +19,10 @@ public static class DependencyInjection
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
         services.AddSingleton<IExternalRoleSynchronizer, DisabledExternalRoleSynchronizer>();
         services.AddSingleton<IRoleReconciliationQueue, DisabledRoleReconciliationQueue>();
-        services.AddScoped<UserService>();
+        services.AddScoped<UserRegistrationService>();
+        services.AddScoped<ExternalUserProvisioningService>();
         services.AddScoped<IExternalUserProvisioningService>(
-            provider => provider.GetRequiredService<UserService>());
+            provider => provider.GetRequiredService<ExternalUserProvisioningService>());
         services.AddScoped<AdminUserService>();
         services.AddScoped<
             ICommandHandler<RegisterUserCommand, Result<UserResponse>>,

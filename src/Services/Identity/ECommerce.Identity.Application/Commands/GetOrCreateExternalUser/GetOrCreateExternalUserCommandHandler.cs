@@ -7,9 +7,9 @@ namespace ECommerce.Identity.Application.Commands.GetOrCreateExternalUser;
 public sealed class GetOrCreateExternalUserCommandHandler
     : ICommandHandler<GetOrCreateExternalUserCommand, Result<UserResponse>>
 {
-    private readonly UserService userService;
+    private readonly ExternalUserProvisioningService userService;
 
-    public GetOrCreateExternalUserCommandHandler(UserService userService)
+    public GetOrCreateExternalUserCommandHandler(ExternalUserProvisioningService userService)
     {
         this.userService = userService;
     }

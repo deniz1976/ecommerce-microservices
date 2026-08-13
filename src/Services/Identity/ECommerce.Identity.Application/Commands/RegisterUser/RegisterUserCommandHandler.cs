@@ -7,9 +7,9 @@ namespace ECommerce.Identity.Application.Commands.RegisterUser;
 public sealed class RegisterUserCommandHandler
     : ICommandHandler<RegisterUserCommand, Result<UserResponse>>
 {
-    private readonly UserService userService;
+    private readonly UserRegistrationService userService;
 
-    public RegisterUserCommandHandler(UserService userService)
+    public RegisterUserCommandHandler(UserRegistrationService userService)
     {
         this.userService = userService;
     }

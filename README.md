@@ -114,7 +114,7 @@ remain focused read interfaces.
 | Payment | Focused provider-neutral authorization/refund orchestration with aggregate-enforced refund integrity, customer-safe summaries, and Admin reads |
 | Shipping | Event-driven shipment creation with a canonical address value object, customer-safe tracking, and Admin operations reads |
 | Notification | Persisted notifications with focused creation/live-delivery and read-state application services |
-| Identity | Local user profiles, roles, Auth0 subject mapping, and role reconciliation |
+| Identity | Focused local registration and external-user provisioning, roles, Auth0 subject mapping, and reconciliation |
 | Ordering Saga | Durable order orchestration and compensation |
 
 The included `DemoPaymentProvider` never performs a real charge. It requires no
@@ -454,7 +454,7 @@ odaklı read interface'lerinde kalır.
 | Payment | Ayrılmış provider-neutral yetkilendirme/iade orkestrasyonu, aggregate tarafından korunan iade bütünlüğü, güvenli müşteri özeti ve Admin okumaları |
 | Shipping | Canonical adres value object'iyle event-driven gönderi oluşturma, güvenli müşteri takibi ve Admin operasyon okumaları |
 | Notification | Oluşturma/canlı teslim ve okuma durumu için ayrılmış Application servisleriyle kalıcı bildirimler |
-| Identity | Yerel kullanıcı profili, roller, Auth0 subject eşlemesi ve rol uzlaştırma |
+| Identity | Ayrılmış yerel kayıt ve harici kullanıcı provisioning'i, roller, Auth0 subject eşlemesi ve uzlaştırma |
 | Ordering Saga | Kalıcı sipariş orkestrasyonu ve compensation |
 
 Projede bulunan `DemoPaymentProvider` gerçek ödeme veya tahsilat yapmaz. Kart
