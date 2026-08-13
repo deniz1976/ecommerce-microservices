@@ -1,4 +1,8 @@
 using ECommerce.Catalog.Application;
+using ECommerce.Catalog.Application.Commands.CreateCatalogBrand;
+using ECommerce.Catalog.Application.Commands.CreateCatalogCategory;
+using ECommerce.Catalog.Application.Commands.UpdateCatalogBrand;
+using ECommerce.Catalog.Application.Commands.UpdateCatalogCategory;
 using ECommerce.Catalog.Application.References;
 using ECommerce.Catalog.Domain;
 
@@ -6,13 +10,27 @@ namespace ECommerce.ContractTests;
 
 public sealed class CatalogReferenceManagementServiceTests
 {
+    [Theory]
+    [InlineData(typeof(CreateCatalogCategoryCommandHandler), typeof(CatalogCategoryManagementService))]
+    [InlineData(typeof(UpdateCatalogCategoryCommandHandler), typeof(CatalogCategoryManagementService))]
+    [InlineData(typeof(CreateCatalogBrandCommandHandler), typeof(CatalogBrandManagementService))]
+    [InlineData(typeof(UpdateCatalogBrandCommandHandler), typeof(CatalogBrandManagementService))]
+    public void ReferenceHandlersDependOnTheirFocusedManagementService(
+        Type handlerType,
+        Type serviceType)
+    {
+        System.Reflection.ConstructorInfo constructor = Assert.Single(handlerType.GetConstructors());
+        System.Reflection.ParameterInfo parameter = Assert.Single(constructor.GetParameters());
+        Assert.Equal(serviceType, parameter.ParameterType);
+    }
+
     [Fact]
     public async Task AdminCategoryCreationNormalizesSlugAndPersistsBothLanguages()
     {
         FakeCatalogReferenceWriter writer = new();
-        CatalogReferenceManagementService service = CreateService(writer);
+        CatalogCategoryManagementService service = CreateCategoryService(writer);
 
-        var result = await service.CreateCategoryAsync(
+        var result = await service.CreateAsync(
             new CreateCatalogCategoryRequest(
                 "  elektronik  ",
                 "Electronics",
@@ -45,9 +63,9 @@ public sealed class CatalogReferenceManagementServiceTests
         existing.SetTranslation("en", "Electronics");
         existing.SetTranslation("tr", "Elektronik");
         FakeCatalogReferenceWriter writer = new([existing]);
-        CatalogReferenceManagementService service = CreateService(writer);
+        CatalogCategoryManagementService service = CreateCategoryService(writer);
 
-        var result = await service.CreateCategoryAsync(
+        var result = await service.CreateAsync(
             new CreateCatalogCategoryRequest(
                 "electronics",
                 "Electronics",
@@ -64,9 +82,9 @@ public sealed class CatalogReferenceManagementServiceTests
     public async Task AdminBrandCreationPersistsAnActiveReference()
     {
         FakeCatalogReferenceWriter writer = new();
-        CatalogReferenceManagementService service = CreateService(writer);
+        CatalogBrandManagementService service = CreateBrandService(writer);
 
-        var result = await service.CreateBrandAsync(
+        var result = await service.CreateAsync(
             new CreateCatalogBrandRequest("Örnek Marka", "ornek-marka"),
             CancellationToken.None);
 
@@ -84,9 +102,9 @@ public sealed class CatalogReferenceManagementServiceTests
         category.SetTranslation("en", "Electronics");
         category.SetTranslation("tr", "Elektronik");
         FakeCatalogReferenceWriter writer = new([category]);
-        CatalogReferenceManagementService service = CreateService(writer);
+        CatalogCategoryManagementService service = CreateCategoryService(writer);
 
-        var result = await service.UpdateCategoryAsync(
+        var result = await service.UpdateAsync(
             category.Id,
             new UpdateCatalogCategoryRequest(
                 "consumer-electronics",
@@ -107,9 +125,9 @@ public sealed class CatalogReferenceManagementServiceTests
     {
         Brand brand = new(Guid.NewGuid(), "Eski Marka", "eski-marka", false);
         FakeCatalogReferenceWriter writer = new(brands: [brand]);
-        CatalogReferenceManagementService service = CreateService(writer);
+        CatalogBrandManagementService service = CreateBrandService(writer);
 
-        var result = await service.UpdateBrandAsync(
+        var result = await service.UpdateAsync(
             brand.Id,
             new UpdateCatalogBrandRequest(
                 "Yeni Marka",
@@ -123,7 +141,11 @@ public sealed class CatalogReferenceManagementServiceTests
         Assert.True(result.Value.IsActive);
     }
 
-    private static CatalogReferenceManagementService CreateService(
+    private static CatalogCategoryManagementService CreateCategoryService(
         FakeCatalogReferenceWriter writer) =>
-        new(writer, writer, writer, writer);
+        new(writer, writer, writer);
+
+    private static CatalogBrandManagementService CreateBrandService(
+        FakeCatalogReferenceWriter writer) =>
+        new(writer, writer, writer);
 }

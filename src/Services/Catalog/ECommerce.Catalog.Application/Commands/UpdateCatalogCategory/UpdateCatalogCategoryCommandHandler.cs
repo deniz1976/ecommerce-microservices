@@ -9,10 +9,10 @@ public sealed class UpdateCatalogCategoryCommandHandler
         UpdateCatalogCategoryCommand,
         Result<ManagedCatalogCategoryResponse>>
 {
-    private readonly CatalogReferenceManagementService managementService;
+    private readonly CatalogCategoryManagementService managementService;
 
     public UpdateCatalogCategoryCommandHandler(
-        CatalogReferenceManagementService managementService)
+        CatalogCategoryManagementService managementService)
     {
         this.managementService = managementService;
     }
@@ -21,7 +21,7 @@ public sealed class UpdateCatalogCategoryCommandHandler
         UpdateCatalogCategoryCommand command,
         CancellationToken cancellationToken)
     {
-        return managementService.UpdateCategoryAsync(
+        return managementService.UpdateAsync(
             command.CategoryId,
             command.Request,
             cancellationToken);

@@ -7,10 +7,10 @@ namespace ECommerce.Catalog.Application.Commands.CreateCatalogBrand;
 public sealed class CreateCatalogBrandCommandHandler
     : ICommandHandler<CreateCatalogBrandCommand, Result<CatalogBrandResponse>>
 {
-    private readonly CatalogReferenceManagementService managementService;
+    private readonly CatalogBrandManagementService managementService;
 
     public CreateCatalogBrandCommandHandler(
-        CatalogReferenceManagementService managementService)
+        CatalogBrandManagementService managementService)
     {
         this.managementService = managementService;
     }
@@ -19,7 +19,7 @@ public sealed class CreateCatalogBrandCommandHandler
         CreateCatalogBrandCommand command,
         CancellationToken cancellationToken)
     {
-        return managementService.CreateBrandAsync(
+        return managementService.CreateAsync(
             command.Request,
             cancellationToken);
     }

@@ -9,10 +9,10 @@ public sealed class UpdateCatalogBrandCommandHandler
         UpdateCatalogBrandCommand,
         Result<ManagedCatalogBrandResponse>>
 {
-    private readonly CatalogReferenceManagementService managementService;
+    private readonly CatalogBrandManagementService managementService;
 
     public UpdateCatalogBrandCommandHandler(
-        CatalogReferenceManagementService managementService)
+        CatalogBrandManagementService managementService)
     {
         this.managementService = managementService;
     }
@@ -21,7 +21,7 @@ public sealed class UpdateCatalogBrandCommandHandler
         UpdateCatalogBrandCommand command,
         CancellationToken cancellationToken)
     {
-        return managementService.UpdateBrandAsync(
+        return managementService.UpdateAsync(
             command.BrandId,
             command.Request,
             cancellationToken);

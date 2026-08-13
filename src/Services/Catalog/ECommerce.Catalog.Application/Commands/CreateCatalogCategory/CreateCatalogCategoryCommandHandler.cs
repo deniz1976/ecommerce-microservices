@@ -9,10 +9,10 @@ public sealed class CreateCatalogCategoryCommandHandler
         CreateCatalogCategoryCommand,
         Result<CatalogCategoryResponse>>
 {
-    private readonly CatalogReferenceManagementService managementService;
+    private readonly CatalogCategoryManagementService managementService;
 
     public CreateCatalogCategoryCommandHandler(
-        CatalogReferenceManagementService managementService)
+        CatalogCategoryManagementService managementService)
     {
         this.managementService = managementService;
     }
@@ -21,7 +21,7 @@ public sealed class CreateCatalogCategoryCommandHandler
         CreateCatalogCategoryCommand command,
         CancellationToken cancellationToken)
     {
-        return managementService.CreateCategoryAsync(
+        return managementService.CreateAsync(
             command.Request,
             command.Culture,
             cancellationToken);

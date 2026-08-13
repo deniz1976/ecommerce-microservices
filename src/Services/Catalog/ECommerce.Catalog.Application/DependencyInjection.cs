@@ -45,7 +45,8 @@ public static class DependencyInjection
         services.AddScoped<StoreService>();
         services.AddScoped<ManagedStoreQueryService>();
         services.AddScoped<CatalogReferenceService>();
-        services.AddScoped<CatalogReferenceManagementService>();
+        services.AddScoped<CatalogCategoryManagementService>();
+        services.AddScoped<CatalogBrandManagementService>();
         services.AddScoped<CatalogReferenceQueryService>();
         services.AddScoped<
             IQueryHandler<SearchProductsQuery, Result<PagedResult<ProductResponse>>>,
