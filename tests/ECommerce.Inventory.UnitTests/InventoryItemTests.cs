@@ -20,8 +20,12 @@ public sealed class InventoryItemTests
         Guid orderId = Guid.NewGuid();
         Guid reservationId = Guid.NewGuid();
 
-        item.Reserve(3, orderId, reservationId);
+        InventoryReservationMutationResult result = item.Reserve(
+            3,
+            orderId,
+            reservationId);
 
+        Assert.Equal(InventoryReservationMutationResult.Applied, result);
         Assert.Equal(3, item.ReservedQuantity);
         Assert.Equal(7, item.AvailableQuantity);
         StockMovement movement = Assert.Single(item.PendingMovements);
@@ -30,6 +34,44 @@ public sealed class InventoryItemTests
         Assert.Equal(reservationId, movement.ReservationId);
         Assert.Equal(0, movement.ReservedQuantityBefore);
         Assert.Equal(3, movement.ReservedQuantityAfter);
+    }
+
+    [Fact]
+    public void Reserve_rejects_quantity_above_available_stock_without_changing_state()
+    {
+        InventoryItem item = new(Guid.NewGuid(), 2);
+        item.DequeuePendingMovements();
+        DateTimeOffset updatedAt = item.UpdatedAt;
+        long concurrencyVersion = item.ConcurrencyVersion;
+
+        InventoryReservationMutationResult result = item.Reserve(
+            3,
+            Guid.NewGuid(),
+            Guid.NewGuid());
+
+        Assert.Equal(InventoryReservationMutationResult.InsufficientStock, result);
+        Assert.Equal(0, item.ReservedQuantity);
+        Assert.Equal(2, item.AvailableQuantity);
+        Assert.Equal(updatedAt, item.UpdatedAt);
+        Assert.Equal(concurrencyVersion, item.ConcurrencyVersion);
+        Assert.Empty(item.PendingMovements);
+    }
+
+    [Fact]
+    public void Reserve_rejects_non_positive_quantity_without_changing_state()
+    {
+        InventoryItem item = new(Guid.NewGuid(), 2);
+        item.DequeuePendingMovements();
+
+        InventoryReservationMutationResult result = item.Reserve(
+            0,
+            Guid.NewGuid(),
+            Guid.NewGuid());
+
+        Assert.Equal(InventoryReservationMutationResult.InvalidQuantity, result);
+        Assert.Equal(0, item.ReservedQuantity);
+        Assert.Equal(2, item.AvailableQuantity);
+        Assert.Empty(item.PendingMovements);
     }
 
     [Fact]

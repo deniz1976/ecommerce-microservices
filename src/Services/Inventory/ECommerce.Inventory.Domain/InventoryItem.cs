@@ -45,8 +45,21 @@ public sealed class InventoryItem
         return quantity > 0 && AvailableQuantity >= quantity;
     }
 
-    public void Reserve(int quantity, Guid orderId, Guid reservationId)
+    public InventoryReservationMutationResult Reserve(
+        int quantity,
+        Guid orderId,
+        Guid reservationId)
     {
+        if (quantity <= 0)
+        {
+            return InventoryReservationMutationResult.InvalidQuantity;
+        }
+
+        if (AvailableQuantity < quantity)
+        {
+            return InventoryReservationMutationResult.InsufficientStock;
+        }
+
         int reservedBefore = ReservedQuantity;
         ReservedQuantity += quantity;
         ConcurrencyVersion++;
@@ -60,6 +73,7 @@ public sealed class InventoryItem
             ReservedQuantity,
             orderId,
             reservationId);
+        return InventoryReservationMutationResult.Applied;
     }
 
     public void Release(int quantity, Guid orderId, Guid reservationId)
