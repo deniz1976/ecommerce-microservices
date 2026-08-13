@@ -7,9 +7,9 @@ namespace ECommerce.Catalog.Application.Queries.GetProduct;
 public sealed class GetProductQueryHandler
     : IQueryHandler<GetProductQuery, Result<ProductResponse>>
 {
-    private readonly ProductService productService;
+    private readonly ProductQueryService productService;
 
-    public GetProductQueryHandler(ProductService productService)
+    public GetProductQueryHandler(ProductQueryService productService)
     {
         this.productService = productService;
     }

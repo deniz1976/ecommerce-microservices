@@ -32,7 +32,8 @@ public static class DependencyInjection
     {
         services.AddMediatR(configuration =>
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
-        services.AddScoped<ProductService>();
+        services.AddScoped<ProductQueryService>();
+        services.AddScoped<ProductManagementService>();
         services.AddScoped<CatalogMetricsService>();
         services.AddScoped<ProductImageService>();
         services.AddScoped<IProductStoreAccessValidator, ProductStoreAccessValidator>();

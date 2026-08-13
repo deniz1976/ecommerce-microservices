@@ -7,9 +7,9 @@ namespace ECommerce.Catalog.Application.Commands.UpdateProduct;
 public sealed class UpdateProductCommandHandler
     : ICommandHandler<UpdateProductCommand, Result<ProductResponse>>
 {
-    private readonly ProductService productService;
+    private readonly ProductManagementService productService;
 
-    public UpdateProductCommandHandler(ProductService productService)
+    public UpdateProductCommandHandler(ProductManagementService productService)
     {
         this.productService = productService;
     }

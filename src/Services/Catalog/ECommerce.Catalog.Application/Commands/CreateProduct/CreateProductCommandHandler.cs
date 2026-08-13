@@ -7,9 +7,9 @@ namespace ECommerce.Catalog.Application.Commands.CreateProduct;
 public sealed class CreateProductCommandHandler
     : ICommandHandler<CreateProductCommand, Result<ProductResponse>>
 {
-    private readonly ProductService productService;
+    private readonly ProductManagementService productService;
 
-    public CreateProductCommandHandler(ProductService productService)
+    public CreateProductCommandHandler(ProductManagementService productService)
     {
         this.productService = productService;
     }
