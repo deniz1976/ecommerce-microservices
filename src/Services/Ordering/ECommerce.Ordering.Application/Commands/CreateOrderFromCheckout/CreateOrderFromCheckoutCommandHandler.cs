@@ -7,9 +7,9 @@ namespace ECommerce.Ordering.Application.Commands.CreateOrderFromCheckout;
 public sealed class CreateOrderFromCheckoutCommandHandler
     : ICommandHandler<CreateOrderFromCheckoutCommand, Result<OrderResponse>>
 {
-    private readonly OrderService orderService;
+    private readonly CheckoutOrderCreationService orderService;
 
-    public CreateOrderFromCheckoutCommandHandler(OrderService orderService)
+    public CreateOrderFromCheckoutCommandHandler(CheckoutOrderCreationService orderService)
     {
         this.orderService = orderService;
     }
@@ -18,6 +18,6 @@ public sealed class CreateOrderFromCheckoutCommandHandler
         CreateOrderFromCheckoutCommand command,
         CancellationToken cancellationToken)
     {
-        return orderService.CreateFromCheckoutAsync(command.Checkout, cancellationToken);
+        return orderService.CreateAsync(command.Checkout, cancellationToken);
     }
 }

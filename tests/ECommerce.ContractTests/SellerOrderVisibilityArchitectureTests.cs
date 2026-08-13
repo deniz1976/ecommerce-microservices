@@ -39,7 +39,7 @@ public sealed class SellerOrderVisibilityArchitectureTests
             "Baskets", "BasketMutationService.cs");
         string orderService = ReadRepositoryFile(
             "src", "Services", "Ordering", "ECommerce.Ordering.Application",
-            "Orders", "OrderService.cs");
+            "Orders", "CheckoutOrderCreationService.cs");
         string directRequest = ReadRepositoryFile(
             "src", "Services", "Ordering", "ECommerce.Ordering.Application",
             "Orders", "CreateOrderItemRequest.cs");

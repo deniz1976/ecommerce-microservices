@@ -7,9 +7,9 @@ namespace ECommerce.Ordering.Application.Commands.CreateOrder;
 public sealed class CreateOrderCommandHandler
     : ICommandHandler<CreateOrderCommand, Result<OrderResponse>>
 {
-    private readonly OrderService orderService;
+    private readonly OrderCreationService orderService;
 
-    public CreateOrderCommandHandler(OrderService orderService)
+    public CreateOrderCommandHandler(OrderCreationService orderService)
     {
         this.orderService = orderService;
     }

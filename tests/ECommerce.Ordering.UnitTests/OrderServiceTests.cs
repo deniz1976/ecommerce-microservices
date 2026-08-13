@@ -14,7 +14,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, repository, publisher);
+        OrderCreationService service = new(repository, repository, publisher);
 
         CreateOrderRequest request = CreateValidRequest() with { CustomerId = Guid.Empty };
 
@@ -32,7 +32,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, repository, publisher);
+        OrderCreationService service = new(repository, repository, publisher);
 
         CreateOrderRequest request = CreateValidRequest() with
         {
@@ -59,7 +59,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, repository, publisher);
+        OrderCreationService service = new(repository, repository, publisher);
 
         Guid correlationId = Guid.NewGuid();
         Guid causationId = Guid.NewGuid();
@@ -79,7 +79,8 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, repository, publisher);
+        OrderCreationService orderCreationService = new(repository, repository, publisher);
+        CheckoutOrderCreationService service = new(repository, orderCreationService);
         Guid checkoutId = Guid.NewGuid();
         Guid storeId = Guid.NewGuid();
         BasketCheckedOut checkout = new(
@@ -99,8 +100,8 @@ public sealed class OrderServiceTests
             "34000",
             [new OrderLine(Guid.NewGuid(), "Test Product", 2, 12.50m, "USD", storeId)]);
 
-        var first = await service.CreateFromCheckoutAsync(checkout, CancellationToken.None);
-        var duplicate = await service.CreateFromCheckoutAsync(checkout, CancellationToken.None);
+        var first = await service.CreateAsync(checkout, CancellationToken.None);
+        var duplicate = await service.CreateAsync(checkout, CancellationToken.None);
 
         Assert.True(first.IsSuccess);
         Assert.True(duplicate.IsSuccess);
@@ -116,7 +117,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, repository, publisher);
+        OrderCreationService service = new(repository, repository, publisher);
 
         var result = await service.CreateAsync(
             CreateValidRequest(),
@@ -133,7 +134,7 @@ public sealed class OrderServiceTests
     {
         OrderServiceFakeOrderRepository repository = new();
         FakeOrderSubmittedPublisher publisher = new(repository);
-        OrderService service = new(repository, repository, publisher);
+        OrderCreationService service = new(repository, repository, publisher);
         CreateOrderRequest validRequest = CreateValidRequest();
         CreateOrderItemRequest item = Assert.Single(validRequest.Items);
         CreateOrderRequest request = validRequest with { Items = [item, item] };

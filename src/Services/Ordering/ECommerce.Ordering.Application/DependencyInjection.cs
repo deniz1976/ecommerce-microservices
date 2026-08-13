@@ -20,7 +20,8 @@ public static class DependencyInjection
     {
         services.AddMediatR(configuration =>
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
-        services.AddScoped<OrderService>();
+        services.AddScoped<OrderCreationService>();
+        services.AddScoped<CheckoutOrderCreationService>();
         services.AddScoped<OrderDetailQueryService>();
         services.AddScoped<OrderStatusService>();
         services.AddScoped<OrderCancellationService>();
