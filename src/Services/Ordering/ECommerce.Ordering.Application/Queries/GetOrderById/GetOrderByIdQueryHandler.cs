@@ -7,9 +7,9 @@ namespace ECommerce.Ordering.Application.Queries.GetOrderById;
 public sealed class GetOrderByIdQueryHandler
     : IQueryHandler<GetOrderByIdQuery, Result<OrderResponse>>
 {
-    private readonly OrderService orderService;
+    private readonly OrderDetailQueryService orderService;
 
-    public GetOrderByIdQueryHandler(OrderService orderService)
+    public GetOrderByIdQueryHandler(OrderDetailQueryService orderService)
     {
         this.orderService = orderService;
     }
