@@ -6,7 +6,5 @@ namespace ECommerce.Catalog.Application.Queries.SearchProducts;
 
 public sealed record SearchProductsQuery(
     ProductListQuery Filter,
-    string Culture,
-    bool Managed,
-    ProductAccessContext? Access = null)
+    string Culture)
     : IQuery<Result<PagedResult<ProductResponse>>>;

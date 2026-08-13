@@ -16,9 +16,11 @@ using ECommerce.Catalog.Application.Queries.GetCatalogMetrics;
 using ECommerce.Catalog.Application.Queries.GetManagedCatalogBrands;
 using ECommerce.Catalog.Application.Queries.GetManagedCatalogCategories;
 using ECommerce.Catalog.Application.Queries.GetProduct;
+using ECommerce.Catalog.Application.Queries.GetManagedProduct;
 using ECommerce.Catalog.Application.Queries.GetStoreById;
 using ECommerce.Catalog.Application.Queries.GetStoresByOwner;
 using ECommerce.Catalog.Application.Queries.SearchProducts;
+using ECommerce.Catalog.Application.Queries.SearchManagedProducts;
 using ECommerce.Catalog.Application.Queries.SearchManagedStores;
 using ECommerce.Catalog.Application.References;
 using ECommerce.Catalog.Application.Stores;
@@ -32,7 +34,8 @@ public static class DependencyInjection
     {
         services.AddMediatR(configuration =>
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
-        services.AddScoped<ProductQueryService>();
+        services.AddScoped<PublicProductQueryService>();
+        services.AddScoped<ManagedProductQueryService>();
         services.AddScoped<ProductManagementService>();
         services.AddScoped<CatalogMetricsService>();
         services.AddScoped<ProductImageAccessService>();
@@ -55,6 +58,12 @@ public static class DependencyInjection
         services.AddScoped<
             IQueryHandler<GetProductQuery, Result<ProductResponse>>,
             GetProductQueryHandler>();
+        services.AddScoped<
+            IQueryHandler<SearchManagedProductsQuery, Result<PagedResult<ProductResponse>>>,
+            SearchManagedProductsQueryHandler>();
+        services.AddScoped<
+            IQueryHandler<GetManagedProductQuery, Result<ProductResponse>>,
+            GetManagedProductQueryHandler>();
         services.AddScoped<
             ICommandHandler<CreateProductCommand, Result<ProductResponse>>,
             CreateProductCommandHandler>();

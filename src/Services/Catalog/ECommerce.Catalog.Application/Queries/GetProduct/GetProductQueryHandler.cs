@@ -7,9 +7,9 @@ namespace ECommerce.Catalog.Application.Queries.GetProduct;
 public sealed class GetProductQueryHandler
     : IQueryHandler<GetProductQuery, Result<ProductResponse>>
 {
-    private readonly ProductQueryService productService;
+    private readonly PublicProductQueryService productService;
 
-    public GetProductQueryHandler(ProductQueryService productService)
+    public GetProductQueryHandler(PublicProductQueryService productService)
     {
         this.productService = productService;
     }
@@ -18,15 +18,6 @@ public sealed class GetProductQueryHandler
         GetProductQuery query,
         CancellationToken cancellationToken)
     {
-        return query.Managed
-            ? productService.GetManagedByIdAsync(
-                query.Id,
-                query.Access ?? new ProductAccessContext(null, false),
-                query.Culture,
-                cancellationToken)
-            : productService.GetPublicByIdAsync(
-                query.Id,
-                query.Culture,
-                cancellationToken);
+        return productService.GetByIdAsync(query.Id, query.Culture, cancellationToken);
     }
 }

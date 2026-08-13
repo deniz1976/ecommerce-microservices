@@ -4,7 +4,9 @@ using ECommerce.Catalog.Application.Commands.CreateProduct;
 using ECommerce.Catalog.Application.Commands.UpdateProduct;
 using ECommerce.Catalog.Application.Products;
 using ECommerce.Catalog.Application.Queries.GetProduct;
+using ECommerce.Catalog.Application.Queries.GetManagedProduct;
 using ECommerce.Catalog.Application.Queries.SearchProducts;
+using ECommerce.Catalog.Application.Queries.SearchManagedProducts;
 using ECommerce.Catalog.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -43,7 +45,7 @@ public sealed class ProductsController(
             sortBy,
             sortDescending);
         Result<PagedResult<ProductResponse>> result = await sender.Send(
-            new SearchProductsQuery(query, culture, Managed: false),
+            new SearchProductsQuery(query, culture),
             cancellationToken);
         return CatalogResults.FromResult(result, HttpContext);
     }
@@ -56,7 +58,7 @@ public sealed class ProductsController(
     {
         string culture = RequestCultureReader.Read(HttpContext);
         Result<ProductResponse> result = await sender.Send(
-            new GetProductQuery(id, culture, Managed: false),
+            new GetProductQuery(id, culture),
             cancellationToken);
         return CatalogResults.FromResult(result, HttpContext);
     }
@@ -88,7 +90,7 @@ public sealed class ProductsController(
             sortBy,
             sortDescending);
         Result<PagedResult<ProductResponse>> result = await sender.Send(
-            new SearchProductsQuery(query, culture, Managed: true, access),
+            new SearchManagedProductsQuery(query, access, culture),
             cancellationToken);
         return CatalogResults.FromResult(result, HttpContext);
     }
@@ -102,7 +104,7 @@ public sealed class ProductsController(
         string culture = RequestCultureReader.Read(HttpContext);
         ProductAccessContext access = await ResolveAccessAsync(cancellationToken);
         Result<ProductResponse> result = await sender.Send(
-            new GetProductQuery(id, culture, Managed: true, access),
+            new GetManagedProductQuery(id, access, culture),
             cancellationToken);
         return CatalogResults.FromResult(result, HttpContext);
     }

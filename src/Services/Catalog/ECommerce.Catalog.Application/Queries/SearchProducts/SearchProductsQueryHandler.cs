@@ -7,9 +7,9 @@ namespace ECommerce.Catalog.Application.Queries.SearchProducts;
 public sealed class SearchProductsQueryHandler
     : IQueryHandler<SearchProductsQuery, Result<PagedResult<ProductResponse>>>
 {
-    private readonly ProductQueryService productService;
+    private readonly PublicProductQueryService productService;
 
-    public SearchProductsQueryHandler(ProductQueryService productService)
+    public SearchProductsQueryHandler(PublicProductQueryService productService)
     {
         this.productService = productService;
     }
@@ -18,15 +18,6 @@ public sealed class SearchProductsQueryHandler
         SearchProductsQuery query,
         CancellationToken cancellationToken)
     {
-        return query.Managed
-            ? productService.SearchManagedAsync(
-                query.Filter,
-                query.Access ?? new ProductAccessContext(null, false),
-                query.Culture,
-                cancellationToken)
-            : productService.SearchPublicAsync(
-                query.Filter,
-                query.Culture,
-                cancellationToken);
+        return productService.SearchAsync(query.Filter, query.Culture, cancellationToken);
     }
 }
