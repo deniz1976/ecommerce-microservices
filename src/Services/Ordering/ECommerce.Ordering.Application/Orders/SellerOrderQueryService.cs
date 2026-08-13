@@ -3,35 +3,16 @@ using ECommerce.BuildingBlocks.Contracts.Results;
 
 namespace ECommerce.Ordering.Application.Orders;
 
-public sealed class OrderQueryService
+public sealed class SellerOrderQueryService(
+    IOrderReader orderReader,
+    IStoreOrderAccessAuthorizer storeAccessAuthorizer)
 {
-    private readonly IOrderReader orderReader;
-    private readonly IStoreOrderAccessAuthorizer storeAccessAuthorizer;
-
-    public OrderQueryService(
-        IOrderReader orderReader,
-        IStoreOrderAccessAuthorizer storeAccessAuthorizer)
-    {
-        this.orderReader = orderReader;
-        this.storeAccessAuthorizer = storeAccessAuthorizer;
-    }
-
-    public async Task<Result<PagedResult<OrderSummaryResponse>>> SearchAsync(
-        OrderListCriteria criteria,
-        CancellationToken cancellationToken)
-    {
-        PagedResult<OrderSummaryResponse> page = await orderReader.SearchAsync(
-            criteria,
-            cancellationToken);
-        return Result<PagedResult<OrderSummaryResponse>>.Success(page);
-    }
-
-    public async Task<Result<PagedResult<SellerOrderSummaryResponse>>> SearchSellerAsync(
+    public async Task<Result<PagedResult<SellerOrderSummaryResponse>>> SearchAsync(
         SellerOrderListCriteria criteria,
         SellerOrderAccessContext accessContext,
         CancellationToken cancellationToken)
     {
-        Error? authorizationError = await GetSellerStoreAuthorizationErrorAsync(
+        Error? authorizationError = await GetAuthorizationErrorAsync(
             criteria.StoreId,
             accessContext,
             cancellationToken);
@@ -46,13 +27,13 @@ public sealed class OrderQueryService
         return Result<PagedResult<SellerOrderSummaryResponse>>.Success(page);
     }
 
-    public async Task<Result<SellerOrderDetailResponse>> GetSellerAsync(
+    public async Task<Result<SellerOrderDetailResponse>> GetByIdAsync(
         Guid storeId,
         Guid orderId,
         SellerOrderAccessContext accessContext,
         CancellationToken cancellationToken)
     {
-        Error? authorizationError = await GetSellerStoreAuthorizationErrorAsync(
+        Error? authorizationError = await GetAuthorizationErrorAsync(
             storeId,
             accessContext,
             cancellationToken);
@@ -71,7 +52,7 @@ public sealed class OrderQueryService
             : Result<SellerOrderDetailResponse>.Success(order);
     }
 
-    private async Task<Error?> GetSellerStoreAuthorizationErrorAsync(
+    private async Task<Error?> GetAuthorizationErrorAsync(
         Guid storeId,
         SellerOrderAccessContext accessContext,
         CancellationToken cancellationToken)

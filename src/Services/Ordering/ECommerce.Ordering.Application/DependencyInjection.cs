@@ -25,7 +25,8 @@ public static class DependencyInjection
         services.AddScoped<OrderDetailQueryService>();
         services.AddScoped<OrderStatusService>();
         services.AddScoped<OrderCancellationService>();
-        services.AddScoped<OrderQueryService>();
+        services.AddScoped<OrderListQueryService>();
+        services.AddScoped<SellerOrderQueryService>();
         services.AddScoped<
             ICommandHandler<CreateOrderCommand, Result<OrderResponse>>,
             CreateOrderCommandHandler>();

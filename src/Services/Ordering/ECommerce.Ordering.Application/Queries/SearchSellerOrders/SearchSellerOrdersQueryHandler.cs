@@ -7,9 +7,9 @@ namespace ECommerce.Ordering.Application.Queries.SearchSellerOrders;
 public sealed class SearchSellerOrdersQueryHandler
     : IQueryHandler<SearchSellerOrdersQuery, Result<PagedResult<SellerOrderSummaryResponse>>>
 {
-    private readonly OrderQueryService queryService;
+    private readonly SellerOrderQueryService queryService;
 
-    public SearchSellerOrdersQueryHandler(OrderQueryService queryService)
+    public SearchSellerOrdersQueryHandler(SellerOrderQueryService queryService)
     {
         this.queryService = queryService;
     }
@@ -18,7 +18,7 @@ public sealed class SearchSellerOrdersQueryHandler
         SearchSellerOrdersQuery query,
         CancellationToken cancellationToken)
     {
-        return queryService.SearchSellerAsync(
+        return queryService.SearchAsync(
             new SellerOrderListCriteria(
                 query.StoreId,
                 query.PageNumber,

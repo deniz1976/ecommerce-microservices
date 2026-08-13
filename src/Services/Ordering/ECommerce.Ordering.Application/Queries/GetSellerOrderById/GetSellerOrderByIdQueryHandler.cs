@@ -7,9 +7,9 @@ namespace ECommerce.Ordering.Application.Queries.GetSellerOrderById;
 public sealed class GetSellerOrderByIdQueryHandler
     : IQueryHandler<GetSellerOrderByIdQuery, Result<SellerOrderDetailResponse>>
 {
-    private readonly OrderQueryService queryService;
+    private readonly SellerOrderQueryService queryService;
 
-    public GetSellerOrderByIdQueryHandler(OrderQueryService queryService)
+    public GetSellerOrderByIdQueryHandler(SellerOrderQueryService queryService)
     {
         this.queryService = queryService;
     }
@@ -18,7 +18,7 @@ public sealed class GetSellerOrderByIdQueryHandler
         GetSellerOrderByIdQuery query,
         CancellationToken cancellationToken)
     {
-        return queryService.GetSellerAsync(
+        return queryService.GetByIdAsync(
             query.StoreId,
             query.OrderId,
             query.AccessContext,

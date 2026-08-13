@@ -1,6 +1,10 @@
 using ECommerce.Ordering.Application.Commands.CreateOrder;
 using ECommerce.Ordering.Application.Commands.CreateOrderFromCheckout;
 using ECommerce.Ordering.Application.Orders;
+using ECommerce.Ordering.Application.Queries.GetOrdersByCustomer;
+using ECommerce.Ordering.Application.Queries.GetSellerOrderById;
+using ECommerce.Ordering.Application.Queries.SearchManagedOrders;
+using ECommerce.Ordering.Application.Queries.SearchSellerOrders;
 
 namespace ECommerce.ContractTests;
 
@@ -10,6 +14,18 @@ public sealed class OrderingResponsibilityArchitectureTests
     [InlineData(typeof(CreateOrderCommandHandler), typeof(OrderCreationService))]
     [InlineData(typeof(CreateOrderFromCheckoutCommandHandler), typeof(CheckoutOrderCreationService))]
     public void CreationHandlersDependOnTheirFocusedService(Type handlerType, Type serviceType)
+    {
+        System.Reflection.ConstructorInfo constructor = Assert.Single(handlerType.GetConstructors());
+        System.Reflection.ParameterInfo parameter = Assert.Single(constructor.GetParameters());
+        Assert.Equal(serviceType, parameter.ParameterType);
+    }
+
+    [Theory]
+    [InlineData(typeof(GetOrdersByCustomerQueryHandler), typeof(OrderListQueryService))]
+    [InlineData(typeof(SearchManagedOrdersQueryHandler), typeof(OrderListQueryService))]
+    [InlineData(typeof(SearchSellerOrdersQueryHandler), typeof(SellerOrderQueryService))]
+    [InlineData(typeof(GetSellerOrderByIdQueryHandler), typeof(SellerOrderQueryService))]
+    public void ListHandlersDependOnTheirFocusedQueryService(Type handlerType, Type serviceType)
     {
         System.Reflection.ConstructorInfo constructor = Assert.Single(handlerType.GetConstructors());
         System.Reflection.ParameterInfo parameter = Assert.Single(constructor.GetParameters());

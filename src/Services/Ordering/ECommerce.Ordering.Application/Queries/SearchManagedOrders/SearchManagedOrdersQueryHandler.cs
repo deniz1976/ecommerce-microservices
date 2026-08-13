@@ -7,9 +7,9 @@ namespace ECommerce.Ordering.Application.Queries.SearchManagedOrders;
 public sealed class SearchManagedOrdersQueryHandler
     : IQueryHandler<SearchManagedOrdersQuery, Result<PagedResult<OrderSummaryResponse>>>
 {
-    private readonly OrderQueryService queryService;
+    private readonly OrderListQueryService queryService;
 
-    public SearchManagedOrdersQueryHandler(OrderQueryService queryService)
+    public SearchManagedOrdersQueryHandler(OrderListQueryService queryService)
     {
         this.queryService = queryService;
     }

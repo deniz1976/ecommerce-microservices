@@ -7,9 +7,9 @@ namespace ECommerce.Ordering.Application.Queries.GetOrdersByCustomer;
 public sealed class GetOrdersByCustomerQueryHandler
     : IQueryHandler<GetOrdersByCustomerQuery, Result<PagedResult<OrderSummaryResponse>>>
 {
-    private readonly OrderQueryService queryService;
+    private readonly OrderListQueryService queryService;
 
-    public GetOrdersByCustomerQueryHandler(OrderQueryService queryService)
+    public GetOrdersByCustomerQueryHandler(OrderListQueryService queryService)
     {
         this.queryService = queryService;
     }

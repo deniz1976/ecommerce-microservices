@@ -19,7 +19,7 @@ public sealed class OrderQueryServiceTests
             DateTimeOffset.UtcNow);
         PagedResult<OrderSummaryResponse> page = new([item], 2, 10, 16);
         FakeOrderReader reader = new(page);
-        OrderQueryService service = new(reader, new FakeStoreOrderAccessAuthorizer());
+        OrderListQueryService service = new(reader);
         OrderListCriteria criteria = new(
             item.CustomerId,
             2,
@@ -47,10 +47,10 @@ public sealed class OrderQueryServiceTests
         FakeOrderReader reader = new(
             new PagedResult<OrderSummaryResponse>([], 1, 20, 0), page);
         FakeStoreOrderAccessAuthorizer authorizer = new(StoreOrderAccessResult.Granted);
-        OrderQueryService service = new(reader, authorizer);
+        SellerOrderQueryService service = new(reader, authorizer);
         SellerOrderListCriteria criteria = new(storeId, 1, 20, null, true);
 
-        Result<PagedResult<SellerOrderSummaryResponse>> result = await service.SearchSellerAsync(
+        Result<PagedResult<SellerOrderSummaryResponse>> result = await service.SearchAsync(
             criteria,
             new SellerOrderAccessContext(false, "seller-token"),
             CancellationToken.None);
@@ -66,11 +66,11 @@ public sealed class OrderQueryServiceTests
     public async Task SearchSellerDeniesUnknownStoreWithoutQueryingOrders()
     {
         FakeOrderReader reader = new(new PagedResult<OrderSummaryResponse>([], 1, 20, 0));
-        OrderQueryService service = new(
+        SellerOrderQueryService service = new(
             reader,
             new FakeStoreOrderAccessAuthorizer(StoreOrderAccessResult.Denied));
 
-        Result<PagedResult<SellerOrderSummaryResponse>> result = await service.SearchSellerAsync(
+        Result<PagedResult<SellerOrderSummaryResponse>> result = await service.SearchAsync(
             new SellerOrderListCriteria(Guid.NewGuid(), 1, 20, null, true),
             new SellerOrderAccessContext(false, "seller-token"),
             CancellationToken.None);
@@ -84,11 +84,11 @@ public sealed class OrderQueryServiceTests
     public async Task SearchSellerMapsCatalogFailureWithoutQueryingOrders()
     {
         FakeOrderReader reader = new(new PagedResult<OrderSummaryResponse>([], 1, 20, 0));
-        OrderQueryService service = new(
+        SellerOrderQueryService service = new(
             reader,
             new FakeStoreOrderAccessAuthorizer(StoreOrderAccessResult.DependencyUnavailable));
 
-        Result<PagedResult<SellerOrderSummaryResponse>> result = await service.SearchSellerAsync(
+        Result<PagedResult<SellerOrderSummaryResponse>> result = await service.SearchAsync(
             new SellerOrderListCriteria(Guid.NewGuid(), 1, 20, null, true),
             new SellerOrderAccessContext(false, "seller-token"),
             CancellationToken.None);
@@ -115,9 +115,9 @@ public sealed class OrderQueryServiceTests
         FakeOrderReader reader = new(
             new PagedResult<OrderSummaryResponse>([], 1, 20, 0),
             sellerDetailResult: detail);
-        OrderQueryService service = new(reader, new FakeStoreOrderAccessAuthorizer());
+        SellerOrderQueryService service = new(reader, new FakeStoreOrderAccessAuthorizer());
 
-        Result<SellerOrderDetailResponse> result = await service.GetSellerAsync(
+        Result<SellerOrderDetailResponse> result = await service.GetByIdAsync(
             storeId,
             orderId,
             new SellerOrderAccessContext(false, "seller-token"),
@@ -133,9 +133,9 @@ public sealed class OrderQueryServiceTests
     public async Task GetSellerConcealsAnOrderOutsideTheSelectedStore()
     {
         FakeOrderReader reader = new(new PagedResult<OrderSummaryResponse>([], 1, 20, 0));
-        OrderQueryService service = new(reader, new FakeStoreOrderAccessAuthorizer());
+        SellerOrderQueryService service = new(reader, new FakeStoreOrderAccessAuthorizer());
 
-        Result<SellerOrderDetailResponse> result = await service.GetSellerAsync(
+        Result<SellerOrderDetailResponse> result = await service.GetByIdAsync(
             Guid.NewGuid(),
             Guid.NewGuid(),
             new SellerOrderAccessContext(false, "seller-token"),
@@ -149,11 +149,11 @@ public sealed class OrderQueryServiceTests
     public async Task GetSellerDeniesUnknownStoreWithoutQueryingOrderDetail()
     {
         FakeOrderReader reader = new(new PagedResult<OrderSummaryResponse>([], 1, 20, 0));
-        OrderQueryService service = new(
+        SellerOrderQueryService service = new(
             reader,
             new FakeStoreOrderAccessAuthorizer(StoreOrderAccessResult.Denied));
 
-        Result<SellerOrderDetailResponse> result = await service.GetSellerAsync(
+        Result<SellerOrderDetailResponse> result = await service.GetByIdAsync(
             Guid.NewGuid(),
             Guid.NewGuid(),
             new SellerOrderAccessContext(false, "seller-token"),
