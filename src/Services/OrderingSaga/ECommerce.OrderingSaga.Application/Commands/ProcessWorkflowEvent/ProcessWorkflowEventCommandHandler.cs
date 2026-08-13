@@ -9,13 +9,16 @@ public sealed class ProcessWorkflowEventCommandHandler<TEvent>
     where TEvent : class
 {
     private readonly OrderWorkflowService workflowService;
+    private readonly OrderWorkflowCancellationService cancellationService;
     private readonly OrderWorkflowTimeoutOptions timeoutOptions;
 
     public ProcessWorkflowEventCommandHandler(
         OrderWorkflowService workflowService,
+        OrderWorkflowCancellationService cancellationService,
         OrderWorkflowTimeoutOptions timeoutOptions)
     {
         this.workflowService = workflowService;
+        this.cancellationService = cancellationService;
         this.timeoutOptions = timeoutOptions;
     }
 
@@ -46,7 +49,7 @@ public sealed class ProcessWorkflowEventCommandHandler<TEvent>
             PaymentFailed message => workflowService.HandleAsync(message, cancellationToken),
             ShipmentCreated message => workflowService.HandleAsync(message, cancellationToken),
             ShipmentFailed message => workflowService.HandleAsync(message, cancellationToken),
-            OrderCancellationRequested message => workflowService.HandleAsync(
+            OrderCancellationRequested message => cancellationService.HandleAsync(
                 message,
                 cancellationToken),
             _ => throw new ArgumentOutOfRangeException(

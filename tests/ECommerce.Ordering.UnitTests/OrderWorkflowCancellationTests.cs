@@ -11,7 +11,7 @@ public sealed class OrderWorkflowCancellationTests
     [Fact]
     public async Task Submitted_workflow_cancels_without_compensation()
     {
-        (OrderWorkflow workflow, OrderWorkflowService service, FakeWorkflowCommandPublisher publisher) =
+        (OrderWorkflow workflow, OrderWorkflowCancellationService service, FakeWorkflowCommandPublisher publisher) =
             CreateService();
 
         await service.HandleAsync(CreateRequest(workflow), CancellationToken.None);
@@ -23,9 +23,31 @@ public sealed class OrderWorkflowCancellationTests
     }
 
     [Fact]
+    public async Task Missing_workflow_uses_specific_not_ready_exception()
+    {
+        OrderWorkflowFakeRepository repository = new();
+        OrderWorkflowCancellationService service = new(
+            repository,
+            repository,
+            repository,
+            new FakeWorkflowCommandPublisher());
+        OrderCancellationRequested request = new(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            null,
+            TestNow,
+            1,
+            Guid.NewGuid(),
+            Guid.NewGuid());
+
+        await Assert.ThrowsAsync<OrderWorkflowNotReadyException>(() =>
+            service.HandleAsync(request, CancellationToken.None));
+    }
+
+    [Fact]
     public async Task Inventory_reserved_workflow_releases_stock()
     {
-        (OrderWorkflow workflow, OrderWorkflowService service, FakeWorkflowCommandPublisher publisher) =
+        (OrderWorkflow workflow, OrderWorkflowCancellationService service, FakeWorkflowCommandPublisher publisher) =
             CreateService();
         workflow.MarkInventoryReserved(TestNow.AddMinutes(2));
 
@@ -40,7 +62,7 @@ public sealed class OrderWorkflowCancellationTests
     [Fact]
     public async Task Payment_authorized_workflow_rejects_late_cancellation()
     {
-        (OrderWorkflow workflow, OrderWorkflowService service, FakeWorkflowCommandPublisher publisher) =
+        (OrderWorkflow workflow, OrderWorkflowCancellationService service, FakeWorkflowCommandPublisher publisher) =
             CreateService();
         workflow.MarkInventoryReserved(TestNow.AddMinutes(2));
         workflow.MarkPaymentAuthorized(TestNow.AddMinutes(4));
@@ -57,7 +79,7 @@ public sealed class OrderWorkflowCancellationTests
     [Fact]
     public async Task Completed_workflow_rejects_late_cancellation()
     {
-        (OrderWorkflow workflow, OrderWorkflowService service, FakeWorkflowCommandPublisher publisher) =
+        (OrderWorkflow workflow, OrderWorkflowCancellationService service, FakeWorkflowCommandPublisher publisher) =
             CreateService();
         workflow.MarkInventoryReserved(TestNow.AddMinutes(2));
         workflow.MarkPaymentAuthorized(TestNow.AddMinutes(4));
@@ -76,9 +98,11 @@ public sealed class OrderWorkflowCancellationTests
     [Fact]
     public async Task Late_inventory_success_after_customer_cancellation_releases_stock()
     {
-        (OrderWorkflow workflow, OrderWorkflowService service, FakeWorkflowCommandPublisher publisher) =
+        (OrderWorkflow workflow, OrderWorkflowCancellationService cancellationService, FakeWorkflowCommandPublisher publisher) =
             CreateService();
-        await service.HandleAsync(CreateRequest(workflow), CancellationToken.None);
+        await cancellationService.HandleAsync(CreateRequest(workflow), CancellationToken.None);
+
+        OrderWorkflowService service = CreateWorkflowService(workflow, publisher);
 
         await service.HandleAsync(
             new InventoryReserved(
@@ -100,9 +124,11 @@ public sealed class OrderWorkflowCancellationTests
     [Fact]
     public async Task Late_payment_success_after_customer_cancellation_refunds_and_releases()
     {
-        (OrderWorkflow workflow, OrderWorkflowService service, FakeWorkflowCommandPublisher publisher) =
+        (OrderWorkflow workflow, OrderWorkflowCancellationService cancellationService, FakeWorkflowCommandPublisher publisher) =
             CreateService();
-        await service.HandleAsync(CreateRequest(workflow), CancellationToken.None);
+        await cancellationService.HandleAsync(CreateRequest(workflow), CancellationToken.None);
+
+        OrderWorkflowService service = CreateWorkflowService(workflow, publisher);
 
         await service.HandleAsync(
             new PaymentAuthorized(
@@ -126,7 +152,7 @@ public sealed class OrderWorkflowCancellationTests
 
     private static (
         OrderWorkflow Workflow,
-        OrderWorkflowService Service,
+        OrderWorkflowCancellationService Service,
         FakeWorkflowCommandPublisher Publisher) CreateService()
     {
         OrderWorkflow workflow = new(
@@ -145,12 +171,21 @@ public sealed class OrderWorkflowCancellationTests
         OrderWorkflowFakeRepository repository = new();
         repository.Add(workflow);
         FakeWorkflowCommandPublisher publisher = new();
-        OrderWorkflowService service = new(
+        OrderWorkflowCancellationService service = new(
             repository,
             repository,
             repository,
             publisher);
         return (workflow, service, publisher);
+    }
+
+    private static OrderWorkflowService CreateWorkflowService(
+        OrderWorkflow workflow,
+        FakeWorkflowCommandPublisher publisher)
+    {
+        OrderWorkflowFakeRepository repository = new();
+        repository.Add(workflow);
+        return new OrderWorkflowService(repository, repository, repository, publisher);
     }
 
     private static OrderCancellationRequested CreateRequest(OrderWorkflow workflow)

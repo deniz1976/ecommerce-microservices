@@ -1,5 +1,4 @@
 using ECommerce.BuildingBlocks.Contracts.Events;
-using ECommerce.BuildingBlocks.Contracts.Errors;
 using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.OrderingSaga.Domain;
 
@@ -187,58 +186,6 @@ public sealed class OrderWorkflowService
         await publisher.RefundPaymentAsync(workflow, message.CorrelationId, message.MessageId, message.Reason, cancellationToken);
         await publisher.ReleaseInventoryAsync(workflow, message.CorrelationId, message.MessageId, message.Reason, cancellationToken);
         await publisher.CancelOrderAsync(workflow, message.CorrelationId, message.MessageId, message.ReasonCode, message.Reason, cancellationToken);
-    }
-
-    public async Task HandleAsync(
-        OrderCancellationRequested message,
-        CancellationToken cancellationToken)
-    {
-        OrderWorkflow? workflow = await FindByOrderIdAsync(
-            message.OrderId,
-            cancellationToken);
-        if (workflow is null)
-        {
-            throw new InvalidOperationException(
-                "The order workflow is not available for cancellation yet.");
-        }
-
-        if (workflow.Status == OrderWorkflowStatus.Cancelled)
-        {
-            return;
-        }
-
-        if (workflow.Status >= OrderWorkflowStatus.PaymentAuthorized)
-        {
-            await publisher.RejectOrderCancellationAsync(
-                workflow,
-                message.CorrelationId,
-                message.MessageId,
-                cancellationToken);
-            return;
-        }
-
-        OrderWorkflowStatus statusBeforeCancellation = workflow.Status;
-        const string reason = "Customer requested order cancellation.";
-        workflow.MarkCancelled(ErrorCodes.OrderCancelledByCustomer);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        if (statusBeforeCancellation >= OrderWorkflowStatus.InventoryReserved)
-        {
-            await publisher.ReleaseInventoryAsync(
-                workflow,
-                message.CorrelationId,
-                message.MessageId,
-                reason,
-                cancellationToken);
-        }
-
-        await publisher.CancelOrderAsync(
-            workflow,
-            message.CorrelationId,
-            message.MessageId,
-            ErrorCodes.OrderCancelledByCustomer,
-            reason,
-            cancellationToken);
     }
 
     private async Task<OrderWorkflow?> FindByOrderIdAsync(

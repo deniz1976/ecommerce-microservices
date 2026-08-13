@@ -1,6 +1,7 @@
 using ECommerce.BuildingBlocks.Contracts.Events;
 using ECommerce.OrderingSaga.Application;
 using ECommerce.OrderingSaga.Application.Commands.ProcessWorkflowEvent;
+using ECommerce.OrderingSaga.Application.Workflows;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,6 +9,20 @@ namespace ECommerce.ContractTests;
 
 public sealed class OrderingSagaMediatRRegistrationTests
 {
+    [Fact]
+    public void CancellationWorkflowHasAFocusedApplicationService()
+    {
+        Assert.DoesNotContain(
+            typeof(OrderWorkflowService).GetMethods(),
+            method => method.GetParameters().Any(parameter =>
+                parameter.ParameterType == typeof(OrderCancellationRequested)));
+
+        Assert.Contains(
+            typeof(OrderWorkflowCancellationService).GetMethods(),
+            method => method.GetParameters().Any(parameter =>
+                parameter.ParameterType == typeof(OrderCancellationRequested)));
+    }
+
     [Fact]
     public void AddOrderingSagaApplication_RegistersEveryWorkflowEventHandlerForMediatR()
     {
