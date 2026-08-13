@@ -7,9 +7,9 @@ namespace ECommerce.Catalog.Application.Commands.CreateStore;
 public sealed class CreateStoreCommandHandler
     : ICommandHandler<CreateStoreCommand, Result<StoreResponse>>
 {
-    private readonly StoreService storeService;
+    private readonly StoreManagementService storeService;
 
-    public CreateStoreCommandHandler(StoreService storeService)
+    public CreateStoreCommandHandler(StoreManagementService storeService)
     {
         this.storeService = storeService;
     }

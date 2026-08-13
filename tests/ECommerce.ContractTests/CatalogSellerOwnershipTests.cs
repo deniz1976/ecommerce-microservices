@@ -331,7 +331,7 @@ public sealed class CatalogSellerOwnershipTests
     {
         Guid sellerId = Guid.NewGuid();
         FakeStoreRepository stores = new();
-        StoreService service = new(stores, stores, stores);
+        StoreManagementService service = new(stores, stores, stores);
 
         Result<StoreResponse> result = await service.CreateAsync(
             sellerId,

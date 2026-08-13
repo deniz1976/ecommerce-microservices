@@ -7,9 +7,9 @@ namespace ECommerce.Catalog.Application.Queries.GetStoresByOwner;
 public sealed class GetStoresByOwnerQueryHandler
     : IQueryHandler<GetStoresByOwnerQuery, Result<IReadOnlyCollection<StoreResponse>>>
 {
-    private readonly StoreService storeService;
+    private readonly StoreQueryService storeService;
 
-    public GetStoresByOwnerQueryHandler(StoreService storeService)
+    public GetStoresByOwnerQueryHandler(StoreQueryService storeService)
     {
         this.storeService = storeService;
     }
@@ -18,6 +18,6 @@ public sealed class GetStoresByOwnerQueryHandler
         GetStoresByOwnerQuery query,
         CancellationToken cancellationToken)
     {
-        return storeService.GetMineAsync(query.OwnerUserId, cancellationToken);
+        return storeService.GetByOwnerAsync(query.OwnerUserId, cancellationToken);
     }
 }

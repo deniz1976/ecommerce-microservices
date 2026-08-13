@@ -7,9 +7,9 @@ namespace ECommerce.Catalog.Application.Commands.UpdateStore;
 public sealed class UpdateStoreCommandHandler
     : ICommandHandler<UpdateStoreCommand, Result<StoreResponse>>
 {
-    private readonly StoreService storeService;
+    private readonly StoreManagementService storeService;
 
-    public UpdateStoreCommandHandler(StoreService storeService)
+    public UpdateStoreCommandHandler(StoreManagementService storeService)
     {
         this.storeService = storeService;
     }

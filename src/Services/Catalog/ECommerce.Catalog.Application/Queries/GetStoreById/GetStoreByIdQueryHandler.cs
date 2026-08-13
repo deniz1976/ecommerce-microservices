@@ -7,9 +7,9 @@ namespace ECommerce.Catalog.Application.Queries.GetStoreById;
 public sealed class GetStoreByIdQueryHandler
     : IQueryHandler<GetStoreByIdQuery, Result<StoreResponse>>
 {
-    private readonly StoreService storeService;
+    private readonly StoreQueryService storeService;
 
-    public GetStoreByIdQueryHandler(StoreService storeService)
+    public GetStoreByIdQueryHandler(StoreQueryService storeService)
     {
         this.storeService = storeService;
     }

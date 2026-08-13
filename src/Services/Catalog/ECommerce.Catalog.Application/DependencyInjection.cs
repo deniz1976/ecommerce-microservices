@@ -42,7 +42,8 @@ public static class DependencyInjection
         services.AddScoped<IProductStoreAccessValidator, ProductStoreAccessValidator>();
         services.AddScoped<IProductReferenceValidator, ProductReferenceValidator>();
         services.AddScoped<ProductImageUploadValidator>();
-        services.AddScoped<StoreService>();
+        services.AddScoped<StoreQueryService>();
+        services.AddScoped<StoreManagementService>();
         services.AddScoped<ManagedStoreQueryService>();
         services.AddScoped<CatalogReferenceService>();
         services.AddScoped<CatalogCategoryManagementService>();
