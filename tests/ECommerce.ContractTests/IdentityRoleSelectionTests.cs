@@ -10,6 +10,23 @@ namespace ECommerce.ContractTests;
 public sealed class IdentityRoleSelectionTests
 {
     [Fact]
+    public void RoleSelectionHandlerDelegatesThroughSingleApplicationService()
+    {
+        System.Reflection.ConstructorInfo constructor = Assert.Single(
+            typeof(SelectExternalUserRoleCommandHandler).GetConstructors());
+
+        System.Reflection.ParameterInfo parameter = Assert.Single(constructor.GetParameters());
+        Assert.Equal(typeof(ExternalUserRoleSelectionService), parameter.ParameterType);
+    }
+
+    [Fact]
+    public void InvalidSelfServiceRoleUsesDomainSpecificException()
+    {
+        Assert.Throws<InvalidSelfServiceRoleException>(() =>
+            UserRoleNames.NormalizeSelfServiceRole(UserRoleNames.Admin));
+    }
+
+    [Fact]
     public async Task Auth0FailureLeavesLocalRoleUnchanged()
     {
         StubGetOrCreateExternalUserHandler getOrCreateHandler = new(
@@ -21,12 +38,11 @@ public sealed class IdentityRoleSelectionTests
                     [UserRoleNames.Customer],
                     true)));
         TrackingSelfServiceRoleWriter roleWriter = new();
-        SelectExternalUserRoleCommandHandler handler = new(
+        SelectExternalUserRoleCommandHandler handler = CreateHandler(
             getOrCreateHandler,
             new RejectingRoleSynchronizer(),
             roleWriter,
-            new TrackingRoleReconciliationQueue(),
-            NullLogger<SelectExternalUserRoleCommandHandler>.Instance);
+            new TrackingRoleReconciliationQueue());
 
         Result<UserResponse> result = await handler.HandleAsync(
             new SelectExternalUserRoleCommand(
@@ -50,12 +66,11 @@ public sealed class IdentityRoleSelectionTests
         {
             ExceptionToThrow = new InvalidOperationException("Synthetic local persistence failure.")
         };
-        SelectExternalUserRoleCommandHandler handler = new(
+        SelectExternalUserRoleCommandHandler handler = CreateHandler(
             getOrCreateHandler,
             roleSynchronizer,
             roleWriter,
-            new TrackingRoleReconciliationQueue(),
-            NullLogger<SelectExternalUserRoleCommandHandler>.Instance);
+            new TrackingRoleReconciliationQueue());
 
         Result<UserResponse> result = await handler.HandleAsync(
             new SelectExternalUserRoleCommand(
@@ -79,12 +94,11 @@ public sealed class IdentityRoleSelectionTests
             ExternalRoleSynchronizationResult.Succeeded,
             ExternalRoleSynchronizationResult.Succeeded);
         TrackingSelfServiceRoleWriter roleWriter = new();
-        SelectExternalUserRoleCommandHandler handler = new(
+        SelectExternalUserRoleCommandHandler handler = CreateHandler(
             getOrCreateHandler,
             roleSynchronizer,
             roleWriter,
-            new TrackingRoleReconciliationQueue(),
-            NullLogger<SelectExternalUserRoleCommandHandler>.Instance);
+            new TrackingRoleReconciliationQueue());
 
         Result<UserResponse> result = await handler.HandleAsync(
             new SelectExternalUserRoleCommand(
@@ -107,12 +121,11 @@ public sealed class IdentityRoleSelectionTests
             ExternalRoleSynchronizationResult.ReconciliationRequired);
         TrackingSelfServiceRoleWriter roleWriter = new();
         TrackingRoleReconciliationQueue reconciliationQueue = new();
-        SelectExternalUserRoleCommandHandler handler = new(
+        SelectExternalUserRoleCommandHandler handler = CreateHandler(
             getOrCreateHandler,
             roleSynchronizer,
             roleWriter,
-            reconciliationQueue,
-            NullLogger<SelectExternalUserRoleCommandHandler>.Instance);
+            reconciliationQueue);
 
         Result<UserResponse> result = await handler.HandleAsync(
             new SelectExternalUserRoleCommand(
@@ -137,5 +150,20 @@ public sealed class IdentityRoleSelectionTests
                     "Test User",
                     [UserRoleNames.Customer],
                     true)));
+    }
+
+    private static SelectExternalUserRoleCommandHandler CreateHandler(
+        IExternalUserProvisioningService userService,
+        IExternalRoleSynchronizer roleSynchronizer,
+        ISelfServiceRoleWriter roleWriter,
+        IRoleReconciliationQueue reconciliationQueue)
+    {
+        ExternalUserRoleSelectionService service = new(
+            userService,
+            roleSynchronizer,
+            roleWriter,
+            reconciliationQueue,
+            NullLogger<ExternalUserRoleSelectionService>.Instance);
+        return new SelectExternalUserRoleCommandHandler(service);
     }
 }

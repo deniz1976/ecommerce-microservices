@@ -24,6 +24,6 @@ public static class UserRoleNames
             return Customer;
         }
 
-        throw new ArgumentException("Role is not available for self-service registration.", nameof(role));
+        throw new InvalidSelfServiceRoleException(role);
     }
 }

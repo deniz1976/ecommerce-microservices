@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<ExternalUserProvisioningService>();
         services.AddScoped<IExternalUserProvisioningService>(
             provider => provider.GetRequiredService<ExternalUserProvisioningService>());
+        services.AddScoped<ExternalUserRoleSelectionService>();
         services.AddScoped<AdminUserService>();
         services.AddScoped<
             ICommandHandler<RegisterUserCommand, Result<UserResponse>>,
