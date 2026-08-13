@@ -100,9 +100,21 @@ public sealed class PaymentService
         Domain.Payment payment = (await repository.GetByIdAsync(
             paymentId.Value,
             cancellationToken))!;
-        if (payment.Status is PaymentStatus.Failed or PaymentStatus.Refunded)
+        string normalizedCurrency = request.Currency.Trim().ToUpperInvariant();
+        PaymentRefundEligibility eligibility = payment.EvaluateRefund(
+            request.CustomerId,
+            request.Amount,
+            normalizedCurrency);
+        if (eligibility is PaymentRefundEligibility.AlreadyRefunded or
+            PaymentRefundEligibility.InvalidStatus)
         {
             return;
+        }
+
+        if (eligibility != PaymentRefundEligibility.Eligible)
+        {
+            throw new PaymentRefundIntegrityException(
+                $"Refund request does not match the persisted payment ({eligibility}).");
         }
 
         if (string.IsNullOrWhiteSpace(payment.ProviderPaymentReference))
@@ -111,7 +123,6 @@ public sealed class PaymentService
                 "The payment does not contain a provider reference required for refund.");
         }
 
-        string normalizedCurrency = request.Currency.Trim().ToUpperInvariant();
         PaymentProviderRefundResult providerResult = await paymentProvider.RefundAsync(
             new PaymentProviderRefundRequest(
                 request.OrderId,
@@ -128,11 +139,18 @@ public sealed class PaymentService
                 "The payment provider could not complete the refund.");
         }
 
-        payment.MarkRefunded(
+        PaymentRefundEligibility mutationResult = payment.MarkRefunded(
+            request.CustomerId,
             request.Amount,
             normalizedCurrency,
             providerResult.TransactionReference,
             request.Reason);
+        if (mutationResult != PaymentRefundEligibility.Eligible)
+        {
+            throw new PaymentRefundIntegrityException(
+                $"Payment became ineligible for refund ({mutationResult}).");
+        }
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 

@@ -148,4 +148,39 @@ public sealed class PaymentCommandHandlerTests
             repository.Payment.Transactions,
             transaction => transaction.Type == PaymentTransactionType.Refund);
     }
+
+    [Fact]
+    public async Task RefundMismatchDoesNotCallProviderAndSignalsIntegrityFailure()
+    {
+        Guid orderId = Guid.NewGuid();
+        InMemoryPaymentRepository repository = new();
+        StubPaymentProvider provider = new();
+        PaymentService paymentService = new(repository, repository, repository, provider);
+        AuthorizePaymentCommandHandler authorizeHandler = new(paymentService);
+        RefundPaymentCommandHandler refundHandler = new(paymentService);
+        await authorizeHandler.HandleAsync(
+            new AuthorizePaymentCommand(
+                new PaymentAuthorizationRequest(
+                    orderId,
+                    Guid.NewGuid(),
+                    19m,
+                    "USD")),
+            CancellationToken.None);
+
+        await Assert.ThrowsAsync<PaymentRefundIntegrityException>(
+            () => refundHandler.HandleAsync(
+                new RefundPaymentCommand(
+                    new RefundPaymentRequest(
+                        orderId,
+                        repository.Payment!.CustomerId,
+                        18m,
+                        "USD",
+                        "Shipment failed.")),
+                CancellationToken.None));
+
+        Assert.Equal(0, provider.RefundCount);
+        Assert.Equal(PaymentStatus.Authorized, repository.Payment!.Status);
+        Assert.Single(repository.Payment.Transactions);
+        Assert.Equal(1, repository.SaveCount);
+    }
 }

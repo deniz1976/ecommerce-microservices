@@ -56,6 +56,36 @@ public sealed class Payment
 
     public IReadOnlyCollection<PaymentTransaction> Transactions => transactions;
 
+    public PaymentRefundEligibility EvaluateRefund(
+        Guid customerId,
+        decimal amount,
+        string currency)
+    {
+        if (Status == PaymentStatus.Refunded)
+        {
+            return PaymentRefundEligibility.AlreadyRefunded;
+        }
+
+        if (Status != PaymentStatus.Authorized)
+        {
+            return PaymentRefundEligibility.InvalidStatus;
+        }
+
+        if (CustomerId != customerId)
+        {
+            return PaymentRefundEligibility.CustomerMismatch;
+        }
+
+        if (Amount != amount)
+        {
+            return PaymentRefundEligibility.AmountMismatch;
+        }
+
+        return string.Equals(Currency, currency, StringComparison.OrdinalIgnoreCase)
+            ? PaymentRefundEligibility.Eligible
+            : PaymentRefundEligibility.CurrencyMismatch;
+    }
+
     public static Payment CreateAuthorized(
         Guid orderId,
         Guid customerId,
@@ -113,15 +143,20 @@ public sealed class Payment
         return payment;
     }
 
-    public void MarkRefunded(
+    public PaymentRefundEligibility MarkRefunded(
+        Guid customerId,
         decimal amount,
         string currency,
         string providerTransactionReference,
         string reason)
     {
-        if (Status == PaymentStatus.Refunded)
+        PaymentRefundEligibility eligibility = EvaluateRefund(
+            customerId,
+            amount,
+            currency);
+        if (eligibility != PaymentRefundEligibility.Eligible)
         {
-            return;
+            return eligibility;
         }
 
         Status = PaymentStatus.Refunded;
@@ -135,5 +170,6 @@ public sealed class Payment
                 currency,
                 providerTransactionReference,
                 reason));
+        return PaymentRefundEligibility.Eligible;
     }
 }

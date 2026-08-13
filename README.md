@@ -111,7 +111,7 @@ remain focused read interfaces.
 | Basket | Redis-backed active baskets with bounded sliding-on-mutation expiration, aggregate-enforced item/currency invariants, canonical catalog pricing, checkout snapshots, and checkout handoff |
 | Ordering | Orders, order items, delivery address, status history, paged customer/Seller views, and Admin operations reads |
 | Inventory | Seller-managed stock, aggregate-enforced reservations, releases, atomic UTC movement audit, and Admin operations reads |
-| Payment | Provider-neutral authorization/refund workflow, customer-safe summaries, and Admin operations reads |
+| Payment | Provider-neutral authorization/refund workflow with aggregate-enforced refund identity/amount/currency integrity, customer-safe summaries, and Admin operations reads |
 | Shipping | Event-driven shipment creation, customer-safe tracking, and Admin operations reads |
 | Notification | Persisted notifications, unread state, and SignalR delivery |
 | Identity | Local user profiles, roles, Auth0 subject mapping, and role reconciliation |
@@ -451,7 +451,7 @@ odaklı read interface'lerinde kalır.
 | Basket | Sınırlandırılmış mutasyon-temelli süre sonuna sahip Redis sepetleri, aggregate tarafından korunan ürün/para birimi kuralları, katalogdan doğrulanan fiyatlar, checkout snapshot'ı ve handoff |
 | Ordering | Siparişler, kalemler, teslimat adresi, durum geçmişi, sayfalı müşteri/Seller görünümleri ve Admin operasyon okumaları |
 | Inventory | Satıcı tarafından yönetilen stok, aggregate tarafından korunan rezervasyonlar, stok serbest bırakma, atomik UTC hareket geçmişi ve Admin operasyon okumaları |
-| Payment | Provider-neutral authorization/refund akışı, güvenli müşteri özeti ve Admin operasyon okumaları |
+| Payment | Aggregate tarafından korunan müşteri/tutar/para birimi bütünlüğüne sahip provider-neutral yetkilendirme/iade akışı, güvenli müşteri özeti ve Admin operasyon okumaları |
 | Shipping | Event-driven gönderi oluşturma, güvenli müşteri takibi ve Admin operasyon okumaları |
 | Notification | Kalıcı bildirimler, okunmamış durumu ve SignalR teslimi |
 | Identity | Yerel kullanıcı profili, roller, Auth0 subject eşlemesi ve rol uzlaştırma |

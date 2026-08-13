@@ -24,7 +24,12 @@ public sealed class PaymentTrackingTests
         using PaymentDbContext dbContext = new(options);
         dbContext.Attach(payment);
 
-        payment.MarkRefunded(10.50m, "USD", "refund-reference", "Shipment failed.");
+        payment.MarkRefunded(
+            payment.CustomerId,
+            10.50m,
+            "USD",
+            "refund-reference",
+            "Shipment failed.");
         dbContext.ChangeTracker.DetectChanges();
 
         PaymentTransaction refund = Assert.Single(
