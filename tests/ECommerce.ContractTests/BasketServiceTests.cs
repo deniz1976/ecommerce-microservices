@@ -16,9 +16,9 @@ public sealed class BasketServiceTests
         StubProductCatalogReader catalogReader = new(
             Result<CatalogProductSnapshot>.Success(
                 new CatalogProductSnapshot(productId, "Canonical product", 149.90m, "TRY", 1)));
-        BasketMutationService service = new(store, catalogReader);
+        BasketItemAdditionService service = new(store, catalogReader);
 
-        Result<BasketResponse> result = await service.AddItemAsync(
+        Result<BasketResponse> result = await service.AddAsync(
             customerId,
             new AddBasketItemRequest(productId, 2),
             CancellationToken.None);
@@ -39,9 +39,9 @@ public sealed class BasketServiceTests
             Result<CatalogProductSnapshot>.Failure(
                 new Error(BasketErrorCodes.ProductCatalogUnavailable, BasketErrorCodes.ProductCatalogUnavailable)));
         InMemoryActiveBasketStore store = new();
-        BasketMutationService service = new(store, catalogReader);
+        BasketItemAdditionService service = new(store, catalogReader);
 
-        Result<BasketResponse> result = await service.AddItemAsync(
+        Result<BasketResponse> result = await service.AddAsync(
             Guid.NewGuid(),
             new AddBasketItemRequest(Guid.NewGuid(), 1),
             CancellationToken.None);
@@ -64,9 +64,9 @@ public sealed class BasketServiceTests
         StubProductCatalogReader catalogReader = new(
             Result<CatalogProductSnapshot>.Success(
                 new CatalogProductSnapshot(newProductId, "Foreign currency product", 10m, "USD", 1)));
-        BasketMutationService service = new(store, catalogReader);
+        BasketItemAdditionService service = new(store, catalogReader);
 
-        Result<BasketResponse> result = await service.AddItemAsync(
+        Result<BasketResponse> result = await service.AddAsync(
             customerId,
             new AddBasketItemRequest(newProductId, 1),
             CancellationToken.None);

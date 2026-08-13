@@ -7,9 +7,9 @@ namespace ECommerce.Basket.Application.Commands.AddBasketItem;
 public sealed class AddBasketItemCommandHandler
     : ICommandHandler<AddBasketItemCommand, Result<BasketResponse>>
 {
-    private readonly BasketMutationService basketMutationService;
+    private readonly BasketItemAdditionService basketMutationService;
 
-    public AddBasketItemCommandHandler(BasketMutationService basketMutationService)
+    public AddBasketItemCommandHandler(BasketItemAdditionService basketMutationService)
     {
         this.basketMutationService = basketMutationService;
     }
@@ -18,7 +18,7 @@ public sealed class AddBasketItemCommandHandler
         AddBasketItemCommand command,
         CancellationToken cancellationToken)
     {
-        return basketMutationService.AddItemAsync(
+        return basketMutationService.AddAsync(
             command.CustomerId,
             command.Request,
             cancellationToken);

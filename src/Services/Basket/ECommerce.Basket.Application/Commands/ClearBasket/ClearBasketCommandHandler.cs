@@ -7,9 +7,9 @@ namespace ECommerce.Basket.Application.Commands.ClearBasket;
 public sealed class ClearBasketCommandHandler
     : ICommandHandler<ClearBasketCommand, Result>
 {
-    private readonly BasketMutationService basketMutationService;
+    private readonly BasketClearService basketMutationService;
 
-    public ClearBasketCommandHandler(BasketMutationService basketMutationService)
+    public ClearBasketCommandHandler(BasketClearService basketMutationService)
     {
         this.basketMutationService = basketMutationService;
     }
