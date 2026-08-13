@@ -14,7 +14,7 @@ public sealed class PaymentCommandHandlerTests
         InMemoryPaymentRepository repository = new();
         StubPaymentProvider provider = new();
         AuthorizePaymentCommandHandler handler = new(
-            new PaymentService(repository, repository, repository, provider));
+            new PaymentAuthorizationService(repository, repository, repository, provider));
 
         PaymentAuthorizationResult result = await handler.HandleAsync(
             new AuthorizePaymentCommand(
@@ -37,7 +37,7 @@ public sealed class PaymentCommandHandlerTests
         InMemoryPaymentRepository repository = new();
         StubPaymentProvider provider = new();
         AuthorizePaymentCommandHandler handler = new(
-            new PaymentService(repository, repository, repository, provider));
+            new PaymentAuthorizationService(repository, repository, repository, provider));
         PaymentAuthorizationRequest request = new(orderId, Guid.NewGuid(), 12m, "USD");
 
         PaymentAuthorizationResult first = await handler.HandleAsync(
@@ -63,7 +63,7 @@ public sealed class PaymentCommandHandlerTests
             AuthorizationResult = new(false, null, null, "Raw provider decline detail")
         };
         AuthorizePaymentCommandHandler handler = new(
-            new PaymentService(repository, repository, repository, provider));
+            new PaymentAuthorizationService(repository, repository, repository, provider));
 
         PaymentAuthorizationResult result = await handler.HandleAsync(
             new AuthorizePaymentCommand(
@@ -82,9 +82,11 @@ public sealed class PaymentCommandHandlerTests
         Guid orderId = Guid.NewGuid();
         InMemoryPaymentRepository repository = new();
         StubPaymentProvider provider = new();
-        PaymentService paymentService = new(repository, repository, repository, provider);
-        AuthorizePaymentCommandHandler authorizeHandler = new(paymentService);
-        RefundPaymentCommandHandler refundHandler = new(paymentService);
+        PaymentAuthorizationService authorizationService = new(
+            repository, repository, repository, provider);
+        PaymentRefundService refundService = new(repository, repository, repository, provider);
+        AuthorizePaymentCommandHandler authorizeHandler = new(authorizationService);
+        RefundPaymentCommandHandler refundHandler = new(refundService);
         await authorizeHandler.HandleAsync(
             new AuthorizePaymentCommand(
                 new PaymentAuthorizationRequest(orderId, Guid.NewGuid(), 19m, "USD")),
@@ -118,9 +120,11 @@ public sealed class PaymentCommandHandlerTests
         {
             RefundResult = new(false, null, "Raw demo refund failure")
         };
-        PaymentService paymentService = new(repository, repository, repository, provider);
-        AuthorizePaymentCommandHandler authorizeHandler = new(paymentService);
-        RefundPaymentCommandHandler refundHandler = new(paymentService);
+        PaymentAuthorizationService authorizationService = new(
+            repository, repository, repository, provider);
+        PaymentRefundService refundService = new(repository, repository, repository, provider);
+        AuthorizePaymentCommandHandler authorizeHandler = new(authorizationService);
+        RefundPaymentCommandHandler refundHandler = new(refundService);
         await authorizeHandler.HandleAsync(
             new AuthorizePaymentCommand(
                 new PaymentAuthorizationRequest(
@@ -155,9 +159,11 @@ public sealed class PaymentCommandHandlerTests
         Guid orderId = Guid.NewGuid();
         InMemoryPaymentRepository repository = new();
         StubPaymentProvider provider = new();
-        PaymentService paymentService = new(repository, repository, repository, provider);
-        AuthorizePaymentCommandHandler authorizeHandler = new(paymentService);
-        RefundPaymentCommandHandler refundHandler = new(paymentService);
+        PaymentAuthorizationService authorizationService = new(
+            repository, repository, repository, provider);
+        PaymentRefundService refundService = new(repository, repository, repository, provider);
+        AuthorizePaymentCommandHandler authorizeHandler = new(authorizationService);
+        RefundPaymentCommandHandler refundHandler = new(refundService);
         await authorizeHandler.HandleAsync(
             new AuthorizePaymentCommand(
                 new PaymentAuthorizationRequest(

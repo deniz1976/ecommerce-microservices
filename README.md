@@ -111,7 +111,7 @@ remain focused read interfaces.
 | Basket | Redis-backed active baskets with bounded sliding-on-mutation expiration, aggregate-enforced item/currency invariants, canonical catalog pricing, checkout snapshots, and checkout handoff |
 | Ordering | Orders with aggregate-enforced item/currency integrity, delivery address, status history, paged customer/Seller views, and Admin operations reads |
 | Inventory | Focused stock management and order-reservation orchestration, aggregate-enforced reservations, atomic UTC movement audit, and Admin reads |
-| Payment | Provider-neutral authorization/refund workflow with aggregate-enforced refund identity/amount/currency integrity, customer-safe summaries, and Admin operations reads |
+| Payment | Focused provider-neutral authorization/refund orchestration with aggregate-enforced refund integrity, customer-safe summaries, and Admin reads |
 | Shipping | Event-driven shipment creation with a canonical address value object, customer-safe tracking, and Admin operations reads |
 | Notification | Persisted notifications with focused creation/live-delivery and read-state application services |
 | Identity | Local user profiles, roles, Auth0 subject mapping, and role reconciliation |
@@ -451,7 +451,7 @@ odaklı read interface'lerinde kalır.
 | Basket | Sınırlandırılmış mutasyon-temelli süre sonuna sahip Redis sepetleri, aggregate tarafından korunan ürün/para birimi kuralları, katalogdan doğrulanan fiyatlar, checkout snapshot'ı ve handoff |
 | Ordering | Aggregate tarafından korunan kalem/para birimi bütünlüğüne sahip siparişler, teslimat adresi, durum geçmişi, sayfalı müşteri/Seller görünümleri ve Admin operasyon okumaları |
 | Inventory | Ayrılmış stok yönetimi ve sipariş rezervasyon orkestrasyonu, aggregate tarafından korunan rezervasyonlar, atomik UTC hareket geçmişi ve Admin okumaları |
-| Payment | Aggregate tarafından korunan müşteri/tutar/para birimi bütünlüğüne sahip provider-neutral yetkilendirme/iade akışı, güvenli müşteri özeti ve Admin operasyon okumaları |
+| Payment | Ayrılmış provider-neutral yetkilendirme/iade orkestrasyonu, aggregate tarafından korunan iade bütünlüğü, güvenli müşteri özeti ve Admin okumaları |
 | Shipping | Canonical adres value object'iyle event-driven gönderi oluşturma, güvenli müşteri takibi ve Admin operasyon okumaları |
 | Notification | Oluşturma/canlı teslim ve okuma durumu için ayrılmış Application servisleriyle kalıcı bildirimler |
 | Identity | Yerel kullanıcı profili, roller, Auth0 subject eşlemesi ve rol uzlaştırma |

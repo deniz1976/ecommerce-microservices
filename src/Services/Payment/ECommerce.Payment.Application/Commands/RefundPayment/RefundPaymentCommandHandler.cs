@@ -5,9 +5,9 @@ namespace ECommerce.Payment.Application.Commands.RefundPayment;
 
 public sealed class RefundPaymentCommandHandler : ICommandHandler<RefundPaymentCommand>
 {
-    private readonly PaymentService paymentService;
+    private readonly PaymentRefundService paymentService;
 
-    public RefundPaymentCommandHandler(PaymentService paymentService)
+    public RefundPaymentCommandHandler(PaymentRefundService paymentService)
     {
         this.paymentService = paymentService;
     }

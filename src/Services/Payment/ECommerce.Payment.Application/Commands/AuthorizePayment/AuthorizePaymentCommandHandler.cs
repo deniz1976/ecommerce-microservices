@@ -6,9 +6,9 @@ namespace ECommerce.Payment.Application.Commands.AuthorizePayment;
 public sealed class AuthorizePaymentCommandHandler
     : ICommandHandler<AuthorizePaymentCommand, PaymentAuthorizationResult>
 {
-    private readonly PaymentService paymentService;
+    private readonly PaymentAuthorizationService paymentService;
 
-    public AuthorizePaymentCommandHandler(PaymentService paymentService)
+    public AuthorizePaymentCommandHandler(PaymentAuthorizationService paymentService)
     {
         this.paymentService = paymentService;
     }

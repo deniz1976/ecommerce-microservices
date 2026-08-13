@@ -15,7 +15,8 @@ public static class DependencyInjection
     {
         services.AddMediatR(configuration =>
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
-        services.AddScoped<PaymentService>();
+        services.AddScoped<PaymentAuthorizationService>();
+        services.AddScoped<PaymentRefundService>();
         services.AddScoped<PaymentQueryService>();
         services.AddScoped<
             ICommandHandler<AuthorizePaymentCommand, PaymentAuthorizationResult>,
