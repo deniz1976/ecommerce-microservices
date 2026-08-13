@@ -18,6 +18,8 @@ public static class DependencyInjection
         services.AddMediatR(configuration =>
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
         services.AddScoped<InventoryReservationService>();
+        services.AddScoped<InventoryReleaseService>();
+        services.AddScoped<StockReservationLoader>();
         services.AddScoped<InventoryManagementService>();
         services.AddScoped<InventoryQueryService>();
         services.AddScoped<StockMovementQueryService>();

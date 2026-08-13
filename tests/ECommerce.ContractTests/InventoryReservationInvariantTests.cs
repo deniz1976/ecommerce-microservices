@@ -12,11 +12,14 @@ public sealed class InventoryReservationInvariantTests
         InventoryItem item = new(productId, 5);
         item.DequeuePendingMovements();
         FakeInventoryPersistence persistence = new(item);
+        StockReservationLoader reservationLoader = new(
+            persistence,
+            new EmptyStockReservationIdentityReader());
         InventoryReservationService service = new(
             persistence,
             persistence,
             persistence,
-            new EmptyStockReservationIdentityReader());
+            reservationLoader);
         InventoryReservationRequest request = new(
             Guid.NewGuid(),
             Guid.NewGuid(),

@@ -9,23 +9,23 @@ public sealed class InventoryReservationService
     private readonly IRepository<InventoryItem, Guid> itemRepository;
     private readonly IRepository<StockReservation, Guid> reservationRepository;
     private readonly IUnitOfWork unitOfWork;
-    private readonly IStockReservationIdentityReader reservationIdentityReader;
+    private readonly StockReservationLoader reservationLoader;
 
     public InventoryReservationService(
         IRepository<InventoryItem, Guid> itemRepository,
         IRepository<StockReservation, Guid> reservationRepository,
         IUnitOfWork unitOfWork,
-        IStockReservationIdentityReader reservationIdentityReader)
+        StockReservationLoader reservationLoader)
     {
         this.itemRepository = itemRepository;
         this.reservationRepository = reservationRepository;
         this.unitOfWork = unitOfWork;
-        this.reservationIdentityReader = reservationIdentityReader;
+        this.reservationLoader = reservationLoader;
     }
 
     public async Task<InventoryReservationResult> ReserveAsync(InventoryReservationRequest request, CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<StockReservation> existingReservations = await GetReservationsAsync(
+        IReadOnlyCollection<StockReservation> existingReservations = await reservationLoader.LoadByOrderIdAsync(
             request.OrderId,
             cancellationToken);
 
@@ -129,42 +129,4 @@ public sealed class InventoryReservationService
         return new InventoryReservationResult(false, ErrorCodes.InsufficientStock, reason);
     }
 
-    public async Task ReleaseAsync(InventoryReleaseRequest request, CancellationToken cancellationToken)
-    {
-        IReadOnlyCollection<StockReservation> reservations = await GetReservationsAsync(
-            request.OrderId,
-            cancellationToken);
-
-        foreach (StockReservation reservation in reservations.Where(x => x.Status == StockReservationStatus.Reserved))
-        {
-            InventoryItem? item = await itemRepository.GetByIdAsync(
-                reservation.ProductId,
-                cancellationToken);
-            item?.Release(reservation.Quantity, request.OrderId, reservation.Id);
-            reservation.MarkReleased();
-        }
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task<IReadOnlyCollection<StockReservation>> GetReservationsAsync(
-        Guid orderId,
-        CancellationToken cancellationToken)
-    {
-        IReadOnlyCollection<Guid> reservationIds =
-            await reservationIdentityReader.FindIdsByOrderIdAsync(orderId, cancellationToken);
-        List<StockReservation> reservations = new(reservationIds.Count);
-        foreach (Guid reservationId in reservationIds)
-        {
-            StockReservation? reservation = await reservationRepository.GetByIdAsync(
-                reservationId,
-                cancellationToken);
-            if (reservation is not null)
-            {
-                reservations.Add(reservation);
-            }
-        }
-
-        return reservations;
-    }
 }
