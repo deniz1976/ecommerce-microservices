@@ -21,6 +21,25 @@ public sealed class ShipmentServiceTests
     }
 
     [Fact]
+    public async Task CreateAsyncPersistsNormalizedDomainAddress()
+    {
+        FakeShipmentRepository repository = new();
+        StubShippingProvider provider = new(new ShippingProviderResult(true, "TRACK-123", null));
+        ShipmentService service = new(repository, repository, repository, provider);
+        CreateShipmentRequest request = CreateValidRequest() with
+        {
+            RecipientName = "  Test Customer  ",
+            CountryCode = " tr "
+        };
+
+        CreateShipmentResult result = await service.CreateAsync(request, CancellationToken.None);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal("Test Customer", repository.Shipment!.RecipientName);
+        Assert.Equal("TR", repository.Shipment.CountryCode);
+    }
+
+    [Fact]
     public async Task CreateAsyncPersistsFailedShipmentWhenProviderRejectsRequest()
     {
         FakeShipmentRepository repository = new();

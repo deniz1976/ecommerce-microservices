@@ -38,26 +38,22 @@ public sealed class ShipmentService
                 : new CreateShipmentResult(true, existingShipment.Id, existingShipment.TrackingNumber, null, null);
         }
 
-        string normalizedRecipientName = request.RecipientName.Trim();
-        string normalizedAddressLine = request.AddressLine.Trim();
-        string normalizedCity = request.City.Trim();
-        string normalizedCountryCode = request.CountryCode.Trim().ToUpperInvariant();
-        string normalizedPostalCode = request.PostalCode.Trim();
-
-        if (string.IsNullOrWhiteSpace(normalizedRecipientName) ||
-            string.IsNullOrWhiteSpace(normalizedAddressLine) ||
-            string.IsNullOrWhiteSpace(normalizedCity) ||
-            normalizedCountryCode.Length != 2 ||
-            string.IsNullOrWhiteSpace(normalizedPostalCode))
+        if (!ShipmentAddress.TryCreate(
+                request.RecipientName,
+                request.AddressLine,
+                request.City,
+                request.CountryCode,
+                request.PostalCode,
+                out ShipmentAddress? address))
         {
             Domain.Shipment failedShipment = Domain.Shipment.CreateFailed(
                 request.OrderId,
                 request.CustomerId,
-                normalizedRecipientName,
-                normalizedAddressLine,
-                normalizedCity,
-                normalizedCountryCode,
-                normalizedPostalCode,
+                request.RecipientName.Trim(),
+                request.AddressLine.Trim(),
+                request.City.Trim(),
+                request.CountryCode.Trim().ToUpperInvariant(),
+                request.PostalCode.Trim(),
                 "Shipment address must be valid.");
 
             shipmentRepository.Add(failedShipment);
@@ -66,15 +62,16 @@ public sealed class ShipmentService
             return new CreateShipmentResult(false, failedShipment.Id, null, ErrorCodes.ShipmentFailed, failedShipment.FailureReason);
         }
 
+        ShipmentAddress validAddress = address!;
         ShippingProviderResult providerResult = await shippingProvider.CreateAsync(
             new ShippingProviderRequest(
                 request.OrderId,
                 request.CustomerId,
-                normalizedRecipientName,
-                normalizedAddressLine,
-                normalizedCity,
-                normalizedCountryCode,
-                normalizedPostalCode),
+                validAddress.RecipientName,
+                validAddress.AddressLine,
+                validAddress.City,
+                validAddress.CountryCode,
+                validAddress.PostalCode),
             cancellationToken);
 
         if (!providerResult.Succeeded || string.IsNullOrWhiteSpace(providerResult.TrackingNumber))
@@ -83,11 +80,11 @@ public sealed class ShipmentService
             Domain.Shipment failedShipment = Domain.Shipment.CreateFailed(
                 request.OrderId,
                 request.CustomerId,
-                normalizedRecipientName,
-                normalizedAddressLine,
-                normalizedCity,
-                normalizedCountryCode,
-                normalizedPostalCode,
+                validAddress.RecipientName,
+                validAddress.AddressLine,
+                validAddress.City,
+                validAddress.CountryCode,
+                validAddress.PostalCode,
                 failureReason);
 
             shipmentRepository.Add(failedShipment);
@@ -99,11 +96,7 @@ public sealed class ShipmentService
         Domain.Shipment shipment = Domain.Shipment.Create(
             request.OrderId,
             request.CustomerId,
-            normalizedRecipientName,
-            normalizedAddressLine,
-            normalizedCity,
-            normalizedCountryCode,
-            normalizedPostalCode,
+            validAddress,
             providerResult.TrackingNumber);
 
         shipmentRepository.Add(shipment);

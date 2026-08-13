@@ -67,21 +67,17 @@ public sealed class Shipment
     public static Shipment Create(
         Guid orderId,
         Guid customerId,
-        string recipientName,
-        string addressLine,
-        string city,
-        string countryCode,
-        string postalCode,
+        ShipmentAddress address,
         string trackingNumber)
     {
         return new Shipment(
             orderId,
             customerId,
-            recipientName,
-            addressLine,
-            city,
-            countryCode,
-            postalCode,
+            address.RecipientName,
+            address.AddressLine,
+            address.City,
+            address.CountryCode,
+            address.PostalCode,
             trackingNumber,
             ShipmentStatus.Created,
             null);
