@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, EfUnitOfWork<InventoryDbContext>>();
         services.AddScoped<IStockReservationIdentityReader, StockReservationIdentityReader>();
         services.AddScoped<IInventoryQueryReader, InventoryQueryReader>();
+        services.AddScoped<IStockMovementReader, StockMovementReader>();
         services.AddOptions<CatalogClientOptions>()
             .Bind(configuration.GetSection(CatalogClientOptions.SectionName))
             .Validate(

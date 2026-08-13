@@ -15,8 +15,12 @@ public sealed class InventoryItemConfiguration : IEntityTypeConfiguration<Invent
         builder.Property(x => x.ProductId).HasColumnName("product_id");
         builder.Property(x => x.QuantityOnHand).HasColumnName("quantity_on_hand");
         builder.Property(x => x.ReservedQuantity).HasColumnName("reserved_quantity");
+        builder.Property(x => x.ConcurrencyVersion)
+            .HasColumnName("concurrency_version")
+            .IsConcurrencyToken();
         builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
 
         builder.Ignore(x => x.AvailableQuantity);
+        builder.Ignore(x => x.PendingMovements);
     }
 }

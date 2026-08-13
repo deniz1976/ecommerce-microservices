@@ -69,9 +69,10 @@ public sealed class InventoryService
             InventoryItem item = (await itemRepository.GetByIdAsync(
                 requestItem.ProductId,
                 cancellationToken))!;
-            item.Reserve(requestItem.Quantity);
+            Guid reservationId = Guid.NewGuid();
+            item.Reserve(requestItem.Quantity, request.OrderId, reservationId);
             reservationRepository.Add(new StockReservation(
-                Guid.NewGuid(),
+                reservationId,
                 request.OrderId,
                 requestItem.ProductId,
                 requestItem.Quantity,
@@ -148,7 +149,7 @@ public sealed class InventoryService
             InventoryItem? item = await itemRepository.GetByIdAsync(
                 reservation.ProductId,
                 cancellationToken);
-            item?.Release(reservation.Quantity);
+            item?.Release(reservation.Quantity, request.OrderId, reservation.Id);
             reservation.MarkReleased();
         }
 

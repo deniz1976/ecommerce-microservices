@@ -149,6 +149,14 @@
       "DownstreamHostAndPorts": [ { "Host": "ordering-api", "Port": 8080 } ]
     },
     {
+      "UpstreamPathTemplate": "/gateway/inventory/items/{productId}/movements",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/inventory/items/{productId}/movements",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "inventory-api", "Port": 8080 } ],
+      "Priority": 3
+    },
+    {
       "UpstreamPathTemplate": "/gateway/inventory/items/manage",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/v1/inventory/items/manage",

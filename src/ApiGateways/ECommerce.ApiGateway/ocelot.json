@@ -149,6 +149,14 @@
       "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5265 } ]
     },
     {
+      "UpstreamPathTemplate": "/gateway/inventory/items/{productId}/movements",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/inventory/items/{productId}/movements",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5054 } ],
+      "Priority": 3
+    },
+    {
       "UpstreamPathTemplate": "/gateway/inventory/items/manage",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/v1/inventory/items/manage",

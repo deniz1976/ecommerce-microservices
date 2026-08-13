@@ -5,6 +5,7 @@ using ECommerce.Inventory.Application.Commands.UpsertInventoryItem;
 using ECommerce.Inventory.Application.Inventory;
 using ECommerce.Inventory.Application.Queries.GetInventoryItem;
 using ECommerce.Inventory.Application.Queries.SearchManagedInventory;
+using ECommerce.Inventory.Application.Queries.SearchStockMovements;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,27 @@ namespace ECommerce.Inventory.Api.Inventory;
 [Route("api/v1/inventory")]
 public sealed class InventoryController(ISender sender) : ControllerBase
 {
+    [HttpGet("items/{productId:guid}/movements", Name = "SearchStockMovements")]
+    [Authorize(Policy = AuthorizationPolicies.Admin)]
+    public Task<PagedResult<StockMovementResponse>> SearchMovementsAsync(
+        Guid productId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] Guid? orderId = null,
+        [FromQuery] StockMovementKind? type = null,
+        CancellationToken cancellationToken = default)
+    {
+        return sender.Send(
+            new SearchStockMovementsQuery(
+                new StockMovementListCriteria(
+                    productId,
+                    pageNumber,
+                    pageSize,
+                    orderId,
+                    type)),
+            cancellationToken);
+    }
+
     [HttpGet("items/manage", Name = "SearchManagedInventory")]
     [Authorize(Policy = AuthorizationPolicies.Admin)]
     public async Task<PagedResult<InventoryItemResponse>> SearchManagedAsync(
