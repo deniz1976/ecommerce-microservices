@@ -23,6 +23,9 @@ public sealed class ShipmentConfiguration : IEntityTypeConfiguration<Domain.Ship
         builder.Property(x => x.FailureReason).HasColumnName("failure_reason").HasMaxLength(512);
         builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
         builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
+        builder.Property(x => x.StatusUpdatedAt).HasColumnName("status_updated_at").IsUtcTimestamp();
+        builder.Property(x => x.LastStatusUpdateId).HasColumnName("last_status_update_id");
+        builder.Property(x => x.Version).HasColumnName("version").IsConcurrencyToken();
         builder.HasIndex(x => x.OrderId).IsUnique();
         builder.HasIndex(x => x.TrackingNumber).IsUnique();
     }

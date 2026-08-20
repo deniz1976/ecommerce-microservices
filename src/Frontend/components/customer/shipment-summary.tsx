@@ -72,7 +72,7 @@ export function ShipmentSummary({
           {labels.title}
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-medium ${failed ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`}>
-          {failed ? labels.failed : labels.created}
+          {shipmentStatusLabel(shipment.status, labels)}
         </span>
       </div>
       <dl className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -81,6 +81,13 @@ export function ShipmentSummary({
       </dl>
     </section>
   )
+}
+
+function shipmentStatusLabel(status: Shipment["status"], labels: Dictionary["orders"]["shipment"]): string {
+  if (status === 2) return labels.failed
+  if (status === 3) return labels.inTransit
+  if (status === 4) return labels.delivered
+  return labels.created
 }
 
 function formatDate(value: string, locale: "en" | "tr") {

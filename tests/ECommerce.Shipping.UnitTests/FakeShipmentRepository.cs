@@ -7,7 +7,8 @@ namespace ECommerce.Shipping.UnitTests;
 internal sealed class FakeShipmentRepository :
     IRepository<Shipment, Guid>,
     IUnitOfWork,
-    IShipmentIdentityReader
+    IShipmentIdentityReader,
+    IShipmentTrackingReader
 {
     public Shipment? Shipment { get; private set; }
 
@@ -15,6 +16,11 @@ internal sealed class FakeShipmentRepository :
 
     public Task<Guid?> FindIdByOrderIdAsync(Guid orderId, CancellationToken cancellationToken) =>
         Task.FromResult<Guid?>(Shipment?.OrderId == orderId ? Shipment.Id : null);
+
+    public Task<Guid?> FindIdByTrackingNumberAsync(
+        string trackingNumber,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<Guid?>(Shipment?.TrackingNumber == trackingNumber ? Shipment.Id : null);
 
     public Task<Shipment?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         Task.FromResult(Shipment?.Id == id ? Shipment : null);

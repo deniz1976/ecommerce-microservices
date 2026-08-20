@@ -280,6 +280,8 @@ export interface Dictionary {
     trackingNumber: string
     shipmentCreated: string
     shipmentFailed: string
+    shipmentInTransit: string
+    shipmentDelivered: string
     notAvailable: string
     applyShipmentFilters: string
     shipmentsUnavailable: string
@@ -518,6 +520,8 @@ export interface Dictionary {
       unavailable: string
       created: string
       failed: string
+      inTransit: string
+      delivered: string
       trackingNumber: string
       notAvailable: string
       createdAt: string
@@ -831,6 +835,8 @@ const en: Dictionary = {
     trackingNumber: "Tracking number",
     shipmentCreated: "Created",
     shipmentFailed: "Failed",
+    shipmentInTransit: "In transit",
+    shipmentDelivered: "Delivered",
     notAvailable: "Not available",
     applyShipmentFilters: "Apply shipment filters",
     shipmentsUnavailable: "Shipment data could not be loaded.",
@@ -1090,6 +1096,8 @@ const en: Dictionary = {
       unavailable: "Shipment details are temporarily unavailable.",
       created: "Created",
       failed: "Failed",
+      inTransit: "In transit",
+      delivered: "Delivered",
       trackingNumber: "Tracking number",
       notAvailable: "Not available",
       createdAt: "Created",
@@ -1403,6 +1411,8 @@ const tr: Dictionary = {
     trackingNumber: "Takip numarası",
     shipmentCreated: "Oluşturuldu",
     shipmentFailed: "Başarısız",
+    shipmentInTransit: "Yolda",
+    shipmentDelivered: "Teslim edildi",
     notAvailable: "Bulunmuyor",
     applyShipmentFilters: "Gönderi filtrelerini uygula",
     shipmentsUnavailable: "Gönderi verisi yüklenemedi.",
@@ -1662,6 +1672,8 @@ const tr: Dictionary = {
       unavailable: "Gönderi ayrıntılarına geçici olarak ulaşılamıyor.",
       created: "Oluşturuldu",
       failed: "Başarısız",
+      inTransit: "Yolda",
+      delivered: "Teslim edildi",
       trackingNumber: "Takip numarası",
       notAvailable: "Bulunmuyor",
       createdAt: "Oluşturulma",

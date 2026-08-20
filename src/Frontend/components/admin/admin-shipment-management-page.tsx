@@ -24,7 +24,7 @@ interface AppliedFilters {
   createdTo?: string
 }
 
-const shipmentStatuses: readonly ShipmentStatus[] = [1, 2]
+const shipmentStatuses: readonly ShipmentStatus[] = [1, 2, 3, 4]
 
 export function AdminShipmentManagementPage() {
   const { locale, t } = useI18n()
@@ -161,8 +161,11 @@ function ShipmentMessage({ message, loading = false }: { message: string; loadin
   return <div className="flex min-h-44 items-center justify-center gap-3 px-5 text-sm text-muted-foreground">{loading ? <Loader2 className="size-5 animate-spin" /> : <Truck className="size-5" />}{message}</div>
 }
 
-function shipmentStatusLabel(status: ShipmentStatus, labels: { shipmentCreated: string; shipmentFailed: string }) {
-  return status === 1 ? labels.shipmentCreated : labels.shipmentFailed
+function shipmentStatusLabel(status: ShipmentStatus, labels: { shipmentCreated: string; shipmentFailed: string; shipmentInTransit: string; shipmentDelivered: string }) {
+  if (status === 1) return labels.shipmentCreated
+  if (status === 2) return labels.shipmentFailed
+  if (status === 3) return labels.shipmentInTransit
+  return labels.shipmentDelivered
 }
 
 function formatDate(value: string, locale: "en" | "tr") {

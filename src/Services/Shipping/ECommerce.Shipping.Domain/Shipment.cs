@@ -36,6 +36,7 @@ public sealed class Shipment
         FailureReason = failureReason;
         CreatedAt = DateTimeOffset.UtcNow;
         UpdatedAt = CreatedAt;
+        StatusUpdatedAt = CreatedAt;
     }
 
     public Guid Id { get; private set; }
@@ -63,6 +64,12 @@ public sealed class Shipment
     public DateTimeOffset CreatedAt { get; private set; }
 
     public DateTimeOffset UpdatedAt { get; private set; }
+
+    public DateTimeOffset? StatusUpdatedAt { get; private set; }
+
+    public Guid? LastStatusUpdateId { get; private set; }
+
+    public long Version { get; private set; }
 
     public static Shipment Create(
         Guid orderId,
@@ -104,5 +111,49 @@ public sealed class Shipment
             null,
             ShipmentStatus.Failed,
             reason);
+    }
+
+    public ShipmentStatusUpdateResult ApplyStatusUpdate(
+        Guid updateId,
+        ShipmentStatus status,
+        DateTimeOffset occurredAt)
+    {
+        if (updateId == Guid.Empty)
+        {
+            throw new InvalidShipmentStatusUpdateException("Shipment status update id is required.");
+        }
+
+        if (!Enum.IsDefined(status) || status is ShipmentStatus.Created)
+        {
+            throw new InvalidShipmentStatusUpdateException("Created is not a carrier progress update.");
+        }
+
+        if (LastStatusUpdateId == updateId)
+        {
+            return ShipmentStatusUpdateResult.Duplicate;
+        }
+
+        if (Status is ShipmentStatus.Delivered or ShipmentStatus.Failed)
+        {
+            return ShipmentStatusUpdateResult.Terminal;
+        }
+
+        DateTimeOffset normalizedOccurredAt = occurredAt.ToUniversalTime();
+        if (normalizedOccurredAt <= (StatusUpdatedAt ?? CreatedAt))
+        {
+            return ShipmentStatusUpdateResult.Stale;
+        }
+
+        if (Status == ShipmentStatus.InTransit && status == ShipmentStatus.InTransit)
+        {
+            return ShipmentStatusUpdateResult.Stale;
+        }
+
+        Status = status;
+        StatusUpdatedAt = normalizedOccurredAt;
+        UpdatedAt = normalizedOccurredAt;
+        LastStatusUpdateId = updateId;
+        Version++;
+        return ShipmentStatusUpdateResult.Applied;
     }
 }

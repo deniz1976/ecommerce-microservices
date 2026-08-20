@@ -369,7 +369,7 @@ export interface PaymentTransaction {
   createdAt: string
 }
 
-export type ShipmentStatus = 1 | 2
+export type ShipmentStatus = 1 | 2 | 3 | 4
 
 export interface ShipmentSummary {
   id: string
