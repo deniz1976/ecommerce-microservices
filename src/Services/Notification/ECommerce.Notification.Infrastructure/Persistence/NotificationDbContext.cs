@@ -13,6 +13,8 @@ public sealed class NotificationDbContext : DbContext
 
     public DbSet<NotificationRecord> Notifications => Set<NotificationRecord>();
 
+    public DbSet<NotificationDispatch> NotificationDispatches => Set<NotificationDispatch>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(NotificationDbContext).Assembly);

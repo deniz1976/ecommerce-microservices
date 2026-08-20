@@ -37,9 +37,10 @@ public sealed class NotificationResponsibilityArchitectureTests
             Path.Combine(notificationDirectory, "BulkNotificationReadService.cs"));
 
         Assert.Contains("ILiveNotificationPublisher", creationService, StringComparison.Ordinal);
-        Assert.Contains("FindBySourceAsync", creationService, StringComparison.Ordinal);
+        Assert.Contains("INotificationCreationStore", creationService, StringComparison.Ordinal);
         Assert.DoesNotContain("MarkRead", creationService, StringComparison.Ordinal);
         Assert.DoesNotContain("TimeProvider", creationService, StringComparison.Ordinal);
+        Assert.DoesNotContain("IUnitOfWork", creationService, StringComparison.Ordinal);
 
         Assert.Contains("MarkReadAsync", readService, StringComparison.Ordinal);
         Assert.DoesNotContain("INotificationReader", readService, StringComparison.Ordinal);

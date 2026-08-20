@@ -3,6 +3,7 @@ using ECommerce.BuildingBlocks.Persistence;
 using ECommerce.Notification.Domain;
 using ECommerce.Notification.Application.Notifications;
 using ECommerce.Notification.Infrastructure.Persistence;
+using ECommerce.Notification.Infrastructure.Delivery;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,6 +25,13 @@ public static class DependencyInjection
         services.AddScoped<INotificationHistoryReader>(
             serviceProvider => serviceProvider.GetRequiredService<NotificationReader>());
         services.AddSingleton(TimeProvider.System);
+        services.AddOptions<NotificationDeliveryOptions>()
+            .Bind(configuration.GetSection(NotificationDeliveryOptions.SectionName))
+            .ValidateOnStart();
+        services.AddSingleton<Microsoft.Extensions.Options.IValidateOptions<NotificationDeliveryOptions>, NotificationDeliveryOptionsValidator>();
+        services.AddScoped<INotificationCreationStore, NotificationCreationStore>();
+        services.AddScoped<NotificationDispatchProcessor>();
+        services.AddHostedService<NotificationDispatchBackgroundService>();
         return services;
     }
 }

@@ -42,8 +42,6 @@ public sealed class NotificationCreationServiceTests
     {
         return new NotificationCreationService(
             repository,
-            repository,
-            repository,
             publisher);
     }
 

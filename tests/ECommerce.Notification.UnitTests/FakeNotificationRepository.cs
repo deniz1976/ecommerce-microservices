@@ -7,7 +7,8 @@ namespace ECommerce.Notification.UnitTests;
 internal sealed class FakeNotificationRepository :
     IRepository<NotificationRecord, Guid>,
     IUnitOfWork,
-    INotificationReader
+    INotificationReader,
+    INotificationCreationStore
 {
     public NotificationRecord? Notification { get; private set; }
 
@@ -56,5 +57,32 @@ internal sealed class FakeNotificationRepository :
     {
         SaveChangesCount++;
         return Task.CompletedTask;
+    }
+
+    public async Task<NotificationCreationResult> CreateIfMissingAsync(
+        CreateNotificationRequest request,
+        CancellationToken cancellationToken)
+    {
+        NotificationRecord? existing = await FindBySourceAsync(
+            request.SourceMessageId,
+            NotificationChannel.Realtime,
+            cancellationToken);
+        if (existing is not null)
+        {
+            return new NotificationCreationResult(existing, false);
+        }
+
+        NotificationRecord notification = new(
+            request.SourceMessageId,
+            request.CustomerId,
+            request.OrderId,
+            request.Type,
+            request.Title,
+            request.Message,
+            request.Culture,
+            NotificationChannel.Realtime);
+        Add(notification);
+        await SaveChangesAsync(cancellationToken);
+        return new NotificationCreationResult(notification, true);
     }
 }
