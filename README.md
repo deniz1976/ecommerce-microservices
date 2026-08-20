@@ -358,6 +358,8 @@ npm --prefix ./src/Frontend ci
 
 Backend:
 
+Inventory optimistic concurrency is verified against disposable PostgreSQL through Testcontainers. Shared message contracts are centrally checked for stable metadata and forward-compatible JSON readers.
+
 ```powershell
 dotnet restore ECommerce.sln
 dotnet build ECommerce.sln --no-restore
