@@ -288,6 +288,8 @@ backend graph with secret injection:
 Apply database migrations to each isolated Infisical environment explicitly.
 
 Ordering Saga step deadlines are durable in `OrderingSagaDb`. Defaults are 120 seconds for inventory/payment and 180 seconds for shipping; Docker overrides use `ORDER_WORKFLOW_INVENTORY_TIMEOUT_SECONDS`, `ORDER_WORKFLOW_PAYMENT_TIMEOUT_SECONDS`, `ORDER_WORKFLOW_SHIPPING_TIMEOUT_SECONDS`, `ORDER_WORKFLOW_TIMEOUT_POLL_INTERVAL_SECONDS`, and `ORDER_WORKFLOW_TIMEOUT_BATCH_SIZE`.
+
+The Saga runtime also exposes an Admin-only bounded diagnostics projection through `GET /gateway/workflows/diagnostics`; sensitive customer, payload, provider, and correlation details are excluded.
 The environment argument is mandatory so a migration cannot silently default
 to the wrong database set:
 

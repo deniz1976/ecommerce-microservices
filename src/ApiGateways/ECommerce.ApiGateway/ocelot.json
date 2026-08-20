@@ -1,6 +1,13 @@
 {
   "Routes": [
     {
+      "UpstreamPathTemplate": "/gateway/workflows/diagnostics",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/v1/workflows/diagnostics",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5274 } ]
+    },
+    {
       "UpstreamPathTemplate": "/gateway/catalog/metrics",
       "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/v1/catalog-metrics",

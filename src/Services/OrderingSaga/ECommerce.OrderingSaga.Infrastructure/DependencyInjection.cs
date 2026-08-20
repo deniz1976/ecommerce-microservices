@@ -2,6 +2,7 @@ using ECommerce.BuildingBlocks.Contracts.Persistence;
 using ECommerce.BuildingBlocks.Persistence;
 using ECommerce.OrderingSaga.Domain;
 using ECommerce.OrderingSaga.Application.Workflows;
+using ECommerce.OrderingSaga.Application.Diagnostics;
 using ECommerce.OrderingSaga.Infrastructure.Messaging;
 using ECommerce.OrderingSaga.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,8 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, EfUnitOfWork<OrderingSagaDbContext>>();
         services.AddScoped<IOrderWorkflowIdentityReader, OrderWorkflowIdentityReader>();
         services.AddScoped<IOrderWorkflowTimeoutReader, OrderWorkflowTimeoutReader>();
+        services.AddScoped<IOrderWorkflowDiagnosticsReader, OrderWorkflowDiagnosticsReader>();
+        services.AddSingleton(TimeProvider.System);
         services.AddScoped<IWorkflowCommandPublisher, MassTransitWorkflowCommandPublisher>();
         OrderWorkflowTimeoutOptions timeoutOptions = configuration
             .GetSection(OrderWorkflowTimeoutOptions.SectionName)
