@@ -114,7 +114,7 @@ public sealed class WorkflowScenarioTests
     }
 
     [Fact]
-    public void RuntimeContainerCheckRemapsOnlyDiagnosticHostPorts()
+    public void ComposeUsesOverridableWindowsSafeHostPorts()
     {
         string repositoryRoot = FindRepositoryRoot();
         string script = File.ReadAllText(Path.Combine(
@@ -129,11 +129,16 @@ public sealed class WorkflowScenarioTests
         Assert.Contains("$env:ORDERING_API_HOST_PORT = \"15265\"", script, StringComparison.Ordinal);
         Assert.Contains("$env:SHIPPING_API_HOST_PORT = \"15187\"", script, StringComparison.Ordinal);
         Assert.Contains("$env:NOTIFICATION_API_HOST_PORT = \"15234\"", script, StringComparison.Ordinal);
-        Assert.Contains("${CATALOG_API_HOST_PORT:-5283}:8080", compose, StringComparison.Ordinal);
-        Assert.Contains("${ORDERING_API_HOST_PORT:-5265}:8080", compose, StringComparison.Ordinal);
-        Assert.Contains("${SHIPPING_API_HOST_PORT:-5187}:8080", compose, StringComparison.Ordinal);
-        Assert.Contains("${NOTIFICATION_API_HOST_PORT:-5234}:8080", compose, StringComparison.Ordinal);
-        Assert.Contains("\"5080:8080\"", compose, StringComparison.Ordinal);
+        Assert.Contains("${CATALOG_API_HOST_PORT:-15283}:8080", compose, StringComparison.Ordinal);
+        Assert.Contains("${BASKET_API_HOST_PORT:-15041}:8080", compose, StringComparison.Ordinal);
+        Assert.Contains("${ORDERING_API_HOST_PORT:-15265}:8080", compose, StringComparison.Ordinal);
+        Assert.Contains("${INVENTORY_API_HOST_PORT:-15054}:8080", compose, StringComparison.Ordinal);
+        Assert.Contains("${PAYMENT_API_HOST_PORT:-15004}:8080", compose, StringComparison.Ordinal);
+        Assert.Contains("${SHIPPING_API_HOST_PORT:-15187}:8080", compose, StringComparison.Ordinal);
+        Assert.Contains("${NOTIFICATION_API_HOST_PORT:-15234}:8080", compose, StringComparison.Ordinal);
+        Assert.Contains("${IDENTITY_API_HOST_PORT:-15090}:8080", compose, StringComparison.Ordinal);
+        Assert.Contains("${ORDERING_SAGA_HOST_PORT:-15274}:8080", compose, StringComparison.Ordinal);
+        Assert.Contains("${API_GATEWAY_HOST_PORT:-15080}:8080", compose, StringComparison.Ordinal);
         Assert.Contains(
             "Cors__AllowedOrigins__0: ${CORS_ALLOWED_ORIGIN:-http://localhost:3000}",
             compose,
