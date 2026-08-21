@@ -1,6 +1,6 @@
 const isDevelopment = process.env.NODE_ENV !== "production"
 const apiOrigin = readHttpOrigin(
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5080",
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:15080",
   "NEXT_PUBLIC_API_BASE_URL",
 )
 const websocketOrigin = toWebSocketOrigin(apiOrigin)

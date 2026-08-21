@@ -3,7 +3,7 @@ import type { Locale } from "@/lib/i18n/dictionaries"
 import { getStoredLocale } from "@/lib/i18n/locale"
 
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5080"
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:15080"
 
 export class ApiError extends Error {
   status: number

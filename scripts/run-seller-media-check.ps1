@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$Environment = "staging",
-    [string]$GatewayBaseUrl = "http://localhost:5080",
+    [string]$GatewayBaseUrl = "http://localhost:15080",
     [Guid]$ProductId = [Guid]::Empty
 )
 

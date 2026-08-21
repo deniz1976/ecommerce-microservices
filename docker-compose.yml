@@ -48,7 +48,7 @@ services:
       - ./deploy/observability/loki.yaml:/etc/loki/local-config.yaml:ro
       - loki-data:/loki
     ports:
-      - "3100:3100"
+      - "13100:3100"
 
   jaeger:
     image: jaegertracing/jaeger:2.19.0
@@ -132,7 +132,7 @@ services:
       <<: [*api-env, *managed-env]
     restart: unless-stopped
     ports:
-      - "${CATALOG_API_HOST_PORT:-5283}:8080"
+      - "${CATALOG_API_HOST_PORT:-15283}:8080"
 
   basket-api:
     build:
@@ -148,7 +148,7 @@ services:
       Redis__BasketTtlHours: ${Redis__BasketTtlHours:-72}
     restart: unless-stopped
     ports:
-      - "5041:8080"
+      - "${BASKET_API_HOST_PORT:-15041}:8080"
     depends_on:
       redis:
         condition: service_started
@@ -165,7 +165,7 @@ services:
       CatalogClient__TimeoutSeconds: ${CatalogClient__TimeoutSeconds:-5}
     restart: unless-stopped
     ports:
-      - "${ORDERING_API_HOST_PORT:-5265}:8080"
+      - "${ORDERING_API_HOST_PORT:-15265}:8080"
 
   inventory-api:
     build:
@@ -179,7 +179,7 @@ services:
       CatalogClient__TimeoutSeconds: ${CatalogClient__TimeoutSeconds:-5}
     restart: unless-stopped
     ports:
-      - "5054:8080"
+      - "${INVENTORY_API_HOST_PORT:-15054}:8080"
 
   payment-api:
     build:
@@ -194,7 +194,7 @@ services:
       DemoPayment__AuthorizationDelayMilliseconds: ${DemoPayment__AuthorizationDelayMilliseconds:-0}
     restart: unless-stopped
     ports:
-      - "5004:8080"
+      - "${PAYMENT_API_HOST_PORT:-15004}:8080"
 
   shipping-api:
     build:
@@ -207,7 +207,7 @@ services:
       <<: [*api-env, *managed-env]
     restart: unless-stopped
     ports:
-      - "${SHIPPING_API_HOST_PORT:-5187}:8080"
+      - "${SHIPPING_API_HOST_PORT:-15187}:8080"
 
   notification-api:
     build:
@@ -220,7 +220,7 @@ services:
       <<: [*api-env, *managed-env]
     restart: unless-stopped
     ports:
-      - "${NOTIFICATION_API_HOST_PORT:-5234}:8080"
+      - "${NOTIFICATION_API_HOST_PORT:-15234}:8080"
 
   identity-api:
     build:
@@ -240,7 +240,7 @@ services:
       Auth0Management__TimeoutSeconds: ${Auth0Management__TimeoutSeconds:-10}
     restart: unless-stopped
     ports:
-      - "5090:8080"
+      - "${IDENTITY_API_HOST_PORT:-15090}:8080"
 
   ordering-saga-worker:
     build:
@@ -258,7 +258,7 @@ services:
       OrderWorkflowTimeouts__BatchSize: ${ORDER_WORKFLOW_TIMEOUT_BATCH_SIZE:-25}
     restart: unless-stopped
     ports:
-      - "${ORDERING_SAGA_HOST_PORT:-5274}:8080"
+      - "${ORDERING_SAGA_HOST_PORT:-15274}:8080"
     depends_on:
       inventory-api:
         condition: service_started
@@ -279,7 +279,7 @@ services:
       Cors__AllowedOrigins__0: ${CORS_ALLOWED_ORIGIN:-http://localhost:3000}
     restart: unless-stopped
     ports:
-      - "5080:8080"
+      - "${API_GATEWAY_HOST_PORT:-15080}:8080"
     depends_on:
       catalog-api:
         condition: service_started

@@ -1,5 +1,5 @@
 param(
-    [string]$GatewayBaseUrl = "http://localhost:5080",
+    [string]$GatewayBaseUrl = "http://localhost:15080",
     [switch]$SkipWorkflowProbe
 )
 

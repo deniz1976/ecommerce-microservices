@@ -324,9 +324,15 @@ are unavailable:
 
 ```dotenv
 CATALOG_API_HOST_PORT=15283
+BASKET_API_HOST_PORT=15041
 ORDERING_API_HOST_PORT=15265
+INVENTORY_API_HOST_PORT=15054
+PAYMENT_API_HOST_PORT=15004
 SHIPPING_API_HOST_PORT=15187
 NOTIFICATION_API_HOST_PORT=15234
+IDENTITY_API_HOST_PORT=15090
+ORDERING_SAGA_HOST_PORT=15274
+API_GATEWAY_HOST_PORT=15080
 OTEL_COLLECTOR_HEALTH_HOST_PORT=14133
 ```
 
@@ -347,9 +353,9 @@ npm --prefix ./src/Frontend ci
 | Component | URL |
 | --- | --- |
 | Frontend | `http://localhost:3000` |
-| API Gateway | `http://localhost:5080` |
-| Gateway live health | `http://localhost:5080/health/live` |
-| Gateway readiness | `http://localhost:5080/health/ready` |
+| API Gateway | `http://localhost:15080` |
+| Gateway live health | `http://localhost:15080/health/live` |
+| Gateway readiness | `http://localhost:15080/health/ready` |
 | Grafana | `http://localhost:3001` |
 | Prometheus | `http://localhost:9090` |
 | Jaeger | `http://localhost:16686` |
@@ -667,9 +673,15 @@ secret içermeyen override'ları ekleyin:
 
 ```dotenv
 CATALOG_API_HOST_PORT=15283
+BASKET_API_HOST_PORT=15041
 ORDERING_API_HOST_PORT=15265
+INVENTORY_API_HOST_PORT=15054
+PAYMENT_API_HOST_PORT=15004
 SHIPPING_API_HOST_PORT=15187
 NOTIFICATION_API_HOST_PORT=15234
+IDENTITY_API_HOST_PORT=15090
+ORDERING_SAGA_HOST_PORT=15274
+API_GATEWAY_HOST_PORT=15080
 OTEL_COLLECTOR_HEALTH_HOST_PORT=14133
 ```
 
@@ -691,9 +703,9 @@ npm --prefix ./src/Frontend ci
 | Bileşen | Adres |
 | --- | --- |
 | Frontend | `http://localhost:3000` |
-| API Gateway | `http://localhost:5080` |
-| Gateway live health | `http://localhost:5080/health/live` |
-| Gateway readiness | `http://localhost:5080/health/ready` |
+| API Gateway | `http://localhost:15080` |
+| Gateway live health | `http://localhost:15080/health/live` |
+| Gateway readiness | `http://localhost:15080/health/ready` |
 | Grafana | `http://localhost:3001` |
 | Prometheus | `http://localhost:9090` |
 | Jaeger | `http://localhost:16686` |

@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$Environment = "staging",
-    [string]$SecretPath = "/"
+    [string]$SecretPath = "/",
+    [string]$ApiBaseUrl = "http://localhost:15080"
 )
 
 $ErrorActionPreference = "Stop"
@@ -9,11 +10,8 @@ $ErrorActionPreference = "Stop"
 $repositoryRoot = Split-Path $PSScriptRoot -Parent
 $frontendRoot = Join-Path $repositoryRoot "src\Frontend"
 $runner = Join-Path $PSScriptRoot "run-with-secrets.ps1"
-$frontendCommand = @(
-    "npm",
-    "run",
-    "dev"
-)
+$frontendLauncher = Join-Path $PSScriptRoot "start-frontend-process.ps1"
+$frontendCommand = @($frontendLauncher, "-ApiBaseUrl", $ApiBaseUrl)
 
 Push-Location $frontendRoot
 try {

@@ -11,7 +11,7 @@ if (!accessToken) {
 }
 
 const gatewayBaseUrl =
-  process.env.RuntimeChecks__GatewayBaseUrl ?? "http://localhost:5080"
+  process.env.RuntimeChecks__GatewayBaseUrl ?? "http://localhost:15080"
 const hubUrl = `${gatewayBaseUrl.replace(/\/$/, "")}/gateway/hubs/notifications`
 
 const anonymousConnection = new HubConnectionBuilder()
