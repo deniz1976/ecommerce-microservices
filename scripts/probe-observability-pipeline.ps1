@@ -16,6 +16,12 @@ $collectorHealthHostPort = if ($env:OTEL_COLLECTOR_HEALTH_HOST_PORT) {
 else {
     "14133"
 }
+$prometheusHostPort = if ($env:PROMETHEUS_HOST_PORT) {
+    $env:PROMETHEUS_HOST_PORT
+}
+else {
+    "19090"
+}
 $startTimeUnixNano = [string](
     [DateTimeOffset]::UtcNow.AddMinutes(-1).ToUnixTimeMilliseconds() * 1000000)
 
@@ -186,7 +192,7 @@ function Get-PrometheusQueryResult {
 
     $encodedQuery = [Uri]::EscapeDataString($Query)
     $response = Invoke-RestMethod `
-        -Uri "http://localhost:9090/api/v1/query?query=$encodedQuery" `
+        -Uri "http://localhost:$prometheusHostPort/api/v1/query?query=$encodedQuery" `
         -TimeoutSec 10
     if ($response.status -ne "success") {
         throw "Prometheus query failed"
@@ -229,7 +235,7 @@ function Test-AlertRulesPending {
         "ECommerceCatalogImageDeletionFailures"
     )
     $response = Invoke-RestMethod `
-        -Uri "http://localhost:9090/api/v1/rules?type=alert" `
+        -Uri "http://localhost:$prometheusHostPort/api/v1/rules?type=alert" `
         -TimeoutSec 10
     $rules = @($response.data.groups | ForEach-Object { $_.rules })
 
@@ -298,7 +304,7 @@ try {
         -Condition { Test-HttpOk "http://localhost:$collectorHealthHostPort/" }
     Wait-Until `
         -Description "Prometheus readiness" `
-        -Condition { Test-HttpOk "http://localhost:9090/-/ready" }
+        -Condition { Test-HttpOk "http://localhost:$prometheusHostPort/-/ready" }
     Wait-Until `
         -Description "Grafana provisioning" `
         -Condition { Test-GrafanaProvisioning }

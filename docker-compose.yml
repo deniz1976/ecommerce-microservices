@@ -87,7 +87,7 @@ services:
       - ./deploy/observability/prometheus-rules:/etc/prometheus/rules:ro
       - prometheus-data:/prometheus
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_HOST_PORT:-19090}:9090"
     depends_on:
       otel-collector:
         condition: service_started

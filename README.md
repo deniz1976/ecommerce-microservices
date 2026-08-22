@@ -334,6 +334,7 @@ IDENTITY_API_HOST_PORT=15090
 ORDERING_SAGA_HOST_PORT=15274
 API_GATEWAY_HOST_PORT=15080
 OTEL_COLLECTOR_HEALTH_HOST_PORT=14133
+PROMETHEUS_HOST_PORT=19090
 ```
 
 The `.env` file is ignored by Git. Docker Desktop can subsequently start an
@@ -357,7 +358,7 @@ npm --prefix ./src/Frontend ci
 | Gateway live health | `http://localhost:15080/health/live` |
 | Gateway readiness | `http://localhost:15080/health/ready` |
 | Grafana | `http://localhost:3001` |
-| Prometheus | `http://localhost:9090` |
+| Prometheus | `http://localhost:19090` |
 | Jaeger | `http://localhost:16686` |
 
 ### Validation
@@ -683,6 +684,7 @@ IDENTITY_API_HOST_PORT=15090
 ORDERING_SAGA_HOST_PORT=15274
 API_GATEWAY_HOST_PORT=15080
 OTEL_COLLECTOR_HEALTH_HOST_PORT=14133
+PROMETHEUS_HOST_PORT=19090
 ```
 
 `.env` Git tarafından ignore edilir. Docker Desktop daha önce bu port
@@ -707,7 +709,7 @@ npm --prefix ./src/Frontend ci
 | Gateway live health | `http://localhost:15080/health/live` |
 | Gateway readiness | `http://localhost:15080/health/ready` |
 | Grafana | `http://localhost:3001` |
-| Prometheus | `http://localhost:9090` |
+| Prometheus | `http://localhost:19090` |
 | Jaeger | `http://localhost:16686` |
 
 ### Doğrulama

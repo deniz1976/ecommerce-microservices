@@ -139,6 +139,7 @@ public sealed class WorkflowScenarioTests
         Assert.Contains("${IDENTITY_API_HOST_PORT:-15090}:8080", compose, StringComparison.Ordinal);
         Assert.Contains("${ORDERING_SAGA_HOST_PORT:-15274}:8080", compose, StringComparison.Ordinal);
         Assert.Contains("${API_GATEWAY_HOST_PORT:-15080}:8080", compose, StringComparison.Ordinal);
+        Assert.Contains("${PROMETHEUS_HOST_PORT:-19090}:9090", compose, StringComparison.Ordinal);
         Assert.Contains(
             "Cors__AllowedOrigins__0: ${CORS_ALLOWED_ORIGIN:-http://localhost:3000}",
             compose,
