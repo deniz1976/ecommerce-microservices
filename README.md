@@ -333,8 +333,15 @@ NOTIFICATION_API_HOST_PORT=15234
 IDENTITY_API_HOST_PORT=15090
 ORDERING_SAGA_HOST_PORT=15274
 API_GATEWAY_HOST_PORT=15080
-OTEL_COLLECTOR_HEALTH_HOST_PORT=14133
+LOKI_HOST_PORT=19100
+JAEGER_HOST_PORT=19686
+OTEL_GRPC_HOST_PORT=19317
+OTEL_HTTP_HOST_PORT=19318
+OTEL_COLLECTOR_HEALTH_HOST_PORT=19133
+OTEL_METRICS_HOST_PORT=19889
 PROMETHEUS_HOST_PORT=19090
+GRAFANA_HOST_PORT=19001
+REDIS_HOST_PORT=19379
 ```
 
 The `.env` file is ignored by Git. Docker Desktop can subsequently start an
@@ -357,9 +364,9 @@ npm --prefix ./src/Frontend ci
 | API Gateway | `http://localhost:15080` |
 | Gateway live health | `http://localhost:15080/health/live` |
 | Gateway readiness | `http://localhost:15080/health/ready` |
-| Grafana | `http://localhost:3001` |
+| Grafana | `http://localhost:19001` |
 | Prometheus | `http://localhost:19090` |
-| Jaeger | `http://localhost:16686` |
+| Jaeger | `http://localhost:19686` |
 
 ### Validation
 
@@ -683,8 +690,15 @@ NOTIFICATION_API_HOST_PORT=15234
 IDENTITY_API_HOST_PORT=15090
 ORDERING_SAGA_HOST_PORT=15274
 API_GATEWAY_HOST_PORT=15080
-OTEL_COLLECTOR_HEALTH_HOST_PORT=14133
+LOKI_HOST_PORT=19100
+JAEGER_HOST_PORT=19686
+OTEL_GRPC_HOST_PORT=19317
+OTEL_HTTP_HOST_PORT=19318
+OTEL_COLLECTOR_HEALTH_HOST_PORT=19133
+OTEL_METRICS_HOST_PORT=19889
 PROMETHEUS_HOST_PORT=19090
+GRAFANA_HOST_PORT=19001
+REDIS_HOST_PORT=19379
 ```
 
 `.env` Git tarafından ignore edilir. Docker Desktop daha önce bu port
@@ -708,9 +722,9 @@ npm --prefix ./src/Frontend ci
 | API Gateway | `http://localhost:15080` |
 | Gateway live health | `http://localhost:15080/health/live` |
 | Gateway readiness | `http://localhost:15080/health/ready` |
-| Grafana | `http://localhost:3001` |
+| Grafana | `http://localhost:19001` |
 | Prometheus | `http://localhost:19090` |
-| Jaeger | `http://localhost:16686` |
+| Jaeger | `http://localhost:19686` |
 
 ### Doğrulama
 

@@ -140,6 +140,14 @@ public sealed class WorkflowScenarioTests
         Assert.Contains("${ORDERING_SAGA_HOST_PORT:-15274}:8080", compose, StringComparison.Ordinal);
         Assert.Contains("${API_GATEWAY_HOST_PORT:-15080}:8080", compose, StringComparison.Ordinal);
         Assert.Contains("${PROMETHEUS_HOST_PORT:-19090}:9090", compose, StringComparison.Ordinal);
+        Assert.Contains("${LOKI_HOST_PORT:-19100}:3100", compose, StringComparison.Ordinal);
+        Assert.Contains("${JAEGER_HOST_PORT:-19686}:16686", compose, StringComparison.Ordinal);
+        Assert.Contains("${OTEL_GRPC_HOST_PORT:-19317}:4317", compose, StringComparison.Ordinal);
+        Assert.Contains("${OTEL_HTTP_HOST_PORT:-19318}:4318", compose, StringComparison.Ordinal);
+        Assert.Contains("${OTEL_COLLECTOR_HEALTH_HOST_PORT:-19133}:13133", compose, StringComparison.Ordinal);
+        Assert.Contains("${OTEL_METRICS_HOST_PORT:-19889}:8889", compose, StringComparison.Ordinal);
+        Assert.Contains("${GRAFANA_HOST_PORT:-19001}:3000", compose, StringComparison.Ordinal);
+        Assert.Contains("${REDIS_HOST_PORT:-19379}:6379", compose, StringComparison.Ordinal);
         Assert.Contains(
             "Cors__AllowedOrigins__0: ${CORS_ALLOWED_ORIGIN:-http://localhost:3000}",
             compose,

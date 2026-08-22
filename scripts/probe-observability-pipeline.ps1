@@ -14,8 +14,10 @@ $collectorHealthHostPort = if ($env:OTEL_COLLECTOR_HEALTH_HOST_PORT) {
     $env:OTEL_COLLECTOR_HEALTH_HOST_PORT
 }
 else {
-    "14133"
+    "19133"
 }
+$otelHttpHostPort = if ($env:OTEL_HTTP_HOST_PORT) { $env:OTEL_HTTP_HOST_PORT } else { "19318" }
+$grafanaHostPort = if ($env:GRAFANA_HOST_PORT) { $env:GRAFANA_HOST_PORT } else { "19001" }
 $prometheusHostPort = if ($env:PROMETHEUS_HOST_PORT) {
     $env:PROMETHEUS_HOST_PORT
 }
@@ -122,7 +124,7 @@ function Send-ProbeMetrics {
     } | ConvertTo-Json -Depth 20 -Compress
 
     Invoke-RestMethod `
-        -Uri "http://localhost:4318/v1/metrics" `
+        -Uri "http://localhost:$otelHttpHostPort/v1/metrics" `
         -Method Post `
         -ContentType "application/json" `
         -Body $payload `
@@ -260,7 +262,7 @@ function Test-AlertRulesPending {
 
 function Test-GrafanaProvisioning {
     $health = Invoke-RestMethod `
-        -Uri "http://localhost:3001/api/health" `
+        -Uri "http://localhost:$grafanaHostPort/api/health" `
         -TimeoutSec 10
     if ($health.database -ne "ok") {
         return $false
@@ -268,7 +270,7 @@ function Test-GrafanaProvisioning {
 
     $dashboards = @(
         Invoke-RestMethod `
-            -Uri "http://localhost:3001/api/search?type=dash-db" `
+            -Uri "http://localhost:$grafanaHostPort/api/search?type=dash-db" `
             -TimeoutSec 10
     )
     $uids = @($dashboards | ForEach-Object { $_.uid })
@@ -278,7 +280,7 @@ function Test-GrafanaProvisioning {
     }
 
     $dataSource = Invoke-RestMethod `
-        -Uri "http://localhost:3001/api/datasources/uid/prometheus/health" `
+        -Uri "http://localhost:$grafanaHostPort/api/datasources/uid/prometheus/health" `
         -TimeoutSec 10
     return $dataSource.status -eq "OK"
 }
