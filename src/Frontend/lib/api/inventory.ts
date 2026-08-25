@@ -1,5 +1,5 @@
 import { apiRequest } from "@/lib/api/client"
-import type { InventoryItem, PagedResult } from "@/types"
+import type { InventoryItem, PagedResult, StockMovement, StockMovementKind } from "@/types"
 
 export interface ManagedInventoryQuery {
   productId?: string
@@ -44,4 +44,28 @@ export function updateInventoryItem(
     authenticated: true,
     body: { quantityOnHand },
   })
+}
+
+export interface StockMovementQuery {
+  pageNumber?: number
+  pageSize?: number
+  orderId?: string
+  type?: StockMovementKind
+}
+
+export function getStockMovements(
+  productId: string,
+  query: StockMovementQuery,
+  signal?: AbortSignal,
+): Promise<PagedResult<StockMovement>> {
+  const parameters = new URLSearchParams({
+    pageNumber: String(query.pageNumber ?? 1),
+    pageSize: String(query.pageSize ?? 20),
+  })
+  if (query.orderId) parameters.set("orderId", query.orderId)
+  if (query.type !== undefined) parameters.set("type", String(query.type))
+  return apiRequest<PagedResult<StockMovement>>(
+    `/gateway/inventory/items/${productId}/movements?${parameters.toString()}`,
+    { authenticated: true, signal },
+  )
 }

@@ -88,6 +88,7 @@ export function getPublicCatalogProducts(
   if (query.search?.trim()) parameters.set("search", query.search.trim())
   if (query.categoryId) parameters.set("categoryId", query.categoryId)
   if (query.brandId) parameters.set("brandId", query.brandId)
+  if (query.storeId) parameters.set("storeId", query.storeId)
 
   return apiRequest<PagedResult<CatalogProduct>>(
     `/gateway/catalog/products?${parameters.toString()}`,
@@ -313,6 +314,10 @@ export function getMyCatalogStores(signal?: AbortSignal): Promise<CatalogStore[]
     authenticated: true,
     signal,
   })
+}
+
+export function getCatalogStore(storeId: string): Promise<CatalogStore> {
+  return apiRequest<CatalogStore>(`/gateway/catalog/stores/${storeId}`)
 }
 
 export function createCatalogStore(

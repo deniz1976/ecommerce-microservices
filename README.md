@@ -41,6 +41,8 @@ project rather than a production-ready commerce product.
 - Read-only cross-owner store directory with name/address search, exact owner
   filtering, stable sorting, and bounded server pagination
 - Auth0 login with Customer, Seller, and Admin authorization boundaries
+- Public store detail pages with bounded active-product listings
+- Admin stock-movement audit and order-workflow diagnostics screens
 - Resource ownership checks for customer and seller data
 - English and Turkish frontend content and localized API errors
 - Persisted notifications with single/bulk read actions and SignalR-based live updates
@@ -454,6 +456,8 @@ amaçlı bir çalışmadır.
   sayfalama ve ayrı ekleme/düzenleme formları sunan bağımsız, yalnızca Admin
   kategori/marka liste sayfaları
 - Customer, Seller ve Admin sınırlarıyla Auth0 kimlik doğrulaması
+- Sayfalı aktif ürün listesine sahip public mağaza detay ekranları
+- Admin stok-hareket denetimi ve sipariş iş-akışı tanı ekranları
 - Müşteri ve satıcı kaynaklarında sahiplik kontrolleri
 - Türkçe/İngilizce arayüz ve localized API hata mesajları
 - Tekil/toplu okundu işlemleri, kalıcı bildirim geçmişi ve SignalR canlı güncellemeleri

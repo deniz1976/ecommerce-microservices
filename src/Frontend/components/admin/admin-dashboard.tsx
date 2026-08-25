@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import {
   ClipboardList,
+  Activity,
   LayoutDashboard,
   Loader2,
   LogOut,
@@ -116,6 +117,10 @@ export function AdminDashboard({ profile, onOpenSellerWorkspace }: AdminDashboar
             <Link href="/admin/shipments" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
               <Truck className="size-4" />
               {t.admin.shipments}
+            </Link>
+            <Link href="/admin/workflows" className="flex h-9 items-center gap-3 px-3 text-sm text-muted-foreground transition hover:text-foreground">
+              <Activity className="size-4" />
+              {t.admin.workflows}
             </Link>
           </nav>
         </aside>

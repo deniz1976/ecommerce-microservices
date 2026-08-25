@@ -113,6 +113,7 @@ export function ProductDetail() {
               sku: t.seller.sku,
               category: t.customer.category,
               brand: t.customer.brand,
+              store: t.customer.viewStore,
             }}
             basketAction={customerId ? (
               <div className="mt-6">
@@ -142,6 +143,7 @@ interface ProductContentProps {
     sku: string
     category: string
     brand: string
+    store: string
   }
   basketAction: ReactNode
 }
@@ -173,6 +175,7 @@ function ProductContent({ product, locale, labels, basketAction }: ProductConten
           <div><dt className="text-muted-foreground">{labels.brand}</dt><dd className="mt-1 font-medium text-foreground">{product.brandName || "-"}</dd></div>
         </dl>
         <p className="mt-8 font-heading text-3xl font-semibold text-foreground">{price}</p>
+        {product.storeId ? <Link href={`/stores/${product.storeId}`} className="mt-4 inline-flex text-sm font-medium text-primary hover:underline">{labels.store}</Link> : null}
         {basketAction}
       </div>
     </article>

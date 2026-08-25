@@ -5,6 +5,7 @@ import type { ReactNode } from "react"
 import { useEffect, useState } from "react"
 
 import { AdminPageLayout } from "@/components/admin/admin-page-layout"
+import { StockMovementPanel } from "@/components/admin/stock-movement-panel"
 import { ReferencePagination } from "@/components/admin/admin-reference-list-controls"
 import { Button } from "@/components/ui/button"
 import { isOptionalGuid } from "@/lib/admin/filters"
@@ -28,6 +29,7 @@ export function AdminInventoryManagementPage() {
   const [sortDescending, setSortDescending] = useState(true)
   const [pageSize, setPageSize] = useState(20)
   const [page, setPage] = useState(1)
+  const [movementProductId, setMovementProductId] = useState<string | null>(null)
 
   const normalizedProduct = productInput.trim()
   const productValid = isOptionalGuid(normalizedProduct)
@@ -118,6 +120,7 @@ export function AdminInventoryManagementPage() {
                         <th scope="col" className="px-4 py-3 text-right font-medium">{t.admin.reservedQuantity}</th>
                         <th scope="col" className="px-4 py-3 text-right font-medium">{t.admin.availableQuantity}</th>
                         <th scope="col" className="px-4 py-3 font-medium">{t.admin.inventoryUpdatedAt}</th>
+                        <th scope="col" className="px-4 py-3"><span className="sr-only">{t.admin.viewStockMovements}</span></th>
                       </tr></thead>
                       <tbody className="divide-y divide-border">{inventory.data.items.map((item) => <tr key={item.productId} className="hover:bg-muted/25">
                         <td className="px-4 py-3 font-mono text-xs text-foreground">{item.productId}</td>
@@ -125,12 +128,14 @@ export function AdminInventoryManagementPage() {
                         <td className="px-4 py-3 text-right text-muted-foreground">{item.reservedQuantity}</td>
                         <td className="px-4 py-3 text-right font-medium text-primary">{item.availableQuantity}</td>
                         <td className="px-4 py-3 text-muted-foreground">{formatDate(item.updatedAt, locale)}</td>
+                        <td className="px-4 py-3 text-right"><Button type="button" variant="outline" size="sm" onClick={() => setMovementProductId(item.productId)}>{t.admin.viewStockMovements}</Button></td>
                       </tr>)}</tbody>
                     </table>
                   </div>
                   <ReferencePagination page={inventory.data.pageNumber} totalPages={Math.max(1, inventory.data.totalPages)} totalCount={inventory.data.totalCount} pageLabel={t.admin.inventoryPageStatus} previousLabel={t.admin.previousPage} nextLabel={t.admin.nextPage} onPageChange={(value) => { setInventory({ status: "loading" }); setPage(value) }} />
                 </>}
         </div>
+        {movementProductId ? <StockMovementPanel productId={movementProductId} onClose={() => setMovementProductId(null)} /> : null}
       </section>
     </AdminPageLayout>
   )

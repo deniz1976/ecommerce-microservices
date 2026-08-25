@@ -97,6 +97,7 @@ export interface Dictionary {
     inventory: string
     payments: string
     shipments: string
+    workflows: string
     openSellerWorkspace: string
     roleLabel: string
     welcome: string
@@ -251,6 +252,19 @@ export interface Dictionary {
     inventoryUnavailable: string
     noMatchingInventory: string
     inventoryPageStatus: string
+    viewStockMovements: string
+    stockMovements: string
+    stockMovementsDescription: string
+    stockMovementsUnavailable: string
+    noStockMovements: string
+    movementType: string
+    movementQuantity: string
+    movementOnHand: string
+    movementReserved: string
+    movementOrder: string
+    movementOccurredAt: string
+    movementPageStatus: string
+    close: string
     managePaymentsDescription: string
     paymentList: string
     paymentCustomerId: string
@@ -300,6 +314,20 @@ export interface Dictionary {
     storesUnavailable: string
     noMatchingStores: string
     storePageStatus: string
+    manageWorkflowsDescription: string
+    workflowList: string
+    workflowOrderId: string
+    workflowStatus: string
+    allWorkflowStatuses: string
+    workflowOverdueOnly: string
+    workflowDeadline: string
+    workflowTimeoutHandled: string
+    workflowCreatedAt: string
+    workflowUpdatedAt: string
+    workflowsUnavailable: string
+    noMatchingWorkflows: string
+    workflowPageStatus: string
+    applyWorkflowFilters: string
     userRole: Record<Role, string>
     status: Record<ProductStatusName, string>
   }
@@ -444,6 +472,11 @@ export interface Dictionary {
     productUnavailable: string
     backToCatalog: string
     productDetails: string
+    storeDetails: string
+    viewStore: string
+    storeUnavailable: string
+    storeProducts: string
+    backToStore: string
   }
   basket: {
     title: string
@@ -652,6 +685,7 @@ const en: Dictionary = {
     inventory: "Inventory",
     payments: "Payments",
     shipments: "Shipments",
+    workflows: "Workflows",
     openSellerWorkspace: "Seller workspace",
     roleLabel: "Administrator",
     welcome: "Welcome back, {name}",
@@ -806,6 +840,19 @@ const en: Dictionary = {
     inventoryUnavailable: "Inventory data could not be loaded.",
     noMatchingInventory: "No inventory items match the selected filters.",
     inventoryPageStatus: "Page {page} of {total} · {count} inventory items",
+    viewStockMovements: "View movements",
+    stockMovements: "Stock movements",
+    stockMovementsDescription: "Immutable stock changes recorded for product {productId}.",
+    stockMovementsUnavailable: "Stock movements could not be loaded.",
+    noStockMovements: "No stock movements were recorded for this product.",
+    movementType: "Type",
+    movementQuantity: "Quantity",
+    movementOnHand: "On hand before → after",
+    movementReserved: "Reserved before → after",
+    movementOrder: "Order",
+    movementOccurredAt: "Occurred",
+    movementPageStatus: "Page {page} of {total} · {count} movements",
+    close: "Close",
     managePaymentsDescription: "Review safe payment summaries across customers and orders with bounded server-side filters.",
     paymentList: "Payment operations",
     paymentCustomerId: "Customer ID",
@@ -855,6 +902,20 @@ const en: Dictionary = {
     storesUnavailable: "Store data could not be loaded.",
     noMatchingStores: "No stores match the selected filters.",
     storePageStatus: "Page {page} of {total} · {count} stores",
+    manageWorkflowsDescription: "Inspect bounded order-saga workflow state and overdue processing deadlines.",
+    workflowList: "Order workflow diagnostics",
+    workflowOrderId: "Order ID",
+    workflowStatus: "Workflow status",
+    allWorkflowStatuses: "All statuses",
+    workflowOverdueOnly: "Overdue only",
+    workflowDeadline: "Step deadline",
+    workflowTimeoutHandled: "Timeout handled",
+    workflowCreatedAt: "Created",
+    workflowUpdatedAt: "Updated",
+    workflowsUnavailable: "Workflow diagnostics could not be loaded.",
+    noMatchingWorkflows: "No workflows match the selected filters.",
+    workflowPageStatus: "Page {page} of {total} · {count} workflows",
+    applyWorkflowFilters: "Apply workflow filters",
     userRole: {
       Customer: "Customer",
       Seller: "Seller",
@@ -1008,6 +1069,11 @@ const en: Dictionary = {
     productUnavailable: "This product is unavailable or no longer active.",
     backToCatalog: "Back to catalog",
     productDetails: "Product details",
+    storeDetails: "Store details",
+    viewStore: "View store",
+    storeUnavailable: "This store is unavailable.",
+    storeProducts: "Products from this store",
+    backToStore: "Back to store",
   },
   basket: {
     title: "Your basket",
@@ -1228,6 +1294,7 @@ const tr: Dictionary = {
     inventory: "Stok",
     payments: "Ödemeler",
     shipments: "Gönderiler",
+    workflows: "İş akışları",
     openSellerWorkspace: "Satıcı paneli",
     roleLabel: "Yönetici",
     welcome: "Tekrar hoş geldiniz, {name}",
@@ -1382,6 +1449,19 @@ const tr: Dictionary = {
     inventoryUnavailable: "Stok verisi yüklenemedi.",
     noMatchingInventory: "Seçili filtrelerle eşleşen stok kaydı bulunamadı.",
     inventoryPageStatus: "Sayfa {page} / {total} · {count} stok kaydı",
+    viewStockMovements: "Hareketleri görüntüle",
+    stockMovements: "Stok hareketleri",
+    stockMovementsDescription: "{productId} ürünü için değiştirilemez stok hareketleri.",
+    stockMovementsUnavailable: "Stok hareketleri yüklenemedi.",
+    noStockMovements: "Bu ürün için stok hareketi bulunmuyor.",
+    movementType: "Tür",
+    movementQuantity: "Miktar",
+    movementOnHand: "Eldeki önce → sonra",
+    movementReserved: "Ayrılmış önce → sonra",
+    movementOrder: "Sipariş",
+    movementOccurredAt: "Gerçekleşme",
+    movementPageStatus: "Sayfa {page} / {total} · {count} hareket",
+    close: "Kapat",
     managePaymentsDescription: "Müşteri ve siparişler arasındaki güvenli ödeme özetlerini sınırlı sunucu filtreleriyle inceleyin.",
     paymentList: "Ödeme operasyonları",
     paymentCustomerId: "Müşteri kimliği",
@@ -1431,6 +1511,20 @@ const tr: Dictionary = {
     storesUnavailable: "Mağaza verisi yüklenemedi.",
     noMatchingStores: "Seçili filtrelerle eşleşen mağaza bulunamadı.",
     storePageStatus: "Sayfa {page} / {total} · {count} mağaza",
+    manageWorkflowsDescription: "Sipariş saga durumlarını ve gecikmiş işlem son tarihlerini sınırlı sorgularla inceleyin.",
+    workflowList: "Sipariş iş akışı tanıları",
+    workflowOrderId: "Sipariş kimliği",
+    workflowStatus: "İş akışı durumu",
+    allWorkflowStatuses: "Tüm durumlar",
+    workflowOverdueOnly: "Yalnız gecikenler",
+    workflowDeadline: "Adım son tarihi",
+    workflowTimeoutHandled: "Zaman aşımı işlendi",
+    workflowCreatedAt: "Oluşturulma",
+    workflowUpdatedAt: "Güncellenme",
+    workflowsUnavailable: "İş akışı tanıları yüklenemedi.",
+    noMatchingWorkflows: "Seçili filtrelerle eşleşen iş akışı bulunamadı.",
+    workflowPageStatus: "Sayfa {page} / {total} · {count} iş akışı",
+    applyWorkflowFilters: "İş akışı filtrelerini uygula",
     userRole: {
       Customer: "Müşteri",
       Seller: "Satıcı",
@@ -1584,6 +1678,11 @@ const tr: Dictionary = {
     productUnavailable: "Bu ürün kullanılamıyor veya artık aktif değil.",
     backToCatalog: "Kataloğa dön",
     productDetails: "Ürün detayları",
+    storeDetails: "Mağaza detayları",
+    viewStore: "Mağazayı görüntüle",
+    storeUnavailable: "Bu mağaza kullanılamıyor.",
+    storeProducts: "Bu mağazanın ürünleri",
+    backToStore: "Mağazaya dön",
   },
   basket: {
     title: "Sepetiniz",

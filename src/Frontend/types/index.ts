@@ -62,6 +62,33 @@ export interface InventoryItem {
   updatedAt: string
 }
 
+export type StockMovementKind = 1 | 2 | 3 | 4 | 5 | 6
+
+export interface StockMovement {
+  id: string
+  productId: string
+  type: StockMovementKind
+  quantity: number
+  quantityOnHandBefore: number
+  quantityOnHandAfter: number
+  reservedQuantityBefore: number
+  reservedQuantityAfter: number
+  orderId: string | null
+  occurredAt: string
+}
+
+export type OrderWorkflowStatus = 1 | 2 | 3 | 4 | 5 | 6
+
+export interface OrderWorkflowDiagnostics {
+  orderId: string
+  status: OrderWorkflowStatus
+  stepDeadlineAt: string | null
+  timeoutHandledAt: string | null
+  createdAt: string
+  updatedAt: string
+  isOverdue: boolean
+}
+
 export interface CatalogStore {
   id: string
   name: string

@@ -17,6 +17,23 @@ public sealed class FrontendAdminInventoryWorkspaceTests
     }
 
     [Fact]
+    public void AdminInventoryExposesBoundedStockMovementHistory()
+    {
+        string api = ReadFrontendFile("lib", "api", "inventory.ts");
+        string workspace = ReadFrontendFile(
+            "components", "admin", "admin-inventory-management-page.tsx");
+        string panel = ReadFrontendFile(
+            "components", "admin", "stock-movement-panel.tsx");
+
+        Assert.Contains("getStockMovements(", api, StringComparison.Ordinal);
+        Assert.Contains("/gateway/inventory/items/${productId}/movements?", api, StringComparison.Ordinal);
+        Assert.Contains("authenticated: true, signal", api, StringComparison.Ordinal);
+        Assert.Contains("<StockMovementPanel", workspace, StringComparison.Ordinal);
+        Assert.Contains("getStockMovements(", panel, StringComparison.Ordinal);
+        Assert.Contains("<ReferencePagination", panel, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AdminInventoryRouteIsGuardedAndUsesServerPagination()
     {
         string route = ReadFrontendFile("app", "admin", "inventory", "page.tsx");

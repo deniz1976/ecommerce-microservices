@@ -10,12 +10,12 @@ interface CatalogProductCardProps {
   locale: Locale
   product: CatalogProduct
   viewLabel: string
-  addLabel: string
-  addingLabel: string
-  addedLabel: string
-  adding: boolean
-  added: boolean
-  onAdd: (product: CatalogProduct) => void
+  addLabel?: string
+  addingLabel?: string
+  addedLabel?: string
+  adding?: boolean
+  added?: boolean
+  onAdd?: (product: CatalogProduct) => void
 }
 
 export function CatalogProductCard({
@@ -71,7 +71,7 @@ export function CatalogProductCard({
             <ArrowUpRight className="size-4" aria-hidden="true" />
           </Link>
         </div>
-        <Button
+        {onAdd ? <Button
           type="button"
           className="mt-4 w-full"
           disabled={adding}
@@ -79,7 +79,7 @@ export function CatalogProductCard({
         >
           {adding ? <Loader2 className="animate-spin" /> : added ? <Check /> : <ShoppingCart />}
           {adding ? addingLabel : added ? addedLabel : addLabel}
-        </Button>
+        </Button> : null}
       </div>
     </article>
   )

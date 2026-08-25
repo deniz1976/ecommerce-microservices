@@ -16,6 +16,21 @@ public sealed class FrontendAdminStoreWorkspaceTests
     }
 
     [Fact]
+    public void PublicStoreDetailUsesPublicStoreAndBoundedProductQueries()
+    {
+        string route = ReadFrontendFile("app", "stores", "[id]", "page.tsx");
+        string detail = ReadFrontendFile("components", "customer", "store-detail.tsx");
+        string api = ReadFrontendFile("lib", "api", "catalog.ts");
+
+        Assert.Contains("<StoreDetail", route, StringComparison.Ordinal);
+        Assert.Contains("getCatalogStore(params.id)", detail, StringComparison.Ordinal);
+        Assert.Contains("getPublicCatalogProducts", detail, StringComparison.Ordinal);
+        Assert.Contains("storeId: params.id", detail, StringComparison.Ordinal);
+        Assert.Contains("/gateway/catalog/stores/${storeId}", api, StringComparison.Ordinal);
+        Assert.Contains("parameters.set(\"storeId\"", api, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AdminStoreRouteIsGuardedAndUsesServerPagination()
     {
         string route = ReadFrontendFile("app", "admin", "stores", "page.tsx");
