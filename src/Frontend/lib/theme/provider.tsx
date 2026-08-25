@@ -70,17 +70,3 @@ export function useTheme(): ThemeContextValue {
   }
   return context
 }
-
-export const themeInitScript = `
-(function() {
-  try {
-    var stored = localStorage.getItem('${STORAGE_KEY}');
-    var theme = (stored === 'light' || stored === 'dark')
-      ? stored
-      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    var root = document.documentElement;
-    root.classList.add(theme);
-    root.style.colorScheme = theme;
-  } catch (e) {}
-})();
-`

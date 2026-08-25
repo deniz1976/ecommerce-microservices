@@ -19,6 +19,9 @@ public sealed class ManagedPaymentPagingArchitectureTests
         Assert.Contains(".Skip(", reader, StringComparison.Ordinal);
         Assert.Contains(".Take(pageSize)", reader, StringComparison.Ordinal);
         Assert.Contains("ThenBy(item => item.Id)", reader, StringComparison.Ordinal);
+        Assert.True(
+            reader.IndexOf("payments = ApplyOrdering", StringComparison.Ordinal) <
+            reader.IndexOf("IQueryable<PaymentSummaryResponse> projection", StringComparison.Ordinal));
         Assert.DoesNotContain("ProviderName", reader, StringComparison.Ordinal);
         Assert.DoesNotContain("ProviderPaymentReference", reader, StringComparison.Ordinal);
         Assert.DoesNotContain("FailureReason", reader, StringComparison.Ordinal);

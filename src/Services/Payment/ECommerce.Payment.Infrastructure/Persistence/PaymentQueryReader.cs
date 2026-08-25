@@ -85,6 +85,8 @@ public sealed class PaymentQueryReader : IPaymentQueryReader
             pageSize,
             totalCount);
 
+        payments = ApplyOrdering(payments, criteria.SortBy, criteria.SortDescending);
+
         IQueryable<PaymentSummaryResponse> projection = payments.Select(payment =>
             new PaymentSummaryResponse(
                 payment.Id,
@@ -95,11 +97,6 @@ public sealed class PaymentQueryReader : IPaymentQueryReader
                 payment.Status,
                 payment.CreatedAt,
                 payment.UpdatedAt));
-
-        projection = ApplyOrdering(
-            projection,
-            criteria.SortBy,
-            criteria.SortDescending);
 
         PaymentSummaryResponse[] items = await projection
             .Skip((pageNumber - 1) * pageSize)
@@ -113,8 +110,8 @@ public sealed class PaymentQueryReader : IPaymentQueryReader
             totalCount);
     }
 
-    private static IQueryable<PaymentSummaryResponse> ApplyOrdering(
-        IQueryable<PaymentSummaryResponse> query,
+    private static IQueryable<Domain.Payment> ApplyOrdering(
+        IQueryable<Domain.Payment> query,
         string? sortBy,
         bool descending)
     {

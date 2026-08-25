@@ -87,6 +87,11 @@ public sealed class CatalogReferenceReader :
         long totalCount = await categories.LongCountAsync(cancellationToken);
         int pageNumber = NormalizePageNumber(criteria.PageNumber, pageSize, totalCount);
 
+        categories = ApplyCategoryOrdering(
+            categories,
+            criteria.SortBy,
+            criteria.SortDescending);
+
         IQueryable<ManagedCatalogCategoryResponse> projection = categories.Select(category =>
             new ManagedCatalogCategoryResponse(
                 category.Id,
@@ -105,11 +110,6 @@ public sealed class CatalogReferenceReader :
                 category.Slug,
                 category.Slug,
                 category.IsActive));
-
-        projection = ApplyCategoryOrdering(
-            projection,
-            criteria.SortBy,
-            criteria.SortDescending);
 
         ManagedCatalogCategoryResponse[] items = await projection
             .Skip((pageNumber - 1) * pageSize)
@@ -146,17 +146,17 @@ public sealed class CatalogReferenceReader :
         long totalCount = await brands.LongCountAsync(cancellationToken);
         int pageNumber = NormalizePageNumber(criteria.PageNumber, pageSize, totalCount);
 
+        brands = ApplyBrandOrdering(
+            brands,
+            criteria.SortBy,
+            criteria.SortDescending);
+
         IQueryable<ManagedCatalogBrandResponse> projection = brands.Select(brand =>
             new ManagedCatalogBrandResponse(
                 brand.Id,
                 brand.Name,
                 brand.Slug,
                 brand.IsActive));
-
-        projection = ApplyBrandOrdering(
-            projection,
-            criteria.SortBy,
-            criteria.SortDescending);
 
         ManagedCatalogBrandResponse[] items = await projection
             .Skip((pageNumber - 1) * pageSize)
@@ -170,44 +170,60 @@ public sealed class CatalogReferenceReader :
             totalCount);
     }
 
-    private static IQueryable<ManagedCatalogCategoryResponse> ApplyCategoryOrdering(
-        IQueryable<ManagedCatalogCategoryResponse> query,
+    private static IQueryable<Category> ApplyCategoryOrdering(
+        IQueryable<Category> query,
         string? sortBy,
         bool descending)
     {
         return sortBy?.Trim() switch
         {
             CatalogReferenceSortFields.TurkishName => descending
-                ? query.OrderByDescending(item => item.TurkishName).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.TurkishName).ThenBy(item => item.Id),
+                ? query.OrderByDescending(category => category.Translations
+                        .Where(translation => translation.LanguageCode == "tr")
+                        .Select(translation => translation.Name)
+                        .FirstOrDefault() ?? category.Slug)
+                    .ThenBy(category => category.Id)
+                : query.OrderBy(category => category.Translations
+                        .Where(translation => translation.LanguageCode == "tr")
+                        .Select(translation => translation.Name)
+                        .FirstOrDefault() ?? category.Slug)
+                    .ThenBy(category => category.Id),
             CatalogReferenceSortFields.Slug => descending
-                ? query.OrderByDescending(item => item.Slug).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.Slug).ThenBy(item => item.Id),
+                ? query.OrderByDescending(category => category.Slug).ThenBy(category => category.Id)
+                : query.OrderBy(category => category.Slug).ThenBy(category => category.Id),
             CatalogReferenceSortFields.IsActive => descending
-                ? query.OrderByDescending(item => item.IsActive).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.IsActive).ThenBy(item => item.Id),
+                ? query.OrderByDescending(category => category.IsActive).ThenBy(category => category.Id)
+                : query.OrderBy(category => category.IsActive).ThenBy(category => category.Id),
             _ => descending
-                ? query.OrderByDescending(item => item.EnglishName).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.EnglishName).ThenBy(item => item.Id)
+                ? query.OrderByDescending(category => category.Translations
+                        .Where(translation => translation.LanguageCode == "en")
+                        .Select(translation => translation.Name)
+                        .FirstOrDefault() ?? category.Slug)
+                    .ThenBy(category => category.Id)
+                : query.OrderBy(category => category.Translations
+                        .Where(translation => translation.LanguageCode == "en")
+                        .Select(translation => translation.Name)
+                        .FirstOrDefault() ?? category.Slug)
+                    .ThenBy(category => category.Id)
         };
     }
 
-    private static IQueryable<ManagedCatalogBrandResponse> ApplyBrandOrdering(
-        IQueryable<ManagedCatalogBrandResponse> query,
+    private static IQueryable<Brand> ApplyBrandOrdering(
+        IQueryable<Brand> query,
         string? sortBy,
         bool descending)
     {
         return sortBy?.Trim() switch
         {
             CatalogReferenceSortFields.Slug => descending
-                ? query.OrderByDescending(item => item.Slug).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.Slug).ThenBy(item => item.Id),
+                ? query.OrderByDescending(brand => brand.Slug).ThenBy(brand => brand.Id)
+                : query.OrderBy(brand => brand.Slug).ThenBy(brand => brand.Id),
             CatalogReferenceSortFields.IsActive => descending
-                ? query.OrderByDescending(item => item.IsActive).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.IsActive).ThenBy(item => item.Id),
+                ? query.OrderByDescending(brand => brand.IsActive).ThenBy(brand => brand.Id)
+                : query.OrderBy(brand => brand.IsActive).ThenBy(brand => brand.Id),
             _ => descending
-                ? query.OrderByDescending(item => item.Name).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.Name).ThenBy(item => item.Id)
+                ? query.OrderByDescending(brand => brand.Name).ThenBy(brand => brand.Id)
+                : query.OrderBy(brand => brand.Name).ThenBy(brand => brand.Id)
         };
     }
 

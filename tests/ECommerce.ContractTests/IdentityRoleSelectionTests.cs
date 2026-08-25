@@ -46,7 +46,7 @@ public sealed class IdentityRoleSelectionTests
 
         Result<UserResponse> result = await handler.HandleAsync(
             new SelectExternalUserRoleCommand(
-                new ExternalUserProfile("Auth0", "auth0|user-1", "user@example.test", "Test User"),
+                new ExternalUserProfile("Auth0", "auth0|user-1", "user@example.test", true, "Test User"),
                 UserRoleNames.Seller),
             CancellationToken.None);
 
@@ -74,7 +74,7 @@ public sealed class IdentityRoleSelectionTests
 
         Result<UserResponse> result = await handler.HandleAsync(
             new SelectExternalUserRoleCommand(
-                new ExternalUserProfile("Auth0", "auth0|user-2", "user@example.test", "Test User"),
+                new ExternalUserProfile("Auth0", "auth0|user-2", "user@example.test", true, "Test User"),
                 UserRoleNames.Seller),
             CancellationToken.None);
 
@@ -102,7 +102,7 @@ public sealed class IdentityRoleSelectionTests
 
         Result<UserResponse> result = await handler.HandleAsync(
             new SelectExternalUserRoleCommand(
-                new ExternalUserProfile("Auth0", "auth0|user-3", "user@example.test", "Test User"),
+                new ExternalUserProfile("Auth0", "auth0|user-3", "user@example.test", true, "Test User"),
                 UserRoleNames.Seller),
             CancellationToken.None);
 
@@ -129,7 +129,7 @@ public sealed class IdentityRoleSelectionTests
 
         Result<UserResponse> result = await handler.HandleAsync(
             new SelectExternalUserRoleCommand(
-                new ExternalUserProfile("Auth0", "auth0|user-4", "user@example.test", "Test User"),
+                new ExternalUserProfile("Auth0", "auth0|user-4", "user@example.test", true, "Test User"),
                 UserRoleNames.Seller),
             CancellationToken.None);
 

@@ -57,6 +57,8 @@ public sealed class InventoryQueryReader : IInventoryQueryReader
             pageSize,
             totalCount);
 
+        items = ApplyOrdering(items, criteria.SortBy, criteria.SortDescending);
+
         IQueryable<InventoryItemResponse> projection = items.Select(item =>
             new InventoryItemResponse(
                 item.ProductId,
@@ -64,11 +66,6 @@ public sealed class InventoryQueryReader : IInventoryQueryReader
                 item.ReservedQuantity,
                 item.QuantityOnHand - item.ReservedQuantity,
                 item.UpdatedAt));
-
-        projection = ApplyOrdering(
-            projection,
-            criteria.SortBy,
-            criteria.SortDescending);
 
         InventoryItemResponse[] pageItems = await projection
             .Skip((pageNumber - 1) * pageSize)
@@ -82,8 +79,8 @@ public sealed class InventoryQueryReader : IInventoryQueryReader
             totalCount);
     }
 
-    private static IQueryable<InventoryItemResponse> ApplyOrdering(
-        IQueryable<InventoryItemResponse> query,
+    private static IQueryable<InventoryItem> ApplyOrdering(
+        IQueryable<InventoryItem> query,
         string? sortBy,
         bool descending)
     {

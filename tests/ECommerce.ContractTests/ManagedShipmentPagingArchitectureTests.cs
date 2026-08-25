@@ -19,6 +19,9 @@ public sealed class ManagedShipmentPagingArchitectureTests
         Assert.Contains(".Skip(", reader, StringComparison.Ordinal);
         Assert.Contains(".Take(pageSize)", reader, StringComparison.Ordinal);
         Assert.Contains("ThenBy(item => item.Id)", reader, StringComparison.Ordinal);
+        Assert.True(
+            reader.IndexOf("shipments = ApplyOrdering", StringComparison.Ordinal) <
+            reader.IndexOf("IQueryable<ShipmentResponse> projection", StringComparison.Ordinal));
         Assert.DoesNotContain("FailureReason", reader, StringComparison.Ordinal);
         Assert.DoesNotContain("AddressLine", reader, StringComparison.Ordinal);
         Assert.DoesNotContain(".Include(", reader, StringComparison.Ordinal);

@@ -23,6 +23,6 @@ public sealed class ProductImageConfiguration : IEntityTypeConfiguration<Product
         builder.Property(x => x.IsMain).HasColumnName("is_main");
 
         builder.HasIndex(x => x.PublicId).IsUnique();
-        builder.HasIndex(x => new { x.ProductId, x.SortOrder });
+        builder.HasIndex(x => new { x.ProductId, x.SortOrder }).IsUnique();
     }
 }

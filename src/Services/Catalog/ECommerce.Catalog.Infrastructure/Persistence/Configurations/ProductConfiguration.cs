@@ -21,7 +21,10 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(x => x.Currency).HasColumnName("currency").HasMaxLength(3).IsRequired();
         builder.Property(x => x.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(32);
         builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsUtcTimestamp();
+        builder.Property(x => x.UpdatedAt)
+            .HasColumnName("updated_at")
+            .IsUtcTimestamp()
+            .IsConcurrencyToken();
 
         builder.HasIndex(x => x.Sku).IsUnique();
         builder.HasIndex(x => x.CategoryId);

@@ -74,6 +74,8 @@ public sealed class ShipmentQueryReader : IShipmentQueryReader
             pageSize,
             totalCount);
 
+        shipments = ApplyOrdering(shipments, criteria.SortBy, criteria.SortDescending);
+
         IQueryable<ShipmentResponse> projection = shipments.Select(shipment =>
             new ShipmentResponse(
                 shipment.Id,
@@ -83,11 +85,6 @@ public sealed class ShipmentQueryReader : IShipmentQueryReader
                 shipment.Status,
                 shipment.CreatedAt,
                 shipment.UpdatedAt));
-
-        projection = ApplyOrdering(
-            projection,
-            criteria.SortBy,
-            criteria.SortDescending);
 
         ShipmentResponse[] items = await projection
             .Skip((pageNumber - 1) * pageSize)
@@ -101,8 +98,8 @@ public sealed class ShipmentQueryReader : IShipmentQueryReader
             totalCount);
     }
 
-    private static IQueryable<ShipmentResponse> ApplyOrdering(
-        IQueryable<ShipmentResponse> query,
+    private static IQueryable<Domain.Shipment> ApplyOrdering(
+        IQueryable<Domain.Shipment> query,
         string? sortBy,
         bool descending)
     {

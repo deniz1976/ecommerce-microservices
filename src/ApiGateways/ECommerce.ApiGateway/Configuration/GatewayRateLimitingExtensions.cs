@@ -73,8 +73,7 @@ public static class GatewayRateLimitingExtensions
 
     private static bool IsExempt(PathString path) =>
         path.StartsWithSegments("/health") ||
-        path.StartsWithSegments("/gateway/health") ||
-        path.StartsWithSegments("/gateway/hubs/notifications");
+        path.StartsWithSegments("/gateway/health");
 
     private static async ValueTask WriteRejectedResponseAsync(
         OnRejectedContext context,

@@ -162,6 +162,10 @@ scenarios are selected only through server configuration.
 ### Security and reliability
 
 - Auth0 access tokens are validated for issuer and audience.
+- External-user provisioning requires a verified email claim. A new external
+  identity is never linked to an existing local account from email equality
+  alone; account linking requires a separate flow that re-authenticates both
+  identities.
 - Browser authentication uses the Next.js Auth0 BFF and Authorization Code with
   PKCE.
 - Session state, including ID and rotating refresh tokens, stays in an
@@ -180,6 +184,8 @@ scenarios are selected only through server configuration.
   `DateTimeOffset` values.
 - Transactional outboxes and idempotent consumers protect at-least-once message
   delivery.
+- Compose-published development ports bind to `127.0.0.1`; containers continue
+  to communicate over the private Compose network.
 - Telemetry applies sensitive-key redaction before export.
 - RabbitMQ `_error` and `_skipped` queues are monitored during managed runtime
   checks.
@@ -262,6 +268,13 @@ them with `NEXT_PUBLIC_`, place them in `.env.local`, or expose them in command
 output. Allowed Web Origins is not needed for this BFF flow. Save the Auth0
 settings after editing them. Use the corresponding HTTPS URLs in deployed
 environments and do not add wildcard or localhost production entries.
+
+The API access token must also contain a boolean verified-email claim. Configure
+the Auth0 post-login Action that already emits the namespaced email/name claims
+to emit `event.user.email_verified` as
+`https://ecommerce.local/claims/email_verified`. Identity accepts that
+namespaced claim or the standard `email_verified` claim and fails closed when
+neither contains `true`.
 
 #### Start the backend
 
@@ -523,6 +536,10 @@ hata senaryoları yalnızca sunucu konfigürasyonundan seçilir.
 ### Güvenlik ve güvenilirlik
 
 - Auth0 access token'ları issuer ve audience bilgileriyle doğrulanır.
+- Harici kullanıcı oluşturma doğrulanmış e-posta claim'i gerektirir. Yeni bir
+  harici kimlik yalnızca e-posta eşitliğine bakılarak mevcut yerel hesaba
+  bağlanmaz; hesap bağlama iki kimliğin de yeniden doğrulandığı ayrı bir akış
+  gerektirir.
 - Tarayıcı kimlik doğrulaması Next.js Auth0 BFF ve Authorization Code with PKCE
   kullanır.
 - ID ve rotating refresh token dahil oturum durumu şifreli HttpOnly, SameSite
@@ -540,6 +557,8 @@ hata senaryoları yalnızca sunucu konfigürasyonundan seçilir.
   normalize edilir.
 - Transactional outbox ve idempotent consumer'lar at-least-once mesaj teslimini
   güvenli hale getirir.
+- Compose ile yayımlanan geliştirme portları `127.0.0.1` adresine bağlanır;
+  container'lar private Compose ağı üzerinden haberleşmeye devam eder.
 - Telemetry dışa aktarılmadan önce hassas anahtar redaction'ından geçer.
 - Managed runtime kontrollerinde RabbitMQ `_error` ve `_skipped` kuyrukları
   izlenir.
@@ -623,6 +642,13 @@ başlarına `NEXT_PUBLIC_` eklemeyin, `.env.local` dosyasına koymayın ve komut
 çıktısında göstermeyin. Bu BFF akışında Allowed Web Origins gerekmez. Ayarları
 kaydedin; deployment ortamında karşılık gelen HTTPS adreslerini kullanın ve
 production için wildcard ya da localhost eklemeyin.
+
+API access token ayrıca boolean bir doğrulanmış-e-posta claim'i taşımalıdır.
+Namespaced e-posta/ad claim'lerini üreten mevcut Auth0 post-login Action'a
+`event.user.email_verified` değerini
+`https://ecommerce.local/claims/email_verified` adıyla ekleyin. Identity bu
+namespaced claim'i veya standart `email_verified` claim'ini kabul eder; ikisi de
+`true` değilse erişimi güvenli biçimde reddeder.
 
 #### Backend'i başlatma
 

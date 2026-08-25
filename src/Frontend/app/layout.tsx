@@ -4,7 +4,6 @@ import { Inter, Manrope } from 'next/font/google'
 import Script from 'next/script'
 
 import { Providers } from '@/components/providers'
-import { themeInitScript } from '@/lib/theme/provider'
 import './globals.css'
 
 const inter = Inter({
@@ -45,11 +44,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: themeInitScript }}
-        />
+        <Script src="/theme-init.js" strategy="beforeInteractive" />
       </head>
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>

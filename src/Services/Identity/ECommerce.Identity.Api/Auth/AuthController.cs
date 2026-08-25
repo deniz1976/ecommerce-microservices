@@ -52,10 +52,16 @@ public sealed class AuthController(ISender sender) : ControllerBase
             ?? principal.FindFirstValue(Auth0ClaimNames.Name)
             ?? email;
 
+        bool emailVerified = bool.TryParse(
+            principal.FindFirstValue("email_verified")
+                ?? principal.FindFirstValue(Auth0ClaimNames.EmailVerified),
+            out bool verified) && verified;
+
         return new ExternalUserProfile(
             "Auth0",
             subject ?? string.Empty,
             email ?? string.Empty,
+            emailVerified,
             displayName ?? string.Empty);
     }
 }

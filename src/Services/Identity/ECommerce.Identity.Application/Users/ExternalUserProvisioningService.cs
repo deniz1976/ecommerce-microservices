@@ -38,6 +38,11 @@ public sealed class ExternalUserProvisioningService : IExternalUserProvisioningS
             return ValidationFailure();
         }
 
+        if (!profile.EmailVerified)
+        {
+            return Failure(IdentityErrorCodes.ExternalEmailNotVerified);
+        }
+
         Guid? externalUserId = await userIdentityReader.FindIdByExternalIdentityAsync(
             provider,
             subject,
@@ -47,6 +52,11 @@ public sealed class ExternalUserProvisioningService : IExternalUserProvisioningS
             Domain.User externalUser = (await repository.GetByIdAsync(
                 externalUserId.Value,
                 cancellationToken))!;
+            if (externalUser.Status == Domain.UserStatus.Disabled)
+            {
+                return Failure(IdentityErrorCodes.UserDisabled);
+            }
+
             return Result<UserResponse>.Success(externalUser.ToResponse());
         }
 
@@ -55,12 +65,7 @@ public sealed class ExternalUserProvisioningService : IExternalUserProvisioningS
             cancellationToken);
         if (existingUserId is not null)
         {
-            Domain.User existingUser = (await repository.GetByIdAsync(
-                existingUserId.Value,
-                cancellationToken))!;
-            existingUser.LinkExternalIdentity(provider, subject);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            return Result<UserResponse>.Success(existingUser.ToResponse());
+            return Failure(IdentityErrorCodes.ExternalAccountLinkRequired);
         }
 
         Domain.User user = new(
@@ -78,4 +83,7 @@ public sealed class ExternalUserProvisioningService : IExternalUserProvisioningS
     private static Result<UserResponse> ValidationFailure() =>
         Result<UserResponse>.Failure(
             new Error(ErrorCodes.ValidationFailed, ErrorCodes.ValidationFailed));
+
+    private static Result<UserResponse> Failure(string code) =>
+        Result<UserResponse>.Failure(new Error(code, code));
 }

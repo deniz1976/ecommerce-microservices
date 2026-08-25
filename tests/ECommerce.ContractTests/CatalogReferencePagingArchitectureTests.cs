@@ -23,7 +23,14 @@ public sealed class CatalogReferencePagingArchitectureTests
         Assert.Contains(".Skip(", managedSection, StringComparison.Ordinal);
         Assert.Contains(".Take(pageSize)", managedSection, StringComparison.Ordinal);
         Assert.Contains("EF.Functions.ILike", managedSection, StringComparison.Ordinal);
-        Assert.Contains("ThenBy(item => item.Id)", managedSection, StringComparison.Ordinal);
+        Assert.Contains("ThenBy(category => category.Id)", managedSection, StringComparison.Ordinal);
+        Assert.Contains("ThenBy(brand => brand.Id)", managedSection, StringComparison.Ordinal);
+        Assert.True(
+            managedSection.IndexOf("categories = ApplyCategoryOrdering", StringComparison.Ordinal) <
+            managedSection.IndexOf("IQueryable<ManagedCatalogCategoryResponse> projection", StringComparison.Ordinal));
+        Assert.True(
+            managedSection.IndexOf("brands = ApplyBrandOrdering", StringComparison.Ordinal) <
+            managedSection.IndexOf("IQueryable<ManagedCatalogBrandResponse> projection", StringComparison.Ordinal));
         Assert.DoesNotContain(".Include(", managedSection, StringComparison.Ordinal);
     }
 

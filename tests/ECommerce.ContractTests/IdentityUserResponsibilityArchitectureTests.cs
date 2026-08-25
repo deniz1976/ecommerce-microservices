@@ -21,7 +21,7 @@ public sealed class IdentityUserResponsibilityArchitectureTests
         Assert.DoesNotContain("LinkExternalIdentity", registration, StringComparison.Ordinal);
 
         Assert.Contains("GetOrCreateExternalAsync", external, StringComparison.Ordinal);
-        Assert.Contains("LinkExternalIdentity", external, StringComparison.Ordinal);
+        Assert.DoesNotContain("LinkExternalIdentity", external, StringComparison.Ordinal);
         Assert.DoesNotContain("RegisterAsync", external, StringComparison.Ordinal);
         Assert.DoesNotContain("IPasswordHashService", external, StringComparison.Ordinal);
     }

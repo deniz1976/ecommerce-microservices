@@ -19,6 +19,9 @@ public sealed class ManagedInventoryPagingArchitectureTests
         Assert.Contains(".Skip(", reader, StringComparison.Ordinal);
         Assert.Contains(".Take(pageSize)", reader, StringComparison.Ordinal);
         Assert.Contains("ThenBy(item => item.ProductId)", reader, StringComparison.Ordinal);
+        Assert.True(
+            reader.IndexOf("items = ApplyOrdering", StringComparison.Ordinal) <
+            reader.IndexOf("IQueryable<InventoryItemResponse> projection", StringComparison.Ordinal));
         Assert.DoesNotContain(".Include(", reader, StringComparison.Ordinal);
     }
 

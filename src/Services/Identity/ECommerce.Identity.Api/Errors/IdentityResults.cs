@@ -33,6 +33,9 @@ public static class IdentityResults
             IdentityErrorCodes.UserAlreadyExists => StatusCodes.Status409Conflict,
             IdentityErrorCodes.UserNotFound => StatusCodes.Status404NotFound,
             IdentityErrorCodes.ExternalRoleSynchronizationFailed => StatusCodes.Status503ServiceUnavailable,
+            IdentityErrorCodes.ExternalEmailNotVerified => StatusCodes.Status403Forbidden,
+            IdentityErrorCodes.ExternalAccountLinkRequired => StatusCodes.Status409Conflict,
+            IdentityErrorCodes.UserDisabled => StatusCodes.Status403Forbidden,
             ErrorCodes.ValidationFailed => StatusCodes.Status400BadRequest,
             _ => StatusCodes.Status500InternalServerError
         };
@@ -51,6 +54,15 @@ public static class IdentityResults
             IdentityErrorCodes.ExternalRoleSynchronizationFailed => culture == SupportedCultures.Turkish
                 ? "Kullanıcı rolü kimlik sağlayıcısıyla eşitlenemedi."
                 : "The user role could not be synchronized with the identity provider.",
+            IdentityErrorCodes.ExternalEmailNotVerified => culture == SupportedCultures.Turkish
+                ? "Harici hesap e-posta adresi doğrulanmamış."
+                : "The external account email address is not verified.",
+            IdentityErrorCodes.ExternalAccountLinkRequired => culture == SupportedCultures.Turkish
+                ? "Bu e-posta adresi mevcut bir hesaba ait; güvenli hesap bağlama işlemi gerekli."
+                : "This email belongs to an existing account; secure account linking is required.",
+            IdentityErrorCodes.UserDisabled => culture == SupportedCultures.Turkish
+                ? "Kullanıcı hesabı devre dışı."
+                : "The user account is disabled.",
             _ => localizer.GetMessage(code, culture)
         };
     }

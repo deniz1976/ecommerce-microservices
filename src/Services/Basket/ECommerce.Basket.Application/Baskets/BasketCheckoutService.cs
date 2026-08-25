@@ -8,6 +8,7 @@ namespace ECommerce.Basket.Application.Baskets;
 
 public sealed class BasketCheckoutService
 {
+    private const int MaximumCheckoutItemCount = 100;
     private readonly IActiveBasketStore activeBasketStore;
     private readonly IRepository<BasketCheckoutSnapshot, Guid> basketHistoryRepository;
     private readonly IUnitOfWork unitOfWork;
@@ -32,10 +33,14 @@ public sealed class BasketCheckoutService
     {
         if (request.CheckoutId == Guid.Empty ||
             string.IsNullOrWhiteSpace(request.RecipientName) ||
+            request.RecipientName.Trim().Length > 256 ||
             string.IsNullOrWhiteSpace(request.AddressLine) ||
+            request.AddressLine.Trim().Length > 512 ||
             string.IsNullOrWhiteSpace(request.City) ||
+            request.City.Trim().Length > 128 ||
             request.CountryCode.Trim().Length != 2 ||
-            string.IsNullOrWhiteSpace(request.PostalCode))
+            string.IsNullOrWhiteSpace(request.PostalCode) ||
+            request.PostalCode.Trim().Length > 32)
         {
             return Failure(BasketErrorCodes.InvalidCheckoutAddress);
         }
@@ -64,6 +69,11 @@ public sealed class BasketCheckoutService
         if (basket.Items.Count == 0)
         {
             return Failure(BasketErrorCodes.EmptyBasket);
+        }
+
+        if (basket.Items.Count > MaximumCheckoutItemCount)
+        {
+            return Failure(BasketErrorCodes.InvalidCheckoutAddress);
         }
 
         BasketCheckoutSnapshot snapshot = new(

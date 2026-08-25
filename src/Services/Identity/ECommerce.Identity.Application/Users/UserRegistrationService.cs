@@ -38,8 +38,11 @@ public sealed class UserRegistrationService
             : roleValue.Trim();
 
         if (string.IsNullOrWhiteSpace(email) ||
+            email.Length > 320 ||
             string.IsNullOrWhiteSpace(displayName) ||
+            displayName.Length > 256 ||
             password.Length < 8 ||
+            password.Length > 128 ||
             !UserRoleNames.IsSelfServiceRole(requestedRole))
         {
             return ValidationFailure();

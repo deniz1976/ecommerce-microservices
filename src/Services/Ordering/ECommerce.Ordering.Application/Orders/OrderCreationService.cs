@@ -10,6 +10,7 @@ public sealed class OrderCreationService(
     IUnitOfWork unitOfWork,
     IOrderSubmittedPublisher publisher)
 {
+    private const int MaximumOrderItemCount = 100;
     private static readonly IReadOnlyDictionary<Guid, Guid?> NoStoreAttributions =
         new Dictionary<Guid, Guid?>();
 
@@ -37,12 +38,17 @@ public sealed class OrderCreationService(
         if (orderId == Guid.Empty ||
             request.CustomerId == Guid.Empty ||
             string.IsNullOrWhiteSpace(request.Currency) ||
+            request.Currency.Trim().Length != 3 ||
             string.IsNullOrWhiteSpace(request.RecipientName) ||
+            request.RecipientName.Trim().Length > 256 ||
             string.IsNullOrWhiteSpace(request.AddressLine) ||
+            request.AddressLine.Trim().Length > 512 ||
             string.IsNullOrWhiteSpace(request.City) ||
+            request.City.Trim().Length > 128 ||
             request.CountryCode.Trim().Length != 2 ||
             string.IsNullOrWhiteSpace(request.PostalCode) ||
-            request.Items.Count == 0)
+            request.PostalCode.Trim().Length > 32 ||
+            request.Items.Count is 0 or > MaximumOrderItemCount)
         {
             return ValidationFailure();
         }
@@ -50,9 +56,11 @@ public sealed class OrderCreationService(
         if (request.Items.Any(item =>
                 item.ProductId == Guid.Empty ||
                 string.IsNullOrWhiteSpace(item.ProductName) ||
+                item.ProductName.Trim().Length > 256 ||
                 item.Quantity <= 0 ||
                 item.UnitPrice < 0 ||
                 string.IsNullOrWhiteSpace(item.Currency) ||
+                item.Currency.Trim().Length != 3 ||
                 !string.Equals(
                     item.Currency.Trim(),
                     request.Currency.Trim(),

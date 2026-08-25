@@ -55,6 +55,11 @@ public sealed class StoreReader : IStoreReader, IManagedStoreReader
             pageSize,
             totalCount);
 
+        stores = ApplyOrdering(
+            stores,
+            criteria.SortBy,
+            criteria.SortDescending);
+
         IQueryable<ManagedStoreResponse> projection = stores.Select(store =>
             new ManagedStoreResponse(
                 store.Id,
@@ -63,11 +68,6 @@ public sealed class StoreReader : IStoreReader, IManagedStoreReader
                 store.Slug,
                 store.CreatedAt,
                 store.UpdatedAt));
-
-        projection = ApplyOrdering(
-            projection,
-            criteria.SortBy,
-            criteria.SortDescending);
 
         ManagedStoreResponse[] items = await projection
             .Skip((pageNumber - 1) * pageSize)
@@ -81,25 +81,25 @@ public sealed class StoreReader : IStoreReader, IManagedStoreReader
             totalCount);
     }
 
-    private static IQueryable<ManagedStoreResponse> ApplyOrdering(
-        IQueryable<ManagedStoreResponse> query,
+    private static IQueryable<Store> ApplyOrdering(
+        IQueryable<Store> query,
         string? sortBy,
         bool descending)
     {
         return sortBy?.Trim() switch
         {
             ManagedStoreSortFields.Slug => descending
-                ? query.OrderByDescending(item => item.Slug).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.Slug).ThenBy(item => item.Id),
+                ? query.OrderByDescending(store => store.Slug).ThenBy(store => store.Id)
+                : query.OrderBy(store => store.Slug).ThenBy(store => store.Id),
             ManagedStoreSortFields.CreatedAt => descending
-                ? query.OrderByDescending(item => item.CreatedAt).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.CreatedAt).ThenBy(item => item.Id),
+                ? query.OrderByDescending(store => store.CreatedAt).ThenBy(store => store.Id)
+                : query.OrderBy(store => store.CreatedAt).ThenBy(store => store.Id),
             ManagedStoreSortFields.UpdatedAt => descending
-                ? query.OrderByDescending(item => item.UpdatedAt).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.UpdatedAt).ThenBy(item => item.Id),
+                ? query.OrderByDescending(store => store.UpdatedAt).ThenBy(store => store.Id)
+                : query.OrderBy(store => store.UpdatedAt).ThenBy(store => store.Id),
             _ => descending
-                ? query.OrderByDescending(item => item.Name).ThenBy(item => item.Id)
-                : query.OrderBy(item => item.Name).ThenBy(item => item.Id)
+                ? query.OrderByDescending(store => store.Name).ThenBy(store => store.Id)
+                : query.OrderBy(store => store.Name).ThenBy(store => store.Id)
         };
     }
 

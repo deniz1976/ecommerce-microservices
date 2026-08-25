@@ -22,7 +22,10 @@ public sealed class ManagedStorePagingArchitectureTests
         Assert.Contains(".Skip(", managedSection, StringComparison.Ordinal);
         Assert.Contains(".Take(pageSize)", managedSection, StringComparison.Ordinal);
         Assert.Contains("EF.Functions.ILike", managedSection, StringComparison.Ordinal);
-        Assert.Contains("ThenBy(item => item.Id)", managedSection, StringComparison.Ordinal);
+        Assert.Contains("ThenBy(store => store.Id)", managedSection, StringComparison.Ordinal);
+        Assert.True(
+            managedSection.IndexOf("stores = ApplyOrdering", StringComparison.Ordinal) <
+            managedSection.IndexOf("IQueryable<ManagedStoreResponse> projection", StringComparison.Ordinal));
         Assert.DoesNotContain(".Include(", managedSection, StringComparison.Ordinal);
     }
 
