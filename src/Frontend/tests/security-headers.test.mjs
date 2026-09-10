@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { readFile } from "node:fs/promises"
 import test from "node:test"
 
 test("production headers restrict browser capabilities and external origins", async () => {
@@ -7,17 +8,7 @@ test("production headers restrict browser capabilities and external origins", as
 
   const config = await import("../next.config.mjs?security-headers=production")
   const headers = await readHeaders(config.default)
-  const csp = headers.get("Content-Security-Policy")
-
-  assert.match(csp, /default-src 'self'/)
-  assert.match(csp, /connect-src 'self' https:\/\/api\.example\.test wss:\/\/api\.example\.test/)
-  assert.doesNotMatch(csp, /auth0\.test/)
-  assert.match(csp, /frame-src 'self'/)
-  assert.match(csp, /worker-src 'self' blob:/)
-  assert.match(csp, /object-src 'none'/)
-  assert.match(csp, /frame-ancestors 'none'/)
-  assert.match(csp, /upgrade-insecure-requests/)
-  assert.doesNotMatch(csp, /'unsafe-eval'/)
+  assert.equal(headers.has("Content-Security-Policy"), false)
   assert.equal(headers.get("X-Content-Type-Options"), "nosniff")
   assert.equal(headers.get("X-Frame-Options"), "DENY")
   assert.equal(headers.get("Referrer-Policy"), "strict-origin-when-cross-origin")
@@ -37,22 +28,18 @@ test("development headers preserve local Next.js debugging without HSTS", async 
 
   const config = await import("../next.config.mjs?security-headers=development")
   const headers = await readHeaders(config.default)
-  const csp = headers.get("Content-Security-Policy")
-
-  assert.match(csp, /connect-src 'self' http:\/\/localhost:5080 ws:\/\/localhost:5080/)
-  assert.match(csp, /'unsafe-eval'/)
-  assert.doesNotMatch(csp, /upgrade-insecure-requests/)
   assert.equal(headers.has("Strict-Transport-Security"), false)
 })
 
-test("invalid public origins fail closed during configuration", async () => {
-  process.env.NODE_ENV = "production"
-  process.env.NEXT_PUBLIC_API_BASE_URL = "https://user:secret@api.example.test"
+test("proxy creates a per-request nonce policy without unsafe inline scripts", async () => {
+  const source = await readFile(new URL("../proxy.ts", import.meta.url), "utf8")
 
-  await assert.rejects(
-    import("../next.config.mjs?security-headers=invalid-api"),
-    /without credentials/,
-  )
+  assert.match(source, /crypto\.randomUUID\(\)/)
+  assert.match(source, /'nonce-\$\{nonce\}'/)
+  assert.match(source, /'strict-dynamic'/)
+  assert.doesNotMatch(source, /'unsafe-inline'.*script/)
+  assert.match(source, /response\.headers\.set\("Content-Security-Policy"/)
+  assert.match(source, /requestHeaders\.set\("x-nonce"/)
 })
 
 async function readHeaders(config) {

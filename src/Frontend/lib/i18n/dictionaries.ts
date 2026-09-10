@@ -588,6 +588,59 @@ export interface Dictionary {
     displayNameTooShort: string
     selectRole: string
   }
+  status: {
+    payment: {
+      authorized: string
+      failed: string
+      refunded: string
+    }
+    shipment: {
+      created: string
+      failed: string
+      inTransit: string
+      delivered: string
+    }
+    product: {
+      draft: string
+      active: string
+      inactive: string
+      archived: string
+    }
+    user: {
+      active: string
+      disabled: string
+    }
+    workflow: {
+      submitted: string
+      inventoryReserved: string
+      paymentAuthorized: string
+      shipmentCreated: string
+      completed: string
+      cancelled: string
+    }
+    stockMovement: {
+      stockInitialized: string
+      stockIncreased: string
+      stockDecreased: string
+      stockReserved: string
+      stockReleased: string
+      auditBaseline: string
+    }
+  }
+  table: {
+    empty: string
+    emptyDescription: string
+    loadFailed: string
+    loadFailedDescription: string
+    retry: string
+    previousPage: string
+    nextPage: string
+    pageStatus: string
+    rowsPerPage: string
+    totalItems: string
+    clearFilters: string
+    filters: string
+  }
   errors: {
     generic: string
     roleUpdateFailed: string
@@ -1197,6 +1250,59 @@ const en: Dictionary = {
     displayNameTooShort: "Display name must be at least 2 characters.",
     selectRole: "Please select a role to continue.",
   },
+  status: {
+    payment: {
+      authorized: "Authorized",
+      failed: "Failed",
+      refunded: "Refunded",
+    },
+    shipment: {
+      created: "Created",
+      failed: "Failed",
+      inTransit: "In transit",
+      delivered: "Delivered",
+    },
+    product: {
+      draft: "Draft",
+      active: "Active",
+      inactive: "Inactive",
+      archived: "Archived",
+    },
+    user: {
+      active: "Active",
+      disabled: "Disabled",
+    },
+    workflow: {
+      submitted: "Submitted",
+      inventoryReserved: "Inventory reserved",
+      paymentAuthorized: "Payment authorized",
+      shipmentCreated: "Shipment created",
+      completed: "Completed",
+      cancelled: "Cancelled",
+    },
+    stockMovement: {
+      stockInitialized: "Stock initialized",
+      stockIncreased: "Stock increased",
+      stockDecreased: "Stock decreased",
+      stockReserved: "Stock reserved",
+      stockReleased: "Stock released",
+      auditBaseline: "Audit baseline",
+    },
+  },
+  table: {
+    empty: "No records found",
+    emptyDescription: "Try changing the filters or check back later.",
+    loadFailed: "Could not load data",
+    loadFailedDescription: "The request failed. Please try again.",
+    retry: "Try again",
+    previousPage: "Previous",
+    nextPage: "Next",
+    pageStatus: "Page {page} of {totalPages}",
+    rowsPerPage: "Rows per page",
+    totalItems: "{count} records",
+    clearFilters: "Clear filters",
+    filters: "Filters",
+  },
   errors: {
     generic: "Something went wrong. Please try again.",
     roleUpdateFailed: "We could not save your role. Please try again.",
@@ -1805,6 +1911,59 @@ const tr: Dictionary = {
     passwordTooShort: "Parola en az 8 karakter olmalıdır.",
     displayNameTooShort: "Görünen ad en az 2 karakter olmalıdır.",
     selectRole: "Devam etmek için lütfen bir rol seçin.",
+  },
+  status: {
+    payment: {
+      authorized: "Onaylandı",
+      failed: "Başarısız",
+      refunded: "İade edildi",
+    },
+    shipment: {
+      created: "Oluşturuldu",
+      failed: "Başarısız",
+      inTransit: "Yolda",
+      delivered: "Teslim edildi",
+    },
+    product: {
+      draft: "Taslak",
+      active: "Aktif",
+      inactive: "Pasif",
+      archived: "Arşivlendi",
+    },
+    user: {
+      active: "Aktif",
+      disabled: "Devre dışı",
+    },
+    workflow: {
+      submitted: "Oluşturuldu",
+      inventoryReserved: "Stok ayrıldı",
+      paymentAuthorized: "Ödeme onaylandı",
+      shipmentCreated: "Gönderi oluşturuldu",
+      completed: "Tamamlandı",
+      cancelled: "İptal edildi",
+    },
+    stockMovement: {
+      stockInitialized: "Stok başlatıldı",
+      stockIncreased: "Stok artırıldı",
+      stockDecreased: "Stok azaltıldı",
+      stockReserved: "Stok ayrıldı",
+      stockReleased: "Stok serbest bırakıldı",
+      auditBaseline: "Denetim referansı",
+    },
+  },
+  table: {
+    empty: "Kayıt bulunamadı",
+    emptyDescription: "Filtreleri değiştirmeyi deneyin veya daha sonra tekrar bakın.",
+    loadFailed: "Veri yüklenemedi",
+    loadFailedDescription: "İstek başarısız oldu. Lütfen tekrar deneyin.",
+    retry: "Tekrar dene",
+    previousPage: "Önceki",
+    nextPage: "Sonraki",
+    pageStatus: "Sayfa {page} / {totalPages}",
+    rowsPerPage: "Sayfa başına satır",
+    totalItems: "{count} kayıt",
+    clearFilters: "Filtreleri temizle",
+    filters: "Filtreler",
   },
   errors: {
     generic: "Bir şeyler ters gitti. Lütfen tekrar deneyin.",

@@ -103,9 +103,11 @@ public sealed class FrontendAuthenticationBoundaryTests
         string source = File.ReadAllText(GetFrontendPath("proxy.ts"));
 
         Assert.Contains(
-            "return auth0.middleware(request)",
+            "await auth0.middleware(",
             source,
             StringComparison.Ordinal);
+        Assert.Contains("new NextRequest(request, { headers: requestHeaders })", source, StringComparison.Ordinal);
+        Assert.Contains("response.headers.set(\"Content-Security-Policy\"", source, StringComparison.Ordinal);
         Assert.Contains("_next/static", source, StringComparison.Ordinal);
     }
 

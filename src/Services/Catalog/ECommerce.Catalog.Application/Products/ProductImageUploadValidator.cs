@@ -7,6 +7,8 @@ namespace ECommerce.Catalog.Application.Products;
 public sealed class ProductImageUploadValidator
 {
     public const long MaxFileSize = 5 * 1024 * 1024;
+    public const int MaxDimension = 8_192;
+    public const long MaxPixelCount = 40_000_000;
 
     public async Task<Result> ValidateAsync(
         ProductImageUpload upload,
@@ -32,7 +34,20 @@ public sealed class ProductImageUploadValidator
             _ => false
         };
 
-        return signatureMatches ? Result.Success() : Invalid();
+        if (!signatureMatches)
+        {
+            return Invalid();
+        }
+
+        (int Width, int Height)? dimensions = await ProductImageDimensionReader.ReadAsync(
+            upload.Content,
+            upload.ContentType,
+            cancellationToken);
+
+        return dimensions is { Width: > 0 and <= MaxDimension, Height: > 0 and <= MaxDimension } value &&
+               (long)value.Width * value.Height <= MaxPixelCount
+            ? Result.Success()
+            : Invalid();
     }
 
     private static bool IsJpeg(IReadOnlyList<byte> bytes, int length) =>

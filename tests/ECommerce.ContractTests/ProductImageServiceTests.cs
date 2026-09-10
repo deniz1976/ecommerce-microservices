@@ -27,13 +27,27 @@ public sealed class ProductImageServiceTests
     }
 
     [Fact]
+    public async Task UploadAsync_rejects_image_dimensions_above_decode_safety_limit()
+    {
+        (Product product, ProductImageUploadService service, _, TestProductImageStorage storage, _) = CreateServices();
+        await using MemoryStream content = CreatePngHeader(ProductImageUploadValidator.MaxDimension + 1, 1);
+
+        Result<ProductImageResponse> result = await service.UploadAsync(
+            product.Id,
+            new ProductImageUpload(content, "oversized.png", "image/png", content.Length),
+            new ProductAccessContext(TestSellerId, IsAdmin: false),
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(CatalogErrorCodes.InvalidProductImage, result.Error?.Code);
+        Assert.Equal(0, storage.UploadCount);
+    }
+
+    [Fact]
     public async Task UploadAsync_uses_provider_metadata_and_marks_first_image_as_main()
     {
         (Product product, ProductImageUploadService service, _, TestProductImageStorage storage, _) = CreateServices();
-        await using MemoryStream content = new(
-        [
-            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x00
-        ]);
+        await using MemoryStream content = CreatePngHeader(1, 1);
 
         Result<ProductImageResponse> result = await service.UploadAsync(
             product.Id,
@@ -67,10 +81,7 @@ public sealed class ProductImageServiceTests
             Assert.Equal(ProductImageMutationResult.Applied, product.AddImage(image));
         }
 
-        await using MemoryStream content = new(
-        [
-            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x00
-        ]);
+        await using MemoryStream content = CreatePngHeader(1, 1);
 
         Result<ProductImageResponse> result = await service.UploadAsync(
             product.Id,
@@ -152,6 +163,18 @@ public sealed class ProductImageServiceTests
     }
 
     private static readonly Guid TestSellerId = Guid.NewGuid();
+
+    private static MemoryStream CreatePngHeader(int width, int height)
+    {
+        byte[] bytes =
+        [
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+            (byte)(width >> 24), (byte)(width >> 16), (byte)(width >> 8), (byte)width,
+            (byte)(height >> 24), (byte)(height >> 16), (byte)(height >> 8), (byte)height
+        ];
+        return new MemoryStream(bytes);
+    }
 
     private static (
         Product Product,

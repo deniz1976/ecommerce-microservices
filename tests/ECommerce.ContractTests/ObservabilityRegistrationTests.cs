@@ -85,4 +85,16 @@ public sealed class ObservabilityRegistrationTests
         Assert.Equal(SensitiveDataRedaction.RedactedValue, redacted[1].Value);
         Assert.Equal(SensitiveDataRedaction.RedactedValue, redacted[2].Value);
     }
+
+    [Fact]
+    public void SensitiveLogTextRedactionRemovesBearerTokensAndCredentialValues()
+    {
+        string source = "Request failed Authorization=Bearer abc.def Password=top-secret";
+
+        string? redacted = SensitiveLogTextRedaction.Redact(source);
+
+        Assert.DoesNotContain("abc.def", redacted);
+        Assert.DoesNotContain("top-secret", redacted);
+        Assert.Contains(SensitiveDataRedaction.RedactedValue, redacted);
+    }
 }

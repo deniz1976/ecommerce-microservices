@@ -272,11 +272,19 @@ settings after editing them. Use the corresponding HTTPS URLs in deployed
 environments and do not add wildcard or localhost production entries.
 
 The API access token must also contain a boolean verified-email claim. Configure
-the Auth0 post-login Action that already emits the namespaced email/name claims
-to emit `event.user.email_verified` as
+and deploy [`deploy/auth0/post-login-claims.js`](deploy/auth0/post-login-claims.js)
+as a Post Login Action, then add it to the tenant Login Flow. It emits
+`event.user.email_verified` as
 `https://ecommerce.local/claims/email_verified`. Identity accepts that
 namespaced claim or the standard `email_verified` claim and fails closed when
 neither contains `true`.
+
+Never merge accounts only because their emails match. The application returns
+`EXTERNAL_ACCOUNT_LINK_REQUIRED` for that conflict. If account linking is later
+enabled in Auth0, require a fresh interactive authentication for both the
+primary and secondary identity before calling Auth0's account-link operation;
+the runtime role-synchronization M2M client must not receive account-linking
+permissions.
 
 #### Start the backend
 
@@ -648,7 +656,8 @@ kaydedin; deployment ortamında karşılık gelen HTTPS adreslerini kullanın ve
 production için wildcard ya da localhost eklemeyin.
 
 API access token ayrıca boolean bir doğrulanmış-e-posta claim'i taşımalıdır.
-Namespaced e-posta/ad claim'lerini üreten mevcut Auth0 post-login Action'a
+`deploy/auth0/post-login-claims.js` dosyasini Auth0 Post Login Action olarak
+deploy edip tenant Login Flow'a ekleyin. Bu Action
 `event.user.email_verified` değerini
 `https://ecommerce.local/claims/email_verified` adıyla ekleyin. Identity bu
 namespaced claim'i veya standart `email_verified` claim'ini kabul eder; ikisi de

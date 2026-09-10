@@ -1,15 +1,18 @@
 "use client"
 
-import { Loader2, PackageSearch, Search } from "lucide-react"
-import type { ReactNode } from "react"
+import { SearchIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { AdminPageLayout } from "@/components/admin/admin-page-layout"
 import { StockMovementPanel } from "@/components/admin/stock-movement-panel"
-import { ReferencePagination } from "@/components/admin/admin-reference-list-controls"
+import { DataTable, type DataTableColumn } from "@/components/patterns/data-table"
+import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { SelectNative } from "@/components/ui/select-native"
 import { isOptionalGuid } from "@/lib/admin/filters"
 import { getManagedInventory, type ManagedInventoryQuery } from "@/lib/api/inventory"
+import { formatDateTime } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
 import type { InventoryItem, PagedResult } from "@/types"
 
@@ -29,6 +32,7 @@ export function AdminInventoryManagementPage() {
   const [sortDescending, setSortDescending] = useState(true)
   const [pageSize, setPageSize] = useState(20)
   const [page, setPage] = useState(1)
+  const [reloadToken, setReloadToken] = useState(0)
   const [movementProductId, setMovementProductId] = useState<string | null>(null)
 
   const normalizedProduct = productInput.trim()
@@ -38,14 +42,17 @@ export function AdminInventoryManagementPage() {
 
   useEffect(() => {
     const controller = new AbortController()
-    getManagedInventory({
-      productId: productId || undefined,
-      maximumAvailableQuantity,
-      pageNumber: page,
-      pageSize,
-      sortBy,
-      sortDescending,
-    }, controller.signal)
+    getManagedInventory(
+      {
+        productId: productId || undefined,
+        maximumAvailableQuantity,
+        pageNumber: page,
+        pageSize,
+        sortBy,
+        sortDescending,
+      },
+      controller.signal,
+    )
       .then((data) => setInventory({ status: "ready", data }))
       .catch((error: unknown) => {
         if (!(error instanceof DOMException && error.name === "AbortError")) {
@@ -53,102 +60,196 @@ export function AdminInventoryManagementPage() {
         }
       })
     return () => controller.abort()
-  }, [maximumAvailableQuantity, page, pageSize, productId, sortBy, sortDescending])
+  }, [maximumAvailableQuantity, page, pageSize, productId, reloadToken, sortBy, sortDescending])
 
-  const applyFilters = () => {
-    if (!productValid || !maximumValid) return
+  const updateQuery = (update: () => void) => {
     setInventory({ status: "loading" })
-    setProductId(normalizedProduct)
-    setMaximumAvailableQuantity(normalizedMaximum === "" ? undefined : Number(normalizedMaximum))
+    update()
     setPage(1)
   }
 
+  const applyFilters = () => {
+    if (!productValid || !maximumValid) return
+    updateQuery(() => {
+      setProductId(normalizedProduct)
+      setMaximumAvailableQuantity(normalizedMaximum === "" ? undefined : Number(normalizedMaximum))
+    })
+  }
+
+  const clearFilters = () => {
+    setProductInput("")
+    setMaximumInput("")
+    updateQuery(() => {
+      setProductId("")
+      setMaximumAvailableQuantity(undefined)
+    })
+  }
+
+  const columns: DataTableColumn<InventoryItem>[] = [
+    {
+      id: "productId",
+      header: t.admin.inventoryProductId,
+      cell: (row) => <span className="font-mono text-xs">{row.productId}</span>,
+    },
+    {
+      id: "quantityOnHand",
+      header: t.admin.quantityOnHand,
+      headerClassName: "text-right",
+      className: "text-right tabular-nums",
+      cell: (row) => row.quantityOnHand,
+    },
+    {
+      id: "reservedQuantity",
+      header: t.admin.reservedQuantity,
+      headerClassName: "text-right",
+      className: "text-right text-muted-foreground tabular-nums",
+      cell: (row) => row.reservedQuantity,
+    },
+    {
+      id: "availableQuantity",
+      header: t.admin.availableQuantity,
+      headerClassName: "text-right",
+      className: "text-right font-medium tabular-nums",
+      cell: (row) => row.availableQuantity,
+    },
+    {
+      id: "updatedAt",
+      header: t.admin.inventoryUpdatedAt,
+      className: "text-muted-foreground tabular-nums",
+      cell: (row) => formatDateTime(row.updatedAt, locale),
+    },
+    {
+      id: "actions",
+      header: "",
+      className: "text-right",
+      cell: (row) => (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setMovementProductId(row.productId)}
+        >
+          {t.admin.viewStockMovements}
+        </Button>
+      ),
+    },
+  ]
+
   return (
     <AdminPageLayout title={t.admin.inventory} description={t.admin.manageInventoryDescription}>
-      <section className="mt-6" aria-labelledby="admin-inventory-list-title">
-        <h2 id="admin-inventory-list-title" className="font-heading text-xl font-semibold text-foreground">{t.admin.inventoryList}</h2>
-        <div className="mt-4 grid gap-3 rounded-lg border border-border bg-background p-4 lg:grid-cols-[minmax(18rem,1fr)_14rem_13rem_12rem_10rem]">
-          <label className="grid content-start gap-2 text-sm font-medium text-foreground">
-            {t.admin.inventoryProductId}
-            <input value={productInput} onChange={(event) => setProductInput(event.target.value)} placeholder={t.admin.inventoryProductIdPlaceholder} aria-invalid={!productValid} className="h-10 rounded-md border border-input bg-background px-3 font-mono text-xs" />
-            {!productValid ? <span className="text-xs text-destructive">{t.admin.invalidProductId}</span> : null}
-          </label>
-          <label className="grid content-start gap-2 text-sm font-medium text-foreground">
-            {t.admin.maximumAvailable}
-            <input inputMode="numeric" value={maximumInput} onChange={(event) => setMaximumInput(event.target.value)} placeholder={t.admin.maximumAvailablePlaceholder} aria-invalid={!maximumValid} className="h-10 rounded-md border border-input bg-background px-3" />
-            {!maximumValid ? <span className="text-xs text-destructive">{t.admin.invalidMaximumAvailable}</span> : null}
-          </label>
-          <InventorySelect label={t.admin.inventorySort} value={sortBy} onChange={(value) => {
-            setInventory({ status: "loading" })
-            setSortBy(value as NonNullable<ManagedInventoryQuery["sortBy"]>)
-            setPage(1)
-          }}>
-            <option value="updatedAt">{t.admin.inventoryUpdatedAt}</option>
-            <option value="availableQuantity">{t.admin.availableQuantity}</option>
-            <option value="quantityOnHand">{t.admin.quantityOnHand}</option>
-            <option value="reservedQuantity">{t.admin.reservedQuantity}</option>
-          </InventorySelect>
-          <InventorySelect label={t.admin.inventoryDirection} value={sortDescending ? "descending" : "ascending"} onChange={(value) => {
-            setInventory({ status: "loading" })
-            setSortDescending(value === "descending")
-            setPage(1)
-          }}>
-            <option value="descending">{t.admin.descending}</option>
-            <option value="ascending">{t.admin.ascending}</option>
-          </InventorySelect>
-          <div className="grid content-start gap-2">
-            <span className="text-sm font-medium text-foreground">{t.admin.rowsPerPage}</span>
-            <div className="flex gap-2">
-              <select value={pageSize} onChange={(event) => { setInventory({ status: "loading" }); setPageSize(Number(event.target.value)); setPage(1) }} className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3">
-                {[10, 20, 50].map((value) => <option key={value} value={value}>{value}</option>)}
-              </select>
-              <Button type="button" size="icon" onClick={applyFilters} disabled={!productValid || !maximumValid} aria-label={t.admin.applyInventoryFilters}><Search /></Button>
-            </div>
-          </div>
-        </div>
+      <section className="mt-6 flex flex-col gap-4" aria-labelledby="admin-inventory-list-title">
+        <h2 id="admin-inventory-list-title" className="font-heading text-xl font-semibold">
+          {t.admin.inventoryList}
+        </h2>
 
-        <div className="mt-4 overflow-hidden rounded-lg border border-border bg-background">
-          {inventory.status === "loading" ? <InventoryMessage loading message={t.common.loading} />
-            : inventory.status === "unavailable" ? <InventoryMessage message={t.admin.inventoryUnavailable} />
-              : inventory.data.items.length === 0 ? <InventoryMessage message={t.admin.noMatchingInventory} />
-                : <>
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[55rem] border-collapse text-left text-sm">
-                      <thead className="bg-muted/55 text-xs text-muted-foreground"><tr>
-                        <th scope="col" className="px-4 py-3 font-medium">{t.admin.inventoryProductId}</th>
-                        <th scope="col" className="px-4 py-3 text-right font-medium">{t.admin.quantityOnHand}</th>
-                        <th scope="col" className="px-4 py-3 text-right font-medium">{t.admin.reservedQuantity}</th>
-                        <th scope="col" className="px-4 py-3 text-right font-medium">{t.admin.availableQuantity}</th>
-                        <th scope="col" className="px-4 py-3 font-medium">{t.admin.inventoryUpdatedAt}</th>
-                        <th scope="col" className="px-4 py-3"><span className="sr-only">{t.admin.viewStockMovements}</span></th>
-                      </tr></thead>
-                      <tbody className="divide-y divide-border">{inventory.data.items.map((item) => <tr key={item.productId} className="hover:bg-muted/25">
-                        <td className="px-4 py-3 font-mono text-xs text-foreground">{item.productId}</td>
-                        <td className="px-4 py-3 text-right text-foreground">{item.quantityOnHand}</td>
-                        <td className="px-4 py-3 text-right text-muted-foreground">{item.reservedQuantity}</td>
-                        <td className="px-4 py-3 text-right font-medium text-primary">{item.availableQuantity}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{formatDate(item.updatedAt, locale)}</td>
-                        <td className="px-4 py-3 text-right"><Button type="button" variant="outline" size="sm" onClick={() => setMovementProductId(item.productId)}>{t.admin.viewStockMovements}</Button></td>
-                      </tr>)}</tbody>
-                    </table>
-                  </div>
-                  <ReferencePagination page={inventory.data.pageNumber} totalPages={Math.max(1, inventory.data.totalPages)} totalCount={inventory.data.totalCount} pageLabel={t.admin.inventoryPageStatus} previousLabel={t.admin.previousPage} nextLabel={t.admin.nextPage} onPageChange={(value) => { setInventory({ status: "loading" }); setPage(value) }} />
-                </>}
-        </div>
-        {movementProductId ? <StockMovementPanel productId={movementProductId} onClose={() => setMovementProductId(null)} /> : null}
+        <FilterBar
+          onClear={clearFilters}
+          hasActiveFilters={productId !== "" || maximumAvailableQuantity !== undefined}
+        >
+          <FilterField label={t.admin.inventoryProductId} className="min-w-72 flex-1">
+            <Input
+              value={productInput}
+              onChange={(event) => setProductInput(event.target.value)}
+              placeholder={t.admin.inventoryProductIdPlaceholder}
+              aria-invalid={!productValid}
+              className="font-mono text-xs"
+            />
+            {!productValid ? (
+              <span className="text-xs text-destructive">{t.admin.invalidProductId}</span>
+            ) : null}
+          </FilterField>
+
+          <FilterField label={t.admin.maximumAvailable}>
+            <Input
+              inputMode="numeric"
+              value={maximumInput}
+              onChange={(event) => setMaximumInput(event.target.value)}
+              placeholder={t.admin.maximumAvailablePlaceholder}
+              aria-invalid={!maximumValid}
+            />
+            {!maximumValid ? (
+              <span className="text-xs text-destructive">{t.admin.invalidMaximumAvailable}</span>
+            ) : null}
+          </FilterField>
+
+          <FilterField label={t.admin.inventorySort}>
+            <SelectNative
+              value={sortBy}
+              onChange={(event) =>
+                updateQuery(() =>
+                  setSortBy(event.target.value as NonNullable<ManagedInventoryQuery["sortBy"]>),
+                )
+              }
+            >
+              <option value="updatedAt">{t.admin.inventoryUpdatedAt}</option>
+              <option value="availableQuantity">{t.admin.availableQuantity}</option>
+              <option value="quantityOnHand">{t.admin.quantityOnHand}</option>
+              <option value="reservedQuantity">{t.admin.reservedQuantity}</option>
+            </SelectNative>
+          </FilterField>
+
+          <FilterField label={t.admin.inventoryDirection}>
+            <SelectNative
+              value={sortDescending ? "descending" : "ascending"}
+              onChange={(event) =>
+                updateQuery(() => setSortDescending(event.target.value === "descending"))
+              }
+            >
+              <option value="descending">{t.admin.descending}</option>
+              <option value="ascending">{t.admin.ascending}</option>
+            </SelectNative>
+          </FilterField>
+
+          <FilterField label={t.table.rowsPerPage} className="min-w-24">
+            <SelectNative
+              value={pageSize}
+              onChange={(event) => updateQuery(() => setPageSize(Number(event.target.value)))}
+            >
+              {[10, 20, 50].map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </SelectNative>
+          </FilterField>
+
+          <Button
+            type="button"
+            className="self-end"
+            onClick={applyFilters}
+            disabled={!productValid || !maximumValid}
+            aria-label={t.admin.applyInventoryFilters}
+          >
+            <SearchIcon />
+            {t.admin.applyInventoryFilters}
+          </Button>
+        </FilterBar>
+
+        <DataTable
+          columns={columns}
+          page={inventory.status === "ready" ? inventory.data : null}
+          rowKey={(row) => row.productId}
+          isLoading={inventory.status === "loading"}
+          error={inventory.status === "unavailable"}
+          onRetry={() => {
+            setInventory({ status: "loading" })
+            setReloadToken((token) => token + 1)
+          }}
+          onPageChange={(value) => {
+            setInventory({ status: "loading" })
+            setPage(value)
+          }}
+          emptyTitle={t.admin.noMatchingInventory}
+          minWidthClassName="min-w-[55rem]"
+        />
+
+        {movementProductId ? (
+          <StockMovementPanel
+            productId={movementProductId}
+            onClose={() => setMovementProductId(null)}
+          />
+        ) : null}
       </section>
     </AdminPageLayout>
   )
-}
-
-function InventorySelect({ label, value, onChange, children }: { label: string; value: string; onChange: (value: string) => void; children: ReactNode }) {
-  return <label className="grid content-start gap-2 text-sm font-medium text-foreground">{label}<select value={value} onChange={(event) => onChange(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3 font-normal">{children}</select></label>
-}
-
-function InventoryMessage({ message, loading = false }: { message: string; loading?: boolean }) {
-  return <div className="flex min-h-44 items-center justify-center gap-3 px-5 text-sm text-muted-foreground">{loading ? <Loader2 className="size-5 animate-spin" /> : <PackageSearch className="size-5" />}{message}</div>
-}
-
-function formatDate(value: string, locale: "en" | "tr") {
-  return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
 }

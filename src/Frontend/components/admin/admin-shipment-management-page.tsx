@@ -1,15 +1,20 @@
 "use client"
 
-import { Loader2, Search, Truck } from "lucide-react"
-import type { ReactNode } from "react"
+import { SearchIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { AdminPageLayout } from "@/components/admin/admin-page-layout"
-import { ReferencePagination } from "@/components/admin/admin-reference-list-controls"
+import { DataTable, type DataTableColumn } from "@/components/patterns/data-table"
+import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
+import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { SelectNative } from "@/components/ui/select-native"
 import { isOptionalGuid, isValidUtcRange, toOptionalUtcIso } from "@/lib/admin/filters"
 import { getManagedShipments, type ManagedShipmentsQuery } from "@/lib/api/shipping"
+import { formatDateTime } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
+import { shipmentStatusLabel, shipmentStatusTone } from "@/lib/i18n/status"
 import type { PagedResult, ShipmentStatus, ShipmentSummary } from "@/types"
 
 type ShipmentState =
@@ -39,6 +44,7 @@ export function AdminShipmentManagementPage() {
   const [sortDescending, setSortDescending] = useState(true)
   const [pageSize, setPageSize] = useState(20)
   const [page, setPage] = useState(1)
+  const [reloadToken, setReloadToken] = useState(0)
 
   const customerId = customerInput.trim()
   const orderId = orderInput.trim()
@@ -51,14 +57,17 @@ export function AdminShipmentManagementPage() {
 
   useEffect(() => {
     const controller = new AbortController()
-    getManagedShipments({
-      ...filters,
-      status: status === "all" ? undefined : status,
-      pageNumber: page,
-      pageSize,
-      sortBy,
-      sortDescending,
-    }, controller.signal)
+    getManagedShipments(
+      {
+        ...filters,
+        status: status === "all" ? undefined : status,
+        pageNumber: page,
+        pageSize,
+        sortBy,
+        sortDescending,
+      },
+      controller.signal,
+    )
       .then((data) => setShipments({ status: "ready", data }))
       .catch((error: unknown) => {
         if (!(error instanceof DOMException && error.name === "AbortError")) {
@@ -66,14 +75,7 @@ export function AdminShipmentManagementPage() {
         }
       })
     return () => controller.abort()
-  }, [filters, page, pageSize, sortBy, sortDescending, status])
-
-  const applyFilters = () => {
-    if (!filtersValid) return
-    setShipments({ status: "loading" })
-    setFilters({ customerId: customerId || undefined, orderId: orderId || undefined, createdFrom, createdTo })
-    setPage(1)
-  }
+  }, [filters, page, pageSize, reloadToken, sortBy, sortDescending, status])
 
   const updateQuery = (update: () => void) => {
     setShipments({ status: "loading" })
@@ -81,93 +83,231 @@ export function AdminShipmentManagementPage() {
     setPage(1)
   }
 
+  const applyFilters = () => {
+    if (!filtersValid) return
+    updateQuery(() =>
+      setFilters({
+        customerId: customerId || undefined,
+        orderId: orderId || undefined,
+        createdFrom,
+        createdTo,
+      }),
+    )
+  }
+
+  const clearFilters = () => {
+    setCustomerInput("")
+    setOrderInput("")
+    setCreatedFromInput("")
+    setCreatedToInput("")
+    updateQuery(() => {
+      setFilters({})
+      setStatus("all")
+    })
+  }
+
+  const hasActiveFilters =
+    status !== "all" ||
+    filters.customerId !== undefined ||
+    filters.orderId !== undefined ||
+    filters.createdFrom !== undefined ||
+    filters.createdTo !== undefined
+
+  const columns: DataTableColumn<ShipmentSummary>[] = [
+    {
+      id: "id",
+      header: t.admin.shipmentId,
+      cell: (row) => <span className="font-mono text-xs">{row.id}</span>,
+    },
+    {
+      id: "orderId",
+      header: t.admin.paymentOrderId,
+      cell: (row) => <span className="font-mono text-xs text-muted-foreground">{row.orderId}</span>,
+    },
+    {
+      id: "customerId",
+      header: t.admin.paymentCustomerId,
+      cell: (row) => (
+        <span className="font-mono text-xs text-muted-foreground">{row.customerId}</span>
+      ),
+    },
+    {
+      id: "trackingNumber",
+      header: t.admin.trackingNumber,
+      cell: (row) => (
+        <span className="font-mono text-xs">{row.trackingNumber ?? t.admin.notAvailable}</span>
+      ),
+    },
+    {
+      id: "status",
+      header: t.admin.shipmentStatus,
+      cell: (row) => (
+        <StatusBadge
+          label={shipmentStatusLabel(row.status, t.status)}
+          tone={shipmentStatusTone(row.status)}
+        />
+      ),
+    },
+    {
+      id: "createdAt",
+      header: t.admin.paymentCreatedAt,
+      className: "text-muted-foreground tabular-nums",
+      cell: (row) => formatDateTime(row.createdAt, locale),
+    },
+    {
+      id: "updatedAt",
+      header: t.admin.paymentUpdatedAt,
+      className: "text-muted-foreground tabular-nums",
+      cell: (row) => formatDateTime(row.updatedAt, locale),
+    },
+  ]
+
   return (
     <AdminPageLayout title={t.admin.shipments} description={t.admin.manageShipmentsDescription}>
-      <section className="mt-6" aria-labelledby="admin-shipment-list-title">
-        <h2 id="admin-shipment-list-title" className="font-heading text-xl font-semibold text-foreground">{t.admin.shipmentList}</h2>
-        <div className="mt-4 grid gap-3 rounded-lg border border-border bg-background p-4 md:grid-cols-2 xl:grid-cols-4">
-          <ShipmentInput label={t.admin.paymentCustomerId} value={customerInput} onChange={setCustomerInput} placeholder={t.admin.guidFilterPlaceholder} invalid={!customerValid} error={t.admin.invalidCustomerId} />
-          <ShipmentInput label={t.admin.paymentOrderId} value={orderInput} onChange={setOrderInput} placeholder={t.admin.guidFilterPlaceholder} invalid={!orderValid} error={t.admin.invalidOrderId} />
-          <ShipmentInput label={t.admin.createdFrom} value={createdFromInput} onChange={setCreatedFromInput} type="datetime-local" />
-          <ShipmentInput label={t.admin.createdTo} value={createdToInput} onChange={setCreatedToInput} type="datetime-local" invalid={!dateRangeValid} error={t.admin.invalidDateRange} />
-          <ShipmentSelect label={t.admin.shipmentStatus} value={String(status)} onChange={(value) => updateQuery(() => setStatus(value === "all" ? "all" : Number(value) as ShipmentStatus))}>
-            <option value="all">{t.admin.allShipmentStatuses}</option>
-            {shipmentStatuses.map((value) => <option key={value} value={value}>{shipmentStatusLabel(value, t.admin)}</option>)}
-          </ShipmentSelect>
-          <ShipmentSelect label={t.admin.shipmentSort} value={sortBy} onChange={(value) => updateQuery(() => setSortBy(value as NonNullable<ManagedShipmentsQuery["sortBy"]>))}>
-            <option value="createdAt">{t.admin.paymentCreatedAt}</option>
-            <option value="updatedAt">{t.admin.paymentUpdatedAt}</option>
-            <option value="status">{t.admin.shipmentStatus}</option>
-          </ShipmentSelect>
-          <ShipmentSelect label={t.admin.inventoryDirection} value={sortDescending ? "descending" : "ascending"} onChange={(value) => updateQuery(() => setSortDescending(value === "descending"))}>
-            <option value="descending">{t.admin.descending}</option>
-            <option value="ascending">{t.admin.ascending}</option>
-          </ShipmentSelect>
-          <div className="grid content-start gap-2">
-            <span className="text-sm font-medium text-foreground">{t.admin.rowsPerPage}</span>
-            <div className="flex gap-2">
-              <select value={pageSize} onChange={(event) => updateQuery(() => setPageSize(Number(event.target.value)))} className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3">
-                {[10, 20, 50].map((value) => <option key={value} value={value}>{value}</option>)}
-              </select>
-              <Button type="button" size="icon" onClick={applyFilters} disabled={!filtersValid} aria-label={t.admin.applyShipmentFilters}><Search /></Button>
-            </div>
-          </div>
-        </div>
+      <section className="mt-6 flex flex-col gap-4" aria-labelledby="admin-shipment-list-title">
+        <h2 id="admin-shipment-list-title" className="font-heading text-xl font-semibold">
+          {t.admin.shipmentList}
+        </h2>
 
-        <div className="mt-4 overflow-hidden rounded-lg border border-border bg-background">
-          {shipments.status === "loading" ? <ShipmentMessage loading message={t.common.loading} />
-            : shipments.status === "unavailable" ? <ShipmentMessage message={t.admin.shipmentsUnavailable} />
-              : shipments.data.items.length === 0 ? <ShipmentMessage message={t.admin.noMatchingShipments} />
-                : <>
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[72rem] border-collapse text-left text-sm">
-                      <thead className="bg-muted/55 text-xs text-muted-foreground"><tr>
-                        <th scope="col" className="px-4 py-3 font-medium">{t.admin.shipmentId}</th>
-                        <th scope="col" className="px-4 py-3 font-medium">{t.admin.paymentOrderId}</th>
-                        <th scope="col" className="px-4 py-3 font-medium">{t.admin.paymentCustomerId}</th>
-                        <th scope="col" className="px-4 py-3 font-medium">{t.admin.trackingNumber}</th>
-                        <th scope="col" className="px-4 py-3 font-medium">{t.admin.shipmentStatus}</th>
-                        <th scope="col" className="px-4 py-3 font-medium">{t.admin.paymentCreatedAt}</th>
-                        <th scope="col" className="px-4 py-3 font-medium">{t.admin.paymentUpdatedAt}</th>
-                      </tr></thead>
-                      <tbody className="divide-y divide-border">{shipments.data.items.map((shipment) => <tr key={shipment.id} className="hover:bg-muted/25">
-                        <td className="px-4 py-3 font-mono text-xs text-foreground">{shipment.id}</td>
-                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{shipment.orderId}</td>
-                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{shipment.customerId}</td>
-                        <td className="px-4 py-3 font-mono text-xs text-foreground">{shipment.trackingNumber ?? t.admin.notAvailable}</td>
-                        <td className="px-4 py-3 font-medium text-primary">{shipmentStatusLabel(shipment.status, t.admin)}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{formatDate(shipment.createdAt, locale)}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{formatDate(shipment.updatedAt, locale)}</td>
-                      </tr>)}</tbody>
-                    </table>
-                  </div>
-                  <ReferencePagination page={shipments.data.pageNumber} totalPages={Math.max(1, shipments.data.totalPages)} totalCount={shipments.data.totalCount} pageLabel={t.admin.shipmentPageStatus} previousLabel={t.admin.previousPage} nextLabel={t.admin.nextPage} onPageChange={(value) => { setShipments({ status: "loading" }); setPage(value) }} />
-                </>}
-        </div>
+        <FilterBar onClear={clearFilters} hasActiveFilters={hasActiveFilters}>
+          <FilterField label={t.admin.paymentCustomerId} className="min-w-64">
+            <Input
+              value={customerInput}
+              onChange={(event) => setCustomerInput(event.target.value)}
+              placeholder={t.admin.guidFilterPlaceholder}
+              aria-invalid={!customerValid}
+              className="font-mono text-xs"
+            />
+            {!customerValid ? (
+              <span className="text-xs text-destructive">{t.admin.invalidCustomerId}</span>
+            ) : null}
+          </FilterField>
+
+          <FilterField label={t.admin.paymentOrderId} className="min-w-64">
+            <Input
+              value={orderInput}
+              onChange={(event) => setOrderInput(event.target.value)}
+              placeholder={t.admin.guidFilterPlaceholder}
+              aria-invalid={!orderValid}
+              className="font-mono text-xs"
+            />
+            {!orderValid ? (
+              <span className="text-xs text-destructive">{t.admin.invalidOrderId}</span>
+            ) : null}
+          </FilterField>
+
+          <FilterField label={t.admin.createdFrom}>
+            <Input
+              type="datetime-local"
+              value={createdFromInput}
+              onChange={(event) => setCreatedFromInput(event.target.value)}
+            />
+          </FilterField>
+
+          <FilterField label={t.admin.createdTo}>
+            <Input
+              type="datetime-local"
+              value={createdToInput}
+              onChange={(event) => setCreatedToInput(event.target.value)}
+              aria-invalid={!dateRangeValid}
+            />
+            {!dateRangeValid ? (
+              <span className="text-xs text-destructive">{t.admin.invalidDateRange}</span>
+            ) : null}
+          </FilterField>
+
+          <FilterField label={t.admin.shipmentStatus}>
+            <SelectNative
+              value={String(status)}
+              onChange={(event) =>
+                updateQuery(() =>
+                  setStatus(
+                    event.target.value === "all"
+                      ? "all"
+                      : (Number(event.target.value) as ShipmentStatus),
+                  ),
+                )
+              }
+            >
+              <option value="all">{t.admin.allShipmentStatuses}</option>
+              {shipmentStatuses.map((value) => (
+                <option key={value} value={value}>
+                  {shipmentStatusLabel(value, t.status)}
+                </option>
+              ))}
+            </SelectNative>
+          </FilterField>
+
+          <FilterField label={t.admin.shipmentSort}>
+            <SelectNative
+              value={sortBy}
+              onChange={(event) =>
+                updateQuery(() =>
+                  setSortBy(event.target.value as NonNullable<ManagedShipmentsQuery["sortBy"]>),
+                )
+              }
+            >
+              <option value="createdAt">{t.admin.paymentCreatedAt}</option>
+              <option value="updatedAt">{t.admin.paymentUpdatedAt}</option>
+              <option value="status">{t.admin.shipmentStatus}</option>
+            </SelectNative>
+          </FilterField>
+
+          <FilterField label={t.admin.inventoryDirection}>
+            <SelectNative
+              value={sortDescending ? "descending" : "ascending"}
+              onChange={(event) =>
+                updateQuery(() => setSortDescending(event.target.value === "descending"))
+              }
+            >
+              <option value="descending">{t.admin.descending}</option>
+              <option value="ascending">{t.admin.ascending}</option>
+            </SelectNative>
+          </FilterField>
+
+          <FilterField label={t.table.rowsPerPage} className="min-w-24">
+            <SelectNative
+              value={pageSize}
+              onChange={(event) => updateQuery(() => setPageSize(Number(event.target.value)))}
+            >
+              {[10, 20, 50].map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </SelectNative>
+          </FilterField>
+
+          <Button
+            type="button"
+            className="self-end"
+            onClick={applyFilters}
+            disabled={!filtersValid}
+            aria-label={t.admin.applyShipmentFilters}
+          >
+            <SearchIcon />
+            {t.admin.applyShipmentFilters}
+          </Button>
+        </FilterBar>
+
+        <DataTable
+          columns={columns}
+          page={shipments.status === "ready" ? shipments.data : null}
+          rowKey={(row) => row.id}
+          isLoading={shipments.status === "loading"}
+          error={shipments.status === "unavailable"}
+          onRetry={() => {
+            setShipments({ status: "loading" })
+            setReloadToken((token) => token + 1)
+          }}
+          onPageChange={(value) => {
+            setShipments({ status: "loading" })
+            setPage(value)
+          }}
+          emptyTitle={t.admin.noMatchingShipments}
+          minWidthClassName="min-w-[72rem]"
+        />
       </section>
     </AdminPageLayout>
   )
-}
-
-function ShipmentInput({ label, value, onChange, placeholder, type = "text", invalid = false, error }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string; type?: string; invalid?: boolean; error?: string }) {
-  return <label className="grid content-start gap-2 text-sm font-medium text-foreground">{label}<input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} aria-invalid={invalid} className="h-10 rounded-md border border-input bg-background px-3" />{invalid && error ? <span className="text-xs text-destructive">{error}</span> : null}</label>
-}
-
-function ShipmentSelect({ label, value, onChange, children }: { label: string; value: string; onChange: (value: string) => void; children: ReactNode }) {
-  return <label className="grid content-start gap-2 text-sm font-medium text-foreground">{label}<select value={value} onChange={(event) => onChange(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3 font-normal">{children}</select></label>
-}
-
-function ShipmentMessage({ message, loading = false }: { message: string; loading?: boolean }) {
-  return <div className="flex min-h-44 items-center justify-center gap-3 px-5 text-sm text-muted-foreground">{loading ? <Loader2 className="size-5 animate-spin" /> : <Truck className="size-5" />}{message}</div>
-}
-
-function shipmentStatusLabel(status: ShipmentStatus, labels: { shipmentCreated: string; shipmentFailed: string; shipmentInTransit: string; shipmentDelivered: string }) {
-  if (status === 1) return labels.shipmentCreated
-  if (status === 2) return labels.shipmentFailed
-  if (status === 3) return labels.shipmentInTransit
-  return labels.shipmentDelivered
-}
-
-function formatDate(value: string, locale: "en" | "tr") {
-  return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
 }

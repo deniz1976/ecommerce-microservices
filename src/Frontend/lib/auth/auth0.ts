@@ -17,14 +17,14 @@ export async function loginWithAuth0(
     query.set("screen_hint", "signup")
   }
 
-  window.location.assign(`/auth/login?${query.toString()}`)
+  window.location.replace(`/auth/login?${query.toString()}`)
 }
 
 export async function logoutFromAuth0(returnTo = "/login"): Promise<void> {
   const localReturnTo = normalizeLocalReturnPath(returnTo, "/login")
   const absoluteReturnTo = new URL(localReturnTo, window.location.origin)
 
-  window.location.assign(
+  window.location.replace(
     `/auth/logout?returnTo=${encodeURIComponent(absoluteReturnTo.toString())}`,
   )
 }

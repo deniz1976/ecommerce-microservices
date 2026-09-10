@@ -1,38 +1,6 @@
 const isDevelopment = process.env.NODE_ENV !== "production"
-const apiOrigin = readHttpOrigin(
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:15080",
-  "NEXT_PUBLIC_API_BASE_URL",
-)
-const websocketOrigin = toWebSocketOrigin(apiOrigin)
-
-const connectSources = [
-  "'self'",
-  apiOrigin,
-  websocketOrigin,
-].filter(Boolean)
-
-const contentSecurityPolicy = [
-  "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""}`,
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' blob: data: https://res.cloudinary.com",
-  "font-src 'self' data:",
-  `connect-src ${connectSources.join(" ")}`,
-  "frame-src 'self'",
-  "worker-src 'self' blob:",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  "manifest-src 'self'",
-  ...(!isDevelopment ? ["upgrade-insecure-requests"] : []),
-].join("; ")
 
 const securityHeaders = [
-  {
-    key: "Content-Security-Policy",
-    value: contentSecurityPolicy,
-  },
   {
     key: "Referrer-Policy",
     value: "strict-origin-when-cross-origin",
@@ -75,30 +43,3 @@ const nextConfig = {
 }
 
 export default nextConfig
-
-function readHttpOrigin(value, variableName) {
-  let parsed
-  try {
-    parsed = new URL(value)
-  } catch {
-    throw new Error(`${variableName} must be an absolute HTTP or HTTPS URL.`)
-  }
-
-  if (
-    !["http:", "https:"].includes(parsed.protocol) ||
-    parsed.username ||
-    parsed.password
-  ) {
-    throw new Error(
-      `${variableName} must be an absolute HTTP or HTTPS URL without credentials.`,
-    )
-  }
-
-  return parsed.origin
-}
-
-function toWebSocketOrigin(origin) {
-  const parsed = new URL(origin)
-  parsed.protocol = parsed.protocol === "https:" ? "wss:" : "ws:"
-  return parsed.origin
-}

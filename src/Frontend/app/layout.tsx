@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Manrope } from 'next/font/google'
 import Script from 'next/script'
+import { headers } from 'next/headers'
 
 import { Providers } from '@/components/providers'
 import './globals.css'
@@ -32,11 +33,13 @@ export const viewport: Viewport = {
   ],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const nonce = (await headers()).get('x-nonce') ?? undefined
+
   return (
     <html
       lang="en"
@@ -44,7 +47,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <Script src="/theme-init.js" strategy="beforeInteractive" />
+        <Script src="/theme-init.js" strategy="beforeInteractive" nonce={nonce} />
       </head>
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>
