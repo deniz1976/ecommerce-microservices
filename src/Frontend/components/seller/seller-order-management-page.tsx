@@ -1,27 +1,39 @@
 "use client"
 
 import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
-  ClipboardList,
-  Loader2,
-  PackageOpen,
-  Store,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+  ClipboardListIcon,
+  Loader2Icon,
+  StoreIcon,
 } from "lucide-react"
 import Link from "next/link"
-import type { ReactNode } from "react"
 import { useEffect, useRef, useState } from "react"
 
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
+import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
+import { EmptyState, ErrorState } from "@/components/patterns/states"
+import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { SelectNative } from "@/components/ui/select-native"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { getMyCatalogStores } from "@/lib/api/catalog"
 import { getSellerOrder, getSellerOrders } from "@/lib/api/orders"
+import { formatDateTime, formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
-import { getOrderStatusName } from "@/lib/orders/status"
+import { orderStatusLabel, orderStatusTone } from "@/lib/i18n/status"
 import { cn } from "@/lib/utils"
 import type {
   CatalogStore,
@@ -53,6 +65,7 @@ export function SellerOrderManagementPage() {
   const [sortDescending, setSortDescending] = useState(true)
   const [pageSize, setPageSize] = useState(20)
   const [page, setPage] = useState(1)
+  const [reloadToken, setReloadToken] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -91,11 +104,17 @@ export function SellerOrderManagementPage() {
       })
 
     return () => controller.abort()
-  }, [page, pageSize, selectedStoreId, sortDescending, status])
+  }, [page, pageSize, reloadToken, selectedStoreId, sortDescending, status])
 
-  const selectedStore = stores.status === "ready"
-    ? stores.stores.find((store) => store.id === selectedStoreId)
-    : undefined
+  const selectedStore =
+    stores.status === "ready"
+      ? stores.stores.find((store) => store.id === selectedStoreId)
+      : undefined
+
+  const retry = () => {
+    setOrders({ status: "loading" })
+    setReloadToken((token) => token + 1)
+  }
 
   return (
     <div className="min-h-svh bg-muted/35">
@@ -103,7 +122,7 @@ export function SellerOrderManagementPage() {
         <Logo />
         <div className="flex items-center gap-2">
           <Link href="/" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-            <Store />
+            <StoreIcon />
             <span className="hidden sm:inline">{t.seller.backToWorkspace}</span>
           </Link>
           <LanguageSwitcher />
@@ -113,11 +132,11 @@ export function SellerOrderManagementPage() {
 
       <main className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 text-sm text-primary">
-          <ClipboardList className="size-4" />
+          <ClipboardListIcon className="size-4" />
           <span className="font-medium">{t.seller.roleLabel}</span>
         </div>
         <div className="mt-2 border-b border-border pb-6">
-          <h1 className="font-heading text-2xl font-semibold text-foreground sm:text-3xl">
+          <h1 className="font-heading text-2xl font-semibold sm:text-3xl">
             {t.seller.orderPageTitle}
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
@@ -125,72 +144,87 @@ export function SellerOrderManagementPage() {
           </p>
         </div>
 
-        <section className="mt-6" aria-labelledby="seller-order-list-title">
-          <div className="grid gap-4 rounded-xl border border-border bg-background p-4 sm:grid-cols-2 lg:grid-cols-4">
-            <SelectControl
-              label={t.seller.orderStore}
-              value={selectedStoreId}
-              disabled={stores.status !== "ready" || stores.stores.length === 0}
-              onChange={(value) => {
-                setOrders({ status: "loading" })
-                setSelectedStoreId(value)
-                setPage(1)
-              }}
-            >
-              {stores.status === "ready" && stores.stores.length > 0 ? (
-                stores.stores.map((store) => (
-                  <option key={store.id} value={store.id}>{store.name}</option>
-                ))
-              ) : (
-                <option value="">{t.seller.selectStore}</option>
-              )}
-            </SelectControl>
-            <SelectControl
-              label={t.seller.orderStatus}
-              value={String(status)}
-              onChange={(value) => {
-                setOrders({ status: "loading" })
-                setStatus(value === "all" ? "all" : Number(value) as OrderStatus)
-                setPage(1)
-              }}
-            >
-              <option value="all">{t.seller.allOrderStatuses}</option>
-              {orderStatuses.map((value) => (
-                <option key={value} value={value}>
-                  {t.orders.status[getOrderStatusName(value)]}
-                </option>
-              ))}
-            </SelectControl>
-            <SelectControl
-              label={t.seller.orderSort}
-              value={sortDescending ? "newest" : "oldest"}
-              onChange={(value) => {
-                setOrders({ status: "loading" })
-                setSortDescending(value === "newest")
-                setPage(1)
-              }}
-            >
-              <option value="newest">{t.seller.newestOrders}</option>
-              <option value="oldest">{t.seller.oldestOrders}</option>
-            </SelectControl>
-            <SelectControl
-              label={t.seller.orderRowsPerPage}
-              value={String(pageSize)}
-              onChange={(value) => {
-                setOrders({ status: "loading" })
-                setPageSize(Number(value))
-                setPage(1)
-              }}
-            >
-              {[10, 20, 50].map((value) => (
-                <option key={value} value={value}>{value}</option>
-              ))}
-            </SelectControl>
-          </div>
+        <section className="mt-6 flex flex-col gap-4" aria-labelledby="seller-order-list-title">
+          <FilterBar>
+            <FilterField label={t.seller.orderStore} className="min-w-56 flex-1">
+              <SelectNative
+                value={selectedStoreId}
+                disabled={stores.status !== "ready" || stores.stores.length === 0}
+                onChange={(event) => {
+                  setOrders({ status: "loading" })
+                  setSelectedStoreId(event.target.value)
+                  setPage(1)
+                }}
+              >
+                {stores.status === "ready" && stores.stores.length > 0 ? (
+                  stores.stores.map((store) => (
+                    <option key={store.id} value={store.id}>
+                      {store.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">{t.seller.selectStore}</option>
+                )}
+              </SelectNative>
+            </FilterField>
 
-          <div className="mt-6 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+            <FilterField label={t.seller.orderStatus}>
+              <SelectNative
+                value={String(status)}
+                onChange={(event) => {
+                  setOrders({ status: "loading" })
+                  setStatus(
+                    event.target.value === "all"
+                      ? "all"
+                      : (Number(event.target.value) as OrderStatus),
+                  )
+                  setPage(1)
+                }}
+              >
+                <option value="all">{t.seller.allOrderStatuses}</option>
+                {orderStatuses.map((value) => (
+                  <option key={value} value={value}>
+                    {orderStatusLabel(value, t.orders.status)}
+                  </option>
+                ))}
+              </SelectNative>
+            </FilterField>
+
+            <FilterField label={t.seller.orderSort}>
+              <SelectNative
+                value={sortDescending ? "newest" : "oldest"}
+                onChange={(event) => {
+                  setOrders({ status: "loading" })
+                  setSortDescending(event.target.value === "newest")
+                  setPage(1)
+                }}
+              >
+                <option value="newest">{t.seller.newestOrders}</option>
+                <option value="oldest">{t.seller.oldestOrders}</option>
+              </SelectNative>
+            </FilterField>
+
+            <FilterField label={t.seller.orderRowsPerPage} className="min-w-24">
+              <SelectNative
+                value={String(pageSize)}
+                onChange={(event) => {
+                  setOrders({ status: "loading" })
+                  setPageSize(Number(event.target.value))
+                  setPage(1)
+                }}
+              >
+                {[10, 20, 50].map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </SelectNative>
+            </FilterField>
+          </FilterBar>
+
+          <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
             <div>
-              <h2 id="seller-order-list-title" className="font-heading text-xl font-semibold text-foreground">
+              <h2 id="seller-order-list-title" className="font-heading text-xl font-semibold">
                 {selectedStore?.name ?? t.seller.orderPageTitle}
               </h2>
               {selectedStore ? (
@@ -205,15 +239,19 @@ export function SellerOrderManagementPage() {
           </div>
 
           {stores.status === "loading" || orders.status === "loading" ? (
-            <SellerOrderMessage loading message={t.common.loading} />
+            <div className="flex flex-col gap-4">
+              {Array.from({ length: 3 }, (_, index) => (
+                <Skeleton key={index} className="h-32 rounded-xl" />
+              ))}
+            </div>
           ) : stores.status === "unavailable" ? (
-            <SellerOrderMessage message={t.seller.storeLoadFailed} />
+            <ErrorState title={t.seller.storeLoadFailed} />
           ) : stores.status === "ready" && stores.stores.length === 0 ? (
-            <SellerOrderMessage message={`${t.seller.noStores} ${t.seller.noStoresDescription}`} />
+            <EmptyState title={t.seller.noStores} description={t.seller.noStoresDescription} />
           ) : orders.status === "unavailable" ? (
-            <SellerOrderMessage message={t.seller.ordersLoadFailed} />
+            <ErrorState title={t.seller.ordersLoadFailed} onRetry={retry} />
           ) : orders.status === "ready" && orders.data.items.length > 0 ? (
-            <div className="mt-4 space-y-4">
+            <div className="flex flex-col gap-4">
               {orders.data.items.map((order) => (
                 <SellerOrderCard key={order.orderId} order={order} />
               ))}
@@ -226,7 +264,7 @@ export function SellerOrderManagementPage() {
               />
             </div>
           ) : (
-            <SellerOrderMessage message={t.seller.noOrders} />
+            <EmptyState title={t.seller.noOrders} />
           )}
         </section>
       </main>
@@ -269,28 +307,34 @@ function SellerOrderCard({ order }: { order: SellerOrderSummary }) {
   }
 
   return (
-    <article className="overflow-hidden rounded-xl border border-border bg-background">
+    <article className="overflow-hidden rounded-xl border border-border bg-card">
       <div className="grid gap-4 border-b border-border bg-muted/25 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
-        <OrderFact label={t.seller.orderNumber} value={order.orderId.slice(0, 8).toUpperCase()} mono />
-        <OrderFact label={t.seller.placedAt} value={formatDate(order.createdAt, locale)} />
-        <OrderFact label={t.seller.lastUpdated} value={formatDate(order.updatedAt, locale)} />
-        <div className="lg:text-right">
-          <p className="text-xs text-muted-foreground">{t.seller.storeTotal}</p>
-          <p className="mt-1 font-heading text-lg font-semibold text-foreground">
-            {formatMoney(order.storeTotalAmount, order.currency, locale)}
-          </p>
-          <p className="mt-1 text-xs font-medium text-primary">
-            {t.orders.status[getOrderStatusName(order.status)]}
-          </p>
+        <OrderFact
+          label={t.seller.orderNumber}
+          value={order.orderId.slice(0, 8).toUpperCase()}
+          mono
+        />
+        <OrderFact label={t.seller.placedAt} value={formatDateTime(order.createdAt, locale)} />
+        <OrderFact label={t.seller.lastUpdated} value={formatDateTime(order.updatedAt, locale)} />
+        <div className="flex flex-col gap-2 lg:items-end">
+          <div className="flex flex-col gap-1 lg:items-end">
+            <span className="text-xs text-muted-foreground">{t.seller.storeTotal}</span>
+            <span className="font-heading text-lg font-semibold tabular-nums">
+              {formatMoney(order.storeTotalAmount, order.currency, locale)}
+            </span>
+          </div>
+          <StatusBadge
+            label={orderStatusLabel(order.status, t.orders.status)}
+            tone={orderStatusTone(order.status)}
+          />
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="mt-2"
             onClick={toggleDetails}
             aria-expanded={expanded}
           >
-            {expanded ? <ChevronUp /> : <ChevronDown />}
+            {expanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
             {expanded
               ? t.seller.hideOrderItems
               : t.seller.showOrderItems.replace("{count}", String(order.itemCount))}
@@ -299,7 +343,7 @@ function SellerOrderCard({ order }: { order: SellerOrderSummary }) {
       </div>
       {expanded && detail.status === "loading" ? (
         <div className="flex min-h-28 items-center justify-center">
-          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          <Loader2Icon className="size-5 animate-spin text-muted-foreground" />
           <span className="sr-only">{t.common.loading}</span>
         </div>
       ) : expanded && detail.status === "unavailable" ? (
@@ -315,32 +359,33 @@ function SellerOrderItemsTable({ order }: { order: SellerOrderDetail }) {
   const { locale, t } = useI18n()
   return (
     <div className="overflow-x-auto">
-        <table className="w-full min-w-[42rem] border-collapse text-left text-sm">
-          <caption className="sr-only">{t.seller.orderItems}</caption>
-          <thead className="text-xs text-muted-foreground">
-            <tr>
-              <th scope="col" className="px-5 py-3 font-medium">{t.seller.orderProduct}</th>
-              <th scope="col" className="px-5 py-3 text-right font-medium">{t.seller.orderQuantity}</th>
-              <th scope="col" className="px-5 py-3 text-right font-medium">{t.seller.orderUnitPrice}</th>
-              <th scope="col" className="px-5 py-3 text-right font-medium">{t.seller.orderLineTotal}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {order.items.map((item) => (
-              <tr key={item.id}>
-                <td className="px-5 py-3 font-medium text-foreground">{item.productName}</td>
-                <td className="px-5 py-3 text-right text-muted-foreground">{item.quantity}</td>
-                <td className="px-5 py-3 text-right text-muted-foreground">
-                  {formatMoney(item.unitPrice, item.currency, locale)}
-                </td>
-                <td className="px-5 py-3 text-right font-medium text-foreground">
-                  {formatMoney(item.totalPrice, item.currency, locale)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table className="min-w-[42rem]">
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t.seller.orderProduct}</TableHead>
+            <TableHead className="text-right">{t.seller.orderQuantity}</TableHead>
+            <TableHead className="text-right">{t.seller.orderUnitPrice}</TableHead>
+            <TableHead className="text-right">{t.seller.orderLineTotal}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {order.items.map((item) => (
+            <TableRow key={item.id}>
+              <TableCell className="font-medium">{item.productName}</TableCell>
+              <TableCell className="text-right text-muted-foreground tabular-nums">
+                {item.quantity}
+              </TableCell>
+              <TableCell className="text-right text-muted-foreground tabular-nums">
+                {formatMoney(item.unitPrice, item.currency, locale)}
+              </TableCell>
+              <TableCell className="text-right font-medium tabular-nums">
+                {formatMoney(item.totalPrice, item.currency, locale)}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
 
@@ -370,7 +415,7 @@ function SellerOrderPagination({
           onClick={() => onPageChange(Math.max(1, data.pageNumber - 1))}
           aria-label={t.seller.previousOrderPage}
         >
-          <ChevronLeft />
+          <ChevronLeftIcon />
         </Button>
         <Button
           type="button"
@@ -380,77 +425,22 @@ function SellerOrderPagination({
           onClick={() => onPageChange(data.pageNumber + 1)}
           aria-label={t.seller.nextOrderPage}
         >
-          <ChevronRight />
+          <ChevronRightIcon />
         </Button>
       </div>
     </div>
   )
 }
 
-function SelectControl({
-  label,
-  value,
-  onChange,
-  disabled = false,
-  children,
-}: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  disabled?: boolean
-  children: ReactNode
-}) {
-  return (
-    <label className="grid gap-2 text-sm font-medium text-foreground">
-      {label}
-      <select
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {children}
-      </select>
-    </label>
-  )
-}
-
 function OrderFact({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={cn("mt-1 text-sm font-medium text-foreground", mono && "font-mono")}>{value}</p>
-    </div>
-  )
-}
-
-function SellerOrderMessage({ message, loading = false }: { message: string; loading?: boolean }) {
-  return (
-    <div className="mt-4 flex min-h-56 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-background px-6 text-center">
-      {loading ? (
-        <Loader2 className="size-7 animate-spin text-muted-foreground" />
-      ) : (
-        <PackageOpen className="size-8 text-muted-foreground/60" />
-      )}
-      <p className="mt-3 text-sm text-muted-foreground">{message}</p>
+    <div className="flex flex-col gap-1">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className={cn("text-sm font-medium", mono && "font-mono")}>{value}</span>
     </div>
   )
 }
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError"
-}
-
-function formatMoney(amount: number, currency: string, locale: "en" | "tr") {
-  return new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    style: "currency",
-    currency,
-  }).format(amount)
-}
-
-function formatDate(value: string, locale: "en" | "tr") {
-  return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value))
 }
