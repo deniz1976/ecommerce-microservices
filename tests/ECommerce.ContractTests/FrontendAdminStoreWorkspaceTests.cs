@@ -42,7 +42,8 @@ public sealed class FrontendAdminStoreWorkspaceTests
         Assert.Contains("getManagedCatalogStores(", workspace, StringComparison.Ordinal);
         Assert.Contains("new AbortController()", workspace, StringComparison.Ordinal);
         Assert.Contains("isOptionalGuid", workspace, StringComparison.Ordinal);
-        Assert.Contains("<ReferencePagination", workspace, StringComparison.Ordinal);
+        Assert.Contains("<DataTable", workspace, StringComparison.Ordinal);
+        Assert.Contains("onPageChange=", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain(".items.slice(", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain("createCatalogStore", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain("updateCatalogStore", workspace, StringComparison.Ordinal);

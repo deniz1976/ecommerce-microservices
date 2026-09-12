@@ -30,7 +30,8 @@ public sealed class FrontendAdminInventoryWorkspaceTests
         Assert.Contains("authenticated: true, signal", api, StringComparison.Ordinal);
         Assert.Contains("<StockMovementPanel", workspace, StringComparison.Ordinal);
         Assert.Contains("getStockMovements(", panel, StringComparison.Ordinal);
-        Assert.Contains("<ReferencePagination", panel, StringComparison.Ordinal);
+        Assert.Contains("<DataTable", panel, StringComparison.Ordinal);
+        Assert.Contains("onPageChange=", panel, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -46,7 +47,8 @@ public sealed class FrontendAdminInventoryWorkspaceTests
         Assert.Contains("new AbortController()", workspace, StringComparison.Ordinal);
         Assert.Contains("isOptionalGuid", workspace, StringComparison.Ordinal);
         Assert.Contains("maximumValid", workspace, StringComparison.Ordinal);
-        Assert.Contains("<ReferencePagination", workspace, StringComparison.Ordinal);
+        Assert.Contains("<DataTable", workspace, StringComparison.Ordinal);
+        Assert.Contains("onPageChange=", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain(".items.slice(", workspace, StringComparison.Ordinal);
         Assert.Contains("href=\"/admin/inventory\"", dashboard, StringComparison.Ordinal);
     }

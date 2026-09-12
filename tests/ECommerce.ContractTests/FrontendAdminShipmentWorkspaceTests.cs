@@ -33,7 +33,8 @@ public sealed class FrontendAdminShipmentWorkspaceTests
         Assert.Contains("isValidUtcRange", workspace, StringComparison.Ordinal);
         Assert.Contains("toOptionalUtcIso", workspace, StringComparison.Ordinal);
         Assert.Contains("toISOString()", filters, StringComparison.Ordinal);
-        Assert.Contains("<ReferencePagination", workspace, StringComparison.Ordinal);
+        Assert.Contains("<DataTable", workspace, StringComparison.Ordinal);
+        Assert.Contains("onPageChange=", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain(".items.slice(", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain("address", workspace, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("href=\"/admin/shipments\"", dashboard, StringComparison.Ordinal);

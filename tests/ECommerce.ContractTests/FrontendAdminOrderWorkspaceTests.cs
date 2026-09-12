@@ -28,7 +28,8 @@ public sealed class FrontendAdminOrderWorkspaceTests
         Assert.Contains("getManagedOrders(", workspace, StringComparison.Ordinal);
         Assert.Contains("new AbortController()", workspace, StringComparison.Ordinal);
         Assert.Contains("isOptionalGuid", workspace, StringComparison.Ordinal);
-        Assert.Contains("<ReferencePagination", workspace, StringComparison.Ordinal);
+        Assert.Contains("<DataTable", workspace, StringComparison.Ordinal);
+        Assert.Contains("onPageChange=", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain(".items.slice(", workspace, StringComparison.Ordinal);
         Assert.Contains("href=\"/admin/orders\"", dashboard, StringComparison.Ordinal);
     }

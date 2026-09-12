@@ -81,15 +81,15 @@ export function AdminUserWorkspace() {
     {
       id: "user",
       header: t.admin.searchUsers,
-      cell: (row) => (
+      cell: (user) => (
         <div className="flex min-w-0 flex-col gap-0.5">
           <Link
-            href={`/admin/users/${row.id}`}
+            href={`/admin/users/${user.id}`}
             className="truncate font-medium text-primary hover:underline"
           >
-            {row.displayName || row.email}
+            {user.displayName || user.email}
           </Link>
-          <span className="truncate text-xs text-muted-foreground">{row.email}</span>
+          <span className="truncate text-xs text-muted-foreground">{user.email}</span>
         </div>
       ),
     },

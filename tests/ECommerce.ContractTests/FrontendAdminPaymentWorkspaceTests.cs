@@ -31,7 +31,8 @@ public sealed class FrontendAdminPaymentWorkspaceTests
         Assert.Contains("isOptionalGuid", workspace, StringComparison.Ordinal);
         Assert.Contains("dateRangeValid", workspace, StringComparison.Ordinal);
         Assert.Contains("toOptionalUtcIso", workspace, StringComparison.Ordinal);
-        Assert.Contains("<ReferencePagination", workspace, StringComparison.Ordinal);
+        Assert.Contains("<DataTable", workspace, StringComparison.Ordinal);
+        Assert.Contains("onPageChange=", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain(".items.slice(", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain("transactions", workspace, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("href=\"/admin/payments\"", dashboard, StringComparison.Ordinal);
