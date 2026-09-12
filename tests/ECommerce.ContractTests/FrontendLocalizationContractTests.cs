@@ -55,7 +55,7 @@ public sealed class FrontendLocalizationContractTests
             File.ReadAllText(Path.Combine(frontendRoot, "customer", "product-detail.tsx")),
             StringComparison.Ordinal);
         Assert.Contains(
-            "}, [locale, pageNumber, search, statusFilter])",
+            "}, [locale, pageNumber, reloadToken, search, statusFilter])",
             File.ReadAllText(Path.Combine(frontendRoot, "admin", "admin-catalog-workspace.tsx")),
             StringComparison.Ordinal);
     }

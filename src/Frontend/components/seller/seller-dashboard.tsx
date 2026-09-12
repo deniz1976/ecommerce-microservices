@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Boxes, ClipboardList, Loader2, LogOut, Package, Pencil, ShieldCheck, Store } from "lucide-react"
+import { Boxes, ClipboardList, Loader2, LogOut, Pencil, ShieldCheck, Store } from "lucide-react"
 import Link from "next/link"
 
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
@@ -12,10 +12,15 @@ import { StoreEditForm } from "@/components/seller/store-edit-form"
 import { ProductCreateForm } from "@/components/seller/product-create-form"
 import { ProductEditForm } from "@/components/seller/product-edit-form"
 import { ProductInventoryForm } from "@/components/seller/product-inventory-form"
+import { EmptyState, ErrorState } from "@/components/patterns/states"
+import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { getMyCatalogStores, getStoreCatalogProducts } from "@/lib/api/catalog"
 import { logoutFromAuth0 } from "@/lib/auth/auth0"
+import { formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
+import { productStatusLabel, productStatusTone } from "@/lib/i18n/status"
 import { cn } from "@/lib/utils"
 import type { CatalogProduct, CatalogStore, PagedResult, UserProfile } from "@/types"
 
@@ -196,13 +201,20 @@ export function SellerDashboard({ profile, onOpenAdminWorkspace }: SellerDashboa
         <div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <section className="min-w-0">
             <h2 className="font-heading text-lg font-semibold text-foreground">{t.seller.stores}</h2>
-            <div className="mt-4 overflow-hidden rounded-lg border border-border bg-background">
+            <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
               {stores.status === "loading" ? (
-                <LoadingState label={t.common.loading} />
+                <div className="flex flex-col gap-2 p-3">
+                  {Array.from({ length: 2 }, (_, index) => (
+                    <Skeleton key={index} className="h-14 rounded-lg" />
+                  ))}
+                </div>
               ) : stores.status === "unavailable" ? (
-                <MessageState message={t.seller.storeLoadFailed} />
+                <ErrorState title={t.seller.storeLoadFailed} />
               ) : stores.stores.length === 0 ? (
-                <MessageState message={`${t.seller.noStores} ${t.seller.noStoresDescription}`} />
+                <EmptyState
+                  title={t.seller.noStores}
+                  description={t.seller.noStoresDescription}
+                />
               ) : (
                 <div className="divide-y divide-border">
                   {stores.stores.map((store) => (
@@ -244,28 +256,31 @@ export function SellerDashboard({ profile, onOpenAdminWorkspace }: SellerDashboa
                 </span>
               ) : null}
             </div>
-            <div className="mt-4 overflow-hidden rounded-lg border border-border bg-background">
+            <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
               {products.status === "loading" ? (
-                <LoadingState label={t.common.loading} />
+                <div className="flex flex-col gap-2 p-3">
+                  {Array.from({ length: 3 }, (_, index) => (
+                    <Skeleton key={index} className="h-14 rounded-lg" />
+                  ))}
+                </div>
               ) : products.status === "unavailable" ? (
-                <MessageState message={t.seller.productLoadFailed} />
+                <ErrorState title={t.seller.productLoadFailed} />
               ) : products.status === "ready" && products.products.items.length > 0 ? (
                 <div className="divide-y divide-border">
                   {products.products.items.map((product) => (
                     <article key={product.id} className="flex items-center justify-between gap-4 px-5 py-4">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-foreground">{product.name}</p>
-                        <p className="mt-1 truncate text-xs text-muted-foreground">
-                          {product.sku} · {[
-                            t.seller.draft,
-                            t.seller.active,
-                            t.seller.inactive,
-                            t.seller.archived,
-                          ][product.status]}
-                        </p>
+                        <p className="mt-1 truncate text-xs text-muted-foreground">{product.sku}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-3">
-                        <p className="text-sm font-medium text-foreground">{product.price} {product.currency}</p>
+                        <StatusBadge
+                          label={productStatusLabel(product.status, t.status)}
+                          tone={productStatusTone(product.status)}
+                        />
+                        <p className="text-sm font-medium tabular-nums">
+                          {formatMoney(product.price, product.currency, locale)}
+                        </p>
                         <Button
                           type="button"
                           variant="outline"
@@ -297,7 +312,10 @@ export function SellerDashboard({ profile, onOpenAdminWorkspace }: SellerDashboa
                   ))}
                 </div>
               ) : (
-                <MessageState message={selectedStoreId ? t.seller.noProducts : t.seller.selectStore} />
+                <EmptyState
+                  title={selectedStoreId ? t.seller.noProducts : t.seller.selectStore}
+                  description=""
+                />
               )}
             </div>
           </section>
@@ -335,24 +353,6 @@ export function SellerDashboard({ profile, onOpenAdminWorkspace }: SellerDashboa
           </aside>
         </div>
       </main>
-    </div>
-  )
-}
-
-function LoadingState({ label }: { label: string }) {
-  return (
-    <div className="flex min-h-32 items-center justify-center">
-      <Loader2 className="size-5 animate-spin text-muted-foreground" />
-      <span className="sr-only">{label}</span>
-    </div>
-  )
-}
-
-function MessageState({ message }: { message: string }) {
-  return (
-    <div className="flex min-h-32 items-center gap-3 px-5 text-sm text-muted-foreground">
-      <Package className="size-4 shrink-0" />
-      {message}
     </div>
   )
 }

@@ -2,6 +2,8 @@
 
 import type { ChangeEventHandler } from "react"
 
+import { FormField } from "@/components/patterns/form-field"
+import { Input } from "@/components/ui/input"
 import { ApiError } from "@/lib/api/client"
 
 export function ReferenceTextField({
@@ -18,21 +20,16 @@ export function ReferenceTextField({
   slug?: boolean
 }) {
   return (
-    <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
-      {label}
-      <input
+    <FormField label={label} hint={hint}>
+      <Input
         required
         minLength={2}
         maxLength={slug ? 160 : 256}
         pattern={slug ? "[a-z0-9]+(?:-[a-z0-9]+)*" : undefined}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal"
       />
-      {hint ? (
-        <span className="text-xs font-normal text-muted-foreground">{hint}</span>
-      ) : null}
-    </label>
+    </FormField>
   )
 }
 
@@ -50,7 +47,7 @@ export function ReferenceActiveField({
   }
 
   return (
-    <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+    <label className="flex items-center gap-2 text-sm font-medium">
       <input
         type="checkbox"
         checked={checked}
