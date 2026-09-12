@@ -320,6 +320,10 @@ export interface Dictionary {
     workflowStatus: string
     allWorkflowStatuses: string
     workflowOverdueOnly: string
+    overdueWorkflowsTitle: string
+    overdueWorkflowsBody: string
+    reviewOverdueWorkflows: string
+    metricsRetry: string
     workflowDeadline: string
     workflowTimeoutHandled: string
     workflowCreatedAt: string
@@ -961,6 +965,10 @@ const en: Dictionary = {
     workflowStatus: "Workflow status",
     allWorkflowStatuses: "All statuses",
     workflowOverdueOnly: "Overdue only",
+    overdueWorkflowsTitle: "Order workflows need attention",
+    overdueWorkflowsBody: "{count} order workflows are past their step deadline.",
+    reviewOverdueWorkflows: "Review workflows",
+    metricsRetry: "Try again",
     workflowDeadline: "Step deadline",
     workflowTimeoutHandled: "Timeout handled",
     workflowCreatedAt: "Created",
@@ -1623,6 +1631,10 @@ const tr: Dictionary = {
     workflowStatus: "İş akışı durumu",
     allWorkflowStatuses: "Tüm durumlar",
     workflowOverdueOnly: "Yalnız gecikenler",
+    overdueWorkflowsTitle: "Sipariş iş akışları dikkat istiyor",
+    overdueWorkflowsBody: "{count} sipariş iş akışı adım süresini aştı.",
+    reviewOverdueWorkflows: "İş akışlarını incele",
+    metricsRetry: "Tekrar dene",
     workflowDeadline: "Adım son tarihi",
     workflowTimeoutHandled: "Zaman aşımı işlendi",
     workflowCreatedAt: "Oluşturulma",

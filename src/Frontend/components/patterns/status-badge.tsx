@@ -3,10 +3,6 @@ import { cva, type VariantProps } from "class-variance-authority"
 import type { StatusTone } from "@/lib/i18n/status"
 import { cn } from "@/lib/utils"
 
-/**
- * Colour is carried by the dot rather than the label so contrast stays safe in
- * both themes regardless of which token a tone maps to.
- */
 const dotVariants = cva("size-1.5 shrink-0 rounded-full", {
   variants: {
     tone: {

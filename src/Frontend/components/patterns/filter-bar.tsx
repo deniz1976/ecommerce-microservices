@@ -20,10 +20,6 @@ interface FilterBarProps {
   className?: string
 }
 
-/**
- * Shared filter row for every list surface. Individual filters are passed as
- * children so each page keeps ownership of its own query parameters.
- */
 export function FilterBar({
   children,
   search,

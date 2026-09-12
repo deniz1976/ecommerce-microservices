@@ -1,19 +1,27 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useState } from "react"
 import {
-  Archive,
-  Badge,
-  Boxes,
-  CheckCircle2,
-  ClipboardList,
-  Loader2,
-  PauseCircle,
-  Store,
-  Tags,
+  ArchiveIcon,
+  BookmarkIcon,
+  BoxesIcon,
+  CheckCircle2Icon,
+  ClipboardListIcon,
+  PauseCircleIcon,
+  StoreIcon,
+  TagsIcon,
+  TriangleAlertIcon,
 } from "lucide-react"
 
+import { MetricCard } from "@/components/patterns/metric-card"
+import { ErrorState } from "@/components/patterns/states"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { getCatalogMetrics } from "@/lib/api/catalog"
+import { getWorkflowDiagnostics } from "@/lib/api/workflows"
+import { formatNumber } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
 import type { CatalogMetrics } from "@/types"
 
@@ -23,8 +31,10 @@ type MetricsState =
   | { status: "unavailable" }
 
 export function AdminOverviewMetrics() {
-  const { t } = useI18n()
+  const { locale, t } = useI18n()
   const [metrics, setMetrics] = useState<MetricsState>({ status: "loading" })
+  const [overdueCount, setOverdueCount] = useState(0)
+  const [reloadToken, setReloadToken] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -40,63 +50,104 @@ export function AdminOverviewMetrics() {
     return () => {
       active = false
     }
-  }, [])
+  }, [reloadToken])
 
-  if (metrics.status === "loading") {
-    return (
-      <section className="mt-7 flex min-h-32 items-center justify-center rounded-lg border border-border bg-background">
-        <Loader2 className="size-5 animate-spin text-muted-foreground" />
-        <span className="sr-only">{t.common.loading}</span>
-      </section>
-    )
-  }
+  useEffect(() => {
+    let active = true
 
-  if (metrics.status === "unavailable") {
-    return (
-      <section className="mt-7 rounded-lg border border-border bg-background p-5 text-sm text-muted-foreground">
-        {t.admin.metricsUnavailable}
-      </section>
-    )
-  }
+    getWorkflowDiagnostics({ pageNumber: 1, pageSize: 1, overdueOnly: true })
+      .then((data) => {
+        if (active) setOverdueCount(data.totalCount)
+      })
+      .catch(() => {
+        if (active) setOverdueCount(0)
+      })
 
-  const data = metrics.data
+    return () => {
+      active = false
+    }
+  }, [reloadToken])
 
   return (
-    <section className="mt-7" aria-labelledby="admin-overview-title">
+    <section className="mt-7 flex flex-col gap-5" aria-labelledby="admin-overview-title">
       <div>
-        <h2 id="admin-overview-title" className="font-heading text-xl font-semibold text-foreground">
+        <h2 id="admin-overview-title" className="font-heading text-xl font-semibold">
           {t.admin.catalogSummary}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">{t.admin.catalogSummaryDescription}</p>
       </div>
-      <div className="mt-5 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard icon={Boxes} label={t.admin.totalProducts} value={data.totalProducts} />
-        <MetricCard icon={CheckCircle2} label={t.admin.activeProducts} value={data.activeProducts} />
-        <MetricCard icon={ClipboardList} label={t.admin.draftProducts} value={data.draftProducts} />
-        <MetricCard icon={PauseCircle} label={t.admin.inactiveProducts} value={data.inactiveProducts} />
-        <MetricCard icon={Archive} label={t.admin.archivedProducts} value={data.archivedProducts} />
-        <MetricCard icon={Store} label={t.admin.totalStores} value={data.totalStores} />
-        <MetricCard icon={Tags} label={t.admin.totalCategories} value={data.totalCategories} />
-        <MetricCard icon={Badge} label={t.admin.totalBrands} value={data.totalBrands} />
-      </div>
+
+      {overdueCount > 0 ? (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
+              <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-medium">{t.admin.overdueWorkflowsTitle}</span>
+                <span className="text-sm text-muted-foreground">
+                  {t.admin.overdueWorkflowsBody.replace("{count}", formatNumber(overdueCount, locale))}
+                </span>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" render={<Link href="/admin/workflows" />}>
+              {t.admin.reviewOverdueWorkflows}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {metrics.status === "unavailable" ? (
+        <ErrorState
+          title={t.admin.metricsUnavailable}
+          onRetry={() => {
+            setMetrics({ status: "loading" })
+            setReloadToken((token) => token + 1)
+          }}
+        />
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {metrics.status === "loading"
+            ? Array.from({ length: 8 }, (_, index) => (
+                <Skeleton key={index} className="h-[5.75rem] rounded-xl" />
+              ))
+            : metricItems(metrics.data).map((item) => (
+                <MetricCard
+                  key={item.id}
+                  label={labelFor(item.id, t)}
+                  value={formatNumber(item.value, locale)}
+                  tone={item.tone}
+                  icon={item.icon}
+                />
+              ))}
+        </div>
+      )}
     </section>
   )
 }
 
-function MetricCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Boxes
-  label: string
-  value: number
-}) {
-  return (
-    <div className="bg-background p-5">
-      <Icon className="size-4 text-primary" />
-      <p className="mt-5 text-2xl font-semibold text-foreground">{value.toLocaleString()}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{label}</p>
-    </div>
-  )
+type MetricId =
+  | "totalProducts"
+  | "activeProducts"
+  | "draftProducts"
+  | "inactiveProducts"
+  | "archivedProducts"
+  | "totalStores"
+  | "totalCategories"
+  | "totalBrands"
+
+function metricItems(data: CatalogMetrics) {
+  return [
+    { id: "totalProducts" as const, value: data.totalProducts, tone: "neutral" as const, icon: <BoxesIcon className="size-4" /> },
+    { id: "activeProducts" as const, value: data.activeProducts, tone: "success" as const, icon: <CheckCircle2Icon className="size-4" /> },
+    { id: "draftProducts" as const, value: data.draftProducts, tone: "progress" as const, icon: <ClipboardListIcon className="size-4" /> },
+    { id: "inactiveProducts" as const, value: data.inactiveProducts, tone: "warning" as const, icon: <PauseCircleIcon className="size-4" /> },
+    { id: "archivedProducts" as const, value: data.archivedProducts, tone: "danger" as const, icon: <ArchiveIcon className="size-4" /> },
+    { id: "totalStores" as const, value: data.totalStores, tone: "neutral" as const, icon: <StoreIcon className="size-4" /> },
+    { id: "totalCategories" as const, value: data.totalCategories, tone: "neutral" as const, icon: <TagsIcon className="size-4" /> },
+    { id: "totalBrands" as const, value: data.totalBrands, tone: "neutral" as const, icon: <BookmarkIcon className="size-4" /> },
+  ]
+}
+
+function labelFor(id: MetricId, t: ReturnType<typeof useI18n>["t"]): string {
+  return t.admin[id]
 }

@@ -10,19 +10,10 @@ import type {
   UserStatus,
 } from "@/types"
 
-/**
- * Visual tone shared by every status surface. Keeps enum values from every
- * service mapped to a single, bounded set of colours.
- */
 export type StatusTone = "neutral" | "progress" | "success" | "warning" | "danger"
 
 type StatusDictionary = Dictionary["status"]
 
-/**
- * Order status labels already live under `orders.status`, keyed by
- * `OrderStatusName`. This wrapper keeps every status surface on one call shape
- * without duplicating those translations.
- */
 export function orderStatusLabel(
   status: OrderStatus,
   labels: Dictionary["orders"]["status"],
@@ -165,5 +156,4 @@ export function stockMovementTone(kind: StockMovementKind): StatusTone {
   return tones[kind]
 }
 
-/** Ordered saga steps rendered by the order timeline. Cancellation is not a step. */
 export const ORDER_TIMELINE_STEPS: readonly OrderStatus[] = [0, 1, 2, 3, 4] as const

@@ -18,7 +18,6 @@ import type { PagedResult } from "@/types"
 import { cn } from "@/lib/utils"
 
 export interface DataTableColumn<TRow> {
-  /** Stable key, also used as the React key for the cell. */
   id: string
   header: string
   cell: (row: TRow) => ReactNode
@@ -40,11 +39,6 @@ interface DataTableProps<TRow> {
   minWidthClassName?: string
 }
 
-/**
- * Server-paged table bound to the `PagedResult<T>` contract every list endpoint
- * returns. Loading, empty and error states are handled here so pages do not
- * re-implement them.
- */
 export function DataTable<TRow>({
   columns,
   page,

@@ -9,21 +9,29 @@ import {
   orderStatusLabel,
   orderStatusTone,
 } from "@/lib/i18n/status"
-import type { OrderStatus, OrderStatusHistory } from "@/types"
+import type {
+  OrderCancellationReasonCode,
+  OrderStatus,
+  OrderStatusHistory,
+} from "@/types"
 import { cn } from "@/lib/utils"
 import { StatusBadge } from "@/components/patterns/status-badge"
 
 interface OrderTimelineProps {
   status: OrderStatus
   history: OrderStatusHistory[]
+  cancellationReasonLabel?: string
+  cancellationReasons?: Record<OrderCancellationReasonCode, string>
   className?: string
 }
 
-/**
- * Horizontal view of the ordering saga. Steps come from the fixed happy path;
- * timestamps come from the status history the ordering service returns.
- */
-export function OrderTimeline({ status, history, className }: OrderTimelineProps) {
+export function OrderTimeline({
+  status,
+  history,
+  cancellationReasonLabel,
+  cancellationReasons,
+  className,
+}: OrderTimelineProps) {
   const { t, locale } = useI18n()
 
   const occurredAtByStatus = new Map<OrderStatus, string>()
@@ -36,6 +44,7 @@ export function OrderTimeline({ status, history, className }: OrderTimelineProps
   const isCancelled = status === 5
   const cancellationRequested = status === 6
   const reachedIndex = ORDER_TIMELINE_STEPS.indexOf(status)
+  const cancellationReason = history.find((entry) => entry.reasonCode !== null)?.reasonCode ?? null
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
@@ -96,6 +105,13 @@ export function OrderTimeline({ status, history, className }: OrderTimelineProps
           )
         })}
       </ol>
+
+      {cancellationReason && cancellationReasonLabel && cancellationReasons ? (
+        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <span className="font-medium">{cancellationReasonLabel}:</span>{" "}
+          {cancellationReasons[cancellationReason]}
+        </p>
+      ) : null}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, Check, Loader2, MapPin, PackageCheck, X } from "lucide-react"
+import { ArrowLeft, Loader2, MapPin, PackageCheck, X } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -10,13 +10,15 @@ import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { PaymentSummary } from "@/components/customer/payment-summary"
 import { ShipmentSummary } from "@/components/customer/shipment-summary"
+import { OrderTimeline } from "@/components/patterns/order-timeline"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ApiError } from "@/lib/api/client"
 import { getOrder, requestOrderCancellation } from "@/lib/api/orders"
+import { formatDateTime, formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
-import { getOrderStatusName, orderProgress } from "@/lib/orders/status"
+import { getOrderStatusName } from "@/lib/orders/status"
 import { cn } from "@/lib/utils"
-import type { Order, OrderCancellationReasonCode, OrderStatusHistory, OrderStatusName } from "@/types"
+import type { Order } from "@/types"
 
 type DetailState =
   | { status: "loading" }
@@ -111,7 +113,7 @@ export function OrderDetail() {
               <div>
                 <p className="text-xs text-muted-foreground">{t.orders.orderNumber}</p>
                 <h1 className="mt-1 font-mono text-lg font-semibold">{state.order.id.toUpperCase()}</h1>
-                <p className="mt-2 text-sm text-muted-foreground">{formatDate(state.order.createdAt, locale)}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{formatDateTime(state.order.createdAt, locale)}</p>
               </div>
               <div className="flex flex-col items-end gap-2">
                 <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
@@ -137,14 +139,14 @@ export function OrderDetail() {
                 ) : null}
               </div>
             </div>
-            <OrderProgress
-              status={getOrderStatusName(state.order.status)}
-              history={state.order.statusHistory}
-              labels={t.orders.status}
-              cancellationReasonLabel={t.orders.cancellationReason}
-              cancellationReasons={t.orders.cancellationReasons}
-              locale={locale}
-            />
+            <div className="border-b border-border p-6">
+              <OrderTimeline
+                status={state.order.status}
+                history={state.order.statusHistory}
+                cancellationReasonLabel={t.orders.cancellationReason}
+                cancellationReasons={t.orders.cancellationReasons}
+              />
+            </div>
             <PaymentSummary
               orderId={state.order.id}
               locale={locale}
@@ -190,87 +192,6 @@ export function OrderDetail() {
       </main>
     </div>
   )
-}
-
-function OrderProgress({
-  status,
-  history,
-  labels,
-  cancellationReasonLabel,
-  cancellationReasons,
-  locale,
-}: {
-  status: OrderStatusName
-  history: OrderStatusHistory[]
-  labels: Record<OrderStatusName, string>
-  cancellationReasonLabel: string
-  cancellationReasons: Record<OrderCancellationReasonCode, string>
-  locale: "en" | "tr"
-}) {
-  const cancelled = status === "Cancelled"
-  const cancellationPending = status === "CancellationRequested"
-  const currentIndex = orderProgress.indexOf(status)
-  const steps = cancelled
-    ? ["Submitted", "Cancelled"] as const
-    : cancellationPending
-      ? ["Submitted", "CancellationRequested"] as const
-      : orderProgress
-  const cancellation = history.find((entry) => getOrderStatusName(entry.status) === "Cancelled")
-
-  return (
-    <div className="border-b border-border p-6">
-      <ol className="grid gap-3 sm:grid-cols-5">
-        {steps.map((step, index) => {
-          const complete = cancelled || cancellationPending ? index === 0 : index <= currentIndex
-          const active = step === status
-          const entry = history.find((item) => getOrderStatusName(item.status) === step)
-          return (
-            <li key={step} className="flex items-start gap-2 text-xs">
-              <span className={cn(
-                "flex size-6 shrink-0 items-center justify-center rounded-full border",
-                complete || active
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border text-muted-foreground",
-                (step === "Cancelled" || step === "CancellationRequested") && "border-destructive bg-destructive text-destructive-foreground",
-              )}>
-                {step === "Cancelled" || step === "CancellationRequested" ? <X className="size-3.5" /> : complete ? <Check className="size-3.5" /> : index + 1}
-              </span>
-              <span>
-                <span className={active ? "font-medium text-foreground" : "text-muted-foreground"}>
-                  {labels[step]}
-                </span>
-                {entry && (
-                  <span className="mt-1 block text-[11px] text-muted-foreground">
-                    {formatDate(entry.occurredAt, locale)}
-                  </span>
-                )}
-              </span>
-            </li>
-          )
-        })}
-      </ol>
-      {cancellation?.reasonCode && (
-        <p className="mt-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          <span className="font-medium">{cancellationReasonLabel}:</span>{" "}
-          {cancellationReasons[cancellation.reasonCode]}
-        </p>
-      )}
-    </div>
-  )
-}
-
-function formatMoney(amount: number, currency: string, locale: "en" | "tr") {
-  return new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    style: "currency",
-    currency,
-  }).format(amount)
-}
-
-function formatDate(value: string, locale: "en" | "tr") {
-  return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value))
 }
 
 function shouldRetryMissingPayment(order: Order) {

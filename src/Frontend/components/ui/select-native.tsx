@@ -2,10 +2,6 @@ import { ChevronDownIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-/**
- * Native select styled with the same tokens as `Input`. Used for filter rows
- * where the richer `Select` primitive would add no value.
- */
 function SelectNative({ className, children, ...props }: React.ComponentProps<"select">) {
   return (
     <div className="relative">
