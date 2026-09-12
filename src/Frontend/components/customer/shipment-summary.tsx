@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { ApiError } from "@/lib/api/client"
 import { getOrderShipment } from "@/lib/api/shipping"
 import type { Dictionary } from "@/lib/i18n/dictionaries"
+import { formatDateTime } from "@/lib/i18n/format"
 import type { ShipmentSummary as Shipment } from "@/types"
 
 type ShipmentState =
@@ -77,7 +78,7 @@ export function ShipmentSummary({
       </div>
       <dl className="mt-4 grid gap-3 sm:grid-cols-2">
         <div><dt className="text-xs text-muted-foreground">{labels.trackingNumber}</dt><dd className="mt-1 font-mono text-sm text-foreground">{shipment.trackingNumber ?? labels.notAvailable}</dd></div>
-        <div><dt className="text-xs text-muted-foreground">{labels.createdAt}</dt><dd className="mt-1 text-sm text-foreground">{formatDate(shipment.createdAt, locale)}</dd></div>
+        <div><dt className="text-xs text-muted-foreground">{labels.createdAt}</dt><dd className="mt-1 text-sm text-foreground">{formatDateTime(shipment.createdAt, locale)}</dd></div>
       </dl>
     </section>
   )
@@ -88,8 +89,4 @@ function shipmentStatusLabel(status: Shipment["status"], labels: Dictionary["ord
   if (status === 3) return labels.inTransit
   if (status === 4) return labels.delivered
   return labels.created
-}
-
-function formatDate(value: string, locale: "en" | "tr") {
-  return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
 }

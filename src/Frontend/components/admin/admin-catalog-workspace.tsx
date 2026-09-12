@@ -13,6 +13,7 @@ import {
 import { ProductEditForm } from "@/components/seller/product-edit-form"
 import { Button } from "@/components/ui/button"
 import { getManagedCatalogProducts } from "@/lib/api/catalog"
+import { formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
 import {
   productStatusNames,
@@ -149,7 +150,7 @@ export function AdminCatalogWorkspace() {
                       </p>
                     </div>
                     <p className="text-sm font-medium text-foreground">
-                      {formatPrice(product.price, product.currency, locale)}
+                      {formatMoney(product.price, product.currency, locale)}
                     </p>
                     <StatusBadge product={product} label={t.admin.status[productStatusNames[product.status]]} />
                     <Button
@@ -244,12 +245,4 @@ function MessageState({ message }: { message: string }) {
       {message}
     </div>
   )
-}
-
-function formatPrice(price: number, currency: string, locale: string) {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 2,
-  }).format(price)
 }

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { ApiError } from "@/lib/api/client"
 import { getOrderPayment } from "@/lib/api/payments"
 import type { Dictionary } from "@/lib/i18n/dictionaries"
+import { formatDateTime, formatMoney } from "@/lib/i18n/format"
 import type { Payment } from "@/types"
 
 type PaymentState =
@@ -89,24 +90,10 @@ export function PaymentSummary({
               {transaction.type === 2 ? <RotateCcw className="size-3.5" /> : <CreditCard className="size-3.5" />}
               {transaction.type === 2 ? labels.refund : labels.authorization}
             </span>
-            <time>{formatDate(transaction.createdAt, locale)}</time>
+            <time>{formatDateTime(transaction.createdAt, locale)}</time>
           </li>
         ))}
       </ol>
     </section>
   )
-}
-
-function formatMoney(amount: number, currency: string, locale: "en" | "tr") {
-  return new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    style: "currency",
-    currency,
-  }).format(amount)
-}
-
-function formatDate(value: string, locale: "en" | "tr") {
-  return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value))
 }

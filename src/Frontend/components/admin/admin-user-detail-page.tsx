@@ -9,6 +9,7 @@ import { AdminPageLayout } from "@/components/admin/admin-page-layout"
 import { buttonVariants } from "@/components/ui/button"
 import { getAdminUser } from "@/lib/api/admin-users"
 import { ApiError } from "@/lib/api/client"
+import { formatDateTime } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
 import { cn } from "@/lib/utils"
 import type { AdminUser } from "@/types"
@@ -54,8 +55,8 @@ export function AdminUserDetailPage() {
                   <DetailField label={t.admin.filterUserStatus} value={user.data.status === 1 ? t.admin.userActive : t.admin.userDisabled} />
                   <DetailField label={t.admin.userRoles} value={user.data.roles.length === 0 ? t.admin.onboardingPending : user.data.roles.map((role) => t.admin.userRole[role]).join(", ")} />
                   <DetailField label={t.admin.onboardingStatus} value={user.data.isOnboardingComplete ? t.admin.onboardingComplete : t.admin.onboardingPending} />
-                  <DetailField label={t.admin.joinedAt} value={formatDate(user.data.createdAt, locale)} />
-                  <DetailField label={t.admin.paymentUpdatedAt} value={formatDate(user.data.updatedAt, locale)} />
+                  <DetailField label={t.admin.joinedAt} value={formatDateTime(user.data.createdAt, locale)} />
+                  <DetailField label={t.admin.paymentUpdatedAt} value={formatDateTime(user.data.updatedAt, locale)} />
                 </dl>
                 <div className="border-t border-border px-5 py-4">
                   <Link href="/#admin-users" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>{t.admin.backToUsers}</Link>
@@ -72,8 +73,4 @@ function DetailField({ label, value, mono = false }: { label: string; value: str
 
 function DetailMessage({ message, loading = false }: { message: string; loading?: boolean }) {
   return <div className="flex min-h-52 items-center justify-center gap-3 rounded-lg border border-border bg-background px-5 text-sm text-muted-foreground">{loading ? <Loader2 className="size-5 animate-spin" /> : <Users className="size-5" />}{message}</div>
-}
-
-function formatDate(value: string, locale: "en" | "tr") {
-  return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
 }
