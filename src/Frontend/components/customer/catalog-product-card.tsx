@@ -4,6 +4,7 @@ import { ArrowUpRight, Check, Loader2, Package, ShoppingCart } from "lucide-reac
 
 import { Button } from "@/components/ui/button"
 import type { Locale } from "@/lib/i18n/dictionaries"
+import { formatMoney } from "@/lib/i18n/format"
 import type { CatalogProduct } from "@/types"
 
 interface CatalogProductCardProps {
@@ -30,10 +31,7 @@ export function CatalogProductCard({
   onAdd,
 }: CatalogProductCardProps) {
   const image = product.images[0]
-  const price = new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    style: "currency",
-    currency: product.currency,
-  }).format(product.price)
+  const price = formatMoney(product.price, product.currency, locale)
 
   return (
     <article className="group overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">

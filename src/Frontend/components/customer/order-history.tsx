@@ -11,8 +11,10 @@ import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { getProfile } from "@/lib/api/auth"
 import { getCustomerOrders } from "@/lib/api/orders"
+import { StatusBadge } from "@/components/patterns/status-badge"
+import { formatDateTime, formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
-import { getOrderStatusName } from "@/lib/orders/status"
+import { orderStatusLabel, orderStatusTone } from "@/lib/i18n/status"
 import { cn } from "@/lib/utils"
 import type { OrderSummary, PagedResult } from "@/types"
 
@@ -111,11 +113,14 @@ export function OrderHistory() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">{t.orders.placedAt}</p>
-                  <p className="mt-1 text-sm font-medium">{formatDate(order.createdAt, locale)}</p>
+                  <p className="mt-1 text-sm font-medium">{formatDateTime(order.createdAt, locale)}</p>
                 </div>
-                <div className="sm:text-right">
-                  <p className="text-sm font-semibold">{formatMoney(order.totalAmount, order.currency, locale)}</p>
-                  <p className="mt-1 text-xs text-primary">{t.orders.status[getOrderStatusName(order.status)]}</p>
+                <div className="flex flex-col gap-1.5 sm:items-end">
+                  <p className="text-sm font-semibold tabular-nums">{formatMoney(order.totalAmount, order.currency, locale)}</p>
+                  <StatusBadge
+                    label={orderStatusLabel(order.status, t.orders.status)}
+                    tone={orderStatusTone(order.status)}
+                  />
                 </div>
               </Link>
             ))}
@@ -170,16 +175,3 @@ function OrderMessage({ message }: { message: string }) {
   )
 }
 
-function formatMoney(amount: number, currency: string, locale: "en" | "tr") {
-  return new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    style: "currency",
-    currency,
-  }).format(amount)
-}
-
-function formatDate(value: string, locale: "en" | "tr") {
-  return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value))
-}

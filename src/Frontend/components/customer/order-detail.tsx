@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, Loader2, MapPin, PackageCheck, X } from "lucide-react"
+import { ArrowLeft, Loader2, MapPin, X } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -11,11 +11,13 @@ import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { PaymentSummary } from "@/components/customer/payment-summary"
 import { ShipmentSummary } from "@/components/customer/shipment-summary"
 import { OrderTimeline } from "@/components/patterns/order-timeline"
+import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ApiError } from "@/lib/api/client"
 import { getOrder, requestOrderCancellation } from "@/lib/api/orders"
 import { formatDateTime, formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
+import { orderStatusLabel, orderStatusTone } from "@/lib/i18n/status"
 import { getOrderStatusName } from "@/lib/orders/status"
 import { cn } from "@/lib/utils"
 import type { Order } from "@/types"
@@ -116,10 +118,10 @@ export function OrderDetail() {
                 <p className="mt-2 text-sm text-muted-foreground">{formatDateTime(state.order.createdAt, locale)}</p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
-                  <PackageCheck className="size-4" />
-                  {t.orders.status[getOrderStatusName(state.order.status)]}
-                </span>
+                <StatusBadge
+                  label={orderStatusLabel(state.order.status, t.orders.status)}
+                  tone={orderStatusTone(state.order.status)}
+                />
                 {state.order.status <= 1 ? (
                   <Button
                     type="button"

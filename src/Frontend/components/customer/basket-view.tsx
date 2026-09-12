@@ -19,6 +19,7 @@ import {
 } from "@/lib/api/basket"
 import { getProfile } from "@/lib/api/auth"
 import { ApiError } from "@/lib/api/client"
+import { formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
 import { cn } from "@/lib/utils"
 import type {
@@ -323,9 +324,3 @@ function BasketMessage({ message }: { message: string }) {
   )
 }
 
-function formatMoney(amount: number, currency: string, locale: "en" | "tr") {
-  return new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    style: "currency",
-    currency,
-  }).format(amount)
-}

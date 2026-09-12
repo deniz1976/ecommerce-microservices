@@ -15,6 +15,7 @@ import {
   markAllCustomerNotificationsRead,
   markCustomerNotificationRead,
 } from "@/lib/api/notifications"
+import { formatDateTime } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
 import { useCustomerNotificationsLive } from "@/lib/notifications/use-customer-notifications-live"
 import { cn } from "@/lib/utils"
@@ -235,7 +236,7 @@ export function NotificationCenter() {
                           dateTime={notification.createdAt}
                           className="mt-3 block text-xs text-muted-foreground"
                         >
-                          {formatDate(notification.createdAt, locale)}
+                          {formatDateTime(notification.createdAt, locale)}
                         </time>
                       </div>
 
@@ -309,9 +310,3 @@ function NotificationMessage({ message }: { message: string }) {
   )
 }
 
-function formatDate(value: string, locale: "en" | "tr") {
-  return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value))
-}
