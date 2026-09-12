@@ -30,6 +30,22 @@ public sealed class InventoryQueryReader : IInventoryQueryReader
             .SingleOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<InventoryItemResponse>> GetManyAsync(
+        IReadOnlyCollection<Guid> productIds,
+        CancellationToken cancellationToken)
+    {
+        return await dbContext.InventoryItems
+            .AsNoTracking()
+            .Where(item => productIds.Contains(item.ProductId))
+            .Select(item => new InventoryItemResponse(
+                item.ProductId,
+                item.QuantityOnHand,
+                item.ReservedQuantity,
+                item.QuantityOnHand - item.ReservedQuantity,
+                item.UpdatedAt))
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task<PagedResult<InventoryItemResponse>> SearchAsync(
         ManagedInventoryListCriteria criteria,
         CancellationToken cancellationToken)

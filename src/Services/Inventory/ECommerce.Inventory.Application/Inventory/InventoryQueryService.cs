@@ -16,6 +16,21 @@ public sealed class InventoryQueryService
         CancellationToken cancellationToken) =>
         inventoryReader.GetAsync(productId, cancellationToken);
 
+    public Task<IReadOnlyCollection<InventoryItemResponse>> GetManyAsync(
+        IReadOnlyCollection<Guid> productIds,
+        CancellationToken cancellationToken)
+    {
+        Guid[] normalized = productIds
+            .Where(productId => productId != Guid.Empty)
+            .Distinct()
+            .Take(ManagedInventoryQueryLimits.MaxBatchProductIds)
+            .ToArray();
+
+        return normalized.Length == 0
+            ? Task.FromResult<IReadOnlyCollection<InventoryItemResponse>>([])
+            : inventoryReader.GetManyAsync(normalized, cancellationToken);
+    }
+
     public Task<PagedResult<InventoryItemResponse>> SearchAsync(
         ManagedInventoryListCriteria criteria,
         CancellationToken cancellationToken) =>

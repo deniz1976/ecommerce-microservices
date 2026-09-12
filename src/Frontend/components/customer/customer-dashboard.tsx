@@ -16,6 +16,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { SelectNative } from "@/components/ui/select-native"
 import { Skeleton } from "@/components/ui/skeleton"
 import { incrementBasketItem } from "@/lib/api/basket"
+import { getInventoryItems } from "@/lib/api/inventory"
 import {
   getCatalogBrands,
   getCatalogCategories,
@@ -59,6 +60,7 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
   const [addingProductId, setAddingProductId] = useState<string | null>(null)
   const [addedProductId, setAddedProductId] = useState<string | null>(null)
   const [basketError, setBasketError] = useState(false)
+  const [stockByProductId, setStockByProductId] = useState<Record<string, number>>({})
 
   useEffect(() => {
     let active = true
@@ -87,6 +89,26 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
       active = false
     }
   }, [locale, query])
+
+  useEffect(() => {
+    if (catalog.status !== "ready" || catalog.data.items.length === 0) {
+      return
+    }
+
+    const controller = new AbortController()
+    getInventoryItems(
+      catalog.data.items.map((product) => product.id),
+      controller.signal,
+    )
+      .then((items) => {
+        setStockByProductId(
+          Object.fromEntries(items.map((item) => [item.productId, item.availableQuantity])),
+        )
+      })
+      .catch(() => undefined)
+
+    return () => controller.abort()
+  }, [catalog])
 
   function updateQuery(change: Partial<CatalogProductQuery>) {
     setCatalog({ status: "loading" })
@@ -283,6 +305,12 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
                   adding={addingProductId === product.id}
                   added={addedProductId === product.id}
                   onAdd={handleAddToBasket}
+                  availableQuantity={stockByProductId[product.id]}
+                  stockLabels={{
+                    inStock: t.customer.inStock,
+                    lowStock: t.customer.lowStock,
+                    outOfStock: t.customer.outOfStock,
+                  }}
                 />
               ))}
             </div>

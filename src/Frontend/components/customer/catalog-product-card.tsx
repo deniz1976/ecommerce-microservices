@@ -2,36 +2,73 @@ import Image from "next/image"
 import Link from "next/link"
 import { CheckIcon, Loader2Icon, PackageIcon, ShoppingCartIcon } from "lucide-react"
 
+import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import type { Locale } from "@/lib/i18n/dictionaries"
 import { formatMoney } from "@/lib/i18n/format"
+import type { StatusTone } from "@/lib/i18n/status"
 import type { CatalogProduct } from "@/types"
 
 interface CatalogProductCardProps {
   locale: Locale
   product: CatalogProduct
   viewLabel: string
+  availableQuantity?: number
   addLabel?: string
   addingLabel?: string
   addedLabel?: string
   adding?: boolean
   added?: boolean
   onAdd?: (product: CatalogProduct) => void
+  stockLabels?: StockLabels
+}
+
+export interface StockLabels {
+  inStock: string
+  lowStock: string
+  outOfStock: string
+}
+
+const LOW_STOCK_THRESHOLD = 5
+
+function stockLabel(availableQuantity: number, labels?: StockLabels): string {
+  if (!labels) {
+    return String(availableQuantity)
+  }
+
+  if (availableQuantity <= 0) {
+    return labels.outOfStock
+  }
+
+  return availableQuantity <= LOW_STOCK_THRESHOLD
+    ? labels.lowStock.replace("{count}", String(availableQuantity))
+    : labels.inStock
+}
+
+function stockTone(availableQuantity: number): StatusTone {
+  if (availableQuantity <= 0) {
+    return "danger"
+  }
+
+  return availableQuantity <= LOW_STOCK_THRESHOLD ? "warning" : "success"
 }
 
 export function CatalogProductCard({
   locale,
   product,
   viewLabel,
+  availableQuantity,
   addLabel,
   addingLabel,
   addedLabel,
   adding,
   added,
   onAdd,
+  stockLabels,
 }: CatalogProductCardProps) {
   const image = product.images[0]
   const price = formatMoney(product.price, product.currency, locale)
+  const soldOut = availableQuantity === 0
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-foreground/20">
@@ -56,6 +93,12 @@ export function CatalogProductCard({
 
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex flex-wrap items-center gap-1.5">
+          {availableQuantity !== undefined ? (
+            <StatusBadge
+              label={stockLabel(availableQuantity, stockLabels)}
+              tone={stockTone(availableQuantity)}
+            />
+          ) : null}
           {product.brandName ? (
             <span className="rounded-4xl border border-border/60 bg-muted/50 px-2 py-0.5 text-xs font-medium">
               {product.brandName}
@@ -87,7 +130,7 @@ export function CatalogProductCard({
             type="button"
             size="lg"
             className="w-full"
-            disabled={adding}
+            disabled={adding || soldOut}
             onClick={() => onAdd(product)}
           >
             {adding ? (

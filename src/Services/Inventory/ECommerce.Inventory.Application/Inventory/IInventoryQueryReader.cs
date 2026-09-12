@@ -8,6 +8,10 @@ public interface IInventoryQueryReader
         Guid productId,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlyCollection<InventoryItemResponse>> GetManyAsync(
+        IReadOnlyCollection<Guid> productIds,
+        CancellationToken cancellationToken);
+
     Task<PagedResult<InventoryItemResponse>> SearchAsync(
         ManagedInventoryListCriteria criteria,
         CancellationToken cancellationToken);

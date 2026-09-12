@@ -4,6 +4,7 @@ using ECommerce.Inventory.Api.Errors;
 using ECommerce.Inventory.Application.Commands.UpsertInventoryItem;
 using ECommerce.Inventory.Application.Inventory;
 using ECommerce.Inventory.Application.Queries.GetInventoryItem;
+using ECommerce.Inventory.Application.Queries.GetInventoryItems;
 using ECommerce.Inventory.Application.Queries.SearchManagedInventory;
 using ECommerce.Inventory.Application.Queries.SearchStockMovements;
 using MediatR;
@@ -57,6 +58,17 @@ public sealed class InventoryController(ISender sender) : ControllerBase
                     maximumAvailableQuantity,
                     sortBy,
                     sortDescending)),
+            cancellationToken);
+    }
+
+    [HttpGet("items", Name = "GetInventoryItems")]
+    [AllowAnonymous]
+    public async Task<IReadOnlyCollection<InventoryItemResponse>> GetItemsAsync(
+        [FromQuery] Guid[] productIds,
+        CancellationToken cancellationToken)
+    {
+        return await sender.Send(
+            new GetInventoryItemsQuery(productIds ?? []),
             cancellationToken);
     }
 

@@ -31,6 +31,25 @@ export function getManagedInventory(
   )
 }
 
+export function getInventoryItems(
+  productIds: readonly string[],
+  signal?: AbortSignal,
+): Promise<InventoryItem[]> {
+  if (productIds.length === 0) {
+    return Promise.resolve([])
+  }
+
+  const parameters = new URLSearchParams()
+  for (const productId of productIds) {
+    parameters.append("productIds", productId)
+  }
+
+  return apiRequest<InventoryItem[]>(
+    `/gateway/inventory/items?${parameters.toString()}`,
+    { signal },
+  )
+}
+
 export function getInventoryItem(productId: string): Promise<InventoryItem> {
   return apiRequest<InventoryItem>(`/gateway/inventory/items/${productId}`)
 }

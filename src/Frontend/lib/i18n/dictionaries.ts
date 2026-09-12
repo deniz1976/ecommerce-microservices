@@ -473,6 +473,9 @@ export interface Dictionary {
     nextPage: string
     page: string
     viewProduct: string
+    inStock: string
+    lowStock: string
+    outOfStock: string
     productUnavailable: string
     backToCatalog: string
     productDetails: string
@@ -1127,6 +1130,9 @@ const en: Dictionary = {
     nextPage: "Next",
     page: "Page {current} of {total}",
     viewProduct: "View product",
+    inStock: "In stock",
+    lowStock: "Only {count} left",
+    outOfStock: "Out of stock",
     productUnavailable: "This product is unavailable or no longer active.",
     backToCatalog: "Back to catalog",
     productDetails: "Product details",
@@ -1793,6 +1799,9 @@ const tr: Dictionary = {
     nextPage: "Sonraki",
     page: "Sayfa {current} / {total}",
     viewProduct: "Ürünü incele",
+    inStock: "Stokta",
+    lowStock: "Son {count} adet",
+    outOfStock: "Stokta yok",
     productUnavailable: "Bu ürün kullanılamıyor veya artık aktif değil.",
     backToCatalog: "Kataloğa dön",
     productDetails: "Ürün detayları",

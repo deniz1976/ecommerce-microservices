@@ -48,6 +48,56 @@ public sealed class ManagedInventoryPagingArchitectureTests
         Assert.DoesNotContain("PagedResult<InventoryItem>", readerContract, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void BatchInventoryReadIsBoundedAnonymousAndTrackingFree()
+    {
+        string limits = File.ReadAllText(GetRepositoryPath(
+            "src",
+            "Services",
+            "Inventory",
+            "ECommerce.Inventory.Application",
+            "Inventory",
+            "ManagedInventoryQueryLimits.cs"));
+        string queryService = File.ReadAllText(GetRepositoryPath(
+            "src",
+            "Services",
+            "Inventory",
+            "ECommerce.Inventory.Application",
+            "Inventory",
+            "InventoryQueryService.cs"));
+        string reader = File.ReadAllText(GetRepositoryPath(
+            "src",
+            "Services",
+            "Inventory",
+            "ECommerce.Inventory.Infrastructure",
+            "Persistence",
+            "InventoryQueryReader.cs"));
+        string controller = File.ReadAllText(GetRepositoryPath(
+            "src",
+            "Services",
+            "Inventory",
+            "ECommerce.Inventory.Api",
+            "Inventory",
+            "InventoryController.cs"));
+        string catalogPage = File.ReadAllText(GetRepositoryPath(
+            "src",
+            "Frontend",
+            "components",
+            "customer",
+            "customer-dashboard.tsx"));
+
+        Assert.Contains("MaxBatchProductIds = 100", limits, StringComparison.Ordinal);
+        Assert.Contains("Take(ManagedInventoryQueryLimits.MaxBatchProductIds)", queryService, StringComparison.Ordinal);
+        Assert.Contains("Distinct()", queryService, StringComparison.Ordinal);
+        Assert.Contains("productId != Guid.Empty", queryService, StringComparison.Ordinal);
+        Assert.Contains("GetManyAsync", reader, StringComparison.Ordinal);
+        Assert.Contains("productIds.Contains(item.ProductId)", reader, StringComparison.Ordinal);
+        Assert.Contains("[HttpGet(\"items\", Name = \"GetInventoryItems\")]", controller, StringComparison.Ordinal);
+        Assert.Contains("GetInventoryItemsQuery", controller, StringComparison.Ordinal);
+        Assert.Contains("getInventoryItems(", catalogPage, StringComparison.Ordinal);
+        Assert.DoesNotContain("getInventoryItem(product.id)", catalogPage, StringComparison.Ordinal);
+    }
+
     private static string GetRepositoryPath(params string[] segments)
     {
         string root = AppContext.BaseDirectory;
