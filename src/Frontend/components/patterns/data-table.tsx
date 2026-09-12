@@ -1,6 +1,12 @@
 "use client"
 
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+  ChevronsUpDownIcon,
+} from "lucide-react"
 import type { ReactNode } from "react"
 
 import { EmptyState, ErrorState, TableSkeleton } from "@/components/patterns/states"
@@ -17,16 +23,25 @@ import { useI18n } from "@/lib/i18n/provider"
 import type { PagedResult } from "@/types"
 import { cn } from "@/lib/utils"
 
-export interface DataTableColumn<TRow> {
+export type DataTableSortDirection = "ascending" | "descending"
+
+export interface DataTableSort<TSortKey extends string = string> {
+  key: TSortKey
+  direction: DataTableSortDirection
+  onChange: (key: TSortKey) => void
+}
+
+export interface DataTableColumn<TRow, TSortKey extends string = string> {
   id: string
   header: string
   cell: (row: TRow) => ReactNode
   className?: string
   headerClassName?: string
+  sortKey?: TSortKey
 }
 
-interface DataTableProps<TRow> {
-  columns: DataTableColumn<TRow>[]
+interface DataTableProps<TRow, TSortKey extends string = string> {
+  columns: DataTableColumn<TRow, TSortKey>[]
   page: PagedResult<TRow> | null
   rowKey: (row: TRow) => string
   isLoading?: boolean
@@ -37,9 +52,10 @@ interface DataTableProps<TRow> {
   emptyTitle?: string
   emptyDescription?: string
   minWidthClassName?: string
+  sort?: DataTableSort<TSortKey>
 }
 
-export function DataTable<TRow>({
+export function DataTable<TRow, TSortKey extends string = string>({
   columns,
   page,
   rowKey,
@@ -51,7 +67,8 @@ export function DataTable<TRow>({
   emptyTitle,
   emptyDescription,
   minWidthClassName = "min-w-[52rem]",
-}: DataTableProps<TRow>) {
+  sort,
+}: DataTableProps<TRow, TSortKey>) {
   const { t } = useI18n()
 
   if (error) {
@@ -71,11 +88,36 @@ export function DataTable<TRow>({
         <Table className={minWidthClassName}>
           <TableHeader>
             <TableRow>
-              {columns.map((column) => (
-                <TableHead key={column.id} className={column.headerClassName}>
-                  {column.header}
-                </TableHead>
-              ))}
+              {columns.map((column) => {
+                const sortable = sort !== undefined && column.sortKey !== undefined
+                const isSorted = sortable && sort.key === column.sortKey
+                const SortIcon = !isSorted
+                  ? ChevronsUpDownIcon
+                  : sort.direction === "ascending"
+                    ? ChevronUpIcon
+                    : ChevronDownIcon
+
+                return (
+                  <TableHead
+                    key={column.id}
+                    className={column.headerClassName}
+                    aria-sort={isSorted ? sort.direction : undefined}
+                  >
+                    {sortable ? (
+                      <button
+                        type="button"
+                        onClick={() => sort.onChange(column.sortKey as TSortKey)}
+                        className="inline-flex items-center gap-1.5 font-medium hover:text-foreground"
+                      >
+                        {column.header}
+                        <SortIcon className="size-3.5" />
+                      </button>
+                    ) : (
+                      column.header
+                    )}
+                  </TableHead>
+                )
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>
