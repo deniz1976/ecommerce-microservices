@@ -3,7 +3,9 @@
 import { type FormEvent, useCallback, useEffect, useState } from "react"
 import { Loader2, PackagePlus, RefreshCcw } from "lucide-react"
 
+import { FormField, SelectField, TextField } from "@/components/patterns/form-field"
 import { Button } from "@/components/ui/button"
+import { SelectNative } from "@/components/ui/select-native"
 import {
   createCatalogProduct,
   getCatalogBrands,
@@ -141,22 +143,24 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
         />
       ) : (
         <div className="mt-5 grid gap-4">
-          <Field label={t.seller.sku} value={sku} onChange={setSku} required />
-          <Field label={t.seller.productName} value={name} onChange={setName} required />
-          <Field label={t.seller.productDescription} value={description} onChange={setDescription} required />
+          <TextField label={t.seller.sku} value={sku} onChange={setSku} required />
+          <TextField label={t.seller.productName} value={name} onChange={setName} required />
+          <TextField label={t.seller.productDescription} value={description} onChange={setDescription} required />
           <SelectField label={t.seller.category} value={categoryId} onChange={setCategoryId} options={references.categories} />
           <SelectField label={t.seller.brand} value={brandId} onChange={setBrandId} options={references.brands} />
           <div className="grid min-w-0 grid-cols-2 gap-3">
-            <Field label={t.seller.price} value={price} onChange={setPrice} type="number" min="0.01" step="0.01" required />
-            <Field label={t.seller.currency} value={currency} onChange={setCurrency} minLength={3} maxLength={3} required />
+            <TextField label={t.seller.price} value={price} onChange={setPrice} type="number" min="0.01" step="0.01" required />
+            <TextField label={t.seller.currency} value={currency} onChange={setCurrency} minLength={3} maxLength={3} required />
           </div>
-          <label className="grid gap-2 text-sm font-medium text-foreground">
-            {t.seller.statusLabel}
-            <select value={status} onChange={(event) => setStatus(Number(event.target.value) as ProductStatus)} className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal">
+          <FormField label={t.seller.statusLabel}>
+            <SelectNative
+              value={status}
+              onChange={(event) => setStatus(Number(event.target.value) as ProductStatus)}
+            >
               <option value={0}>{t.seller.draft}</option>
               <option value={1}>{t.seller.active}</option>
-            </select>
-          </label>
+            </SelectNative>
+          </FormField>
         </div>
       )}
 
@@ -195,41 +199,3 @@ function ReferenceUnavailable({
   )
 }
 
-interface FieldProps {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  type?: string
-  required?: boolean
-  min?: string
-  step?: string
-  minLength?: number
-  maxLength?: number
-}
-
-function Field({ label, value, onChange, type = "text", ...inputProps }: FieldProps) {
-  return (
-    <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
-      {label}
-      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} {...inputProps} className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal" />
-    </label>
-  )
-}
-
-interface SelectFieldProps {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  options: Array<{ id: string; name: string }>
-}
-
-function SelectField({ label, value, onChange, options }: SelectFieldProps) {
-  return (
-    <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
-      {label}
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal">
-        {options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
-      </select>
-    </label>
-  )
-}

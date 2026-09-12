@@ -1,9 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Loader2, X } from "lucide-react"
+import { Loader2Icon, XIcon } from "lucide-react"
 
+import { FormField } from "@/components/patterns/form-field"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import { ApiError } from "@/lib/api/client"
 import { getInventoryItem, updateInventoryItem } from "@/lib/api/inventory"
 import { useI18n } from "@/lib/i18n/provider"
@@ -77,29 +80,28 @@ export function ProductInventoryForm({
   }
 
   return (
-    <section className="rounded-lg border border-border bg-background p-5">
+    <section className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="font-heading text-lg font-semibold text-foreground">{t.seller.stockTitle}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{product.name}</p>
         </div>
         <Button type="button" variant="ghost" size="icon" onClick={onCancel} aria-label={t.seller.closeStockEditor}>
-          <X />
+          <XIcon />
         </Button>
       </div>
 
       {loading ? (
-        <div className="flex min-h-32 items-center justify-center">
-          <Loader2 className="size-5 animate-spin text-muted-foreground" />
-          <span className="sr-only">{t.common.loading}</span>
+        <div className="mt-5 flex flex-col gap-4">
+          <Skeleton className="h-14 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-9 w-full" />
         </div>
       ) : (
         <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
           {isNew ? <p className="text-sm text-muted-foreground">{t.seller.stockNotCreated}</p> : null}
-          <label className="block text-sm font-medium text-foreground">
-            {t.seller.quantityOnHand}
-            <input
-              className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          <FormField label={t.seller.quantityOnHand}>
+            <Input
               type="number"
               min="0"
               step="1"
@@ -107,22 +109,22 @@ export function ProductInventoryForm({
               value={quantity}
               onChange={(event) => setQuantity(event.target.value)}
             />
-          </label>
+          </FormField>
           {inventory ? (
-            <dl className="grid grid-cols-2 gap-3 rounded-md bg-muted/50 p-3 text-sm">
-              <div>
+            <dl className="grid grid-cols-2 gap-3 rounded-lg bg-muted/50 p-3 text-sm">
+              <div className="flex flex-col gap-1">
                 <dt className="text-muted-foreground">{t.seller.reservedQuantity}</dt>
-                <dd className="mt-1 font-medium text-foreground">{inventory.reservedQuantity}</dd>
+                <dd className="font-medium tabular-nums">{inventory.reservedQuantity}</dd>
               </div>
-              <div>
+              <div className="flex flex-col gap-1">
                 <dt className="text-muted-foreground">{t.seller.availableQuantity}</dt>
-                <dd className="mt-1 font-medium text-foreground">{inventory.availableQuantity}</dd>
+                <dd className="font-medium tabular-nums">{inventory.availableQuantity}</dd>
               </div>
             </dl>
           ) : null}
           {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
           <Button className="w-full" type="submit" disabled={saving}>
-            {saving ? <Loader2 className="animate-spin" /> : null}
+            {saving ? <Loader2Icon className="animate-spin" /> : null}
             {saving ? t.seller.savingStock : t.seller.saveStock}
           </Button>
         </form>

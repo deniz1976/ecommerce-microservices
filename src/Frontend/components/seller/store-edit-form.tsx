@@ -1,9 +1,11 @@
 "use client"
 
 import { type FormEvent, useState } from "react"
-import { Loader2, Pencil, X } from "lucide-react"
+import { Loader2Icon, PencilIcon, XIcon } from "lucide-react"
 
+import { FormField } from "@/components/patterns/form-field"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { ApiError } from "@/lib/api/client"
 import { updateCatalogStore } from "@/lib/api/catalog"
 import { useI18n } from "@/lib/i18n/provider"
@@ -45,48 +47,43 @@ export function StoreEditForm({ store, onCancel, onUpdated }: StoreEditFormProps
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-border bg-background p-5">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Pencil className="size-4 text-primary" />
+          <PencilIcon className="size-4 text-primary" />
           <h2 className="font-heading text-lg font-semibold text-foreground">
             {t.seller.editStore}
           </h2>
         </div>
         <Button type="button" variant="ghost" size="icon-sm" onClick={onCancel}>
-          <X />
+          <XIcon />
           <span className="sr-only">{t.common.back}</span>
         </Button>
       </div>
       <div className="mt-5 grid gap-4">
-        <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
-          {t.seller.storeName}
-          <input
+        <FormField label={t.seller.storeName}>
+          <Input
             value={name}
             onChange={(event) => setName(event.target.value)}
             minLength={2}
             maxLength={160}
             required
-            className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring/40"
           />
-        </label>
-        <label className="grid min-w-0 gap-2 text-sm font-medium text-foreground">
-          {t.seller.storeSlug}
-          <input
+        </FormField>
+        <FormField label={t.seller.storeSlug} hint={t.seller.slugHint}>
+          <Input
             value={slug}
             onChange={(event) => setSlug(event.target.value.toLowerCase())}
             pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
             minLength={2}
             maxLength={160}
             required
-            className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring/40"
           />
-          <span className="text-xs font-normal text-muted-foreground">{t.seller.slugHint}</span>
-        </label>
+        </FormField>
       </div>
       {error ? <p className="mt-4 text-sm text-destructive" role="alert">{error}</p> : null}
       <Button type="submit" disabled={saving} className="mt-5">
-        {saving ? <Loader2 className="animate-spin" /> : <Pencil />}
+        {saving ? <Loader2Icon className="animate-spin" /> : <PencilIcon />}
         {saving ? t.seller.updatingStore : t.seller.updateStore}
       </Button>
     </form>
