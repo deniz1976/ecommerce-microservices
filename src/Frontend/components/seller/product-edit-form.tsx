@@ -153,7 +153,7 @@ export function ProductEditForm({ product, onCancel, onUpdated }: ProductEditFor
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/30 bg-background p-5 shadow-sm">
+    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/30 bg-card p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">

@@ -215,7 +215,7 @@ export function NotificationCenter() {
                     key={notification.id}
                     className={cn(
                       "rounded-xl border bg-card p-5",
-                      unread ? "border-primary/35 shadow-sm" : "border-border",
+                      unread ? "border-primary/50" : "border-border",
                     )}
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

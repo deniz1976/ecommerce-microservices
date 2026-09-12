@@ -71,11 +71,11 @@ export function CatalogProductCard({
   const soldOut = availableQuantity === 0
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-foreground/20">
+    <article className="group flex flex-col bg-card">
       <Link
         href={`/products/${product.id}`}
         aria-label={`${product.name} — ${viewLabel}`}
-        className="relative flex aspect-square items-center justify-center overflow-hidden bg-muted outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="relative flex aspect-square items-center justify-center overflow-hidden bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {image ? (
           <Image
@@ -84,14 +84,14 @@ export function CatalogProductCard({
             fill
             unoptimized
             sizes="(min-width: 1280px) 20rem, (min-width: 640px) 45vw, 90vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            className="object-cover"
           />
         ) : (
           <PackageIcon className="size-8 text-muted-foreground/40" aria-hidden="true" />
         )}
       </Link>
 
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className="flex flex-1 flex-col gap-2 pt-2.5">
         <div className="flex flex-wrap items-center gap-1.5">
           {availableQuantity !== undefined ? (
             <StatusBadge
@@ -100,17 +100,15 @@ export function CatalogProductCard({
             />
           ) : null}
           {product.brandName ? (
-            <span className="rounded-4xl border border-border/60 bg-muted/50 px-2 py-0.5 text-xs font-medium">
+            <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
               {product.brandName}
             </span>
           ) : null}
-          {product.categoryName ? (
-            <span className="text-xs text-muted-foreground">{product.categoryName}</span>
-          ) : null}
+
         </div>
 
         <div className="flex flex-1 flex-col gap-1">
-          <h2 className="line-clamp-2 font-heading text-base leading-snug font-semibold">
+          <h2 className="line-clamp-2 text-sm leading-snug font-medium">
             <Link
               href={`/products/${product.id}`}
               className="outline-none hover:underline focus-visible:underline"
@@ -118,17 +116,17 @@ export function CatalogProductCard({
               {product.name}
             </Link>
           </h2>
-          <p className="line-clamp-2 text-sm leading-5 text-muted-foreground">
-            {product.description}
-          </p>
+
         </div>
 
-        <p className="font-heading text-xl font-semibold tabular-nums">{price}</p>
+        <p className="font-heading text-lg leading-none font-bold tracking-tight text-primary tabular-nums">
+          {price}
+        </p>
 
         {onAdd ? (
           <Button
             type="button"
-            size="lg"
+            size="sm"
             className="w-full"
             disabled={adding || soldOut}
             onClick={() => onAdd(product)}

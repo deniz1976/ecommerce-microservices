@@ -1,21 +1,21 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Inter, Manrope } from 'next/font/google'
+import { Archivo, Inter_Tight } from 'next/font/google'
 import Script from 'next/script'
 import { headers } from 'next/headers'
 
 import { Providers } from '@/components/providers'
 import './globals.css'
 
-const inter = Inter({
+const interTight = Inter_Tight({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-inter-tight',
   display: 'swap',
 })
 
-const manrope = Manrope({
+const archivo = Archivo({
   subsets: ['latin'],
-  variable: '--font-manrope',
+  variable: '--font-archivo',
   display: 'swap',
 })
 
@@ -43,7 +43,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${manrope.variable} bg-background`}
+      className={`${interTight.variable} ${archivo.variable} bg-background`}
       suppressHydrationWarning
     >
       <head>

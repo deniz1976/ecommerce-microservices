@@ -15,7 +15,7 @@ export function Logo({ className, showTagline = false }: LogoProps) {
 
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
-      <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+      <span className="flex size-9 items-center justify-center rounded-sm bg-primary text-primary-foreground">
         <ShoppingBag className="size-5" />
       </span>
       <div className="flex flex-col leading-none">

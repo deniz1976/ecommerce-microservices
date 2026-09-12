@@ -48,7 +48,7 @@ type ReferenceState =
   | { status: "ready"; categories: CatalogCategoryReference[]; brands: CatalogBrandReference[] }
   | { status: "unavailable" }
 
-const PAGE_SIZE = 12
+const PAGE_SIZE = 24
 
 export function CustomerDashboard({ profile }: CustomerDashboardProps) {
   const { locale, t } = useI18n()
@@ -151,7 +151,7 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
 
   return (
     <div className="min-h-svh bg-muted/30">
-      <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6">
+      <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
         <Logo />
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
@@ -278,9 +278,9 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
           </div>
 
           {catalog.status === "loading" ? (
-            <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {Array.from({ length: PAGE_SIZE }, (_, index) => (
-                <Skeleton key={index} className="h-[26rem] rounded-xl" />
+            <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {Array.from({ length: 12 }, (_, index) => (
+                <Skeleton key={index} className="aspect-[3/4] rounded-sm" />
               ))}
             </div>
           ) : catalog.status === "unavailable" ? (
@@ -292,7 +292,7 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
           ) : catalog.data.items.length === 0 ? (
             <EmptyState className="mt-4" title={t.customer.noProducts} />
           ) : (
-            <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {catalog.data.items.map((product) => (
                 <CatalogProductCard
                   key={product.id}

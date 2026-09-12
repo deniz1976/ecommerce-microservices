@@ -25,7 +25,7 @@ export function LanguageSwitcher() {
               "h-8 rounded-md px-2.5 text-xs font-semibold uppercase tracking-wide transition-colors",
               "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/25",
               active
-                ? "bg-primary text-primary-foreground shadow-sm"
+                ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >

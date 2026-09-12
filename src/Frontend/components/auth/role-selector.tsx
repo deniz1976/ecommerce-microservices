@@ -43,7 +43,7 @@ export function RoleSelector({ value, onChange, error }: RoleSelectorProps) {
               "group relative flex flex-col gap-3 rounded-lg border p-4 text-left transition-all",
               "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/25",
               selected
-                ? "border-primary bg-accent/60 shadow-sm ring-1 ring-primary/40"
+                ? "border-primary bg-accent/60 ring-1 ring-primary/40"
                 : "border-border bg-card hover:border-primary/40 hover:bg-accent/30",
             )}
           >

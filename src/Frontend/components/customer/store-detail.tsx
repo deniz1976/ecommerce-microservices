@@ -76,9 +76,9 @@ export function StoreDetail() {
         {state.status === "loading" ? (
           <div className="mt-8 flex flex-col gap-8">
             <Skeleton className="h-32 rounded-2xl" />
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {Array.from({ length: PAGE_SIZE }, (_, index) => (
-                <Skeleton key={index} className="h-[22rem] rounded-xl" />
+                <Skeleton key={index} className="aspect-[3/4] rounded-sm" />
               ))}
             </div>
           </div>
@@ -122,7 +122,7 @@ export function StoreDetail() {
               {state.products.items.length === 0 ? (
                 <EmptyState title={t.customer.noProducts} description="" />
               ) : (
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                   {state.products.items.map((product) => (
                     <CatalogProductCard
                       key={product.id}
