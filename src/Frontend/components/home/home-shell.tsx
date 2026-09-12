@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { CheckCircle2, Loader2, LogOut } from "lucide-react"
+import { CheckCircle2Icon, Loader2Icon, LogOutIcon } from "lucide-react"
 
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
@@ -55,7 +55,7 @@ export function HomeShell() {
   if (state.status === "loading") {
     return (
       <main className="flex min-h-svh items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
         <span className="sr-only">{t.common.loading}</span>
       </main>
     )
@@ -119,11 +119,11 @@ export function HomeShell() {
       </header>
 
       <main className="flex flex-1 items-center justify-center px-5 py-12 sm:px-6">
-        <div className="w-full max-w-lg rounded-lg border border-border bg-card p-8 shadow-sm">
+        <div className="w-full max-w-lg rounded-xl border border-border bg-card p-8">
           <span className="flex size-12 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-            <CheckCircle2 className="size-6" />
+            <CheckCircle2Icon className="size-6" />
           </span>
-          <h1 className="mt-5 font-heading text-2xl font-semibold tracking-tight text-foreground">
+          <h1 className="mt-5 font-heading text-2xl font-semibold tracking-tight">
             {t.home.welcome}
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground text-pretty">
@@ -156,7 +156,7 @@ export function HomeShell() {
             onClick={handleSignOut}
             className="mt-6 h-11 w-full"
           >
-            <LogOut className="size-4" />
+            <LogOutIcon className="size-4" />
             {t.home.signOut}
           </LoadingButton>
         </div>
@@ -180,12 +180,24 @@ function AuthEntry() {
 
       <main className="flex flex-1 items-center justify-center px-5 pb-16 sm:px-6">
         <div className="w-full max-w-md text-center">
-          <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
             {t.aside.trustTitle}
           </h1>
           <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground text-pretty">
             {t.aside.trustBody}
           </p>
+
+          <ul className="mx-auto mt-8 flex w-fit flex-col gap-3 text-left">
+            {[t.aside.point1, t.aside.point2, t.aside.point3].map((point) => (
+              <li key={point} className="flex items-start gap-2.5 text-sm">
+                <CheckCircle2Icon
+                  className="mt-0.5 size-4 shrink-0 text-chart-1"
+                  aria-hidden="true"
+                />
+                <span className="text-muted-foreground">{point}</span>
+              </li>
+            ))}
+          </ul>
 
           <div className="mt-8 flex flex-col gap-3">
             <Link
