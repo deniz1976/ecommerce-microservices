@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Check, Inbox, Loader2 } from "lucide-react"
+import { Bell, Check, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -8,7 +8,9 @@ import { useEffect, useState } from "react"
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
+import { EmptyState, ErrorState } from "@/components/patterns/states"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { getProfile } from "@/lib/api/auth"
 import {
   getCustomerNotifications,
@@ -188,14 +190,18 @@ export function NotificationCenter() {
         </div>
 
         {state.status === "loading" ? (
-          <div className="flex min-h-72 items-center justify-center">
-            <Loader2 className="size-6 animate-spin" />
+          <div className="mt-8 flex flex-col gap-3">
+            {Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} className="h-32 rounded-xl" />
+            ))}
           </div>
         ) : state.status === "unavailable" ? (
-          <NotificationMessage message={t.notifications.loadFailed} />
+          <ErrorState className="mt-8" title={t.notifications.loadFailed} />
         ) : state.data.items.length === 0 ? (
-          <NotificationMessage
-            message={unreadOnly ? t.notifications.emptyUnread : t.notifications.empty}
+          <EmptyState
+            className="mt-8"
+            title={unreadOnly ? t.notifications.emptyUnread : t.notifications.empty}
+            description=""
           />
         ) : (
           <>
@@ -300,13 +306,3 @@ export function NotificationCenter() {
     </div>
   )
 }
-
-function NotificationMessage({ message }: { message: string }) {
-  return (
-    <div className="mt-8 flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 text-center">
-      <Inbox className="size-9 text-muted-foreground/60" />
-      <p className="mt-3 text-sm text-muted-foreground">{message}</p>
-    </div>
-  )
-}
-

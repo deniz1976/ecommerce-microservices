@@ -1,7 +1,16 @@
 "use client"
 
 import Link from "next/link"
-import { CheckCircle2, ClipboardList, CreditCard, Loader2, Minus, PackageOpen, Plus, ShoppingBag, Trash2 } from "lucide-react"
+import {
+  CheckCircle2Icon,
+  ClipboardListIcon,
+  CreditCardIcon,
+  Loader2Icon,
+  MinusIcon,
+  PlusIcon,
+  ShoppingBagIcon,
+  Trash2Icon,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import type { FormEvent } from "react"
@@ -9,7 +18,10 @@ import type { FormEvent } from "react"
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
+import { EmptyState, ErrorState } from "@/components/patterns/states"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   addBasketItem,
   checkoutBasket,
@@ -163,7 +175,7 @@ export function BasketView() {
           <LanguageSwitcher />
           <ThemeToggle />
           <Link href="/orders" className={buttonVariants({ variant: "outline", size: "sm" })}>
-            <ClipboardList />
+            <ClipboardListIcon />
             {t.orders.openOrders}
           </Link>
         </div>
@@ -175,7 +187,7 @@ export function BasketView() {
         </Link>
         <div className="mt-6 flex items-start gap-3">
           <span className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <ShoppingBag className="size-5" />
+            <ShoppingBagIcon className="size-5" />
           </span>
           <div>
             <h1 className="font-heading text-3xl font-semibold tracking-tight">{t.basket.title}</h1>
@@ -184,12 +196,15 @@ export function BasketView() {
         </div>
 
         {state.status === "loading" ? (
-          <div className="flex min-h-80 items-center justify-center"><Loader2 className="size-6 animate-spin" /></div>
+          <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
+            <Skeleton className="h-72 rounded-xl" />
+            <Skeleton className="h-96 rounded-xl" />
+          </div>
         ) : state.status === "unavailable" ? (
-          <BasketMessage message={t.basket.loadFailed} />
+          <ErrorState className="mt-8" title={t.basket.loadFailed} />
         ) : checkoutResult ? (
           <div className="mt-8 rounded-xl border border-primary/30 bg-primary/5 p-8 text-center">
-            <CheckCircle2 className="mx-auto size-10 text-primary" />
+            <CheckCircle2Icon className="mx-auto size-10 text-primary" />
             <h2 className="mt-4 font-heading text-2xl font-semibold">{t.basket.checkoutRecorded}</h2>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t.basket.checkoutNote}</p>
             <p className="mt-4 text-sm font-medium">{formatMoney(checkoutResult.totalAmount, checkoutResult.currency, locale)}</p>
@@ -198,7 +213,12 @@ export function BasketView() {
             </Link>
           </div>
         ) : !state.basket || state.basket.items.length === 0 ? (
-          <BasketMessage message={t.basket.empty} />
+          <div className="mt-8 flex flex-col items-center gap-4">
+            <EmptyState className="w-full" title={t.basket.empty} description="" />
+            <Link href="/" className={buttonVariants({ variant: "outline" })}>
+              {t.basket.continueShopping}
+            </Link>
+          </div>
         ) : (
           <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
             <section className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
@@ -217,18 +237,18 @@ export function BasketView() {
                     </div>
                     <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-2" aria-label={t.basket.quantity}>
-                        <Button type="button" variant="outline" size="icon" disabled={busy || item.quantity <= 1} onClick={() => updateQuantity(item.productId, item.quantity - 1)} aria-label={`${t.basket.quantity} -`}><Minus /></Button>
-                        <span className="min-w-8 text-center text-sm font-medium">{busy ? <Loader2 className="mx-auto size-4 animate-spin" /> : item.quantity}</span>
-                        <Button type="button" variant="outline" size="icon" disabled={busy} onClick={() => updateQuantity(item.productId, item.quantity + 1)} aria-label={`${t.basket.quantity} +`}><Plus /></Button>
+                        <Button type="button" variant="outline" size="icon" disabled={busy || item.quantity <= 1} onClick={() => updateQuantity(item.productId, item.quantity - 1)} aria-label={`${t.basket.quantity} -`}><MinusIcon /></Button>
+                        <span className="min-w-8 text-center text-sm font-medium">{busy ? <Loader2Icon className="mx-auto size-4 animate-spin" /> : item.quantity}</span>
+                        <Button type="button" variant="outline" size="icon" disabled={busy} onClick={() => updateQuantity(item.productId, item.quantity + 1)} aria-label={`${t.basket.quantity} +`}><PlusIcon /></Button>
                       </div>
-                      <Button type="button" variant="destructive" disabled={busy} onClick={() => remove(item.productId)}><Trash2 />{t.basket.remove}</Button>
+                      <Button type="button" variant="destructive" disabled={busy} onClick={() => remove(item.productId)}><Trash2Icon />{t.basket.remove}</Button>
                     </div>
                   </article>
                 )
               })}
             </section>
 
-            <form onSubmit={checkout} className="h-fit rounded-xl border border-border bg-card p-5">
+            <form onSubmit={checkout} className="h-fit rounded-xl border border-border bg-card p-5 lg:sticky lg:top-6">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-sm text-muted-foreground">{t.basket.total}</span>
                 <strong className="font-heading text-2xl">{formatMoney(state.basket.totalAmount, state.basket.currency, locale)}</strong>
@@ -267,7 +287,7 @@ export function BasketView() {
                 />
               </div>
               <div className="mt-5 flex gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
-                <CreditCard className="mt-0.5 size-4 shrink-0 text-primary" />
+                <CreditCardIcon className="mt-0.5 size-4 shrink-0 text-primary" />
                 <div>
                   <p className="text-sm font-medium">{t.basket.demoPayment}</p>
                   <p className="mt-1 text-xs leading-5 text-muted-foreground">{t.basket.demoPaymentNote}</p>
@@ -275,11 +295,11 @@ export function BasketView() {
               </div>
               {operationError ? <p className="mt-4 text-sm text-destructive">{t.basket.updateFailed}</p> : null}
               <Button type="submit" size="lg" className="mt-6 w-full" disabled={checkingOut || clearing}>
-                {checkingOut ? <Loader2 className="animate-spin" /> : null}
+                {checkingOut ? <Loader2Icon className="animate-spin" /> : null}
                 {checkingOut ? t.basket.checkingOut : t.basket.checkout}
               </Button>
               <Button type="button" variant="ghost" className="mt-2 w-full" disabled={checkingOut || clearing} onClick={clear}>
-                {clearing ? <Loader2 className="animate-spin" /> : <Trash2 />}
+                {clearing ? <Loader2Icon className="animate-spin" /> : <Trash2Icon />}
                 {t.basket.clear}
               </Button>
             </form>
@@ -304,23 +324,12 @@ function CheckoutField({
   return (
     <label className="grid gap-1.5 text-xs font-medium text-muted-foreground">
       {label}
-      <input
+      <Input
         value={value}
         onChange={(event) => onChange(event.target.value)}
         maxLength={maxLength}
         required
-        className="h-10 rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground outline-none focus:ring-2 focus:ring-ring/30"
       />
     </label>
   )
 }
-
-function BasketMessage({ message }: { message: string }) {
-  return (
-    <div className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 text-center">
-      <PackageOpen className="size-10 text-muted-foreground/60" />
-      <p className="mt-4 text-sm text-muted-foreground">{message}</p>
-    </div>
-  )
-}
-
