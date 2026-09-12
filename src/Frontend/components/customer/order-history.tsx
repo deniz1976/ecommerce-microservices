@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronLeft, ChevronRight, ClipboardList, Loader2, PackageOpen } from "lucide-react"
+import { ChevronLeft, ChevronRight, ClipboardList } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -9,8 +9,10 @@ import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { getProfile } from "@/lib/api/auth"
 import { getCustomerOrders } from "@/lib/api/orders"
+import { EmptyState, ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { formatDateTime, formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
@@ -94,11 +96,15 @@ export function OrderHistory() {
         </div>
 
         {state.status === "loading" ? (
-          <div className="flex min-h-72 items-center justify-center"><Loader2 className="size-6 animate-spin" /></div>
+          <div className="mt-8 flex flex-col gap-4">
+            {Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} className="h-24 rounded-xl" />
+            ))}
+          </div>
         ) : state.status === "unavailable" ? (
-          <OrderMessage message={t.orders.loadFailed} />
+          <ErrorState className="mt-8" title={t.orders.loadFailed} />
         ) : state.data.items.length === 0 ? (
-          <OrderMessage message={t.orders.empty} />
+          <EmptyState className="mt-8" title={t.orders.empty} description="" />
         ) : (
           <div className="mt-8 grid gap-4">
             {state.data.items.map((order) => (
@@ -165,13 +171,3 @@ export function OrderHistory() {
     </div>
   )
 }
-
-function OrderMessage({ message }: { message: string }) {
-  return (
-    <div className="mt-8 flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 text-center">
-      <PackageOpen className="size-9 text-muted-foreground/60" />
-      <p className="mt-3 text-sm text-muted-foreground">{message}</p>
-    </div>
-  )
-}
-
