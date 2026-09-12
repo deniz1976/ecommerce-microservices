@@ -3,7 +3,7 @@
 import { SearchIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import { AdminPageLayout } from "@/components/admin/admin-page-layout"
+import { AdminShell } from "@/components/admin/admin-shell"
 import { DataTable, type DataTableColumn } from "@/components/patterns/data-table"
 import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
 import { StatusBadge } from "@/components/patterns/status-badge"
@@ -109,7 +109,7 @@ export function AdminWorkflowDiagnosticsPage() {
   const hasActiveFilters = orderId !== "" || workflowStatus !== undefined || overdueOnly
 
   return (
-    <AdminPageLayout title={t.admin.workflows} description={t.admin.manageWorkflowsDescription}>
+    <AdminShell section="workflows" title={t.admin.workflows} description={t.admin.manageWorkflowsDescription}>
       <section className="mt-6 flex flex-col gap-4">
         <h2 className="font-heading text-xl font-semibold">{t.admin.workflowList}</h2>
 
@@ -184,6 +184,6 @@ export function AdminWorkflowDiagnosticsPage() {
           minWidthClassName="min-w-[70rem]"
         />
       </section>
-    </AdminPageLayout>
+    </AdminShell>
   )
 }

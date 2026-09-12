@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Edit3Icon, PlusIcon } from "lucide-react"
 
 import { AdminBrandForm } from "@/components/admin/admin-brand-form"
-import { AdminReferencePageLayout } from "@/components/admin/admin-reference-page-layout"
+import { AdminShell } from "@/components/admin/admin-shell"
 import { DataTable, type DataTableColumn } from "@/components/patterns/data-table"
 import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
 import { StatusBadge } from "@/components/patterns/status-badge"
@@ -135,8 +135,8 @@ export function AdminBrandManagementPage() {
   ]
 
   return (
-    <AdminReferencePageLayout
-      activePage="brands"
+    <AdminShell
+      section="brands"
       title={t.admin.brands}
       description={t.admin.manageBrandsDescription}
     >
@@ -243,6 +243,6 @@ export function AdminBrandManagementPage() {
           </div>
         ) : null}
       </section>
-    </AdminReferencePageLayout>
+    </AdminShell>
   )
 }

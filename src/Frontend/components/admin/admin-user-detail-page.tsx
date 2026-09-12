@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { AdminPageLayout } from "@/components/admin/admin-page-layout"
+import { AdminShell } from "@/components/admin/admin-shell"
 import { EmptyState, ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { buttonVariants } from "@/components/ui/button"
@@ -44,7 +44,7 @@ export function AdminUserDetailPage() {
   }, [id, reloadToken])
 
   return (
-    <AdminPageLayout title={t.admin.userDetails} description={t.admin.userDetailsDescription}>
+    <AdminShell section="users" title={t.admin.userDetails} description={t.admin.userDetailsDescription}>
       <div className="mt-6">
         {user.status === "loading" ? (
           <div className="flex flex-col gap-3">
@@ -119,7 +119,7 @@ export function AdminUserDetailPage() {
           </article>
         )}
       </div>
-    </AdminPageLayout>
+    </AdminShell>
   )
 }
 

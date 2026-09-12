@@ -3,7 +3,7 @@
 import { SearchIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import { AdminPageLayout } from "@/components/admin/admin-page-layout"
+import { AdminShell } from "@/components/admin/admin-shell"
 import { StockMovementPanel } from "@/components/admin/stock-movement-panel"
 import { DataTable, type DataTableColumn } from "@/components/patterns/data-table"
 import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
@@ -136,7 +136,7 @@ export function AdminInventoryManagementPage() {
   ]
 
   return (
-    <AdminPageLayout title={t.admin.inventory} description={t.admin.manageInventoryDescription}>
+    <AdminShell section="inventory" title={t.admin.inventory} description={t.admin.manageInventoryDescription}>
       <section className="mt-6 flex flex-col gap-4" aria-labelledby="admin-inventory-list-title">
         <h2 id="admin-inventory-list-title" className="font-heading text-xl font-semibold">
           {t.admin.inventoryList}
@@ -250,6 +250,6 @@ export function AdminInventoryManagementPage() {
           />
         ) : null}
       </section>
-    </AdminPageLayout>
+    </AdminShell>
   )
 }

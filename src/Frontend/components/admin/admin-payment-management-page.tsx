@@ -3,7 +3,7 @@
 import { SearchIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import { AdminPageLayout } from "@/components/admin/admin-page-layout"
+import { AdminShell } from "@/components/admin/admin-shell"
 import { DataTable, type DataTableColumn } from "@/components/patterns/data-table"
 import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
 import { StatusBadge } from "@/components/patterns/status-badge"
@@ -163,7 +163,7 @@ export function AdminPaymentManagementPage() {
   ]
 
   return (
-    <AdminPageLayout title={t.admin.payments} description={t.admin.managePaymentsDescription}>
+    <AdminShell section="payments" title={t.admin.payments} description={t.admin.managePaymentsDescription}>
       <section className="mt-6 flex flex-col gap-4" aria-labelledby="admin-payment-list-title">
         <h2 id="admin-payment-list-title" className="font-heading text-xl font-semibold">
           {t.admin.paymentList}
@@ -309,6 +309,6 @@ export function AdminPaymentManagementPage() {
           minWidthClassName="min-w-[78rem]"
         />
       </section>
-    </AdminPageLayout>
+    </AdminShell>
   )
 }

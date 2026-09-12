@@ -22,7 +22,7 @@ public sealed class FrontendAdminOrderWorkspaceTests
         string route = ReadFrontendFile("app", "admin", "orders", "page.tsx");
         string workspace = ReadFrontendFile(
             "components", "admin", "admin-order-management-page.tsx");
-        string dashboard = ReadFrontendFile("components", "admin", "admin-dashboard.tsx");
+        string shell = ReadFrontendFile("components", "admin", "admin-shell.tsx");
 
         Assert.Contains("<AdminRouteGuard>", route, StringComparison.Ordinal);
         Assert.Contains("getManagedOrders(", workspace, StringComparison.Ordinal);
@@ -31,7 +31,7 @@ public sealed class FrontendAdminOrderWorkspaceTests
         Assert.Contains("<DataTable", workspace, StringComparison.Ordinal);
         Assert.Contains("onPageChange=", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain(".items.slice(", workspace, StringComparison.Ordinal);
-        Assert.Contains("href=\"/admin/orders\"", dashboard, StringComparison.Ordinal);
+        Assert.Contains("href: \"/admin/orders\"", shell, StringComparison.Ordinal);
     }
 
     private static string ReadFrontendFile(params string[] segments)

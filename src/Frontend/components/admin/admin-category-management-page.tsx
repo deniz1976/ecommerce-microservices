@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Edit3Icon, PlusIcon } from "lucide-react"
 
 import { AdminCategoryForm } from "@/components/admin/admin-category-form"
-import { AdminReferencePageLayout } from "@/components/admin/admin-reference-page-layout"
+import { AdminShell } from "@/components/admin/admin-shell"
 import { DataTable, type DataTableColumn } from "@/components/patterns/data-table"
 import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
 import { StatusBadge } from "@/components/patterns/status-badge"
@@ -141,8 +141,8 @@ export function AdminCategoryManagementPage() {
   ]
 
   return (
-    <AdminReferencePageLayout
-      activePage="categories"
+    <AdminShell
+      section="categories"
       title={t.admin.categories}
       description={t.admin.manageCategoriesDescription}
     >
@@ -249,6 +249,6 @@ export function AdminCategoryManagementPage() {
           </div>
         ) : null}
       </section>
-    </AdminReferencePageLayout>
+    </AdminShell>
   )
 }

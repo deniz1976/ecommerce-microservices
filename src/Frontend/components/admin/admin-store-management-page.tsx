@@ -3,7 +3,7 @@
 import { SearchIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import { AdminPageLayout } from "@/components/admin/admin-page-layout"
+import { AdminShell } from "@/components/admin/admin-shell"
 import { DataTable, type DataTableColumn } from "@/components/patterns/data-table"
 import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
 import { Button } from "@/components/ui/button"
@@ -117,7 +117,7 @@ export function AdminStoreManagementPage() {
   ]
 
   return (
-    <AdminPageLayout title={t.admin.stores} description={t.admin.manageStoresDescription}>
+    <AdminShell section="stores" title={t.admin.stores} description={t.admin.manageStoresDescription}>
       <section className="mt-6 flex flex-col gap-4" aria-labelledby="admin-store-list-title">
         <h2 id="admin-store-list-title" className="font-heading text-xl font-semibold">
           {t.admin.storeList}
@@ -225,6 +225,6 @@ export function AdminStoreManagementPage() {
           minWidthClassName="min-w-[68rem]"
         />
       </section>
-    </AdminPageLayout>
+    </AdminShell>
   )
 }

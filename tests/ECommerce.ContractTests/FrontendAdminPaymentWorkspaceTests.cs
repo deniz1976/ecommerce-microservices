@@ -23,7 +23,7 @@ public sealed class FrontendAdminPaymentWorkspaceTests
         string route = ReadFrontendFile("app", "admin", "payments", "page.tsx");
         string workspace = ReadFrontendFile(
             "components", "admin", "admin-payment-management-page.tsx");
-        string dashboard = ReadFrontendFile("components", "admin", "admin-dashboard.tsx");
+        string shell = ReadFrontendFile("components", "admin", "admin-shell.tsx");
 
         Assert.Contains("<AdminRouteGuard>", route, StringComparison.Ordinal);
         Assert.Contains("getManagedPayments(", workspace, StringComparison.Ordinal);
@@ -35,7 +35,7 @@ public sealed class FrontendAdminPaymentWorkspaceTests
         Assert.Contains("onPageChange=", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain(".items.slice(", workspace, StringComparison.Ordinal);
         Assert.DoesNotContain("transactions", workspace, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("href=\"/admin/payments\"", dashboard, StringComparison.Ordinal);
+        Assert.Contains("href: \"/admin/payments\"", shell, StringComparison.Ordinal);
     }
 
     private static string ReadFrontendFile(params string[] segments)

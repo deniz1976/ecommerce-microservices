@@ -3,7 +3,7 @@
 import { SearchIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import { AdminPageLayout } from "@/components/admin/admin-page-layout"
+import { AdminShell } from "@/components/admin/admin-shell"
 import { DataTable, type DataTableColumn } from "@/components/patterns/data-table"
 import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
 import { StatusBadge } from "@/components/patterns/status-badge"
@@ -163,7 +163,7 @@ export function AdminShipmentManagementPage() {
   ]
 
   return (
-    <AdminPageLayout title={t.admin.shipments} description={t.admin.manageShipmentsDescription}>
+    <AdminShell section="shipments" title={t.admin.shipments} description={t.admin.manageShipmentsDescription}>
       <section className="mt-6 flex flex-col gap-4" aria-labelledby="admin-shipment-list-title">
         <h2 id="admin-shipment-list-title" className="font-heading text-xl font-semibold">
           {t.admin.shipmentList}
@@ -308,6 +308,6 @@ export function AdminShipmentManagementPage() {
           minWidthClassName="min-w-[72rem]"
         />
       </section>
-    </AdminPageLayout>
+    </AdminShell>
   )
 }
