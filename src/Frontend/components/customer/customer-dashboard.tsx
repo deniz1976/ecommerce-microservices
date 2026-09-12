@@ -1,16 +1,20 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import type { FormEvent, ReactNode } from "react"
+import type { FormEvent } from "react"
 import Link from "next/link"
-import { Check, ClipboardList, Loader2, LogOut, PackageSearch, Search, ShoppingBag, ShoppingCart } from "lucide-react"
+import { Check, ClipboardList, Loader2, LogOut, Search, ShoppingBag, ShoppingCart } from "lucide-react"
 
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { CatalogProductCard } from "@/components/customer/catalog-product-card"
+import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
+import { EmptyState, ErrorState } from "@/components/patterns/states"
 import { CustomerNotificationLink } from "@/components/customer/customer-notification-link"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { SelectNative } from "@/components/ui/select-native"
+import { Skeleton } from "@/components/ui/skeleton"
 import { incrementBasketItem } from "@/lib/api/basket"
 import {
   getCatalogBrands,
@@ -169,48 +173,64 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
         </section>
 
         <div className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
-          <form onSubmit={handleSearch} className="grid gap-3 rounded-xl border border-border bg-card p-4 shadow-sm lg:grid-cols-[minmax(15rem,1fr)_13rem_13rem_13rem_auto]">
-            <label className="relative">
-              <span className="sr-only">{t.customer.searchLabel}</span>
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
-                placeholder={t.customer.searchPlaceholder}
-                className="h-10 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm outline-none focus:border-ring focus:ring-3 focus:ring-ring/20"
-              />
-            </label>
-            <FilterSelect
-              label={t.customer.category}
-              value={query.categoryId ?? ""}
-              onChange={(value) => updateQuery({ categoryId: value || undefined })}
-              disabled={references.status !== "ready"}
+          <form onSubmit={handleSearch}>
+            <FilterBar
+              search={{
+                value: searchInput,
+                onChange: setSearchInput,
+                placeholder: t.customer.searchPlaceholder,
+              }}
             >
-              <option value="">{t.customer.allCategories}</option>
-              {references.status === "ready" ? references.categories.map((category) => (
-                <option key={category.id} value={category.id}>{category.name}</option>
-              )) : null}
-            </FilterSelect>
-            <FilterSelect
-              label={t.customer.brand}
-              value={query.brandId ?? ""}
-              onChange={(value) => updateQuery({ brandId: value || undefined })}
-              disabled={references.status !== "ready"}
-            >
-              <option value="">{t.customer.allBrands}</option>
-              {references.status === "ready" ? references.brands.map((brand) => (
-                <option key={brand.id} value={brand.id}>{brand.name}</option>
-              )) : null}
-            </FilterSelect>
-            <FilterSelect label={t.customer.sort} value={sortValue(query)} onChange={handleSort}>
-              <option value="newest">{t.customer.newest}</option>
-              <option value="price-asc">{t.customer.priceLowToHigh}</option>
-              <option value="price-desc">{t.customer.priceHighToLow}</option>
-            </FilterSelect>
-            <Button type="submit" size="lg" className="h-10 px-5">
-              <Search />
-              {t.customer.searchAction}
-            </Button>
+              <FilterField label={t.customer.category}>
+                <SelectNative
+                  value={query.categoryId ?? ""}
+                  disabled={references.status !== "ready"}
+                  onChange={(event) => updateQuery({ categoryId: event.target.value || undefined })}
+                >
+                  <option value="">{t.customer.allCategories}</option>
+                  {references.status === "ready"
+                    ? references.categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))
+                    : null}
+                </SelectNative>
+              </FilterField>
+
+              <FilterField label={t.customer.brand}>
+                <SelectNative
+                  value={query.brandId ?? ""}
+                  disabled={references.status !== "ready"}
+                  onChange={(event) => updateQuery({ brandId: event.target.value || undefined })}
+                >
+                  <option value="">{t.customer.allBrands}</option>
+                  {references.status === "ready"
+                    ? references.brands.map((brand) => (
+                        <option key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </option>
+                      ))
+                    : null}
+                </SelectNative>
+              </FilterField>
+
+              <FilterField label={t.customer.sort}>
+                <SelectNative
+                  value={sortValue(query)}
+                  onChange={(event) => handleSort(event.target.value)}
+                >
+                  <option value="newest">{t.customer.newest}</option>
+                  <option value="price-asc">{t.customer.priceLowToHigh}</option>
+                  <option value="price-desc">{t.customer.priceHighToLow}</option>
+                </SelectNative>
+              </FilterField>
+
+              <Button type="submit" className="self-end">
+                <Search />
+                {t.customer.searchAction}
+              </Button>
+            </FilterBar>
           </form>
 
           {references.status === "unavailable" ? (
@@ -236,14 +256,19 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
           </div>
 
           {catalog.status === "loading" ? (
-            <div className="flex min-h-80 items-center justify-center">
-              <Loader2 className="size-6 animate-spin text-muted-foreground" />
-              <span className="sr-only">{t.common.loading}</span>
+            <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: PAGE_SIZE }, (_, index) => (
+                <Skeleton key={index} className="h-[26rem] rounded-xl" />
+              ))}
             </div>
           ) : catalog.status === "unavailable" ? (
-            <CatalogMessage message={t.customer.catalogUnavailable} />
+            <ErrorState
+              className="mt-4"
+              title={t.customer.catalogUnavailable}
+              onRetry={() => updateQuery({ pageNumber: query.pageNumber ?? 1 })}
+            />
           ) : catalog.data.items.length === 0 ? (
-            <CatalogMessage message={t.customer.noProducts} />
+            <EmptyState className="mt-4" title={t.customer.noProducts} />
           ) : (
             <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {catalog.data.items.map((product) => (
@@ -275,37 +300,6 @@ export function CustomerDashboard({ profile }: CustomerDashboardProps) {
           ) : null}
         </div>
       </main>
-    </div>
-  )
-}
-
-function FilterSelect({ label, value, onChange, disabled = false, children }: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  disabled?: boolean
-  children: ReactNode
-}) {
-  return (
-    <label>
-      <span className="sr-only">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        disabled={disabled}
-        className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-3 focus:ring-ring/20 disabled:opacity-50"
-      >
-        {children}
-      </select>
-    </label>
-  )
-}
-
-function CatalogMessage({ message }: { message: string }) {
-  return (
-    <div className="mt-4 flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 text-center">
-      <PackageSearch className="size-8 text-muted-foreground" aria-hidden="true" />
-      <p className="mt-3 text-sm text-muted-foreground">{message}</p>
     </div>
   )
 }

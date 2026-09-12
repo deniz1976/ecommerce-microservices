@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, Check, Loader2, Package, ShoppingCart } from "lucide-react"
+import { ArrowLeftIcon, CheckIcon, Loader2Icon, PackageIcon, ShoppingCartIcon } from "lucide-react"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
@@ -10,10 +10,14 @@ import type { ReactNode } from "react"
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
+import { EmptyState } from "@/components/patterns/states"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { incrementBasketItem } from "@/lib/api/basket"
 import { getProfile } from "@/lib/api/auth"
 import { getCatalogProduct } from "@/lib/api/catalog"
+import type { Locale } from "@/lib/i18n/dictionaries"
+import { formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
 import { cn } from "@/lib/utils"
 import type { CatalogProduct } from "@/types"
@@ -83,27 +87,38 @@ export function ProductDetail() {
           <LanguageSwitcher />
           <ThemeToggle />
           {customerId ? (
-            <Link href="/basket" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}>
-              <ShoppingCart />
+            <Link
+              href="/basket"
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
+            >
+              <ShoppingCartIcon />
               {t.basket.openBasket}
             </Link>
           ) : null}
         </div>
       </header>
+
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
-          <ArrowLeft className="size-4" />
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+        >
+          <ArrowLeftIcon className="size-4" />
           {t.customer.backToCatalog}
         </Link>
+
         {state.status === "loading" ? (
-          <div className="flex min-h-[28rem] items-center justify-center">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          <div className="mt-8 grid gap-8 lg:grid-cols-2">
+            <Skeleton className="aspect-square rounded-2xl" />
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-3/4" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-9 w-40" />
+            </div>
           </div>
         ) : state.status === "unavailable" ? (
-          <div className="mt-8 flex min-h-80 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 text-center">
-            <Package className="size-9 text-muted-foreground" />
-            <p className="mt-3 text-sm text-muted-foreground">{t.customer.productUnavailable}</p>
-          </div>
+          <EmptyState className="mt-8" title={t.customer.productUnavailable} description="" />
         ) : (
           <ProductContent
             product={state.product}
@@ -115,19 +130,38 @@ export function ProductDetail() {
               brand: t.customer.brand,
               store: t.customer.viewStore,
             }}
-            basketAction={customerId ? (
-              <div className="mt-6">
-                <Button type="button" size="lg" className="w-full sm:w-auto" disabled={adding} onClick={() => addToBasket(state.product)}>
-                  {adding ? <Loader2 className="animate-spin" /> : added ? <Check /> : <ShoppingCart />}
-                  {adding ? t.basket.adding : added ? t.basket.added : t.basket.addToBasket}
-                </Button>
-                {addFailed ? <p className="mt-2 text-sm text-destructive">{t.basket.addFailed}</p> : null}
-              </div>
-            ) : (
-              <Link href="/login" className={cn(buttonVariants({ size: "lg" }), "mt-6 w-full sm:w-auto")}>
-                {t.basket.signInToAdd}
-              </Link>
-            )}
+            basketAction={
+              customerId ? (
+                <div className="flex flex-col gap-2">
+                  <Button
+                    type="button"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                    disabled={adding}
+                    onClick={() => addToBasket(state.product)}
+                  >
+                    {adding ? (
+                      <Loader2Icon className="animate-spin" />
+                    ) : added ? (
+                      <CheckIcon />
+                    ) : (
+                      <ShoppingCartIcon />
+                    )}
+                    {adding ? t.basket.adding : added ? t.basket.added : t.basket.addToBasket}
+                  </Button>
+                  {addFailed ? (
+                    <p className="text-sm text-destructive">{t.basket.addFailed}</p>
+                  ) : null}
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto")}
+                >
+                  {t.basket.signInToAdd}
+                </Link>
+              )
+            }
           />
         )}
       </main>
@@ -137,7 +171,7 @@ export function ProductDetail() {
 
 interface ProductContentProps {
   product: CatalogProduct
-  locale: "en" | "tr"
+  locale: Locale
   labels: {
     detail: string
     sku: string
@@ -149,34 +183,96 @@ interface ProductContentProps {
 }
 
 function ProductContent({ product, locale, labels, basketAction }: ProductContentProps) {
-  const image = product.images[0]
-  const price = new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", {
-    style: "currency",
-    currency: product.currency,
-  }).format(product.price)
+  const images = product.images
+  const [activeImageId, setActiveImageId] = useState<string | null>(null)
+  const activeImage = images.find((image) => image.id === activeImageId) ?? images[0]
+  const price = formatMoney(product.price, product.currency, locale)
 
   return (
-    <article className="mt-8 grid overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:grid-cols-2">
-      <div className="relative flex min-h-80 items-center justify-center bg-muted lg:min-h-[34rem]">
-        {image ? (
-          <Image src={image.secureUrl || image.url} alt={product.name} fill unoptimized className="object-cover" />
-        ) : (
-          <Package className="size-16 text-muted-foreground/40" />
-        )}
+    <article className="mt-8 grid gap-8 lg:grid-cols-2 lg:gap-12">
+      <div className="flex flex-col gap-3">
+        <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted">
+          {activeImage ? (
+            <Image
+              src={activeImage.secureUrl || activeImage.url}
+              alt={product.name}
+              fill
+              unoptimized
+              sizes="(min-width: 1024px) 32rem, 90vw"
+              className="object-cover"
+            />
+          ) : (
+            <PackageIcon className="size-14 text-muted-foreground/40" aria-hidden="true" />
+          )}
+        </div>
+
+        {images.length > 1 ? (
+          <div className="grid grid-cols-5 gap-2">
+            {images.map((image) => (
+              <button
+                key={image.id}
+                type="button"
+                onClick={() => setActiveImageId(image.id)}
+                aria-current={image.id === activeImage?.id}
+                className={cn(
+                  "relative aspect-square overflow-hidden rounded-lg border bg-muted outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50",
+                  image.id === activeImage?.id
+                    ? "border-foreground/40"
+                    : "border-border hover:border-foreground/20",
+                )}
+              >
+                <Image
+                  src={image.secureUrl || image.url}
+                  alt=""
+                  fill
+                  unoptimized
+                  sizes="6rem"
+                  className="object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
-      <div className="flex flex-col justify-center p-6 sm:p-10">
-        <p className="text-sm font-medium text-primary">{labels.detail}</p>
-        <p className="mt-4 text-xs uppercase tracking-[0.16em] text-muted-foreground">{product.brandName || product.sku}</p>
-        <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{product.name}</h1>
-        <p className="mt-5 text-base leading-7 text-muted-foreground">{product.description}</p>
-        <dl className="mt-8 grid gap-4 border-t border-border pt-6 text-sm sm:grid-cols-2">
-          <div><dt className="text-muted-foreground">{labels.sku}</dt><dd className="mt-1 font-medium text-foreground">{product.sku}</dd></div>
-          <div><dt className="text-muted-foreground">{labels.category}</dt><dd className="mt-1 font-medium text-foreground">{product.categoryName || "-"}</dd></div>
-          <div><dt className="text-muted-foreground">{labels.brand}</dt><dd className="mt-1 font-medium text-foreground">{product.brandName || "-"}</dd></div>
-        </dl>
-        <p className="mt-8 font-heading text-3xl font-semibold text-foreground">{price}</p>
-        {product.storeId ? <Link href={`/stores/${product.storeId}`} className="mt-4 inline-flex text-sm font-medium text-primary hover:underline">{labels.store}</Link> : null}
+
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            {product.brandName || product.sku}
+          </span>
+          <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+            {product.name}
+          </h1>
+          <p className="font-heading text-3xl font-semibold tabular-nums">{price}</p>
+        </div>
+
         {basketAction}
+
+        <p className="text-base leading-7 text-muted-foreground">{product.description}</p>
+
+        <dl className="grid gap-4 border-t border-border pt-6 text-sm sm:grid-cols-3">
+          <div className="flex flex-col gap-1">
+            <dt className="text-muted-foreground">{labels.sku}</dt>
+            <dd className="font-mono text-xs font-medium">{product.sku}</dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="text-muted-foreground">{labels.category}</dt>
+            <dd className="font-medium">{product.categoryName || "-"}</dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="text-muted-foreground">{labels.brand}</dt>
+            <dd className="font-medium">{product.brandName || "-"}</dd>
+          </div>
+        </dl>
+
+        {product.storeId ? (
+          <Link
+            href={`/stores/${product.storeId}`}
+            className="inline-flex w-fit text-sm font-medium text-primary hover:underline"
+          >
+            {labels.store}
+          </Link>
+        ) : null}
       </div>
     </article>
   )
