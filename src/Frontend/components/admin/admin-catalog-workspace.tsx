@@ -201,7 +201,7 @@ export function AdminCatalogWorkspace() {
               onUpdated={handleProductUpdated}
             />
           ) : (
-            <div className="rounded-xl border border-dashed border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
+            <div className="border border-dashed border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
               {t.admin.selectProductToEdit}
             </div>
           )}

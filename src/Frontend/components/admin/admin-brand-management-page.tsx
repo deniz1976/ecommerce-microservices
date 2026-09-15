@@ -162,7 +162,7 @@ export function AdminBrandManagementPage() {
         </div>
 
         {showCreateForm ? (
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="border border-border bg-card p-5">
             <h3 className="mb-4 font-heading text-lg font-semibold">{t.admin.newBrand}</h3>
             <AdminBrandForm onSaved={handleSaved} onCancel={() => setShowCreateForm(false)} />
           </div>
@@ -232,7 +232,7 @@ export function AdminBrandManagementPage() {
         />
 
         {editingBrand ? (
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="border border-border bg-card p-5">
             <h3 className="mb-4 font-heading text-lg font-semibold">{t.admin.editBrand}</h3>
             <AdminBrandForm
               key={editingBrand.id}

@@ -47,7 +47,7 @@ export function StoreEditForm({ store, onCancel, onUpdated }: StoreEditFormProps
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-5">
+    <form onSubmit={handleSubmit} className="border border-border bg-card p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <PencilIcon className="size-4 text-primary" />

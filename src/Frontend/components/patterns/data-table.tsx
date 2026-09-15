@@ -84,7 +84,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="overflow-x-auto rounded-xl border border-border bg-card">
+      <div className="overflow-x-auto border border-border bg-card">
         <Table className={minWidthClassName}>
           <TableHeader>
             <TableRow>

@@ -48,8 +48,8 @@ export function AdminUserDetailPage() {
       <div className="mt-6">
         {user.status === "loading" ? (
           <div className="flex flex-col gap-3">
-            <Skeleton className="h-20 rounded-xl" />
-            <Skeleton className="h-64 rounded-xl" />
+            <Skeleton className="h-20" />
+            <Skeleton className="h-64" />
           </div>
         ) : user.status === "not-found" ? (
           <EmptyState title={t.admin.userNotFound} description="" />
@@ -62,7 +62,7 @@ export function AdminUserDetailPage() {
             }}
           />
         ) : (
-          <article className="overflow-hidden rounded-xl border border-border bg-card">
+          <article className="overflow-hidden border border-border bg-card">
             <div className="flex items-center gap-3 border-b border-border px-5 py-4">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
                 <UserRoundIcon className="size-5 text-muted-foreground" aria-hidden="true" />

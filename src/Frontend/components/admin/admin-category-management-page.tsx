@@ -168,7 +168,7 @@ export function AdminCategoryManagementPage() {
         </div>
 
         {showCreateForm ? (
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="border border-border bg-card p-5">
             <h3 className="mb-4 font-heading text-lg font-semibold">{t.admin.newCategory}</h3>
             <AdminCategoryForm onSaved={handleSaved} onCancel={() => setShowCreateForm(false)} />
           </div>
@@ -238,7 +238,7 @@ export function AdminCategoryManagementPage() {
         />
 
         {editingCategory ? (
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="border border-border bg-card p-5">
             <h3 className="mb-4 font-heading text-lg font-semibold">{t.admin.editCategory}</h3>
             <AdminCategoryForm
               key={editingCategory.id}

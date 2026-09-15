@@ -44,7 +44,7 @@ export function StoreCreateForm({ onCreated }: StoreCreateFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-5">
+    <form onSubmit={handleSubmit} className="border border-border bg-card p-5">
       <div className="flex items-center gap-2">
         <PlusIcon className="size-4 text-primary" />
         <h2 className="font-heading text-lg font-semibold text-foreground">{t.seller.createStore}</h2>

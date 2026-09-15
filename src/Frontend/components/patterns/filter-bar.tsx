@@ -34,7 +34,7 @@ export function FilterBar({
       role="search"
       aria-label={t.table.filters}
       className={cn(
-        "flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-3",
+        "flex flex-wrap items-end gap-3 border border-border bg-card p-3",
         className,
       )}
     >

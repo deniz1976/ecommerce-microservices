@@ -88,7 +88,7 @@ export function StockMovementPanel({
 
   return (
     <section className="flex flex-col gap-4" aria-labelledby="stock-movements-title">
-      <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4">
+      <div className="flex items-start justify-between gap-4 border border-border bg-card p-4">
         <div>
           <h2 id="stock-movements-title" className="font-heading text-lg font-semibold">
             {t.admin.stockMovements}

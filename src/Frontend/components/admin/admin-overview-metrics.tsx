@@ -108,7 +108,7 @@ export function AdminOverviewMetrics() {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {metrics.status === "loading"
             ? Array.from({ length: 8 }, (_, index) => (
-                <Skeleton key={index} className="h-[5.75rem] rounded-xl" />
+                <Skeleton key={index} className="h-[5.75rem]" />
               ))
             : metricItems(metrics.data).map((item) => (
                 <MetricCard

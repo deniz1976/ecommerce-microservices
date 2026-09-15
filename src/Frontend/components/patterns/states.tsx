@@ -19,7 +19,7 @@ export function EmptyState({ title, description, className }: StateProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 px-6 py-12 text-center",
+        "flex flex-col items-center justify-center gap-2 border border-dashed border-border bg-muted/20 px-6 py-12 text-center",
         className,
       )}
     >
@@ -42,7 +42,7 @@ export function ErrorState({ title, description, onRetry, className }: ErrorStat
     <div
       role="alert"
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-6 py-12 text-center",
+        "flex flex-col items-center justify-center gap-2 border border-destructive/30 bg-destructive/5 px-6 py-12 text-center",
         className,
       )}
     >

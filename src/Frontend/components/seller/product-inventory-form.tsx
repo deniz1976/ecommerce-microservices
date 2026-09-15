@@ -80,7 +80,7 @@ export function ProductInventoryForm({
   }
 
   return (
-    <section className="rounded-xl border border-border bg-card p-5">
+    <section className="border border-border bg-card p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="font-heading text-lg font-semibold text-foreground">{t.seller.stockTitle}</h2>
