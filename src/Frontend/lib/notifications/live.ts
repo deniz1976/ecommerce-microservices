@@ -20,6 +20,7 @@ export function createCustomerNotificationConnection(
     .withUrl(
       `${API_BASE_URL.replace(/\/$/, "")}/gateway/hubs/notifications`,
       {
+        withCredentials: false,
         accessTokenFactory: async () => {
           const token = await getAccessToken()
           if (!token) {
