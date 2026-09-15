@@ -1,7 +1,9 @@
 using ECommerce.BuildingBlocks.Observability;
 using ECommerce.BuildingBlocks.Security;
 using ECommerce.ApiGateway.Configuration;
+using ECommerce.ApiGateway.Logging;
 using ECommerce.ApiGateway.Middleware;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Ocelot.Middleware;
 using Microsoft.AspNetCore.HttpOverrides;
 
@@ -9,6 +11,8 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddGatewayRoutes(builder.Environment);
 
+builder.Services.Replace(
+    ServiceDescriptor.Singleton<ILoggerFactory, RedactingLoggerFactory>());
 builder.Services.AddProblemDetails();
 builder.Services.AddECommerceObservability(builder.Configuration, "ECommerce.ApiGateway");
 builder.Services.AddOidcReadyAuthentication(builder.Configuration);
