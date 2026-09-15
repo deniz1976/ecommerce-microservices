@@ -38,9 +38,14 @@ public sealed class StockMovementReader : IStockMovementReader
 
         long totalCount = await movements.LongCountAsync(cancellationToken);
         int pageNumber = NormalizePageNumber(criteria.PageNumber, pageSize, totalCount);
-        StockMovementResponse[] items = await movements
+        StockMovement[] page = await movements
             .OrderByDescending(movement => movement.OccurredAt)
             .ThenByDescending(movement => movement.Id)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToArrayAsync(cancellationToken);
+
+        StockMovementResponse[] items = page
             .Select(movement => new StockMovementResponse(
                 movement.Id,
                 movement.ProductId,
@@ -52,9 +57,7 @@ public sealed class StockMovementReader : IStockMovementReader
                 movement.ReservedQuantityAfter,
                 movement.OrderId,
                 movement.OccurredAt))
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToArrayAsync(cancellationToken);
+            .ToArray();
 
         return new PagedResult<StockMovementResponse>(
             items,
