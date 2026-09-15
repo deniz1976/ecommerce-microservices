@@ -28,6 +28,7 @@ import {
 } from "@/lib/api/basket"
 import { getProfile } from "@/lib/api/auth"
 import { getInventoryItems } from "@/lib/api/inventory"
+import { getCatalogProduct } from "@/lib/api/catalog"
 import { ApiError } from "@/lib/api/client"
 import { formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
@@ -53,6 +54,7 @@ export function BasketView() {
   const [checkingOut, setCheckingOut] = useState(false)
   const [operationError, setOperationError] = useState(false)
   const [stockByProductId, setStockByProductId] = useState<Record<string, number>>({})
+  const [nameByProductId, setNameByProductId] = useState<Record<string, string>>({})
   const [checkoutResult, setCheckoutResult] = useState<CheckoutBasketResult | null>(null)
   const [checkoutAddress, setCheckoutAddress] = useState<CheckoutBasketPayload>({
     checkoutId: "",
@@ -119,6 +121,33 @@ export function BasketView() {
 
     return () => controller.abort()
   }, [state])
+
+  useEffect(() => {
+    if (state.status !== "ready" || !state.basket || state.basket.items.length === 0) {
+      return
+    }
+
+    let active = true
+    Promise.all(
+      state.basket.items.map((item) =>
+        getCatalogProduct(item.productId)
+          .then((product) => [item.productId, product.name] as const)
+          .catch(() => null),
+      ),
+    ).then((entries) => {
+      if (!active) {
+        return
+      }
+
+      setNameByProductId(
+        Object.fromEntries(entries.filter((entry) => entry !== null)),
+      )
+    })
+
+    return () => {
+      active = false
+    }
+  }, [locale, state])
 
   async function updateQuantity(productId: string, quantity: number) {
     if (state.status !== "ready" || quantity < 1) return
@@ -245,7 +274,9 @@ export function BasketView() {
                   <article key={item.productId} className="p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h2 className="font-heading text-lg font-semibold">{item.productName}</h2>
+                        <h2 className="font-heading text-lg font-semibold">
+                          {nameByProductId[item.productId] ?? item.productName}
+                        </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {t.basket.unitPrice}: {formatMoney(item.unitPrice, item.currency, locale)}
                         </p>
