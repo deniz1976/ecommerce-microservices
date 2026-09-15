@@ -1,7 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Archivo, Inter_Tight } from 'next/font/google'
-import Script from 'next/script'
 import { headers } from 'next/headers'
 
 import { Providers } from '@/components/providers'
@@ -18,6 +17,21 @@ const archivo = Archivo({
   variable: '--font-archivo',
   display: 'swap',
 })
+
+const themeInitScript = `(function () {
+  try {
+    var stored = localStorage.getItem("app.theme")
+    var theme =
+      stored === "light" || stored === "dark"
+        ? stored
+        : window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light"
+    var root = document.documentElement
+    root.classList.add(theme)
+    root.style.colorScheme = theme
+  } catch {}
+})()`
 
 export const metadata: Metadata = {
   title: 'Marketplace - Sign in',
@@ -47,7 +61,11 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <Script src="/theme-init.js" strategy="beforeInteractive" nonce={nonce} />
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
       </head>
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>
