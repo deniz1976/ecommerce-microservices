@@ -11,6 +11,7 @@ import {
   getCatalogBrands,
   getCatalogCategories,
 } from "@/lib/api/catalog"
+import type { Locale } from "@/lib/i18n/dictionaries"
 import { useI18n } from "@/lib/i18n/provider"
 import type {
   CatalogBrandReference,
@@ -34,8 +35,10 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
   const { locale, t } = useI18n()
   const [references, setReferences] = useState<ReferenceState>({ status: "loading" })
   const [sku, setSku] = useState("")
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
+  const [englishName, setEnglishName] = useState("")
+  const [englishDescription, setEnglishDescription] = useState("")
+  const [turkishName, setTurkishName] = useState("")
+  const [turkishDescription, setTurkishDescription] = useState("")
   const [categoryId, setCategoryId] = useState("")
   const [brandId, setBrandId] = useState("")
   const [price, setPrice] = useState("")
@@ -95,11 +98,16 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
         price: Number(price),
         currency: currency.trim().toUpperCase(),
         status,
-        translations: [{ languageCode: locale, name: name.trim(), description: description.trim() }],
+        translations: buildTranslations(
+          { name: englishName, description: englishDescription },
+          { name: turkishName, description: turkishDescription },
+        ),
       })
       setSku("")
-      setName("")
-      setDescription("")
+      setEnglishName("")
+      setEnglishDescription("")
+      setTurkishName("")
+      setTurkishDescription("")
       setPrice("")
       setStatus(0)
       setMessage(t.seller.productCreated)
@@ -144,8 +152,19 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
       ) : (
         <div className="mt-5 grid gap-4">
           <TextField label={t.seller.sku} value={sku} onChange={setSku} required />
-          <TextField label={t.seller.productName} value={name} onChange={setName} required />
-          <TextField label={t.seller.productDescription} value={description} onChange={setDescription} required />
+          <TextField label={t.seller.productNameEnglish} value={englishName} onChange={setEnglishName} required />
+          <TextField
+            label={t.seller.productDescriptionEnglish}
+            value={englishDescription}
+            onChange={setEnglishDescription}
+            required
+          />
+          <TextField label={t.seller.productNameTurkish} value={turkishName} onChange={setTurkishName} />
+          <TextField
+            label={t.seller.productDescriptionTurkish}
+            value={turkishDescription}
+            onChange={setTurkishDescription}
+          />
           <SelectField label={t.seller.category} value={categoryId} onChange={setCategoryId} options={references.categories} />
           <SelectField label={t.seller.brand} value={brandId} onChange={setBrandId} options={references.brands} />
           <div className="grid min-w-0 grid-cols-2 gap-3">
@@ -173,6 +192,29 @@ export function ProductCreateForm({ store, onCreated }: ProductCreateFormProps) 
       ) : null}
     </form>
   )
+}
+
+function buildTranslations(
+  english: { name: string; description: string },
+  turkish: { name: string; description: string },
+) {
+  const translations: Array<{ languageCode: Locale; name: string; description: string }> = [
+    {
+      languageCode: "en",
+      name: english.name.trim(),
+      description: english.description.trim(),
+    },
+  ]
+
+  if (turkish.name.trim() !== "" && turkish.description.trim() !== "") {
+    translations.push({
+      languageCode: "tr",
+      name: turkish.name.trim(),
+      description: turkish.description.trim(),
+    })
+  }
+
+  return translations
 }
 
 function ReferenceUnavailable({
