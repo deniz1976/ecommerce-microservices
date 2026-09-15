@@ -617,6 +617,8 @@ export interface Dictionary {
       orderSubmitted: string
       orderConfirmed: string
       orderCancelled: string
+      orderCancellationRequested: string
+      orderCancellationRejected: string
       paymentAuthorized: string
       paymentFailed: string
       shipmentCreated: string
@@ -1322,6 +1324,8 @@ const en: Dictionary = {
       orderSubmitted: "Your order has been submitted.",
       orderConfirmed: "Your order is confirmed.",
       orderCancelled: "Your order was cancelled.",
+      orderCancellationRequested: "Your cancellation request was received.",
+      orderCancellationRejected: "Your cancellation request was rejected; the order already progressed.",
       paymentAuthorized: "Payment has been authorized.",
       paymentFailed: "Payment failed.",
       shipmentCreated: "Shipment created. Tracking number: {trackingNumber}",
@@ -2027,6 +2031,8 @@ const tr: Dictionary = {
       orderSubmitted: "Siparişiniz alındı.",
       orderConfirmed: "Siparişiniz onaylandı.",
       orderCancelled: "Siparişiniz iptal edildi.",
+      orderCancellationRequested: "İptal talebiniz alındı.",
+      orderCancellationRejected: "İptal talebiniz reddedildi; sipariş çoktan ilerlemişti.",
       paymentAuthorized: "Ödemeniz onaylandı.",
       paymentFailed: "Ödeme alınamadı.",
       shipmentCreated: "Gönderi oluşturuldu. Takip numarası: {trackingNumber}",

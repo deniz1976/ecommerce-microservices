@@ -9,6 +9,8 @@ const knownTypes: Record<string, NotificationTypeKey> = {
   "order.submitted": "orderSubmitted",
   "order.confirmed": "orderConfirmed",
   "order.cancelled": "orderCancelled",
+  "order.cancellation_requested": "orderCancellationRequested",
+  "order.cancellation_rejected": "orderCancellationRejected",
   "payment.authorized": "paymentAuthorized",
   "payment.failed": "paymentFailed",
   "shipment.created": "shipmentCreated",
@@ -44,7 +46,7 @@ export function notificationMessage(
       : labels.types.shipmentCreatedWithoutTracking
   }
 
-  if (key === "paymentFailed" || key === "shipmentFailed" || key === "orderCancelled") {
+  if (key === "orderCancelled") {
     const reason = notification.reasonCode
       ? reasons[notification.reasonCode as keyof typeof reasons]
       : undefined

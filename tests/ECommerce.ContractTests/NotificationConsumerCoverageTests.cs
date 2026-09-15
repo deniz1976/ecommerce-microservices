@@ -24,6 +24,8 @@ public sealed partial class NotificationConsumerCoverageTests
             typeof(OrderSubmitted),
             typeof(OrderConfirmed),
             typeof(OrderCancelled),
+            typeof(OrderCancellationRequested),
+            typeof(OrderCancellationRejected),
             typeof(PaymentAuthorized),
             typeof(PaymentFailed),
             typeof(ShipmentCreated),
