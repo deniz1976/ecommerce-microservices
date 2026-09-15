@@ -3,7 +3,6 @@
 import Link from "next/link"
 import {
   CheckCircle2Icon,
-  ClipboardListIcon,
   CreditCardIcon,
   Loader2Icon,
   MinusIcon,
@@ -15,9 +14,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import type { FormEvent } from "react"
 
-import { LanguageSwitcher } from "@/components/auth/language-switcher"
-import { Logo } from "@/components/auth/logo"
-import { ThemeToggle } from "@/components/auth/theme-toggle"
+import { CustomerShell } from "@/components/customer/customer-shell"
 import { EmptyState, ErrorState } from "@/components/patterns/states"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -168,25 +165,13 @@ export function BasketView() {
   }
 
   return (
-    <div className="min-h-svh bg-muted/30">
-      <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
-        <Logo />
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ThemeToggle />
-          <Link href="/orders" className={buttonVariants({ variant: "outline", size: "sm" })}>
-            <ClipboardListIcon />
-            {t.orders.openOrders}
-          </Link>
-        </div>
-      </header>
-
+    <CustomerShell>
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <Link href="/" className={cn(buttonVariants({ variant: "ghost" }), "-ml-2")}>
           {t.basket.continueShopping}
         </Link>
         <div className="mt-6 flex items-start gap-3">
-          <span className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <span className="flex size-11 items-center justify-center rounded-sm bg-primary text-primary-foreground">
             <ShoppingBagIcon className="size-5" />
           </span>
           <div>
@@ -197,13 +182,13 @@ export function BasketView() {
 
         {state.status === "loading" ? (
           <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
-            <Skeleton className="h-72 rounded-xl" />
-            <Skeleton className="h-96 rounded-xl" />
+            <Skeleton className="h-72" />
+            <Skeleton className="h-96" />
           </div>
         ) : state.status === "unavailable" ? (
           <ErrorState className="mt-8" title={t.basket.loadFailed} />
         ) : checkoutResult ? (
-          <div className="mt-8 rounded-xl border border-primary/30 bg-primary/5 p-8 text-center">
+          <div className="mt-8 border border-primary/30 bg-primary/5 p-8 text-center">
             <CheckCircle2Icon className="mx-auto size-10 text-primary" />
             <h2 className="mt-4 font-heading text-2xl font-semibold">{t.basket.checkoutRecorded}</h2>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t.basket.checkoutNote}</p>
@@ -221,7 +206,7 @@ export function BasketView() {
           </div>
         ) : (
           <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
-            <section className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+            <section className="divide-y divide-border overflow-hidden border border-border bg-card">
               {state.basket.items.map((item) => {
                 const busy = busyItemId === item.productId
                 return (
@@ -248,7 +233,7 @@ export function BasketView() {
               })}
             </section>
 
-            <form onSubmit={checkout} className="h-fit rounded-xl border border-border bg-card p-5 lg:sticky lg:top-6">
+            <form onSubmit={checkout} className="h-fit border border-border bg-card p-5 lg:sticky lg:top-6">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-sm text-muted-foreground">{t.basket.total}</span>
                 <strong className="font-heading text-2xl">{formatMoney(state.basket.totalAmount, state.basket.currency, locale)}</strong>
@@ -306,7 +291,7 @@ export function BasketView() {
           </div>
         )}
       </main>
-    </div>
+    </CustomerShell>
   )
 }
 

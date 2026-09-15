@@ -5,13 +5,11 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { LanguageSwitcher } from "@/components/auth/language-switcher"
-import { Logo } from "@/components/auth/logo"
-import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { PaymentSummary } from "@/components/customer/payment-summary"
 import { ShipmentSummary } from "@/components/customer/shipment-summary"
 import { OrderTimeline } from "@/components/patterns/order-timeline"
 import { StatusBadge } from "@/components/patterns/status-badge"
+import { CustomerShell } from "@/components/customer/customer-shell"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ApiError } from "@/lib/api/client"
 import { getOrder, requestOrderCancellation } from "@/lib/api/orders"
@@ -85,14 +83,7 @@ export function OrderDetail() {
   }
 
   return (
-    <div className="min-h-svh bg-muted/30">
-      <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
-        <Logo />
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ThemeToggle />
-        </div>
-      </header>
+    <CustomerShell>
       <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <Link href="/orders" className={cn(buttonVariants({ variant: "ghost" }), "-ml-2")}>
           <ArrowLeft />
@@ -100,17 +91,17 @@ export function OrderDetail() {
         </Link>
 
         {state.status === "loading" ? (
-          <div className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card">
+          <div className="mt-8 flex min-h-72 flex-col items-center justify-center border border-dashed border-border bg-card">
             <Loader2 className="size-7 animate-spin text-primary" />
             <p className="mt-4 font-medium">{t.orders.processing}</p>
             <p className="mt-2 max-w-md text-center text-sm text-muted-foreground">{t.orders.processingNote}</p>
           </div>
         ) : state.status === "unavailable" ? (
-          <div className="mt-8 rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+          <div className="mt-8 border border-border bg-card p-8 text-center text-sm text-muted-foreground">
             {t.orders.loadFailed}
           </div>
         ) : (
-          <article className="mt-8 overflow-hidden rounded-xl border border-border bg-card">
+          <article className="mt-8 overflow-hidden border border-border bg-card">
             <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border p-6">
               <div>
                 <p className="text-xs text-muted-foreground">{t.orders.orderNumber}</p>
@@ -192,7 +183,7 @@ export function OrderDetail() {
           </article>
         )}
       </main>
-    </div>
+    </CustomerShell>
   )
 }
 

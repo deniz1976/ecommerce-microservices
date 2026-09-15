@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { CheckCircle2Icon, Loader2Icon, LogOutIcon } from "lucide-react"
@@ -12,11 +11,9 @@ import { Logo } from "@/components/auth/logo"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { SellerDashboard } from "@/components/seller/seller-dashboard"
 import { CustomerDashboard } from "@/components/customer/customer-dashboard"
-import { buttonVariants } from "@/components/ui/button"
 import { getProfile } from "@/lib/api/auth"
 import { logoutFromAuth0 } from "@/lib/auth/auth0"
 import { useI18n } from "@/lib/i18n/provider"
-import { cn } from "@/lib/utils"
 import type { UserProfile } from "@/types"
 
 type AuthState =
@@ -62,7 +59,7 @@ export function HomeShell() {
   }
 
   if (state.status === "unauthenticated") {
-    return <AuthEntry />
+    return <CustomerDashboard />
   }
 
   const { profile } = state
@@ -119,7 +116,7 @@ export function HomeShell() {
       </header>
 
       <main className="flex flex-1 items-center justify-center px-5 py-12 sm:px-6">
-        <div className="w-full max-w-lg rounded-xl border border-border bg-card p-8">
+        <div className="w-full max-w-lg border border-border bg-card p-8">
           <span className="flex size-12 items-center justify-center rounded-lg bg-accent text-accent-foreground">
             <CheckCircle2Icon className="size-6" />
           </span>
@@ -159,63 +156,6 @@ export function HomeShell() {
             <LogOutIcon className="size-4" />
             {t.home.signOut}
           </LoadingButton>
-        </div>
-      </main>
-    </div>
-  )
-}
-
-function AuthEntry() {
-  const { t } = useI18n()
-
-  return (
-    <div className="flex min-h-svh flex-col">
-      <header className="flex items-center justify-between gap-3 p-5 sm:px-8">
-        <Logo showTagline />
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ThemeToggle />
-        </div>
-      </header>
-
-      <main className="flex flex-1 items-center justify-center px-5 pb-16 sm:px-6">
-        <div className="w-full max-w-md text-center">
-          <h1 className="font-heading text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            {t.aside.trustTitle}
-          </h1>
-          <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground text-pretty">
-            {t.aside.trustBody}
-          </p>
-
-          <ul className="mx-auto mt-8 flex w-fit flex-col gap-3 text-left">
-            {[t.aside.point1, t.aside.point2, t.aside.point3].map((point) => (
-              <li key={point} className="flex items-start gap-2.5 text-sm">
-                <CheckCircle2Icon
-                  className="mt-0.5 size-4 shrink-0 text-chart-1"
-                  aria-hidden="true"
-                />
-                <span className="text-muted-foreground">{point}</span>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-8 flex flex-col gap-3">
-            <Link
-              href="/login"
-              className={cn(buttonVariants({ size: "lg" }), "h-11 w-full")}
-            >
-              {t.login.signInCta}
-            </Link>
-            <Link
-              href="/register"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                "h-11 w-full",
-              )}
-            >
-              {t.register.createAccount}
-            </Link>
-          </div>
         </div>
       </main>
     </div>

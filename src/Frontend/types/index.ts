@@ -227,6 +227,8 @@ export interface CustomerNotification {
   title: string
   message: string
   culture: string
+  reasonCode: string | null
+  trackingNumber: string | null
   createdAt: string
   readAt: string | null
 }

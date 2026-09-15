@@ -5,9 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { LanguageSwitcher } from "@/components/auth/language-switcher"
-import { Logo } from "@/components/auth/logo"
-import { ThemeToggle } from "@/components/auth/theme-toggle"
+import { CustomerShell } from "@/components/customer/customer-shell"
 import { EmptyState, ErrorState } from "@/components/patterns/states"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -18,6 +16,10 @@ import {
   markCustomerNotificationRead,
 } from "@/lib/api/notifications"
 import { formatDateTime } from "@/lib/i18n/format"
+import {
+  notificationMessage,
+  notificationTitle,
+} from "@/lib/i18n/notifications"
 import { useI18n } from "@/lib/i18n/provider"
 import { useCustomerNotificationsLive } from "@/lib/notifications/use-customer-notifications-live"
 import { cn } from "@/lib/utils"
@@ -120,18 +122,7 @@ export function NotificationCenter() {
   )
 
   return (
-    <div className="min-h-svh bg-muted/30">
-      <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
-        <Logo />
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ThemeToggle />
-          <Link href="/orders" className={buttonVariants({ variant: "outline", size: "sm" })}>
-            {t.orders.openOrders}
-          </Link>
-        </div>
-      </header>
-
+    <CustomerShell>
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <Link href="/" className={cn(buttonVariants({ variant: "ghost" }), "-ml-2")}>
           {t.basket.continueShopping}
@@ -139,7 +130,7 @@ export function NotificationCenter() {
 
         <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
-            <span className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <span className="flex size-11 items-center justify-center rounded-sm bg-primary text-primary-foreground">
               <Bell className="size-5" />
             </span>
             <div>
@@ -192,7 +183,7 @@ export function NotificationCenter() {
         {state.status === "loading" ? (
           <div className="mt-8 flex flex-col gap-3">
             {Array.from({ length: 4 }, (_, index) => (
-              <Skeleton key={index} className="h-32 rounded-xl" />
+              <Skeleton key={index} className="h-32" />
             ))}
           </div>
         ) : state.status === "unavailable" ? (
@@ -214,7 +205,7 @@ export function NotificationCenter() {
                   <article
                     key={notification.id}
                     className={cn(
-                      "rounded-xl border bg-card p-5",
+                      "border bg-card p-5",
                       unread ? "border-primary/50" : "border-border",
                     )}
                   >
@@ -222,7 +213,7 @@ export function NotificationCenter() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <h2 className="font-heading text-lg font-semibold">
-                            {notification.title}
+                            {notificationTitle(notification, t.notifications)}
                           </h2>
                           <span
                             className={cn(
@@ -236,7 +227,11 @@ export function NotificationCenter() {
                           </span>
                         </div>
                         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                          {notification.message}
+                          {notificationMessage(
+                            notification,
+                            t.notifications,
+                            t.orders.cancellationReasons,
+                          )}
                         </p>
                         <time
                           dateTime={notification.createdAt}
@@ -303,6 +298,6 @@ export function NotificationCenter() {
           </>
         )}
       </main>
-    </div>
+    </CustomerShell>
   )
 }

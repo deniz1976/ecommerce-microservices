@@ -5,13 +5,11 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { LanguageSwitcher } from "@/components/auth/language-switcher"
-import { Logo } from "@/components/auth/logo"
-import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getProfile } from "@/lib/api/auth"
 import { getCustomerOrders } from "@/lib/api/orders"
+import { CustomerShell } from "@/components/customer/customer-shell"
 import { EmptyState, ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { formatDateTime, formatMoney } from "@/lib/i18n/format"
@@ -70,23 +68,13 @@ export function OrderHistory() {
   }, [customerId, page])
 
   return (
-    <div className="min-h-svh bg-muted/30">
-      <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
-        <Logo />
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ThemeToggle />
-          <Link href="/basket" className={buttonVariants({ variant: "outline", size: "sm" })}>
-            {t.basket.openBasket}
-          </Link>
-        </div>
-      </header>
+    <CustomerShell>
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <Link href="/" className={cn(buttonVariants({ variant: "ghost" }), "-ml-2")}>
           {t.basket.continueShopping}
         </Link>
         <div className="mt-6 flex items-start gap-3">
-          <span className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <span className="flex size-11 items-center justify-center rounded-sm bg-primary text-primary-foreground">
             <ClipboardList className="size-5" />
           </span>
           <div>
@@ -98,7 +86,7 @@ export function OrderHistory() {
         {state.status === "loading" ? (
           <div className="mt-8 flex flex-col gap-4">
             {Array.from({ length: 4 }, (_, index) => (
-              <Skeleton key={index} className="h-24 rounded-xl" />
+              <Skeleton key={index} className="h-24" />
             ))}
           </div>
         ) : state.status === "unavailable" ? (
@@ -111,7 +99,7 @@ export function OrderHistory() {
               <Link
                 key={order.id}
                 href={`/orders/${order.id}`}
-                className="grid gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 sm:grid-cols-[1fr_auto_auto] sm:items-center"
+                className="grid gap-4 border border-border bg-card p-5 transition-colors hover:border-primary/40 sm:grid-cols-[1fr_auto_auto] sm:items-center"
               >
                 <div>
                   <p className="text-xs text-muted-foreground">{t.orders.orderNumber}</p>
@@ -168,6 +156,6 @@ export function OrderHistory() {
           </div>
         )}
       </main>
-    </div>
+    </CustomerShell>
   )
 }

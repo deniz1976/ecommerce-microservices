@@ -7,9 +7,7 @@ import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 
-import { LanguageSwitcher } from "@/components/auth/language-switcher"
-import { Logo } from "@/components/auth/logo"
-import { ThemeToggle } from "@/components/auth/theme-toggle"
+import { CustomerShell } from "@/components/customer/customer-shell"
 import { EmptyState } from "@/components/patterns/states"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -80,24 +78,7 @@ export function ProductDetail() {
   }
 
   return (
-    <div className="min-h-svh bg-muted/30">
-      <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
-        <Logo />
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ThemeToggle />
-          {customerId ? (
-            <Link
-              href="/basket"
-              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
-            >
-              <ShoppingCartIcon />
-              {t.basket.openBasket}
-            </Link>
-          ) : null}
-        </div>
-      </header>
-
+    <CustomerShell customerId={customerId}>
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           href="/"
@@ -109,7 +90,7 @@ export function ProductDetail() {
 
         {state.status === "loading" ? (
           <div className="mt-8 grid gap-8 lg:grid-cols-2">
-            <Skeleton className="aspect-square rounded-2xl" />
+            <Skeleton className="aspect-square" />
             <div className="flex flex-col gap-4">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-10 w-3/4" />
@@ -124,7 +105,6 @@ export function ProductDetail() {
             product={state.product}
             locale={locale}
             labels={{
-              detail: t.customer.productDetails,
               sku: t.seller.sku,
               category: t.customer.category,
               brand: t.customer.brand,
@@ -136,7 +116,7 @@ export function ProductDetail() {
                   <Button
                     type="button"
                     size="lg"
-                    className="w-full sm:w-auto"
+                    className="w-full"
                     disabled={adding}
                     onClick={() => addToBasket(state.product)}
                   >
@@ -154,10 +134,7 @@ export function ProductDetail() {
                   ) : null}
                 </div>
               ) : (
-                <Link
-                  href="/login"
-                  className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto")}
-                >
+                <Link href="/login" className={cn(buttonVariants({ size: "lg" }), "w-full")}>
                   {t.basket.signInToAdd}
                 </Link>
               )
@@ -165,7 +142,7 @@ export function ProductDetail() {
           />
         )}
       </main>
-    </div>
+    </CustomerShell>
   )
 }
 
@@ -173,7 +150,6 @@ interface ProductContentProps {
   product: CatalogProduct
   locale: Locale
   labels: {
-    detail: string
     sku: string
     category: string
     brand: string
@@ -183,22 +159,23 @@ interface ProductContentProps {
 }
 
 function ProductContent({ product, locale, labels, basketAction }: ProductContentProps) {
+  const { t } = useI18n()
   const images = product.images
   const [activeImageId, setActiveImageId] = useState<string | null>(null)
   const activeImage = images.find((image) => image.id === activeImageId) ?? images[0]
   const price = formatMoney(product.price, product.currency, locale)
 
   return (
-    <article className="mt-8 grid gap-8 lg:grid-cols-2 lg:gap-12">
-      <div className="flex flex-col gap-3">
-        <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted">
+    <article className="mt-6 grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] xl:grid-cols-[24rem_minmax(0,1fr)_18rem]">
+      <div className="flex flex-col gap-2">
+        <div className="relative flex aspect-square items-center justify-center overflow-hidden border border-border bg-muted">
           {activeImage ? (
             <Image
               src={activeImage.secureUrl || activeImage.url}
               alt={product.name}
               fill
               unoptimized
-              sizes="(min-width: 1024px) 32rem, 90vw"
+              sizes="(min-width: 1024px) 24rem, 90vw"
               className="object-cover"
             />
           ) : (
@@ -215,10 +192,8 @@ function ProductContent({ product, locale, labels, basketAction }: ProductConten
                 onClick={() => setActiveImageId(image.id)}
                 aria-current={image.id === activeImage?.id}
                 className={cn(
-                  "relative aspect-square overflow-hidden rounded-lg border bg-muted outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50",
-                  image.id === activeImage?.id
-                    ? "border-foreground/40"
-                    : "border-border hover:border-foreground/20",
+                  "relative aspect-square overflow-hidden rounded-sm border bg-muted outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                  image.id === activeImage?.id ? "border-foreground/40" : "border-border",
                 )}
               >
                 <Image
@@ -235,22 +210,19 @@ function ProductContent({ product, locale, labels, basketAction }: ProductConten
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex min-w-0 flex-col gap-5">
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
             {product.brandName || product.sku}
           </span>
-          <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">
             {product.name}
           </h1>
-          <p className="font-heading text-3xl font-semibold tabular-nums">{price}</p>
         </div>
-
-        {basketAction}
 
         <p className="text-base leading-7 text-muted-foreground">{product.description}</p>
 
-        <dl className="grid gap-4 border-t border-border pt-6 text-sm sm:grid-cols-3">
+        <dl className="grid gap-4 border-t border-border pt-5 text-sm sm:grid-cols-3">
           <div className="flex flex-col gap-1">
             <dt className="text-muted-foreground">{labels.sku}</dt>
             <dd className="font-mono text-xs font-medium">{product.sku}</dd>
@@ -264,16 +236,29 @@ function ProductContent({ product, locale, labels, basketAction }: ProductConten
             <dd className="font-medium">{product.brandName || "-"}</dd>
           </div>
         </dl>
-
-        {product.storeId ? (
-          <Link
-            href={`/stores/${product.storeId}`}
-            className="inline-flex w-fit text-sm font-medium text-primary hover:underline"
-          >
-            {labels.store}
-          </Link>
-        ) : null}
       </div>
+
+      <aside aria-label={t.customer.purchase} className="lg:col-span-2 xl:col-span-1 xl:self-start">
+        <div className="flex flex-col gap-4 border border-border bg-card p-4 xl:sticky xl:top-6">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              {t.customer.purchase}
+            </span>
+            <p className="font-heading text-3xl font-bold text-primary tabular-nums">{price}</p>
+          </div>
+
+          {basketAction}
+
+          {product.storeId ? (
+            <Link
+              href={`/stores/${product.storeId}`}
+              className="border-t border-border pt-3 text-sm font-medium text-primary hover:underline"
+            >
+              {labels.store}
+            </Link>
+          ) : null}
+        </div>
+      </aside>
     </article>
   )
 }
