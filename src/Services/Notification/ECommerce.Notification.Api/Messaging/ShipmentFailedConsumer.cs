@@ -28,7 +28,9 @@ public sealed class ShipmentFailedConsumer : IConsumer<ShipmentFailed>
                     "shipment.failed",
                     title,
                     message,
-                    "en")),
+                    "en",
+                    context.Message.ReasonCode,
+                    null)),
             context.CancellationToken);
     }
 }

@@ -88,6 +88,8 @@ public sealed class NotificationReadStateServiceTests
             "Order submitted",
             "Your order has been submitted.",
             "en",
+            null,
+            null,
             NotificationChannel.Realtime));
         return repository;
     }

@@ -28,7 +28,9 @@ public sealed class PaymentFailedConsumer : IConsumer<PaymentFailed>
                     "payment.failed",
                     title,
                     message,
-                    "en")),
+                    "en",
+                    context.Message.ReasonCode,
+                    null)),
             context.CancellationToken);
     }
 }

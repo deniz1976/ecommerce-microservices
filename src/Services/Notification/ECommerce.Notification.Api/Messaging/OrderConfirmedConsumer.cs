@@ -6,31 +6,31 @@ using MediatR;
 
 namespace ECommerce.Notification.Api.Messaging;
 
-public sealed class ShipmentCreatedConsumer : IConsumer<ShipmentCreated>
+public sealed class OrderConfirmedConsumer : IConsumer<OrderConfirmed>
 {
     private readonly ISender sender;
 
-    public ShipmentCreatedConsumer(
-        ISender sender)
+    public OrderConfirmedConsumer(ISender sender)
     {
         this.sender = sender;
     }
 
-    public Task Consume(ConsumeContext<ShipmentCreated> context)
+    public Task Consume(ConsumeContext<OrderConfirmed> context)
     {
-        (string title, string message) = NotificationText.OrderStatus("shipment.created", context.Message.OrderId, $"Shipment created. Tracking number: {context.Message.TrackingNumber}");
+        (string title, string message) = NotificationText.OrderStatus(
+            "order.confirmed",
+            context.Message.OrderId,
+            "Your order is confirmed.");
         return sender.Send(
             new CreateNotificationCommand(
                 new CreateNotificationRequest(
                     context.Message.MessageId,
                     context.Message.CustomerId,
                     context.Message.OrderId,
-                    "shipment.created",
+                    "order.confirmed",
                     title,
                     message,
-                    "en",
-                    null,
-                    context.Message.TrackingNumber)),
+                    "en")),
             context.CancellationToken);
     }
 }

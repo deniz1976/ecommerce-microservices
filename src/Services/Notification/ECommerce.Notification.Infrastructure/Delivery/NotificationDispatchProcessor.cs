@@ -41,6 +41,8 @@ public sealed class NotificationDispatchProcessor(
                 notification.Title,
                 notification.Message,
                 notification.Culture,
+                notification.ReasonCode,
+                notification.TrackingNumber,
                 dispatch.Channel);
 
             NotificationDeliveryResult result = NotificationDeliveryResult.RetryableFailure;

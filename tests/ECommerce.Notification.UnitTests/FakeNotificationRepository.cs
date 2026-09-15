@@ -80,6 +80,8 @@ internal sealed class FakeNotificationRepository :
             request.Title,
             request.Message,
             request.Culture,
+            request.ReasonCode,
+            request.TrackingNumber,
             NotificationChannel.Realtime);
         Add(notification);
         await SaveChangesAsync(cancellationToken);

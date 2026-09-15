@@ -18,6 +18,8 @@ public sealed class NotificationRecord
         string title,
         string message,
         string culture,
+        string? reasonCode,
+        string? trackingNumber,
         NotificationChannel channel)
     {
         Id = Guid.NewGuid();
@@ -28,6 +30,8 @@ public sealed class NotificationRecord
         Title = title;
         Message = message;
         Culture = culture;
+        ReasonCode = reasonCode;
+        TrackingNumber = trackingNumber;
         Channel = channel;
         CreatedAt = DateTimeOffset.UtcNow;
     }
@@ -47,6 +51,10 @@ public sealed class NotificationRecord
     public string Message { get; private set; }
 
     public string Culture { get; private set; }
+
+    public string? ReasonCode { get; private set; }
+
+    public string? TrackingNumber { get; private set; }
 
     public NotificationChannel Channel { get; private set; }
 

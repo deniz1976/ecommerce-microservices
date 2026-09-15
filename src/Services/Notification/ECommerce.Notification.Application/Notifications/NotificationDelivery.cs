@@ -10,4 +10,6 @@ public sealed record NotificationDelivery(
     string Title,
     string Message,
     string Culture,
+    string? ReasonCode,
+    string? TrackingNumber,
     NotificationDispatchChannel Channel);

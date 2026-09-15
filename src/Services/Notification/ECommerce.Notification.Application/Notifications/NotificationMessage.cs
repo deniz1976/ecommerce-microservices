@@ -8,5 +8,7 @@ public sealed record NotificationMessage(
     string Title,
     string Message,
     string Culture,
+    string? ReasonCode,
+    string? TrackingNumber,
     DateTimeOffset CreatedAt,
     DateTimeOffset? ReadAt);

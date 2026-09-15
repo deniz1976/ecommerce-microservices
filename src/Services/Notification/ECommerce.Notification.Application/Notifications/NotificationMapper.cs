@@ -14,6 +14,8 @@ public static class NotificationMapper
             notification.Title,
             notification.Message,
             notification.Culture,
+            notification.ReasonCode,
+            notification.TrackingNumber,
             notification.CreatedAt,
             notification.ReadAt);
     }

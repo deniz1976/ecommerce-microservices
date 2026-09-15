@@ -35,6 +35,8 @@ public sealed class NotificationCreationStore(
             request.Title,
             request.Message,
             request.Culture,
+            request.ReasonCode,
+            request.TrackingNumber,
             NotificationChannel.Realtime);
         dbContext.Notifications.Add(notification);
 

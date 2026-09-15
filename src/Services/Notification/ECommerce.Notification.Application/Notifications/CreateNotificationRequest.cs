@@ -7,4 +7,6 @@ public sealed record CreateNotificationRequest(
     string Type,
     string Title,
     string Message,
-    string Culture);
+    string Culture,
+    string? ReasonCode = null,
+    string? TrackingNumber = null);

@@ -19,6 +19,8 @@ public sealed class NotificationRecordConfiguration : IEntityTypeConfiguration<N
         builder.Property(x => x.Title).HasColumnName("title").HasMaxLength(256).IsRequired();
         builder.Property(x => x.Message).HasColumnName("message").HasMaxLength(1024).IsRequired();
         builder.Property(x => x.Culture).HasColumnName("culture").HasMaxLength(8).IsRequired();
+        builder.Property(x => x.ReasonCode).HasColumnName("reason_code").HasMaxLength(64);
+        builder.Property(x => x.TrackingNumber).HasColumnName("tracking_number").HasMaxLength(64);
         builder.Property(x => x.Channel).HasColumnName("channel").HasConversion<string>().HasMaxLength(32);
         builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsUtcTimestamp();
         builder.Property(x => x.ReadAt).HasColumnName("read_at").IsUtcTimestamp();
