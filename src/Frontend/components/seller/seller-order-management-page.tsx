@@ -5,20 +5,15 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronUpIcon,
-  ClipboardListIcon,
   Loader2Icon,
-  StoreIcon,
 } from "lucide-react"
-import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 
-import { LanguageSwitcher } from "@/components/auth/language-switcher"
-import { Logo } from "@/components/auth/logo"
-import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { FilterBar, FilterField } from "@/components/patterns/filter-bar"
 import { EmptyState, ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { SellerShell } from "@/components/seller/seller-shell"
+import { Button } from "@/components/ui/button"
 import { SelectNative } from "@/components/ui/select-native"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -117,158 +112,135 @@ export function SellerOrderManagementPage() {
   }
 
   return (
-    <div className="min-h-svh bg-muted/35">
-      <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
-        <Logo />
-        <div className="flex items-center gap-2">
-          <Link href="/" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-            <StoreIcon />
-            <span className="hidden sm:inline">{t.seller.backToWorkspace}</span>
-          </Link>
-          <LanguageSwitcher />
-          <ThemeToggle />
-        </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2 text-sm text-primary">
-          <ClipboardListIcon className="size-4" />
-          <span className="font-medium">{t.seller.roleLabel}</span>
-        </div>
-        <div className="mt-2 border-b border-border pb-6">
-          <h1 className="font-heading text-2xl font-semibold sm:text-3xl">
-            {t.seller.orderPageTitle}
-          </h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-            {t.seller.orderPageDescription}
-          </p>
-        </div>
-
-        <section className="mt-6 flex flex-col gap-4" aria-labelledby="seller-order-list-title">
-          <FilterBar>
-            <FilterField label={t.seller.orderStore} className="min-w-56 flex-1">
-              <SelectNative
-                value={selectedStoreId}
-                disabled={stores.status !== "ready" || stores.stores.length === 0}
-                onChange={(event) => {
-                  setOrders({ status: "loading" })
-                  setSelectedStoreId(event.target.value)
-                  setPage(1)
-                }}
-              >
-                {stores.status === "ready" && stores.stores.length > 0 ? (
-                  stores.stores.map((store) => (
-                    <option key={store.id} value={store.id}>
-                      {store.name}
-                    </option>
-                  ))
-                ) : (
-                  <option value="">{t.seller.selectStore}</option>
-                )}
-              </SelectNative>
-            </FilterField>
-
-            <FilterField label={t.seller.orderStatus}>
-              <SelectNative
-                value={String(status)}
-                onChange={(event) => {
-                  setOrders({ status: "loading" })
-                  setStatus(
-                    event.target.value === "all"
-                      ? "all"
-                      : (Number(event.target.value) as OrderStatus),
-                  )
-                  setPage(1)
-                }}
-              >
-                <option value="all">{t.seller.allOrderStatuses}</option>
-                {orderStatuses.map((value) => (
-                  <option key={value} value={value}>
-                    {orderStatusLabel(value, t.orders.status)}
+    <SellerShell
+      section="orders"
+      title={t.seller.orderPageTitle}
+      description={t.seller.orderPageDescription}
+    >
+      <section className="mt-5 flex flex-col gap-4" aria-labelledby="seller-order-list-title">
+        <FilterBar>
+          <FilterField label={t.seller.orderStore} className="min-w-56 flex-1">
+            <SelectNative
+              value={selectedStoreId}
+              disabled={stores.status !== "ready" || stores.stores.length === 0}
+              onChange={(event) => {
+                setOrders({ status: "loading" })
+                setSelectedStoreId(event.target.value)
+                setPage(1)
+              }}
+            >
+              {stores.status === "ready" && stores.stores.length > 0 ? (
+                stores.stores.map((store) => (
+                  <option key={store.id} value={store.id}>
+                    {store.name}
                   </option>
-                ))}
-              </SelectNative>
-            </FilterField>
+                ))
+              ) : (
+                <option value="">{t.seller.selectStore}</option>
+              )}
+            </SelectNative>
+          </FilterField>
 
-            <FilterField label={t.seller.orderSort}>
-              <SelectNative
-                value={sortDescending ? "newest" : "oldest"}
-                onChange={(event) => {
-                  setOrders({ status: "loading" })
-                  setSortDescending(event.target.value === "newest")
-                  setPage(1)
-                }}
-              >
-                <option value="newest">{t.seller.newestOrders}</option>
-                <option value="oldest">{t.seller.oldestOrders}</option>
-              </SelectNative>
-            </FilterField>
+          <FilterField label={t.seller.orderStatus}>
+            <SelectNative
+              value={String(status)}
+              onChange={(event) => {
+                setOrders({ status: "loading" })
+                setStatus(
+                  event.target.value === "all"
+                    ? "all"
+                    : (Number(event.target.value) as OrderStatus),
+                )
+                setPage(1)
+              }}
+            >
+              <option value="all">{t.seller.allOrderStatuses}</option>
+              {orderStatuses.map((value) => (
+                <option key={value} value={value}>
+                  {orderStatusLabel(value, t.orders.status)}
+                </option>
+              ))}
+            </SelectNative>
+          </FilterField>
 
-            <FilterField label={t.seller.orderRowsPerPage} className="min-w-24">
-              <SelectNative
-                value={String(pageSize)}
-                onChange={(event) => {
-                  setOrders({ status: "loading" })
-                  setPageSize(Number(event.target.value))
-                  setPage(1)
-                }}
-              >
-                {[10, 20, 50].map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </SelectNative>
-            </FilterField>
-          </FilterBar>
+          <FilterField label={t.seller.orderSort}>
+            <SelectNative
+              value={sortDescending ? "newest" : "oldest"}
+              onChange={(event) => {
+                setOrders({ status: "loading" })
+                setSortDescending(event.target.value === "newest")
+                setPage(1)
+              }}
+            >
+              <option value="newest">{t.seller.newestOrders}</option>
+              <option value="oldest">{t.seller.oldestOrders}</option>
+            </SelectNative>
+          </FilterField>
 
-          <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
-            <div>
-              <h2 id="seller-order-list-title" className="font-heading text-xl font-semibold">
-                {selectedStore?.name ?? t.seller.orderPageTitle}
-              </h2>
-              {selectedStore ? (
-                <p className="mt-1 text-sm text-muted-foreground">/{selectedStore.slug}</p>
-              ) : null}
-            </div>
-            {orders.status === "ready" ? (
-              <p className="text-sm text-muted-foreground">
-                {t.seller.orderCount.replace("{count}", String(orders.data.totalCount))}
-              </p>
+          <FilterField label={t.seller.orderRowsPerPage} className="min-w-24">
+            <SelectNative
+              value={String(pageSize)}
+              onChange={(event) => {
+                setOrders({ status: "loading" })
+                setPageSize(Number(event.target.value))
+                setPage(1)
+              }}
+            >
+              {[10, 20, 50].map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </SelectNative>
+          </FilterField>
+        </FilterBar>
+
+        <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+          <div>
+            <h2 id="seller-order-list-title" className="font-heading text-xl font-semibold">
+              {selectedStore?.name ?? t.seller.orderPageTitle}
+            </h2>
+            {selectedStore ? (
+              <p className="mt-1 text-sm text-muted-foreground">/{selectedStore.slug}</p>
             ) : null}
           </div>
+          {orders.status === "ready" ? (
+            <p className="text-sm text-muted-foreground">
+              {t.seller.orderCount.replace("{count}", String(orders.data.totalCount))}
+            </p>
+          ) : null}
+        </div>
 
-          {stores.status === "loading" || orders.status === "loading" ? (
-            <div className="flex flex-col gap-4">
-              {Array.from({ length: 3 }, (_, index) => (
-                <Skeleton key={index} className="h-32 rounded-xl" />
-              ))}
-            </div>
-          ) : stores.status === "unavailable" ? (
-            <ErrorState title={t.seller.storeLoadFailed} />
-          ) : stores.status === "ready" && stores.stores.length === 0 ? (
-            <EmptyState title={t.seller.noStores} description={t.seller.noStoresDescription} />
-          ) : orders.status === "unavailable" ? (
-            <ErrorState title={t.seller.ordersLoadFailed} onRetry={retry} />
-          ) : orders.status === "ready" && orders.data.items.length > 0 ? (
-            <div className="flex flex-col gap-4">
-              {orders.data.items.map((order) => (
-                <SellerOrderCard key={order.orderId} order={order} />
-              ))}
-              <SellerOrderPagination
-                data={orders.data}
-                onPageChange={(value) => {
-                  setOrders({ status: "loading" })
-                  setPage(value)
-                }}
-              />
-            </div>
-          ) : (
-            <EmptyState title={t.seller.noOrders} />
-          )}
-        </section>
-      </main>
-    </div>
+        {stores.status === "loading" || orders.status === "loading" ? (
+          <div className="flex flex-col gap-4">
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-32" />
+            ))}
+          </div>
+        ) : stores.status === "unavailable" ? (
+          <ErrorState title={t.seller.storeLoadFailed} />
+        ) : stores.status === "ready" && stores.stores.length === 0 ? (
+          <EmptyState title={t.seller.noStores} description={t.seller.noStoresDescription} />
+        ) : orders.status === "unavailable" ? (
+          <ErrorState title={t.seller.ordersLoadFailed} onRetry={retry} />
+        ) : orders.status === "ready" && orders.data.items.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            {orders.data.items.map((order) => (
+              <SellerOrderCard key={order.orderId} order={order} />
+            ))}
+            <SellerOrderPagination
+              data={orders.data}
+              onPageChange={(value) => {
+                setOrders({ status: "loading" })
+                setPage(value)
+              }}
+            />
+          </div>
+        ) : (
+          <EmptyState title={t.seller.noOrders} />
+        )}
+      </section>
+    </SellerShell>
   )
 }
 
@@ -307,7 +279,7 @@ function SellerOrderCard({ order }: { order: SellerOrderSummary }) {
   }
 
   return (
-    <article className="overflow-hidden rounded-xl border border-border bg-card">
+    <article className="overflow-hidden border border-border bg-card">
       <div className="grid gap-4 border-b border-border bg-muted/25 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
         <OrderFact
           label={t.seller.orderNumber}

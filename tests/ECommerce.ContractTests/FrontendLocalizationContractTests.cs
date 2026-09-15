@@ -44,7 +44,7 @@ public sealed class FrontendLocalizationContractTests
             StringComparison.Ordinal);
         Assert.Contains(
             "}, [locale, selectedStoreId])",
-            File.ReadAllText(Path.Combine(frontendRoot, "seller", "seller-dashboard.tsx")),
+            File.ReadAllText(Path.Combine(frontendRoot, "seller", "seller-product-management-page.tsx")),
             StringComparison.Ordinal);
         Assert.Contains(
             "}, [locale, query])",

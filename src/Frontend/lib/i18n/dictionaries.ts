@@ -337,6 +337,14 @@ export interface Dictionary {
   }
   seller: {
     workspace: string
+    navigation: string
+    overview: string
+    storePageDescription: string
+    productPageDescription: string
+    storeCount: string
+    manageStoresDescription: string
+    manageProductsDescription: string
+    manageOrdersDescription: string
     openAdminWorkspace: string
     roleLabel: string
     welcome: string
@@ -368,6 +376,10 @@ export interface Dictionary {
     sku: string
     productName: string
     productDescription: string
+    productNameEnglish: string
+    productDescriptionEnglish: string
+    productNameTurkish: string
+    productDescriptionTurkish: string
     category: string
     brand: string
     price: string
@@ -385,6 +397,7 @@ export interface Dictionary {
     refreshReferences: string
     refreshingReferences: string
     productCreated: string
+    productCreatedAddImages: string
     edit: string
     editProduct: string
     cancelEditing: string
@@ -423,7 +436,6 @@ export interface Dictionary {
     openOrders: string
     orderPageTitle: string
     orderPageDescription: string
-    backToWorkspace: string
     orderStore: string
     orderStatus: string
     allOrderStatuses: string
@@ -462,6 +474,15 @@ export interface Dictionary {
     brand: string
     allBrands: string
     sort: string
+    filters: string
+    showFilters: string
+    hideFilters: string
+    priceRange: string
+    minPrice: string
+    maxPrice: string
+    applyFilters: string
+    clearFilters: string
+    priceRangeInvalid: string
     newest: string
     priceLowToHigh: string
     priceHighToLow: string
@@ -478,7 +499,11 @@ export interface Dictionary {
     outOfStock: string
     productUnavailable: string
     backToCatalog: string
+    browseTitle: string
+    catalog: string
+    navigation: string
     productDetails: string
+    purchase: string
     storeDetails: string
     viewStore: string
     storeUnavailable: string
@@ -587,6 +612,17 @@ export interface Dictionary {
     previousPage: string
     nextPage: string
     pageStatus: string
+    orderTitle: string
+    types: {
+      orderSubmitted: string
+      orderConfirmed: string
+      orderCancelled: string
+      paymentAuthorized: string
+      paymentFailed: string
+      shipmentCreated: string
+      shipmentCreatedWithoutTracking: string
+      shipmentFailed: string
+    }
   }
   validation: {
     required: string
@@ -994,6 +1030,14 @@ const en: Dictionary = {
   },
   seller: {
     workspace: "Seller workspace",
+    navigation: "Seller navigation",
+    overview: "Overview",
+    storePageDescription: "Create the stores you sell from and keep their names and addresses current.",
+    productPageDescription: "Pick a store, then add products, edit their catalog details, and adjust stock.",
+    storeCount: "{count} stores",
+    manageStoresDescription: "Create a store or update the ones you already own.",
+    manageProductsDescription: "Add products to a store and keep their details and stock current.",
+    manageOrdersDescription: "Review the order lines and totals attributed to each store.",
     openAdminWorkspace: "Administrator workspace",
     roleLabel: "Seller",
     welcome: "Welcome back, {name}",
@@ -1025,6 +1069,10 @@ const en: Dictionary = {
     sku: "SKU",
     productName: "Product name",
     productDescription: "Description",
+    productNameEnglish: "English product name",
+    productDescriptionEnglish: "English description",
+    productNameTurkish: "Turkish product name",
+    productDescriptionTurkish: "Turkish description",
     category: "Category",
     brand: "Brand",
     price: "Price",
@@ -1042,6 +1090,7 @@ const en: Dictionary = {
     refreshReferences: "Reload categories and brands",
     refreshingReferences: "Reloading categories and brands",
     productCreated: "Product created successfully.",
+    productCreatedAddImages: "Product created. You can add its images below.",
     edit: "Edit",
     editProduct: "Edit product",
     cancelEditing: "Close product editor",
@@ -1080,7 +1129,6 @@ const en: Dictionary = {
     openOrders: "Store orders",
     orderPageTitle: "Store orders",
     orderPageDescription: "Review the order lines and totals attributed to each store you own.",
-    backToWorkspace: "Back to seller workspace",
     orderStore: "Store",
     orderStatus: "Order status",
     allOrderStatuses: "All statuses",
@@ -1119,6 +1167,15 @@ const en: Dictionary = {
     brand: "Brand",
     allBrands: "All brands",
     sort: "Sort",
+    filters: "Filters",
+    showFilters: "Show filters",
+    hideFilters: "Hide filters",
+    priceRange: "Price range",
+    minPrice: "Min",
+    maxPrice: "Max",
+    applyFilters: "Apply",
+    clearFilters: "Clear all filters",
+    priceRangeInvalid: "Enter a valid price range.",
     newest: "Newest",
     priceLowToHigh: "Price: low to high",
     priceHighToLow: "Price: high to low",
@@ -1135,7 +1192,11 @@ const en: Dictionary = {
     outOfStock: "Out of stock",
     productUnavailable: "This product is unavailable or no longer active.",
     backToCatalog: "Back to catalog",
+    browseTitle: "Browse the marketplace",
+    catalog: "Catalog",
+    navigation: "Customer navigation",
     productDetails: "Product details",
+    purchase: "Purchase",
     storeDetails: "Store details",
     viewStore: "View store",
     storeUnavailable: "This store is unavailable.",
@@ -1256,6 +1317,17 @@ const en: Dictionary = {
     previousPage: "Previous",
     nextPage: "Next",
     pageStatus: "Page {page} of {total}",
+    orderTitle: "Order {code}",
+    types: {
+      orderSubmitted: "Your order has been submitted.",
+      orderConfirmed: "Your order is confirmed.",
+      orderCancelled: "Your order was cancelled.",
+      paymentAuthorized: "Payment has been authorized.",
+      paymentFailed: "Payment failed.",
+      shipmentCreated: "Shipment created. Tracking number: {trackingNumber}",
+      shipmentCreatedWithoutTracking: "Shipment created.",
+      shipmentFailed: "Shipment could not be created.",
+    },
   },
   validation: {
     required: "This field is required.",
@@ -1663,6 +1735,14 @@ const tr: Dictionary = {
   },
   seller: {
     workspace: "Satıcı çalışma alanı",
+    navigation: "Satıcı gezinmesi",
+    overview: "Genel bakış",
+    storePageDescription: "Satış yaptığınız mağazaları oluşturun; adlarını ve adreslerini güncel tutun.",
+    productPageDescription: "Bir mağaza seçin; ürün ekleyin, katalog bilgilerini düzenleyin ve stoğu güncelleyin.",
+    storeCount: "{count} mağaza",
+    manageStoresDescription: "Yeni mağaza oluşturun veya mevcut mağazalarınızı güncelleyin.",
+    manageProductsDescription: "Mağazaya ürün ekleyin; bilgilerini ve stoklarını güncel tutun.",
+    manageOrdersDescription: "Her mağazaya ait sipariş kalemlerini ve toplamları inceleyin.",
     openAdminWorkspace: "Yönetici paneli",
     roleLabel: "Satıcı",
     welcome: "Tekrar hoş geldiniz, {name}",
@@ -1694,6 +1774,10 @@ const tr: Dictionary = {
     sku: "Stok kodu",
     productName: "Ürün adı",
     productDescription: "Açıklama",
+    productNameEnglish: "İngilizce ürün adı",
+    productDescriptionEnglish: "İngilizce açıklama",
+    productNameTurkish: "Türkçe ürün adı",
+    productDescriptionTurkish: "Türkçe açıklama",
     category: "Kategori",
     brand: "Marka",
     price: "Fiyat",
@@ -1711,6 +1795,7 @@ const tr: Dictionary = {
     refreshReferences: "Kategori ve markaları yeniden yükle",
     refreshingReferences: "Kategori ve markalar yeniden yükleniyor",
     productCreated: "Ürün başarıyla oluşturuldu.",
+    productCreatedAddImages: "Ürün oluşturuldu. Görsellerini aşağıdan ekleyebilirsiniz.",
     edit: "Düzenle",
     editProduct: "Ürünü düzenle",
     cancelEditing: "Ürün düzenleyiciyi kapat",
@@ -1749,7 +1834,6 @@ const tr: Dictionary = {
     openOrders: "Mağaza siparişleri",
     orderPageTitle: "Mağaza siparişleri",
     orderPageDescription: "Sahibi olduğunuz her mağazaya ait sipariş kalemlerini ve toplamları inceleyin.",
-    backToWorkspace: "Satıcı paneline dön",
     orderStore: "Mağaza",
     orderStatus: "Sipariş durumu",
     allOrderStatuses: "Tüm durumlar",
@@ -1788,6 +1872,15 @@ const tr: Dictionary = {
     brand: "Marka",
     allBrands: "Tüm markalar",
     sort: "Sıralama",
+    filters: "Filtreler",
+    showFilters: "Filtreleri göster",
+    hideFilters: "Filtreleri gizle",
+    priceRange: "Fiyat aralığı",
+    minPrice: "En az",
+    maxPrice: "En çok",
+    applyFilters: "Uygula",
+    clearFilters: "Tüm filtreleri temizle",
+    priceRangeInvalid: "Geçerli bir fiyat aralığı girin.",
     newest: "En yeni",
     priceLowToHigh: "Fiyat: düşükten yükseğe",
     priceHighToLow: "Fiyat: yüksekten düşüğe",
@@ -1804,7 +1897,11 @@ const tr: Dictionary = {
     outOfStock: "Stokta yok",
     productUnavailable: "Bu ürün kullanılamıyor veya artık aktif değil.",
     backToCatalog: "Kataloğa dön",
+    browseTitle: "Pazaryerini keşfedin",
+    catalog: "Katalog",
+    navigation: "Müşteri gezinmesi",
     productDetails: "Ürün detayları",
+    purchase: "Satın alma",
     storeDetails: "Mağaza detayları",
     viewStore: "Mağazayı görüntüle",
     storeUnavailable: "Bu mağaza kullanılamıyor.",
@@ -1925,6 +2022,17 @@ const tr: Dictionary = {
     previousPage: "Önceki",
     nextPage: "Sonraki",
     pageStatus: "Sayfa {page} / {total}",
+    orderTitle: "Sipariş {code}",
+    types: {
+      orderSubmitted: "Siparişiniz alındı.",
+      orderConfirmed: "Siparişiniz onaylandı.",
+      orderCancelled: "Siparişiniz iptal edildi.",
+      paymentAuthorized: "Ödemeniz onaylandı.",
+      paymentFailed: "Ödeme alınamadı.",
+      shipmentCreated: "Gönderi oluşturuldu. Takip numarası: {trackingNumber}",
+      shipmentCreatedWithoutTracking: "Gönderi oluşturuldu.",
+      shipmentFailed: "Gönderi oluşturulamadı.",
+    },
   },
   validation: {
     required: "Bu alan zorunludur.",
