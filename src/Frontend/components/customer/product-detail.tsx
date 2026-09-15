@@ -9,11 +9,13 @@ import type { ReactNode } from "react"
 
 import { CustomerShell } from "@/components/customer/customer-shell"
 import { EmptyState } from "@/components/patterns/states"
+import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { incrementBasketItem } from "@/lib/api/basket"
 import { getProfile } from "@/lib/api/auth"
 import { getCatalogProduct } from "@/lib/api/catalog"
+import { getInventoryItem } from "@/lib/api/inventory"
 import type { Locale } from "@/lib/i18n/dictionaries"
 import { formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
@@ -30,6 +32,7 @@ export function ProductDetail() {
   const params = useParams<{ id: string }>()
   const [state, setState] = useState<ProductState>({ status: "loading" })
   const [customerId, setCustomerId] = useState<string | null>(null)
+  const [availableQuantity, setAvailableQuantity] = useState<number | null>(null)
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
   const [addFailed, setAddFailed] = useState(false)
@@ -48,6 +51,20 @@ export function ProductDetail() {
       active = false
     }
   }, [locale, params.id])
+
+  useEffect(() => {
+    let active = true
+    getInventoryItem(params.id)
+      .then((item) => {
+        if (active) setAvailableQuantity(item.availableQuantity)
+      })
+      .catch(() => {
+        if (active) setAvailableQuantity(null)
+      })
+    return () => {
+      active = false
+    }
+  }, [params.id])
 
   useEffect(() => {
     let active = true
@@ -110,8 +127,20 @@ export function ProductDetail() {
               brand: t.customer.brand,
               store: t.customer.viewStore,
             }}
+            availableQuantity={availableQuantity}
+            stockLabels={{
+              inStock: t.customer.inStock,
+              lowStock: t.customer.lowStock,
+              outOfStock: t.customer.outOfStock,
+            }}
             basketAction={
               customerId ? (
+                availableQuantity === 0 ? (
+                  <Button type="button" size="lg" className="w-full" disabled>
+                    <ShoppingCartIcon />
+                    {t.basket.addToBasket}
+                  </Button>
+                ) : (
                 <div className="flex flex-col gap-2">
                   <Button
                     type="button"
@@ -133,6 +162,7 @@ export function ProductDetail() {
                     <p className="text-sm text-destructive">{t.basket.addFailed}</p>
                   ) : null}
                 </div>
+                )
               ) : (
                 <Link href="/login" className={cn(buttonVariants({ size: "lg" }), "w-full")}>
                   {t.basket.signInToAdd}
@@ -149,6 +179,8 @@ export function ProductDetail() {
 interface ProductContentProps {
   product: CatalogProduct
   locale: Locale
+  availableQuantity: number | null
+  stockLabels: { inStock: string; lowStock: string; outOfStock: string }
   labels: {
     sku: string
     category: string
@@ -158,7 +190,14 @@ interface ProductContentProps {
   basketAction: ReactNode
 }
 
-function ProductContent({ product, locale, labels, basketAction }: ProductContentProps) {
+function ProductContent({
+  product,
+  locale,
+  availableQuantity,
+  stockLabels,
+  labels,
+  basketAction,
+}: ProductContentProps) {
   const { t } = useI18n()
   const images = product.images
   const [activeImageId, setActiveImageId] = useState<string | null>(null)
@@ -247,6 +286,13 @@ function ProductContent({ product, locale, labels, basketAction }: ProductConten
             <p className="font-heading text-3xl font-bold text-primary tabular-nums">{price}</p>
           </div>
 
+          {availableQuantity !== null ? (
+            <StatusBadge
+              label={stockBadgeLabel(availableQuantity, stockLabels)}
+              tone={availableQuantity <= 0 ? "danger" : availableQuantity <= 5 ? "warning" : "success"}
+            />
+          ) : null}
+
           {basketAction}
 
           {product.storeId ? (
@@ -261,4 +307,17 @@ function ProductContent({ product, locale, labels, basketAction }: ProductConten
       </aside>
     </article>
   )
+}
+
+function stockBadgeLabel(
+  availableQuantity: number,
+  labels: { inStock: string; lowStock: string; outOfStock: string },
+): string {
+  if (availableQuantity <= 0) {
+    return labels.outOfStock
+  }
+
+  return availableQuantity <= 5
+    ? labels.lowStock.replace("{count}", String(availableQuantity))
+    : labels.inStock
 }

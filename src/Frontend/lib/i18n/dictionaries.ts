@@ -518,6 +518,8 @@ export interface Dictionary {
     adding: string
     added: string
     addFailed: string
+    outOfStock: string
+    stockLimited: string
     signInToAdd: string
     empty: string
     continueShopping: string
@@ -1213,6 +1215,8 @@ const en: Dictionary = {
     adding: "Adding",
     added: "Added",
     addFailed: "The product could not be added to your basket.",
+    outOfStock: "This product is out of stock; remove it to continue.",
+    stockLimited: "Only {count} left in stock; lower the quantity to continue.",
     signInToAdd: "Sign in to add this product",
     empty: "Your basket is empty.",
     continueShopping: "Continue shopping",
@@ -1920,6 +1924,8 @@ const tr: Dictionary = {
     adding: "Ekleniyor",
     added: "Eklendi",
     addFailed: "Ürün sepetinize eklenemedi.",
+    outOfStock: "Bu ürün tükendi; devam etmek için sepetten çıkarın.",
+    stockLimited: "Stokta {count} adet kaldı; devam etmek için miktarı düşürün.",
     signInToAdd: "Bu ürünü eklemek için giriş yapın",
     empty: "Sepetiniz boş.",
     continueShopping: "Alışverişe devam et",

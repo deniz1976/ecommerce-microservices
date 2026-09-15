@@ -27,6 +27,7 @@ import {
   removeBasketItem,
 } from "@/lib/api/basket"
 import { getProfile } from "@/lib/api/auth"
+import { getInventoryItems } from "@/lib/api/inventory"
 import { ApiError } from "@/lib/api/client"
 import { formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
@@ -51,6 +52,7 @@ export function BasketView() {
   const [clearing, setClearing] = useState(false)
   const [checkingOut, setCheckingOut] = useState(false)
   const [operationError, setOperationError] = useState(false)
+  const [stockByProductId, setStockByProductId] = useState<Record<string, number>>({})
   const [checkoutResult, setCheckoutResult] = useState<CheckoutBasketResult | null>(null)
   const [checkoutAddress, setCheckoutAddress] = useState<CheckoutBasketPayload>({
     checkoutId: "",
@@ -98,6 +100,26 @@ export function BasketView() {
     }
   }, [router])
 
+  useEffect(() => {
+    if (state.status !== "ready" || !state.basket || state.basket.items.length === 0) {
+      return
+    }
+
+    const controller = new AbortController()
+    getInventoryItems(
+      state.basket.items.map((item) => item.productId),
+      controller.signal,
+    )
+      .then((items) => {
+        setStockByProductId(
+          Object.fromEntries(items.map((item) => [item.productId, item.availableQuantity])),
+        )
+      })
+      .catch(() => undefined)
+
+    return () => controller.abort()
+  }, [state])
+
   async function updateQuantity(productId: string, quantity: number) {
     if (state.status !== "ready" || quantity < 1) return
     setBusyItemId(productId)
@@ -142,6 +164,14 @@ export function BasketView() {
       setClearing(false)
     }
   }
+
+  const stockExceeded =
+    state.status === "ready" &&
+    state.basket !== null &&
+    state.basket.items.some((item) => {
+      const available = stockByProductId[item.productId]
+      return available !== undefined && item.quantity > available
+    })
 
   async function checkout(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -209,6 +239,8 @@ export function BasketView() {
             <section className="divide-y divide-border overflow-hidden border border-border bg-card">
               {state.basket.items.map((item) => {
                 const busy = busyItemId === item.productId
+                const available = stockByProductId[item.productId]
+                const exceedsStock = available !== undefined && item.quantity > available
                 return (
                   <article key={item.productId} className="p-5">
                     <div className="flex items-start justify-between gap-4">
@@ -224,10 +256,17 @@ export function BasketView() {
                       <div className="flex items-center gap-2" aria-label={t.basket.quantity}>
                         <Button type="button" variant="outline" size="icon" disabled={busy || item.quantity <= 1} onClick={() => updateQuantity(item.productId, item.quantity - 1)} aria-label={`${t.basket.quantity} -`}><MinusIcon /></Button>
                         <span className="min-w-8 text-center text-sm font-medium">{busy ? <Loader2Icon className="mx-auto size-4 animate-spin" /> : item.quantity}</span>
-                        <Button type="button" variant="outline" size="icon" disabled={busy} onClick={() => updateQuantity(item.productId, item.quantity + 1)} aria-label={`${t.basket.quantity} +`}><PlusIcon /></Button>
+                        <Button type="button" variant="outline" size="icon" disabled={busy || (available !== undefined && item.quantity >= available)} onClick={() => updateQuantity(item.productId, item.quantity + 1)} aria-label={`${t.basket.quantity} +`}><PlusIcon /></Button>
                       </div>
                       <Button type="button" variant="destructive" disabled={busy} onClick={() => remove(item.productId)}><Trash2Icon />{t.basket.remove}</Button>
                     </div>
+                    {exceedsStock ? (
+                      <p className="mt-3 text-sm text-destructive" role="status">
+                        {available === 0
+                          ? t.basket.outOfStock
+                          : t.basket.stockLimited.replace("{count}", String(available))}
+                      </p>
+                    ) : null}
                   </article>
                 )
               })}
@@ -279,7 +318,7 @@ export function BasketView() {
                 </div>
               </div>
               {operationError ? <p className="mt-4 text-sm text-destructive">{t.basket.updateFailed}</p> : null}
-              <Button type="submit" size="lg" className="mt-6 w-full" disabled={checkingOut || clearing}>
+              <Button type="submit" size="lg" className="mt-6 w-full" disabled={checkingOut || clearing || stockExceeded}>
                 {checkingOut ? <Loader2Icon className="animate-spin" /> : null}
                 {checkingOut ? t.basket.checkingOut : t.basket.checkout}
               </Button>
