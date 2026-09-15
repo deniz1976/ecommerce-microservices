@@ -87,33 +87,51 @@ public sealed class CatalogReferenceReader :
         long totalCount = await categories.LongCountAsync(cancellationToken);
         int pageNumber = NormalizePageNumber(criteria.PageNumber, pageSize, totalCount);
 
-        categories = ApplyCategoryOrdering(
-            categories,
-            criteria.SortBy,
-            criteria.SortDescending);
-
-        IQueryable<ManagedCatalogCategoryResponse> projection = categories.Select(category =>
-            new ManagedCatalogCategoryResponse(
-                category.Id,
-                category.Translations
+        var rows =
+            from category in categories
+            join englishTranslation in dbContext.CategoryTranslations
                     .Where(translation => translation.LanguageCode == "en")
-                    .Select(translation => translation.Name)
-                    .FirstOrDefault() ?? category.Slug,
-                category.Translations
+                on category.Id equals englishTranslation.CategoryId into englishTranslations
+            from english in englishTranslations.DefaultIfEmpty()
+            join turkishTranslation in dbContext.CategoryTranslations
                     .Where(translation => translation.LanguageCode == "tr")
-                    .Select(translation => translation.Name)
-                    .FirstOrDefault() ??
-                category.Translations
-                    .Where(translation => translation.LanguageCode == "en")
-                    .Select(translation => translation.Name)
-                    .FirstOrDefault() ??
+                on category.Id equals turkishTranslation.CategoryId into turkishTranslations
+            from turkish in turkishTranslations.DefaultIfEmpty()
+            select new
+            {
+                category.Id,
+                EnglishName = english.Name ?? category.Slug,
+                TurkishName = turkish.Name ?? english.Name ?? category.Slug,
                 category.Slug,
-                category.Slug,
-                category.IsActive));
+                category.IsActive,
+            };
 
-        ManagedCatalogCategoryResponse[] items = await projection
+        bool descending = criteria.SortDescending;
+        var orderedRows = criteria.SortBy?.Trim() switch
+        {
+            CatalogReferenceSortFields.TurkishName => descending
+                ? rows.OrderByDescending(row => row.TurkishName).ThenBy(row => row.Id)
+                : rows.OrderBy(row => row.TurkishName).ThenBy(row => row.Id),
+            CatalogReferenceSortFields.Slug => descending
+                ? rows.OrderByDescending(row => row.Slug).ThenBy(row => row.Id)
+                : rows.OrderBy(row => row.Slug).ThenBy(row => row.Id),
+            CatalogReferenceSortFields.IsActive => descending
+                ? rows.OrderByDescending(row => row.IsActive).ThenBy(row => row.Id)
+                : rows.OrderBy(row => row.IsActive).ThenBy(row => row.Id),
+            _ => descending
+                ? rows.OrderByDescending(row => row.EnglishName).ThenBy(row => row.Id)
+                : rows.OrderBy(row => row.EnglishName).ThenBy(row => row.Id),
+        };
+
+        ManagedCatalogCategoryResponse[] items = await orderedRows
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
+            .Select(row => new ManagedCatalogCategoryResponse(
+                row.Id,
+                row.EnglishName,
+                row.TurkishName,
+                row.Slug,
+                row.IsActive))
             .ToArrayAsync(cancellationToken);
 
         return new PagedResult<ManagedCatalogCategoryResponse>(
@@ -168,44 +186,6 @@ public sealed class CatalogReferenceReader :
             pageNumber,
             pageSize,
             totalCount);
-    }
-
-    private static IQueryable<Category> ApplyCategoryOrdering(
-        IQueryable<Category> query,
-        string? sortBy,
-        bool descending)
-    {
-        return sortBy?.Trim() switch
-        {
-            CatalogReferenceSortFields.TurkishName => descending
-                ? query.OrderByDescending(category => category.Translations
-                        .Where(translation => translation.LanguageCode == "tr")
-                        .Select(translation => translation.Name)
-                        .FirstOrDefault() ?? category.Slug)
-                    .ThenBy(category => category.Id)
-                : query.OrderBy(category => category.Translations
-                        .Where(translation => translation.LanguageCode == "tr")
-                        .Select(translation => translation.Name)
-                        .FirstOrDefault() ?? category.Slug)
-                    .ThenBy(category => category.Id),
-            CatalogReferenceSortFields.Slug => descending
-                ? query.OrderByDescending(category => category.Slug).ThenBy(category => category.Id)
-                : query.OrderBy(category => category.Slug).ThenBy(category => category.Id),
-            CatalogReferenceSortFields.IsActive => descending
-                ? query.OrderByDescending(category => category.IsActive).ThenBy(category => category.Id)
-                : query.OrderBy(category => category.IsActive).ThenBy(category => category.Id),
-            _ => descending
-                ? query.OrderByDescending(category => category.Translations
-                        .Where(translation => translation.LanguageCode == "en")
-                        .Select(translation => translation.Name)
-                        .FirstOrDefault() ?? category.Slug)
-                    .ThenBy(category => category.Id)
-                : query.OrderBy(category => category.Translations
-                        .Where(translation => translation.LanguageCode == "en")
-                        .Select(translation => translation.Name)
-                        .FirstOrDefault() ?? category.Slug)
-                    .ThenBy(category => category.Id)
-        };
     }
 
     private static IQueryable<Brand> ApplyBrandOrdering(

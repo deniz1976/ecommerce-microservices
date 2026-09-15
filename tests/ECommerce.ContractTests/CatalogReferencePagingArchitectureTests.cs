@@ -18,16 +18,16 @@ public sealed class CatalogReferencePagingArchitectureTests
 
         Assert.Contains("AsNoTracking()", managedSection, StringComparison.Ordinal);
         Assert.Contains("LongCountAsync", managedSection, StringComparison.Ordinal);
-        Assert.Contains("Select(category =>", managedSection, StringComparison.Ordinal);
+        Assert.Contains("Select(row => new ManagedCatalogCategoryResponse(", managedSection, StringComparison.Ordinal);
         Assert.Contains("Select(brand =>", managedSection, StringComparison.Ordinal);
         Assert.Contains(".Skip(", managedSection, StringComparison.Ordinal);
         Assert.Contains(".Take(pageSize)", managedSection, StringComparison.Ordinal);
         Assert.Contains("EF.Functions.ILike", managedSection, StringComparison.Ordinal);
-        Assert.Contains("ThenBy(category => category.Id)", managedSection, StringComparison.Ordinal);
+        Assert.Contains("ThenBy(row => row.Id)", managedSection, StringComparison.Ordinal);
         Assert.Contains("ThenBy(brand => brand.Id)", managedSection, StringComparison.Ordinal);
         Assert.True(
-            managedSection.IndexOf("categories = ApplyCategoryOrdering", StringComparison.Ordinal) <
-            managedSection.IndexOf("IQueryable<ManagedCatalogCategoryResponse> projection", StringComparison.Ordinal));
+            managedSection.IndexOf("var orderedRows = criteria.SortBy", StringComparison.Ordinal) <
+            managedSection.IndexOf("await orderedRows", StringComparison.Ordinal));
         Assert.True(
             managedSection.IndexOf("brands = ApplyBrandOrdering", StringComparison.Ordinal) <
             managedSection.IndexOf("IQueryable<ManagedCatalogBrandResponse> projection", StringComparison.Ordinal));
