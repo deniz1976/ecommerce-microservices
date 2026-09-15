@@ -22,6 +22,8 @@ public sealed class CatalogSellerOwnershipTests
             null,
             null,
             storeId,
+            null,
+            null,
             ProductStatus.Archived,
             "createdAt",
             true);
@@ -44,7 +46,7 @@ public sealed class CatalogSellerOwnershipTests
             products,
             products,
             new ProductStoreAccessValidator(new FakeStoreRepository()));
-        ProductListQuery query = new(1, 20, null, null, null, null, null, "createdAt", true);
+        ProductListQuery query = new(1, 20, null, null, null, null, null, null, null, "createdAt", true);
 
         Result<PagedResult<ProductResponse>> result = await service.SearchAsync(
             query,
@@ -67,7 +69,7 @@ public sealed class CatalogSellerOwnershipTests
             products,
             new ProductStoreAccessValidator(
                 new FakeStoreRepository(new Store(storeId, Guid.NewGuid(), "Other Store", "other-store"))));
-        ProductListQuery query = new(1, 20, null, null, null, storeId, null, "createdAt", true);
+        ProductListQuery query = new(1, 20, null, null, null, storeId, null, null, null, "createdAt", true);
 
         Result<PagedResult<ProductResponse>> result = await service.SearchAsync(
             query,
@@ -88,7 +90,7 @@ public sealed class CatalogSellerOwnershipTests
             products,
             products,
             new ProductStoreAccessValidator(new FakeStoreRepository()));
-        ProductListQuery query = new(1, 20, null, null, null, null, null, "createdAt", true);
+        ProductListQuery query = new(1, 20, null, null, null, null, null, null, null, "createdAt", true);
 
         Result<PagedResult<ProductResponse>> result = await service.SearchAsync(
             query,

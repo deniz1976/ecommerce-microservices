@@ -29,6 +29,8 @@ public sealed class ProductsController(
         [FromQuery] Guid? categoryId = null,
         [FromQuery] Guid? brandId = null,
         [FromQuery] Guid? storeId = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
         [FromQuery] string? sortBy = null,
         [FromQuery] bool sortDescending = false,
         CancellationToken cancellationToken = default)
@@ -41,6 +43,8 @@ public sealed class ProductsController(
             categoryId,
             brandId,
             storeId,
+            minPrice,
+            maxPrice,
             ProductStatus.Active,
             sortBy,
             sortDescending);
@@ -72,6 +76,8 @@ public sealed class ProductsController(
         [FromQuery] Guid? categoryId = null,
         [FromQuery] Guid? brandId = null,
         [FromQuery] Guid? storeId = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
         [FromQuery] ProductStatus? status = null,
         [FromQuery] string? sortBy = null,
         [FromQuery] bool sortDescending = false,
@@ -86,6 +92,8 @@ public sealed class ProductsController(
             categoryId,
             brandId,
             storeId,
+            minPrice,
+            maxPrice,
             status,
             sortBy,
             sortDescending);

@@ -29,6 +29,8 @@ export interface CatalogProductQuery {
   categoryId?: string
   brandId?: string
   storeId?: string
+  minPrice?: number
+  maxPrice?: number
   status?: ProductStatus
   sortBy?: "createdAt" | "price" | "sku"
   sortDescending?: boolean
@@ -76,6 +78,8 @@ export function getPublicCatalogProducts(
   if (query.categoryId) parameters.set("categoryId", query.categoryId)
   if (query.brandId) parameters.set("brandId", query.brandId)
   if (query.storeId) parameters.set("storeId", query.storeId)
+  if (query.minPrice !== undefined) parameters.set("minPrice", String(query.minPrice))
+  if (query.maxPrice !== undefined) parameters.set("maxPrice", String(query.maxPrice))
 
   return apiRequest<PagedResult<CatalogProduct>>(
     `/gateway/catalog/products?${parameters.toString()}`,
@@ -100,6 +104,8 @@ export function getManagedCatalogProducts(
   if (query.categoryId) parameters.set("categoryId", query.categoryId)
   if (query.brandId) parameters.set("brandId", query.brandId)
   if (query.storeId) parameters.set("storeId", query.storeId)
+  if (query.minPrice !== undefined) parameters.set("minPrice", String(query.minPrice))
+  if (query.maxPrice !== undefined) parameters.set("maxPrice", String(query.maxPrice))
   if (query.status !== undefined) parameters.set("status", String(query.status))
 
   return apiRequest<PagedResult<CatalogProduct>>(

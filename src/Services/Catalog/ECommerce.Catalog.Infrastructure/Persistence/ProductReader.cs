@@ -48,6 +48,16 @@ public sealed class ProductReader : IProductSearchReader, IProductReferenceReade
             products = products.Where(x => x.StoreId == query.StoreId);
         }
 
+        if (query.MinPrice.HasValue)
+        {
+            products = products.Where(x => x.Price >= query.MinPrice);
+        }
+
+        if (query.MaxPrice.HasValue)
+        {
+            products = products.Where(x => x.Price <= query.MaxPrice);
+        }
+
         if (query.Status.HasValue)
         {
             products = products.Where(x => x.Status == query.Status);

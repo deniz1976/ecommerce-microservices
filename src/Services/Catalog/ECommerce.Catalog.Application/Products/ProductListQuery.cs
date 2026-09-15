@@ -9,6 +9,8 @@ public sealed record ProductListQuery(
     Guid? CategoryId,
     Guid? BrandId,
     Guid? StoreId,
+    decimal? MinPrice,
+    decimal? MaxPrice,
     ProductStatus? Status,
     string? SortBy,
     bool SortDescending);
