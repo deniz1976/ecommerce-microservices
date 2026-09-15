@@ -44,6 +44,7 @@ public sealed class ProductManagementService
             request.CategoryId,
             request.BrandId,
             request.Translations,
+            [],
             cancellationToken);
         if (validation.IsFailure)
         {
@@ -111,6 +112,7 @@ public sealed class ProductManagementService
             request.CategoryId,
             request.BrandId,
             request.Translations,
+            product.Translations.Select(translation => translation.LanguageCode).ToArray(),
             cancellationToken);
         if (validation.IsFailure)
         {

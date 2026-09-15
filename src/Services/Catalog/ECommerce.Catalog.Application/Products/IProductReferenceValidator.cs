@@ -8,5 +8,6 @@ public interface IProductReferenceValidator
         Guid categoryId,
         Guid brandId,
         IReadOnlyCollection<ProductTranslationInput> translations,
+        IReadOnlyCollection<string> existingLanguageCodes,
         CancellationToken cancellationToken);
 }

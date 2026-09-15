@@ -22,6 +22,7 @@ public sealed class ProductReferenceValidator : IProductReferenceValidator
         Guid categoryId,
         Guid brandId,
         IReadOnlyCollection<ProductTranslationInput> translations,
+        IReadOnlyCollection<string> existingLanguageCodes,
         CancellationToken cancellationToken)
     {
         if (!await referenceReader.CategoryExistsAsync(categoryId, cancellationToken))
@@ -34,7 +35,9 @@ public sealed class ProductReferenceValidator : IProductReferenceValidator
             return Result.Failure(new Error(CatalogErrorCodes.BrandNotFound, CatalogErrorCodes.BrandNotFound));
         }
 
-        bool hasEnglish = translations.Any(x => x.LanguageCode.Equals("en", StringComparison.OrdinalIgnoreCase));
+        bool hasEnglish =
+            translations.Any(x => x.LanguageCode.Equals("en", StringComparison.OrdinalIgnoreCase)) ||
+            existingLanguageCodes.Any(x => x.Equals("en", StringComparison.OrdinalIgnoreCase));
         bool allLanguagesSupported = translations.All(x => SupportedLanguages.Contains(x.LanguageCode));
 
         return hasEnglish && allLanguagesSupported
