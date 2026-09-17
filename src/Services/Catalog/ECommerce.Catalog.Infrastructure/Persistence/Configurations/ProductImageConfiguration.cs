@@ -11,7 +11,7 @@ public sealed class ProductImageConfiguration : IEntityTypeConfiguration<Product
         builder.ToTable("product_images");
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(x => x.ProductId).HasColumnName("product_id");
         builder.Property(x => x.PublicId).HasColumnName("public_id").HasMaxLength(256).IsRequired();
         builder.Property(x => x.Url).HasColumnName("url").HasMaxLength(2048).IsRequired();
