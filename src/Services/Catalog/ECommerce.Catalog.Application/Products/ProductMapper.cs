@@ -23,7 +23,8 @@ public static class ProductMapper
             product.Currency,
             product.Status,
             product.Images
-                .OrderBy(x => x.SortOrder)
+                .OrderByDescending(x => x.IsMain)
+                .ThenBy(x => x.SortOrder)
                 .Select(x => x.ToResponse())
                 .ToArray());
     }
