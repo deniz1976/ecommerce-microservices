@@ -126,9 +126,10 @@ public sealed class Order
             return;
         }
 
-        Status = OrderStatus.Confirmed;
+        Status = statusHistory
+            .Where(entry => entry.Status < OrderStatus.Cancelled)
+            .Max(entry => entry.Status);
         UpdatedAt = DateTimeOffset.UtcNow;
-        statusHistory.Add(new OrderStatusHistory(Id, Status, UpdatedAt, null));
     }
 
     public void MarkCancelled(string? reasonCode = null)
