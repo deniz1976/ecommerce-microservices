@@ -27,6 +27,7 @@ import {
 import { getMyCatalogStores } from "@/lib/api/catalog"
 import { getSellerOrder, getSellerOrders } from "@/lib/api/orders"
 import { formatDateTime, formatMoney } from "@/lib/i18n/format"
+import { useLocalizedProductNames } from "@/lib/hooks/use-localized-product-names"
 import { useI18n } from "@/lib/i18n/provider"
 import { orderStatusLabel, orderStatusTone } from "@/lib/i18n/status"
 import { cn } from "@/lib/utils"
@@ -329,6 +330,7 @@ function SellerOrderCard({ order }: { order: SellerOrderSummary }) {
 
 function SellerOrderItemsTable({ order }: { order: SellerOrderDetail }) {
   const { locale, t } = useI18n()
+  const nameByProductId = useLocalizedProductNames(order.items.map((item) => item.productId))
   return (
     <div className="overflow-x-auto">
       <Table className="min-w-[42rem]">
@@ -343,7 +345,7 @@ function SellerOrderItemsTable({ order }: { order: SellerOrderDetail }) {
         <TableBody>
           {order.items.map((item) => (
             <TableRow key={item.id}>
-              <TableCell className="font-medium">{item.productName}</TableCell>
+              <TableCell className="font-medium">{nameByProductId[item.productId] ?? item.productName}</TableCell>
               <TableCell className="text-right text-muted-foreground tabular-nums">
                 {item.quantity}
               </TableCell>

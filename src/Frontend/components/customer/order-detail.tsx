@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/patterns/status-badge"
 import { CustomerShell } from "@/components/customer/customer-shell"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ApiError } from "@/lib/api/client"
+import { useLocalizedProductNames } from "@/lib/hooks/use-localized-product-names"
 import { getOrder, requestOrderCancellation } from "@/lib/api/orders"
 import { formatDateTime, formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
@@ -31,6 +32,9 @@ export function OrderDetail() {
   const [state, setState] = useState<DetailState>({ status: "loading" })
   const [cancelling, setCancelling] = useState(false)
   const [cancellationMessage, setCancellationMessage] = useState<string | null>(null)
+  const nameByProductId = useLocalizedProductNames(
+    state.status === "ready" ? state.order.items.map((item) => item.productId) : [],
+  )
 
   useEffect(() => {
     let active = true
@@ -158,7 +162,7 @@ export function OrderDetail() {
               {state.order.items.map((item) => (
                 <div key={item.id} className="flex items-center justify-between gap-4 p-6">
                   <div>
-                    <h2 className="font-medium">{item.productName}</h2>
+                    <h2 className="font-medium">{nameByProductId[item.productId] ?? item.productName}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">{t.basket.quantity}: {item.quantity}</p>
                   </div>
                   <p className="font-semibold">{formatMoney(item.totalPrice, item.currency, locale)}</p>

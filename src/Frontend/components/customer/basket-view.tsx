@@ -28,8 +28,8 @@ import {
 } from "@/lib/api/basket"
 import { getProfile } from "@/lib/api/auth"
 import { getInventoryItems } from "@/lib/api/inventory"
-import { getCatalogProduct } from "@/lib/api/catalog"
 import { ApiError } from "@/lib/api/client"
+import { useLocalizedProductNames } from "@/lib/hooks/use-localized-product-names"
 import { formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
 import { cn } from "@/lib/utils"
@@ -54,7 +54,6 @@ export function BasketView() {
   const [checkingOut, setCheckingOut] = useState(false)
   const [operationError, setOperationError] = useState(false)
   const [stockByProductId, setStockByProductId] = useState<Record<string, number>>({})
-  const [nameByProductId, setNameByProductId] = useState<Record<string, string>>({})
   const [checkoutResult, setCheckoutResult] = useState<CheckoutBasketResult | null>(null)
   const [checkoutAddress, setCheckoutAddress] = useState<CheckoutBasketPayload>({
     checkoutId: "",
@@ -65,6 +64,11 @@ export function BasketView() {
     postalCode: "",
   })
   const checkoutId = useRef<string | null>(null)
+  const nameByProductId = useLocalizedProductNames(
+    state.status === "ready" && state.basket
+      ? state.basket.items.map((item) => item.productId)
+      : [],
+  )
 
   useEffect(() => {
     let active = true
@@ -122,32 +126,6 @@ export function BasketView() {
     return () => controller.abort()
   }, [state])
 
-  useEffect(() => {
-    if (state.status !== "ready" || !state.basket || state.basket.items.length === 0) {
-      return
-    }
-
-    let active = true
-    Promise.all(
-      state.basket.items.map((item) =>
-        getCatalogProduct(item.productId)
-          .then((product) => [item.productId, product.name] as const)
-          .catch(() => null),
-      ),
-    ).then((entries) => {
-      if (!active) {
-        return
-      }
-
-      setNameByProductId(
-        Object.fromEntries(entries.filter((entry) => entry !== null)),
-      )
-    })
-
-    return () => {
-      active = false
-    }
-  }, [locale, state])
 
   async function updateQuantity(productId: string, quantity: number) {
     if (state.status !== "ready" || quantity < 1) return
