@@ -37,9 +37,4 @@ exports.onExecutePostLogin = async (event, api) => {
     `${namespace}roles`,
     roles
   );
-
-  api.idToken.setCustomClaim(
-    `${namespace}roles`,
-    roles
-  );
 };
