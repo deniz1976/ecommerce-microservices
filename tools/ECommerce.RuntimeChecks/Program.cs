@@ -23,6 +23,7 @@ try
     IWorkflowProbe workflowProbe = new PostgresWorkflowProbe();
     ICatalogProductFixture catalogProductFixture = new PostgresCatalogProductFixture();
     INotificationLiveDeliveryProbe notificationLiveDeliveryProbe = new SignalRNotificationLiveDeliveryProbe(options);
+    await using IWorkflowEventPublisher eventPublisher = new MassTransitWorkflowEventPublisher();
     WorkflowScenarioContext scenarioContext = new(gatewayClient, workflowProbe, options);
     IWorkflowScenarioCheck[] scenarioChecks =
     [
@@ -34,7 +35,8 @@ try
         new NotificationSignalRWorkflowScenarioCheck(scenarioContext, notificationLiveDeliveryProbe),
         new SellerAuthorizationWorkflowScenarioCheck(authorizationBoundaryProbe),
         new ShippingFailureWorkflowScenarioCheck(scenarioContext),
-        new CustomerCancellationWorkflowScenarioCheck(scenarioContext)
+        new CustomerCancellationWorkflowScenarioCheck(scenarioContext),
+        new CancellationRejectionWorkflowScenarioCheck(scenarioContext, eventPublisher)
     ];
     WorkflowCheckRunner runner = new(gatewayClient, options, scenarioChecks);
 

@@ -6,6 +6,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\BuildingBlocks\ECommerce.BuildingBlocks.EventBus\ECommerce.BuildingBlocks.EventBus.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\ECommerce.BuildingBlocks.Persistence\ECommerce.BuildingBlocks.Persistence.csproj" />
   </ItemGroup>
 
