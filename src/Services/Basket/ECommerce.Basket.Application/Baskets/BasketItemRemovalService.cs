@@ -11,7 +11,13 @@ public sealed class BasketItemRemovalService(IActiveBasketStore activeBasketStor
         Guid productId,
         CancellationToken cancellationToken)
     {
-        BasketEntity? basket = await activeBasketStore.GetAsync(customerId, cancellationToken);
+        Result<BasketEntity?> storeResult = await activeBasketStore.GetAsync(customerId, cancellationToken);
+        if (storeResult.IsFailure)
+        {
+            return Result<BasketResponse>.Failure(storeResult.Error!);
+        }
+
+        BasketEntity? basket = storeResult.Value;
         if (basket is null)
         {
             return Result<BasketResponse>.Failure(
@@ -19,7 +25,11 @@ public sealed class BasketItemRemovalService(IActiveBasketStore activeBasketStor
         }
 
         basket.RemoveItem(productId);
-        await activeBasketStore.SaveAsync(basket, cancellationToken);
-        return Result<BasketResponse>.Success(basket.ToResponse());
+
+        Result saveResult = await activeBasketStore.SaveAsync(basket, cancellationToken);
+
+        return saveResult.IsFailure
+            ? Result<BasketResponse>.Failure(saveResult.Error!)
+            : Result<BasketResponse>.Success(basket.ToResponse());
     }
 }

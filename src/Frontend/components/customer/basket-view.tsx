@@ -44,6 +44,9 @@ type BasketState =
   | { status: "loading" }
   | { status: "ready"; profile: UserProfile; basket: Basket | null }
   | { status: "unavailable" }
+  | { status: "storeUnavailable" }
+
+type BasketOperationError = "generic" | "storeUnavailable"
 
 export function BasketView() {
   const { locale, t } = useI18n()
@@ -52,7 +55,7 @@ export function BasketView() {
   const [busyItemId, setBusyItemId] = useState<string | null>(null)
   const [clearing, setClearing] = useState(false)
   const [checkingOut, setCheckingOut] = useState(false)
-  const [operationError, setOperationError] = useState(false)
+  const [operationError, setOperationError] = useState<BasketOperationError | null>(null)
   const [stockByProductId, setStockByProductId] = useState<Record<string, number>>({})
   const [checkoutResult, setCheckoutResult] = useState<CheckoutBasketResult | null>(null)
   const [checkoutAddress, setCheckoutAddress] = useState<CheckoutBasketPayload>({
@@ -92,6 +95,8 @@ export function BasketView() {
           if (!active) return
           if (error instanceof ApiError && error.status === 404) {
             setState({ status: "ready", profile, basket: null })
+          } else if (error instanceof ApiError && error.status === 503) {
+            setState({ status: "storeUnavailable" })
           } else {
             setState({ status: "unavailable" })
           }
@@ -130,13 +135,13 @@ export function BasketView() {
   async function updateQuantity(productId: string, quantity: number) {
     if (state.status !== "ready" || quantity < 1) return
     setBusyItemId(productId)
-    setOperationError(false)
+    setOperationError(null)
 
     try {
       const basket = await addBasketItem(state.profile.id, { productId, quantity })
       setState({ ...state, basket })
-    } catch {
-      setOperationError(true)
+    } catch (error) {
+      setOperationError(resolveOperationError(error))
     } finally {
       setBusyItemId(null)
     }
@@ -145,13 +150,13 @@ export function BasketView() {
   async function remove(productId: string) {
     if (state.status !== "ready") return
     setBusyItemId(productId)
-    setOperationError(false)
+    setOperationError(null)
 
     try {
       const basket = await removeBasketItem(state.profile.id, productId)
       setState({ ...state, basket: basket.items.length > 0 ? basket : null })
-    } catch {
-      setOperationError(true)
+    } catch (error) {
+      setOperationError(resolveOperationError(error))
     } finally {
       setBusyItemId(null)
     }
@@ -160,13 +165,13 @@ export function BasketView() {
   async function clear() {
     if (state.status !== "ready") return
     setClearing(true)
-    setOperationError(false)
+    setOperationError(null)
 
     try {
       await clearBasket(state.profile.id)
       setState({ ...state, basket: null })
-    } catch {
-      setOperationError(true)
+    } catch (error) {
+      setOperationError(resolveOperationError(error))
     } finally {
       setClearing(false)
     }
@@ -184,7 +189,7 @@ export function BasketView() {
     event.preventDefault()
     if (state.status !== "ready" || !state.basket) return
     setCheckingOut(true)
-    setOperationError(false)
+    setOperationError(null)
 
     try {
       checkoutId.current ??= crypto.randomUUID()
@@ -194,8 +199,8 @@ export function BasketView() {
       })
       setCheckoutResult(result)
       setState({ ...state, basket: null })
-    } catch {
-      setOperationError(true)
+    } catch (error) {
+      setOperationError(resolveOperationError(error))
     } finally {
       setCheckingOut(false)
     }
@@ -222,6 +227,8 @@ export function BasketView() {
             <Skeleton className="h-72" />
             <Skeleton className="h-96" />
           </div>
+        ) : state.status === "storeUnavailable" ? (
+          <ErrorState className="mt-8" title={t.basket.temporarilyUnavailable} />
         ) : state.status === "unavailable" ? (
           <ErrorState className="mt-8" title={t.basket.loadFailed} />
         ) : checkoutResult ? (
@@ -326,7 +333,11 @@ export function BasketView() {
                   <p className="mt-1 text-xs leading-5 text-muted-foreground">{t.basket.demoPaymentNote}</p>
                 </div>
               </div>
-              {operationError ? <p className="mt-4 text-sm text-destructive">{t.basket.updateFailed}</p> : null}
+              {operationError ? (
+                <p className="mt-4 text-sm text-destructive">
+                  {operationError === "storeUnavailable" ? t.basket.temporarilyUnavailable : t.basket.updateFailed}
+                </p>
+              ) : null}
               <Button type="submit" size="lg" className="mt-6 w-full" disabled={checkingOut || clearing || stockExceeded}>
                 {checkingOut ? <Loader2Icon className="animate-spin" /> : null}
                 {checkingOut ? t.basket.checkingOut : t.basket.checkout}
@@ -365,4 +376,8 @@ function CheckoutField({
       />
     </label>
   )
+}
+
+function resolveOperationError(error: unknown): BasketOperationError {
+  return error instanceof ApiError && error.status === 503 ? "storeUnavailable" : "generic"
 }

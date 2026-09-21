@@ -17,7 +17,14 @@ public sealed class BasketQueryService
         Guid customerId,
         CancellationToken cancellationToken)
     {
-        BasketEntity? basket = await activeBasketStore.GetAsync(customerId, cancellationToken);
+        Result<BasketEntity?> storeResult = await activeBasketStore.GetAsync(customerId, cancellationToken);
+
+        if (storeResult.IsFailure)
+        {
+            return Result<BasketResponse>.Failure(storeResult.Error!);
+        }
+
+        BasketEntity? basket = storeResult.Value;
 
         return basket is null
             ? Result<BasketResponse>.Failure(

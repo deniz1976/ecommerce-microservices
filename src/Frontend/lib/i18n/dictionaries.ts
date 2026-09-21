@@ -530,6 +530,7 @@ export interface Dictionary {
     clear: string
     updateFailed: string
     loadFailed: string
+    temporarilyUnavailable: string
     checkout: string
     checkingOut: string
     checkoutRecorded: string
@@ -1227,6 +1228,7 @@ const en: Dictionary = {
     clear: "Clear basket",
     updateFailed: "The basket could not be updated.",
     loadFailed: "Your basket could not be loaded.",
+    temporarilyUnavailable: "The basket service is temporarily unavailable. Your basket is preserved, please try again shortly.",
     checkout: "Confirm basket",
     checkingOut: "Confirming basket",
     checkoutRecorded: "Basket confirmed",
@@ -1936,6 +1938,7 @@ const tr: Dictionary = {
     clear: "Sepeti temizle",
     updateFailed: "Sepet güncellenemedi.",
     loadFailed: "Sepetiniz yüklenemedi.",
+    temporarilyUnavailable: "Sepet servisine şu anda ulaşılamıyor. Sepetiniz korunuyor, lütfen birazdan yeniden deneyin.",
     checkout: "Sepeti onayla",
     checkingOut: "Sepet onaylanıyor",
     checkoutRecorded: "Sepet onaylandı",

@@ -13,6 +13,7 @@ public sealed class BasketStoreMetrics : IDisposable
     private readonly Counter<long> writes;
     private readonly Counter<long> deletes;
     private readonly Counter<long> expiredBeforeSave;
+    private readonly Counter<long> unavailable;
 
     public BasketStoreMetrics(IOptions<RedisOptions> options)
         : this(MeterName, TimeSpan.FromHours(options.Value.BasketTtlHours))
@@ -47,6 +48,10 @@ public sealed class BasketStoreMetrics : IDisposable
             "ecommerce.basket.active.expired_before_save",
             unit: "{basket}",
             description: "Active baskets discarded because their mutation-based lifetime elapsed before persistence.");
+        unavailable = meter.CreateCounter<long>(
+            "ecommerce.basket.active.unavailable",
+            unit: "{operation}",
+            description: "Active basket operations rejected because the store was unreachable.");
     }
 
     public void RecordReadHit() => readHits.Add(1);
@@ -58,6 +63,8 @@ public sealed class BasketStoreMetrics : IDisposable
     public void RecordDelete() => deletes.Add(1);
 
     public void RecordExpiredBeforeSave() => expiredBeforeSave.Add(1);
+
+    public void RecordUnavailable() => unavailable.Add(1);
 
     public void Dispose()
     {

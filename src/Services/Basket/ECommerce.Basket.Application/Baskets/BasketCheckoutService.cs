@@ -56,11 +56,17 @@ public sealed class BasketCheckoutService
                 return Failure(BasketErrorCodes.InvalidCheckoutAddress);
             }
 
-            await activeBasketStore.DeleteAsync(customerId, cancellationToken);
+            await DiscardCommittedBasketAsync(customerId, cancellationToken);
             return Result<CheckoutBasketResponse>.Success(ToResponse(existingSnapshot));
         }
 
-        BasketEntity? basket = await activeBasketStore.GetAsync(customerId, cancellationToken);
+        Result<BasketEntity?> storeResult = await activeBasketStore.GetAsync(customerId, cancellationToken);
+        if (storeResult.IsFailure)
+        {
+            return Result<CheckoutBasketResponse>.Failure(storeResult.Error!);
+        }
+
+        BasketEntity? basket = storeResult.Value;
         if (basket is null)
         {
             return Failure(ErrorCodes.BasketNotFound);
@@ -101,9 +107,14 @@ public sealed class BasketCheckoutService
         basketHistoryRepository.Add(snapshot);
         await checkoutPublisher.PublishAsync(snapshot, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        await activeBasketStore.DeleteAsync(customerId, cancellationToken);
+        await DiscardCommittedBasketAsync(customerId, cancellationToken);
 
         return Result<CheckoutBasketResponse>.Success(ToResponse(snapshot));
+    }
+
+    private async Task DiscardCommittedBasketAsync(Guid customerId, CancellationToken cancellationToken)
+    {
+        await activeBasketStore.DeleteAsync(customerId, cancellationToken);
     }
 
     private static CheckoutBasketResponse ToResponse(BasketCheckoutSnapshot snapshot)

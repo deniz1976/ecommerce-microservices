@@ -27,8 +27,13 @@ public sealed class BasketItemAdditionService(
         }
 
         CatalogProductSnapshot product = productResult.Value!;
-        BasketEntity basket = await activeBasketStore.GetAsync(customerId, cancellationToken) ??
-            new BasketEntity(customerId, product.Currency);
+        Result<BasketEntity?> storeResult = await activeBasketStore.GetAsync(customerId, cancellationToken);
+        if (storeResult.IsFailure)
+        {
+            return Result<BasketResponse>.Failure(storeResult.Error!);
+        }
+
+        BasketEntity basket = storeResult.Value ?? new BasketEntity(customerId, product.Currency);
         BasketItemMutationResult mutationResult = basket.AddOrUpdateItem(
             product.Id,
             product.Name,
@@ -43,8 +48,11 @@ public sealed class BasketItemAdditionService(
                 : BasketErrorCodes.InvalidBasketItem);
         }
 
-        await activeBasketStore.SaveAsync(basket, cancellationToken);
-        return Result<BasketResponse>.Success(basket.ToResponse());
+        Result saveResult = await activeBasketStore.SaveAsync(basket, cancellationToken);
+
+        return saveResult.IsFailure
+            ? Result<BasketResponse>.Failure(saveResult.Error!)
+            : Result<BasketResponse>.Success(basket.ToResponse());
     }
 
     private static Result<BasketResponse> Failure(string code) =>

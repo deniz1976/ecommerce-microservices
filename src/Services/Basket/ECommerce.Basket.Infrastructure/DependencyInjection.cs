@@ -57,7 +57,9 @@ public static class DependencyInjection
         services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
         {
             RedisOptions options = serviceProvider.GetRequiredService<IOptions<RedisOptions>>().Value;
-            return ConnectionMultiplexer.Connect(options.Endpoint!);
+            ConfigurationOptions configuration = ConfigurationOptions.Parse(options.Endpoint!);
+            configuration.AbortOnConnectFail = false;
+            return ConnectionMultiplexer.Connect(configuration);
         });
         services.AddScoped<IActiveBasketStore, RedisActiveBasketStore>();
 

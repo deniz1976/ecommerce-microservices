@@ -8,7 +8,6 @@ public sealed class BasketClearService(IActiveBasketStore activeBasketStore)
         Guid customerId,
         CancellationToken cancellationToken)
     {
-        await activeBasketStore.DeleteAsync(customerId, cancellationToken);
-        return Result.Success();
+        return await activeBasketStore.DeleteAsync(customerId, cancellationToken);
     }
 }

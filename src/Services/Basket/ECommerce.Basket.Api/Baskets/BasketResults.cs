@@ -40,6 +40,7 @@ public static class BasketResults
             BasketErrorCodes.CurrencyMismatch => StatusCodes.Status400BadRequest,
             BasketErrorCodes.InvalidCheckoutAddress => StatusCodes.Status400BadRequest,
             BasketErrorCodes.ProductCatalogUnavailable => StatusCodes.Status503ServiceUnavailable,
+            BasketErrorCodes.BasketStoreUnavailable => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError
         };
     }
@@ -51,6 +52,7 @@ public static class BasketResults
             BasketErrorCodes.EmptyBasket => culture == "tr" ? "Sepet boş." : "Basket is empty.",
             BasketErrorCodes.InvalidBasketItem => culture == "tr" ? "Sepet ürünü geçersiz." : "Basket item is invalid.",
             BasketErrorCodes.ProductCatalogUnavailable => culture == "tr" ? "Ürün kataloğuna şu anda ulaşılamıyor." : "The product catalog is currently unavailable.",
+            BasketErrorCodes.BasketStoreUnavailable => culture == "tr" ? "Sepet deposuna şu anda ulaşılamıyor. Sepetiniz korunuyor, lütfen birazdan yeniden deneyin." : "The basket store is currently unavailable. Your basket is preserved, please try again shortly.",
             BasketErrorCodes.CurrencyMismatch => culture == "tr" ? "Sepette yalnızca aynı para birimindeki ürünler bulunabilir." : "A basket can contain products in only one currency.",
             BasketErrorCodes.InvalidCheckoutAddress => culture == "tr" ? "Teslimat adresi geçersiz." : "The shipping address is invalid.",
             _ => localizer.GetMessage(code, culture)
