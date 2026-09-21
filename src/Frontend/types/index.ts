@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/dictionaries"
+
 export type PublicRole = "Customer" | "Seller"
 
 export type Role = PublicRole | "Admin"
@@ -52,6 +54,16 @@ export interface CatalogProduct {
   currency: string
   status: ProductStatus
   images: CatalogProductImage[]
+}
+
+export interface CatalogProductTranslation {
+  languageCode: Locale
+  name: string
+  description: string
+}
+
+export interface ManagedCatalogProduct extends CatalogProduct {
+  translations: CatalogProductTranslation[]
 }
 
 export interface InventoryItem {

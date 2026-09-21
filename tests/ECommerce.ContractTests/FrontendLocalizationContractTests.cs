@@ -39,7 +39,7 @@ public sealed class FrontendLocalizationContractTests
             File.ReadAllText(Path.Combine(frontendRoot, "seller", "product-create-form.tsx")),
             StringComparison.Ordinal);
         Assert.Contains(
-            "}, [locale])",
+            "}, [locale, product.id])",
             File.ReadAllText(Path.Combine(frontendRoot, "seller", "product-edit-form.tsx")),
             StringComparison.Ordinal);
         Assert.Contains(

@@ -111,7 +111,7 @@ public sealed class ProductsController(
     {
         string culture = RequestCultureReader.Read(HttpContext);
         ProductAccessContext access = await ResolveAccessAsync(cancellationToken);
-        Result<ProductResponse> result = await sender.Send(
+        Result<ManagedProductResponse> result = await sender.Send(
             new GetManagedProductQuery(id, access, culture),
             cancellationToken);
         return CatalogResults.FromResult(result, HttpContext);

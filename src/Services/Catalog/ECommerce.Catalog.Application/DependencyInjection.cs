@@ -62,7 +62,7 @@ public static class DependencyInjection
             IQueryHandler<SearchManagedProductsQuery, Result<PagedResult<ProductResponse>>>,
             SearchManagedProductsQueryHandler>();
         services.AddScoped<
-            IQueryHandler<GetManagedProductQuery, Result<ProductResponse>>,
+            IQueryHandler<GetManagedProductQuery, Result<ManagedProductResponse>>,
             GetManagedProductQueryHandler>();
         services.AddScoped<
             ICommandHandler<CreateProductCommand, Result<ProductResponse>>,

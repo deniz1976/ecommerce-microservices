@@ -30,7 +30,7 @@ public sealed class ManagedProductQueryService(
         return ProductSearchResultMapper.ToResult(products, culture);
     }
 
-    public async Task<Result<ProductResponse>> GetByIdAsync(
+    public async Task<Result<ManagedProductResponse>> GetByIdAsync(
         Guid id,
         ProductAccessContext access,
         string culture,
@@ -39,13 +39,13 @@ public sealed class ManagedProductQueryService(
         Product? product = await repository.GetByIdAsync(id, cancellationToken);
         if (product is null)
         {
-            return Result<ProductResponse>.Failure(
+            return Result<ManagedProductResponse>.Failure(
                 new Error(ErrorCodes.ProductNotFound, ErrorCodes.ProductNotFound));
         }
 
         if (!access.IsAdmin && product.StoreId is null)
         {
-            return Result<ProductResponse>.Failure(new Error(
+            return Result<ManagedProductResponse>.Failure(new Error(
                 CatalogErrorCodes.StoreAccessDenied,
                 CatalogErrorCodes.StoreAccessDenied));
         }
@@ -56,7 +56,7 @@ public sealed class ManagedProductQueryService(
             requireStoreForSeller: true,
             cancellationToken);
         return storeAccess.IsFailure
-            ? Result<ProductResponse>.Failure(storeAccess.Error!)
-            : Result<ProductResponse>.Success(product.ToResponse(culture));
+            ? Result<ManagedProductResponse>.Failure(storeAccess.Error!)
+            : Result<ManagedProductResponse>.Success(product.ToManagedResponse(culture));
     }
 }

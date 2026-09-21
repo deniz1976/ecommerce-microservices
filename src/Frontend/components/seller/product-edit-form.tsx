@@ -21,6 +21,7 @@ import type {
   CatalogBrandReference,
   CatalogCategoryReference,
   CatalogProduct,
+  CatalogProductTranslation,
   ProductStatus,
 } from "@/types"
 
@@ -35,11 +36,16 @@ type ReferenceState =
   | { status: "ready"; categories: CatalogCategoryReference[]; brands: CatalogBrandReference[] }
   | { status: "unavailable" }
 
+interface LocalizedText {
+  name: string
+  description: string
+}
+
 export function ProductEditForm({ product, onCancel, onUpdated }: ProductEditFormProps) {
   const { locale, t } = useI18n()
   const [references, setReferences] = useState<ReferenceState>({ status: "loading" })
-  const [name, setName] = useState(product.name)
-  const [description, setDescription] = useState(product.description)
+  const [englishText, setEnglishText] = useState<LocalizedText>({ name: "", description: "" })
+  const [turkishText, setTurkishText] = useState<LocalizedText>({ name: "", description: "" })
   const [categoryId, setCategoryId] = useState(product.categoryId)
   const [brandId, setBrandId] = useState(product.brandId)
   const [price, setPrice] = useState(String(product.price))
@@ -53,9 +59,16 @@ export function ProductEditForm({ product, onCancel, onUpdated }: ProductEditFor
 
   useEffect(() => {
     let active = true
-    Promise.all([getCatalogCategories(locale), getCatalogBrands()])
-      .then(([categories, brands]) => {
-        if (active) setReferences({ status: "ready", categories, brands })
+    Promise.all([
+      getCatalogCategories(locale),
+      getCatalogBrands(),
+      getManagedCatalogProduct(product.id),
+    ])
+      .then(([categories, brands, managed]) => {
+        if (!active) return
+        setEnglishText(selectTranslation(managed.translations, "en"))
+        setTurkishText(selectTranslation(managed.translations, "tr"))
+        setReferences({ status: "ready", categories, brands })
       })
       .catch(() => {
         if (active) setReferences({ status: "unavailable" })
@@ -64,7 +77,7 @@ export function ProductEditForm({ product, onCancel, onUpdated }: ProductEditFor
     return () => {
       active = false
     }
-  }, [locale])
+  }, [locale, product.id])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -79,11 +92,7 @@ export function ProductEditForm({ product, onCancel, onUpdated }: ProductEditFor
         price: Number(price),
         currency: currency.trim().toUpperCase(),
         status,
-        translations: [{
-          languageCode: locale,
-          name: name.trim(),
-          description: description.trim(),
-        }],
+        translations: buildTranslations(englishText, turkishText),
       })
       setImages(updated.images)
       setMessage(t.seller.productUpdated)
@@ -175,8 +184,28 @@ export function ProductEditForm({ product, onCancel, onUpdated }: ProductEditFor
         <p className="mt-5 text-sm text-destructive">{t.seller.referencesUnavailable}</p>
       ) : (
         <div className="mt-5 grid gap-4">
-          <TextField label={t.seller.productName} value={name} onChange={setName} required />
-          <TextField label={t.seller.productDescription} value={description} onChange={setDescription} required />
+          <TextField
+            label={t.seller.productNameEnglish}
+            value={englishText.name}
+            onChange={(value) => setEnglishText({ ...englishText, name: value })}
+            required
+          />
+          <TextField
+            label={t.seller.productDescriptionEnglish}
+            value={englishText.description}
+            onChange={(value) => setEnglishText({ ...englishText, description: value })}
+            required
+          />
+          <TextField
+            label={t.seller.productNameTurkish}
+            value={turkishText.name}
+            onChange={(value) => setTurkishText({ ...turkishText, name: value })}
+          />
+          <TextField
+            label={t.seller.productDescriptionTurkish}
+            value={turkishText.description}
+            onChange={(value) => setTurkishText({ ...turkishText, description: value })}
+          />
           <SelectField label={t.seller.category} value={categoryId} onChange={setCategoryId} options={references.categories} />
           <SelectField label={t.seller.brand} value={brandId} onChange={setBrandId} options={references.brands} />
           <div className="grid min-w-0 grid-cols-2 gap-3">
@@ -268,3 +297,34 @@ export function ProductEditForm({ product, onCancel, onUpdated }: ProductEditFor
   )
 }
 
+function selectTranslation(
+  translations: CatalogProductTranslation[],
+  languageCode: CatalogProductTranslation["languageCode"],
+): LocalizedText {
+  const translation = translations.find((entry) => entry.languageCode === languageCode)
+
+  return {
+    name: translation?.name ?? "",
+    description: translation?.description ?? "",
+  }
+}
+
+function buildTranslations(english: LocalizedText, turkish: LocalizedText) {
+  const translations: Array<CatalogProductTranslation> = [
+    {
+      languageCode: "en",
+      name: english.name.trim(),
+      description: english.description.trim(),
+    },
+  ]
+
+  if (turkish.name.trim() !== "" && turkish.description.trim() !== "") {
+    translations.push({
+      languageCode: "tr",
+      name: turkish.name.trim(),
+      description: turkish.description.trim(),
+    })
+  }
+
+  return translations
+}

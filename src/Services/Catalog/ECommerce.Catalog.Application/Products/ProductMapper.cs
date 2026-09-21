@@ -29,6 +29,30 @@ public static class ProductMapper
                 .ToArray());
     }
 
+    public static ManagedProductResponse ToManagedResponse(this Product product, string culture)
+    {
+        ProductResponse response = product.ToResponse(culture);
+
+        return new ManagedProductResponse(
+            response.Id,
+            response.Sku,
+            response.Name,
+            response.Description,
+            response.CategoryId,
+            response.CategoryName,
+            response.BrandId,
+            response.BrandName,
+            response.StoreId,
+            response.Price,
+            response.Currency,
+            response.Status,
+            response.Images,
+            product.Translations
+                .OrderBy(x => x.LanguageCode)
+                .Select(x => new ProductTranslationResponse(x.LanguageCode, x.Name, x.Description))
+                .ToArray());
+    }
+
     public static ProductImageResponse ToResponse(this ProductImage image)
     {
         return new ProductImageResponse(

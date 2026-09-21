@@ -2,6 +2,7 @@ import { apiRequest } from "@/lib/api/client"
 import type { Locale } from "@/lib/i18n/dictionaries"
 import type {
   CatalogProduct,
+  ManagedCatalogProduct,
   CatalogProductImage,
   CatalogBrandReference,
   CatalogCategoryReference,
@@ -114,8 +115,8 @@ export function getManagedCatalogProducts(
   )
 }
 
-export function getManagedCatalogProduct(productId: string): Promise<CatalogProduct> {
-  return apiRequest<CatalogProduct>(`/gateway/catalog/manage/products/${productId}`, {
+export function getManagedCatalogProduct(productId: string): Promise<ManagedCatalogProduct> {
+  return apiRequest<ManagedCatalogProduct>(`/gateway/catalog/manage/products/${productId}`, {
     authenticated: true,
   })
 }

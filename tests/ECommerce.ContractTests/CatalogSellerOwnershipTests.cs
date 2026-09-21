@@ -145,7 +145,7 @@ public sealed class CatalogSellerOwnershipTests
             products,
             new ProductStoreAccessValidator(new FakeStoreRepository()));
 
-        Result<ProductResponse> result = await service.GetByIdAsync(
+        Result<ManagedProductResponse> result = await service.GetByIdAsync(
             platformProduct.Id,
             new ProductAccessContext(Guid.NewGuid(), IsAdmin: false),
             "en",
@@ -173,7 +173,7 @@ public sealed class CatalogSellerOwnershipTests
             products,
             new ProductStoreAccessValidator(new FakeStoreRepository()));
 
-        Result<ProductResponse> result = await service.GetByIdAsync(
+        Result<ManagedProductResponse> result = await service.GetByIdAsync(
             platformProduct.Id,
             new ProductAccessContext(UserId: null, IsAdmin: true),
             "en",
