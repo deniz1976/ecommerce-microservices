@@ -4,6 +4,7 @@ import { Archivo, Inter_Tight } from 'next/font/google'
 import { headers } from 'next/headers'
 
 import { Providers } from '@/components/providers'
+import { themeInitScript } from '@/lib/theme/init-script'
 import './globals.css'
 
 const interTight = Inter_Tight({
@@ -17,21 +18,6 @@ const archivo = Archivo({
   variable: '--font-archivo',
   display: 'swap',
 })
-
-const themeInitScript = `(function () {
-  try {
-    var stored = localStorage.getItem("app.theme")
-    var theme =
-      stored === "light" || stored === "dark"
-        ? stored
-        : window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light"
-    var root = document.documentElement
-    root.classList.add(theme)
-    root.style.colorScheme = theme
-  } catch {}
-})()`
 
 export const metadata: Metadata = {
   title: 'Marketplace - Sign in',

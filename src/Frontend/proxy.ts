@@ -1,17 +1,35 @@
 import { auth0 } from "./lib/auth/auth0-server"
+import { themeInitScript } from "./lib/theme/init-script"
 import { NextRequest } from "next/server"
+
+let themeScriptHash: string | undefined
 
 export async function proxy(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID())
+  const scriptHash = await readThemeScriptHash()
+  const contentSecurityPolicy = createContentSecurityPolicy(nonce, scriptHash)
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set("x-nonce", nonce)
-  requestHeaders.set("Content-Security-Policy", createContentSecurityPolicy(nonce))
+  requestHeaders.set("Content-Security-Policy", contentSecurityPolicy)
 
   const response = await auth0.middleware(
     new NextRequest(request, { headers: requestHeaders }),
   )
-  response.headers.set("Content-Security-Policy", createContentSecurityPolicy(nonce))
+  response.headers.set("Content-Security-Policy", contentSecurityPolicy)
   return response
+}
+
+async function readThemeScriptHash(): Promise<string> {
+  if (themeScriptHash !== undefined) {
+    return themeScriptHash
+  }
+
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(themeInitScript),
+  )
+  themeScriptHash = `'sha256-${btoa(String.fromCharCode(...new Uint8Array(digest)))}'`
+  return themeScriptHash
 }
 
 export const config = {
@@ -20,7 +38,7 @@ export const config = {
   ],
 }
 
-function createContentSecurityPolicy(nonce: string): string {
+function createContentSecurityPolicy(nonce: string, scriptHash: string): string {
   const apiOrigin = readHttpOrigin(
     process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:15080",
   )
@@ -29,7 +47,7 @@ function createContentSecurityPolicy(nonce: string): string {
 
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${developmentScripts}`,
+    `script-src 'self' 'nonce-${nonce}' ${scriptHash} 'strict-dynamic'${developmentScripts}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data: https://res.cloudinary.com",
     "font-src 'self' data:",
