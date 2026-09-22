@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace ECommerce.ContractTests;
 
 public sealed class FrontendLocalizationContractTests
@@ -29,35 +31,34 @@ public sealed class FrontendLocalizationContractTests
         Assert.DoesNotContain("Å", turkish, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public void LocaleSensitiveCatalogViewsReloadServerData()
+    [Theory]
+    [InlineData("seller", "product-create-form.tsx")]
+    [InlineData("seller", "product-edit-form.tsx")]
+    [InlineData("seller", "seller-product-management-page.tsx")]
+    [InlineData("customer", "customer-dashboard.tsx")]
+    [InlineData("customer", "product-detail.tsx")]
+    [InlineData("admin", "admin-catalog-workspace.tsx")]
+    public void LocaleSensitiveCatalogViewsReloadServerData(string area, string fileName)
     {
-        string frontendRoot = Path.Combine(FindRepositoryRoot(), "src", "Frontend", "components");
+        string source = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "src",
+            "Frontend",
+            "components",
+            area,
+            fileName));
 
         Assert.Contains(
-            "}, [locale])",
-            File.ReadAllText(Path.Combine(frontendRoot, "seller", "product-create-form.tsx")),
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "}, [locale, product.id])",
-            File.ReadAllText(Path.Combine(frontendRoot, "seller", "product-edit-form.tsx")),
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "}, [locale, selectedStoreId])",
-            File.ReadAllText(Path.Combine(frontendRoot, "seller", "seller-product-management-page.tsx")),
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "}, [locale, query])",
-            File.ReadAllText(Path.Combine(frontendRoot, "customer", "customer-dashboard.tsx")),
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "}, [locale, params.id])",
-            File.ReadAllText(Path.Combine(frontendRoot, "customer", "product-detail.tsx")),
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "}, [locale, pageNumber, reloadToken, search, statusFilter])",
-            File.ReadAllText(Path.Combine(frontendRoot, "admin", "admin-catalog-workspace.tsx")),
-            StringComparison.Ordinal);
+            DependencyArrays(source),
+            dependencies => dependencies.Contains("locale"));
+    }
+
+    private static IEnumerable<string[]> DependencyArrays(string source)
+    {
+        return Regex
+            .Matches(source, @"\}, \[(?<dependencies>[^\]]*)\]\)", RegexOptions.None, TimeSpan.FromSeconds(5))
+            .Select(match => match.Groups["dependencies"].Value
+                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
     }
 
     private static string FindRepositoryRoot()

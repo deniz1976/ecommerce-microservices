@@ -4,7 +4,6 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
     <PackageVersion Include="MassTransit" Version="8.5.1" />
     <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="8.5.1" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="8.5.1" />
