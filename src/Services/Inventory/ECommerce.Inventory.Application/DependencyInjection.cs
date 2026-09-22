@@ -2,6 +2,7 @@ using ECommerce.BuildingBlocks.Contracts.Cqrs;
 using ECommerce.BuildingBlocks.Contracts.Results;
 using ECommerce.Inventory.Application.Commands.ReleaseInventory;
 using ECommerce.Inventory.Application.Commands.ReserveInventory;
+using ECommerce.Inventory.Application.Commands.ShipInventory;
 using ECommerce.Inventory.Application.Commands.UpsertInventoryItem;
 using ECommerce.Inventory.Application.Inventory;
 using ECommerce.Inventory.Application.Queries.GetInventoryItem;
@@ -19,6 +20,7 @@ public static class DependencyInjection
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
         services.AddScoped<InventoryReservationService>();
         services.AddScoped<InventoryReleaseService>();
+        services.AddScoped<InventoryShipmentService>();
         services.AddScoped<StockReservationLoader>();
         services.AddScoped<InventoryManagementService>();
         services.AddScoped<InventoryQueryService>();
@@ -41,6 +43,9 @@ public static class DependencyInjection
         services.AddScoped<
             ICommandHandler<ReleaseInventoryCommand>,
             ReleaseInventoryCommandHandler>();
+        services.AddScoped<
+            ICommandHandler<ShipInventoryCommand>,
+            ShipInventoryCommandHandler>();
         return services;
     }
 }

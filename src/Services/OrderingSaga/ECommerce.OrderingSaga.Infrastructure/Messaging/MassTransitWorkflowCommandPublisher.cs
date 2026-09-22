@@ -43,6 +43,20 @@ public sealed class MassTransitWorkflowCommandPublisher : IWorkflowCommandPublis
             reason), cancellationToken);
     }
 
+    public Task ShipInventoryAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, CancellationToken cancellationToken)
+    {
+        return publishEndpoint.Publish(new ShipInventory(
+            Guid.NewGuid(),
+            correlationId,
+            causationId,
+            DateTimeOffset.UtcNow,
+            ECommerce.BuildingBlocks.Contracts.Messaging.MessageDefaults.CurrentVersion,
+            workflow.OrderId,
+            workflow.CustomerId,
+            workflow.Items.Select(x => new InventoryReleaseLine(x.ProductId, x.Quantity)).ToArray()),
+            cancellationToken);
+    }
+
     public Task AuthorizePaymentAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, CancellationToken cancellationToken)
     {
         return publishEndpoint.Publish(new AuthorizePayment(

@@ -7,5 +7,6 @@ public enum StockMovementType
     StockDecreased = 3,
     StockReserved = 4,
     StockReleased = 5,
-    AuditBaseline = 6
+    AuditBaseline = 6,
+    StockShipped = 7
 }

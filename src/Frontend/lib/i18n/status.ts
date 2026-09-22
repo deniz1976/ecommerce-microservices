@@ -140,6 +140,7 @@ export function stockMovementLabel(kind: StockMovementKind, t: StatusDictionary)
     4: t.stockMovement.stockReserved,
     5: t.stockMovement.stockReleased,
     6: t.stockMovement.auditBaseline,
+    7: t.stockMovement.stockShipped,
   }
   return labels[kind]
 }
@@ -152,6 +153,7 @@ export function stockMovementTone(kind: StockMovementKind): StatusTone {
     4: "progress",
     5: "neutral",
     6: "neutral",
+    7: "success",
   }
   return tones[kind]
 }

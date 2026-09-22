@@ -4,5 +4,6 @@ public enum StockReservationStatus
 {
     Reserved = 0,
     Released = 1,
-    Failed = 2
+    Failed = 2,
+    Shipped = 3
 }

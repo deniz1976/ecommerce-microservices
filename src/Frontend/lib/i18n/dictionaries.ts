@@ -673,6 +673,7 @@ export interface Dictionary {
       stockReserved: string
       stockReleased: string
       auditBaseline: string
+      stockShipped: string
     }
   }
   table: {
@@ -1383,6 +1384,7 @@ const en: Dictionary = {
       stockReserved: "Stock reserved",
       stockReleased: "Stock released",
       auditBaseline: "Audit baseline",
+      stockShipped: "Shipped",
     },
   },
   table: {
@@ -2093,6 +2095,7 @@ const tr: Dictionary = {
       stockReserved: "Stok ayrıldı",
       stockReleased: "Stok serbest bırakıldı",
       auditBaseline: "Denetim referansı",
+      stockShipped: "Sevk edildi",
     },
   },
   table: {

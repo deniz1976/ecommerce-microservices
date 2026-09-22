@@ -74,7 +74,7 @@ export interface InventoryItem {
   updatedAt: string
 }
 
-export type StockMovementKind = 1 | 2 | 3 | 4 | 5 | 6
+export type StockMovementKind = 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 export interface StockMovement {
   id: string

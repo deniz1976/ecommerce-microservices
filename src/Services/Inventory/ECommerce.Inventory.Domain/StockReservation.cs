@@ -40,4 +40,10 @@ public sealed class StockReservation
         Status = StockReservationStatus.Released;
         UpdatedAt = DateTimeOffset.UtcNow;
     }
+
+    public void MarkShipped()
+    {
+        Status = StockReservationStatus.Shipped;
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
 }

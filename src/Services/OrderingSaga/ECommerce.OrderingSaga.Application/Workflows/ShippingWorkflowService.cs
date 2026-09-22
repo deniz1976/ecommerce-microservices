@@ -20,6 +20,8 @@ public sealed class ShippingWorkflowService(
         workflow.MarkShipmentCreated();
         workflow.MarkCompleted();
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await publisher.ShipInventoryAsync(
+            workflow, message.CorrelationId, message.MessageId, cancellationToken);
         await publisher.ConfirmOrderAsync(
             workflow, message.CorrelationId, message.MessageId, cancellationToken);
     }

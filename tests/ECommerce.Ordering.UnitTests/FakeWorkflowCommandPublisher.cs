@@ -7,6 +7,8 @@ internal sealed class FakeWorkflowCommandPublisher : IWorkflowCommandPublisher
 {
     public int ReleaseCount { get; private set; }
 
+    public int ShipCount { get; private set; }
+
     public int RefundCount { get; private set; }
 
     public int CancelCount { get; private set; }
@@ -21,6 +23,12 @@ internal sealed class FakeWorkflowCommandPublisher : IWorkflowCommandPublisher
     public Task ReleaseInventoryAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, string reason, CancellationToken cancellationToken)
     {
         ReleaseCount++;
+        return Task.CompletedTask;
+    }
+
+    public Task ShipInventoryAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, CancellationToken cancellationToken)
+    {
+        ShipCount++;
         return Task.CompletedTask;
     }
 

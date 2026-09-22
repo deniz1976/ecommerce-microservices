@@ -99,6 +99,31 @@ public sealed class InventoryItem
             reservationId);
     }
 
+    public void Ship(int quantity, Guid orderId, Guid reservationId)
+    {
+        int reservedBefore = ReservedQuantity;
+        int shippedQuantity = Math.Min(Math.Max(0, quantity), reservedBefore);
+        if (shippedQuantity == 0)
+        {
+            return;
+        }
+
+        int quantityOnHandBefore = QuantityOnHand;
+        ReservedQuantity -= shippedQuantity;
+        QuantityOnHand -= shippedQuantity;
+        ConcurrencyVersion++;
+        UpdatedAt = DateTimeOffset.UtcNow;
+        RecordMovement(
+            StockMovementType.StockShipped,
+            shippedQuantity,
+            quantityOnHandBefore,
+            QuantityOnHand,
+            reservedBefore,
+            ReservedQuantity,
+            orderId,
+            reservationId);
+    }
+
     public void IncreaseStock(int quantity)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);

@@ -8,6 +8,8 @@ public interface IWorkflowCommandPublisher
 
     Task ReleaseInventoryAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, string reason, CancellationToken cancellationToken);
 
+    Task ShipInventoryAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, CancellationToken cancellationToken);
+
     Task AuthorizePaymentAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, CancellationToken cancellationToken);
 
     Task RefundPaymentAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, string reason, CancellationToken cancellationToken);
