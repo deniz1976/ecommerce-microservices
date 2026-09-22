@@ -1,9 +1,6 @@
 import { useEffect, useRef } from "react"
 
-import {
-  createCustomerNotificationConnection,
-  startCustomerNotificationConnection,
-} from "@/lib/notifications/live"
+import { subscribeToCustomerNotifications } from "@/lib/notifications/live"
 import type { CustomerNotification } from "@/types"
 
 export function useCustomerNotificationsLive(
@@ -19,23 +16,8 @@ export function useCustomerNotificationsLive(
   useEffect(() => {
     if (!customerId) return
 
-    let active = true
-    const connection = createCustomerNotificationConnection(
-      customerId,
-      (notification) => {
-        if (active) {
-          notificationHandler.current(notification)
-        }
-      },
-    )
-
-    startCustomerNotificationConnection(connection, customerId).catch(() => {
-      // Persisted history remains available when the live channel is offline.
+    return subscribeToCustomerNotifications(customerId, (notification) => {
+      notificationHandler.current(notification)
     })
-
-    return () => {
-      active = false
-      void connection.stop().catch(() => undefined)
-    }
   }, [customerId])
 }
