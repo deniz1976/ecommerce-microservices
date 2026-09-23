@@ -14,6 +14,7 @@ import { CustomerDashboard } from "@/components/customer/customer-dashboard"
 import { getProfile } from "@/lib/api/auth"
 import { logoutFromAuth0 } from "@/lib/auth/auth0"
 import { useI18n } from "@/lib/i18n/provider"
+import { getStoredWorkspace, storeWorkspace, type Workspace } from "@/lib/workspace/preference"
 import type { UserProfile } from "@/types"
 
 type AuthState =
@@ -25,7 +26,7 @@ export function HomeShell() {
   const { t } = useI18n()
   const router = useRouter()
   const [state, setState] = useState<AuthState>({ status: "loading" })
-  const [selectedWorkspace, setSelectedWorkspace] = useState<"Admin" | "Seller" | "Customer" | null>(null)
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null)
   const [signingOut, setSigningOut] = useState(false)
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export function HomeShell() {
           return
         }
 
+        setSelectedWorkspace(getStoredWorkspace())
         setState({ status: "authenticated", profile })
       })
       .catch(() => {
@@ -63,6 +65,11 @@ export function HomeShell() {
   }
 
   const { profile } = state
+
+  function openWorkspace(workspace: Workspace) {
+    storeWorkspace(workspace)
+    setSelectedWorkspace(workspace)
+  }
   const activeWorkspace =
     selectedWorkspace && profile.roles.includes(selectedWorkspace)
       ? selectedWorkspace
@@ -79,7 +86,7 @@ export function HomeShell() {
       <AdminDashboard
         profile={profile}
         onOpenSellerWorkspace={profile.roles.includes("Seller")
-          ? () => setSelectedWorkspace("Seller")
+          ? () => openWorkspace("Seller")
           : undefined}
       />
     )
@@ -90,7 +97,7 @@ export function HomeShell() {
       <SellerDashboard
         profile={profile}
         onOpenAdminWorkspace={profile.roles.includes("Admin")
-          ? () => setSelectedWorkspace("Admin")
+          ? () => openWorkspace("Admin")
           : undefined}
       />
     )

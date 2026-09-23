@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import type { ReactNode } from "react"
+import { useEffect, type ReactNode } from "react"
 import {
   ActivityIcon,
   ClipboardListIcon,
@@ -19,9 +19,11 @@ import {
 
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
+import { SignOutButton } from "@/components/auth/sign-out-button"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { useI18n } from "@/lib/i18n/provider"
 import { cn } from "@/lib/utils"
+import { storeWorkspace } from "@/lib/workspace/preference"
 
 export type AdminSection =
   | "overview"
@@ -53,6 +55,10 @@ export function AdminShell({
 }: AdminShellProps) {
   const { t } = useI18n()
 
+  useEffect(() => {
+    storeWorkspace("Admin")
+  }, [])
+
   const items: Array<{ id: AdminSection; href: string; label: string; icon: ReactNode }> = [
     { id: "overview", href: "/", label: t.admin.overview, icon: <LayoutDashboardIcon className="size-4" /> },
     { id: "catalog", href: "/#admin-catalog", label: t.admin.catalog, icon: <PackageIcon className="size-4" /> },
@@ -79,6 +85,7 @@ export function AdminShell({
         </div>
         <div className="flex items-center gap-2">
           {headerActions}
+          <SignOutButton />
           <LanguageSwitcher />
           <ThemeToggle />
         </div>

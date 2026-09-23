@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import { buttonVariants } from "@/components/ui/button"
 import { getCustomerNotifications } from "@/lib/api/notifications"
 import { useI18n } from "@/lib/i18n/provider"
+import { subscribeToNotificationReadState } from "@/lib/notifications/read-state"
 import { useCustomerNotificationsLive } from "@/lib/notifications/use-customer-notifications-live"
 import { cn } from "@/lib/utils"
 
@@ -24,6 +25,13 @@ export function CustomerNotificationLink({
   useCustomerNotificationsLive(
     customerId,
     () => setRefreshVersion((current) => current + 1),
+  )
+
+  useEffect(
+    () => subscribeToNotificationReadState(
+      () => setRefreshVersion((current) => current + 1),
+    ),
+    [],
   )
 
   useEffect(() => {

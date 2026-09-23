@@ -20,7 +20,7 @@ const archivo = Archivo({
 })
 
 export const metadata: Metadata = {
-  title: 'Marketplace - Sign in',
+  title: 'Marketplace',
   description:
     'A premium e-commerce platform connecting customers and sellers with speed, security, and clarity.',
 }

@@ -117,7 +117,13 @@ export function SellerProductManagementPage() {
         },
       }
     })
+    setCreatedProductId(null)
     setEditingProduct(product)
+  }
+
+  function closeProductEditor() {
+    setCreatedProductId(null)
+    setEditingProduct(null)
   }
 
   const selectedStore = stores.status === "ready"
@@ -257,7 +263,7 @@ export function SellerProductManagementPage() {
                 <ProductEditForm
                   key={editingProduct.id}
                   product={editingProduct}
-                  onCancel={() => setEditingProduct(null)}
+                  onCancel={closeProductEditor}
                   onUpdated={handleProductUpdated}
                 />
               </div>

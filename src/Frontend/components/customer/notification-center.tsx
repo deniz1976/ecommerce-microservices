@@ -21,6 +21,7 @@ import {
   notificationTitle,
 } from "@/lib/i18n/notifications"
 import { useI18n } from "@/lib/i18n/provider"
+import { announceNotificationsRead } from "@/lib/notifications/read-state"
 import { useCustomerNotificationsLive } from "@/lib/notifications/use-customer-notifications-live"
 import { cn } from "@/lib/utils"
 import type { CustomerNotification, PagedResult } from "@/types"
@@ -88,6 +89,7 @@ export function NotificationCenter() {
     setMarkingId(notificationId)
     try {
       await markCustomerNotificationRead(state.customerId, notificationId)
+      announceNotificationsRead()
       setRefreshVersion((current) => current + 1)
     } catch {
       setState({ status: "unavailable" })
@@ -102,6 +104,7 @@ export function NotificationCenter() {
     setMarkingAll(true)
     try {
       await markAllCustomerNotificationsRead(state.customerId)
+      announceNotificationsRead()
       setPageNumber(1)
       setRefreshVersion((current) => current + 1)
     } catch {

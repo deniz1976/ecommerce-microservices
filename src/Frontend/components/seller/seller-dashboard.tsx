@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { ClipboardListIcon, Loader2Icon, LogOutIcon, PackageIcon, ShieldCheckIcon, StoreIcon } from "lucide-react"
+import { ClipboardListIcon, PackageIcon, ShieldCheckIcon, StoreIcon } from "lucide-react"
 
 import { MetricCard } from "@/components/patterns/metric-card"
 import { EmptyState, ErrorState } from "@/components/patterns/states"
@@ -10,7 +10,6 @@ import { SellerShell } from "@/components/seller/seller-shell"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getMyCatalogStores } from "@/lib/api/catalog"
-import { logoutFromAuth0 } from "@/lib/auth/auth0"
 import { useI18n } from "@/lib/i18n/provider"
 import type { CatalogStore, UserProfile } from "@/types"
 
@@ -27,7 +26,6 @@ type StoreState =
 export function SellerDashboard({ profile, onOpenAdminWorkspace }: SellerDashboardProps) {
   const { t } = useI18n()
   const [stores, setStores] = useState<StoreState>({ status: "loading" })
-  const [signingOut, setSigningOut] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -39,11 +37,6 @@ export function SellerDashboard({ profile, onOpenAdminWorkspace }: SellerDashboa
 
     return () => controller.abort()
   }, [])
-
-  async function handleSignOut() {
-    setSigningOut(true)
-    await logoutFromAuth0("/login")
-  }
 
   const sections = [
     {
@@ -71,26 +64,12 @@ export function SellerDashboard({ profile, onOpenAdminWorkspace }: SellerDashboa
       section="overview"
       title={t.seller.welcome.replace("{name}", profile.displayName || profile.email)}
       description={t.seller.description}
-      headerActions={
-        <>
-          {onOpenAdminWorkspace ? (
-            <Button type="button" variant="outline" size="sm" onClick={onOpenAdminWorkspace}>
-              <ShieldCheckIcon />
-              <span className="hidden sm:inline">{t.seller.openAdminWorkspace}</span>
-            </Button>
-          ) : null}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleSignOut}
-            disabled={signingOut}
-          >
-            {signingOut ? <Loader2Icon className="animate-spin" /> : <LogOutIcon />}
-            <span className="hidden sm:inline">{t.home.signOut}</span>
-          </Button>
-        </>
-      }
+      headerActions={onOpenAdminWorkspace ? (
+        <Button type="button" variant="outline" size="sm" onClick={onOpenAdminWorkspace}>
+          <ShieldCheckIcon />
+          <span className="hidden sm:inline">{t.seller.openAdminWorkspace}</span>
+        </Button>
+      ) : null}
     >
       <section className="mt-5" aria-labelledby="seller-overview-stores-title">
         <h2 id="seller-overview-stores-title" className="font-heading text-lg font-semibold">

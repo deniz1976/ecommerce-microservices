@@ -100,7 +100,7 @@ export function CatalogProductCard({
             />
           ) : null}
           {product.brandName ? (
-            <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+            <span className="text-xs font-semibold tracking-wide text-muted-foreground">
               {product.brandName}
             </span>
           ) : null}

@@ -1996,7 +1996,7 @@ const tr: Dictionary = {
       title: "Ödeme",
       pending: "Ödeme ayrıntıları hazırlanıyor.",
       unavailable: "Ödeme ayrıntılarına geçici olarak ulaşılamıyor.",
-      authorization: "Onay",
+      authorization: "Provizyon",
       refund: "İade",
       status: {
         authorized: "Onaylandı",

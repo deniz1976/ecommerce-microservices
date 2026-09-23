@@ -251,7 +251,7 @@ function ProductContent({
 
       <div className="flex min-w-0 flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          <span className="text-xs font-medium tracking-wide text-muted-foreground">
             {product.brandName || product.sku}
           </span>
           <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">

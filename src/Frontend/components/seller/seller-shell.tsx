@@ -1,14 +1,16 @@
 "use client"
 
 import Link from "next/link"
-import type { ReactNode } from "react"
+import { useEffect, type ReactNode } from "react"
 import { ClipboardListIcon, LayoutDashboardIcon, PackageIcon, StoreIcon } from "lucide-react"
 
 import { LanguageSwitcher } from "@/components/auth/language-switcher"
 import { Logo } from "@/components/auth/logo"
+import { SignOutButton } from "@/components/auth/sign-out-button"
 import { ThemeToggle } from "@/components/auth/theme-toggle"
 import { useI18n } from "@/lib/i18n/provider"
 import { cn } from "@/lib/utils"
+import { storeWorkspace } from "@/lib/workspace/preference"
 
 export type SellerSection = "overview" | "stores" | "products" | "orders"
 
@@ -29,6 +31,10 @@ export function SellerShell({
 }: SellerShellProps) {
   const { t } = useI18n()
 
+  useEffect(() => {
+    storeWorkspace("Seller")
+  }, [])
+
   const items: Array<{ id: SellerSection; href: string; label: string; icon: ReactNode }> = [
     { id: "overview", href: "/", label: t.seller.overview, icon: <LayoutDashboardIcon className="size-4" /> },
     { id: "stores", href: "/seller/stores", label: t.seller.stores, icon: <StoreIcon className="size-4" /> },
@@ -48,6 +54,7 @@ export function SellerShell({
         </div>
         <div className="flex items-center gap-2">
           {headerActions}
+          <SignOutButton />
           <LanguageSwitcher />
           <ThemeToggle />
         </div>
