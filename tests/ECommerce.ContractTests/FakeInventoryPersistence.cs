@@ -1,4 +1,5 @@
 using ECommerce.BuildingBlocks.Contracts.Persistence;
+using ECommerce.Inventory.Application.Inventory;
 using ECommerce.Inventory.Domain;
 
 namespace ECommerce.ContractTests;
@@ -6,6 +7,7 @@ namespace ECommerce.ContractTests;
 internal sealed class FakeInventoryPersistence :
     IRepository<InventoryItem, Guid>,
     IRepository<StockReservation, Guid>,
+    IStockReservationIdentityReader,
     IUnitOfWork
 {
     private readonly Dictionary<Guid, InventoryItem> items;
@@ -37,6 +39,14 @@ internal sealed class FakeInventoryPersistence :
         CancellationToken cancellationToken)
     {
         return Task.FromResult(Reservations.SingleOrDefault(item => item.Id == id));
+    }
+
+    Task<IReadOnlyCollection<Guid>> IStockReservationIdentityReader.FindIdsByOrderIdAsync(
+        Guid orderId,
+        CancellationToken cancellationToken)
+    {
+        return Task.FromResult<IReadOnlyCollection<Guid>>(
+            Reservations.Where(item => item.OrderId == orderId).Select(item => item.Id).ToArray());
     }
 
     void IRepository<StockReservation, Guid>.Add(StockReservation entity)

@@ -29,7 +29,10 @@ public sealed class InventoryReservationService
             request.OrderId,
             cancellationToken);
 
-        if (existingReservations.Any(x => x.Status == StockReservationStatus.Reserved))
+        if (existingReservations.Any(x => x.Status is
+                StockReservationStatus.Reserved or
+                StockReservationStatus.Released or
+                StockReservationStatus.Shipped))
         {
             return new InventoryReservationResult(true, null, null);
         }
