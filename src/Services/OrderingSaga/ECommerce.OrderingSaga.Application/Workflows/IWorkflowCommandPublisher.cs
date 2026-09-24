@@ -16,6 +16,8 @@ public interface IWorkflowCommandPublisher
 
     Task CreateShipmentAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, CancellationToken cancellationToken);
 
+    Task CancelShipmentAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, string reason, CancellationToken cancellationToken);
+
     Task ConfirmOrderAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, CancellationToken cancellationToken);
 
     Task CancelOrderAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, string reasonCode, string reason, CancellationToken cancellationToken);

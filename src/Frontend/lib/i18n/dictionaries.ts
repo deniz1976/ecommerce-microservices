@@ -590,6 +590,7 @@ export interface Dictionary {
       failed: string
       inTransit: string
       delivered: string
+      cancelled: string
       trackingNumber: string
       notAvailable: string
       createdAt: string
@@ -647,6 +648,7 @@ export interface Dictionary {
       failed: string
       inTransit: string
       delivered: string
+      cancelled: string
     }
     product: {
       draft: string
@@ -1301,6 +1303,7 @@ const en: Dictionary = {
       failed: "Failed",
       inTransit: "In transit",
       delivered: "Delivered",
+      cancelled: "Cancelled",
       trackingNumber: "Tracking number",
       notAvailable: "Not available",
       createdAt: "Created",
@@ -1358,6 +1361,7 @@ const en: Dictionary = {
       failed: "Failed",
       inTransit: "In transit",
       delivered: "Delivered",
+      cancelled: "Cancelled",
     },
     product: {
       draft: "Draft",
@@ -2012,6 +2016,7 @@ const tr: Dictionary = {
       failed: "Başarısız",
       inTransit: "Yolda",
       delivered: "Teslim edildi",
+      cancelled: "İptal edildi",
       trackingNumber: "Takip numarası",
       notAvailable: "Bulunmuyor",
       createdAt: "Oluşturulma",
@@ -2069,6 +2074,7 @@ const tr: Dictionary = {
       failed: "Başarısız",
       inTransit: "Yolda",
       delivered: "Teslim edildi",
+      cancelled: "İptal edildi",
     },
     product: {
       draft: "Taslak",

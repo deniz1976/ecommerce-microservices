@@ -123,7 +123,7 @@ public sealed class Shipment
             throw new InvalidShipmentStatusUpdateException("Shipment status update id is required.");
         }
 
-        if (!Enum.IsDefined(status) || status is ShipmentStatus.Created)
+        if (!Enum.IsDefined(status) || status is ShipmentStatus.Created or ShipmentStatus.Cancelled)
         {
             throw new InvalidShipmentStatusUpdateException("Created is not a carrier progress update.");
         }
@@ -133,7 +133,7 @@ public sealed class Shipment
             return ShipmentStatusUpdateResult.Duplicate;
         }
 
-        if (Status is ShipmentStatus.Delivered or ShipmentStatus.Failed)
+        if (Status is ShipmentStatus.Delivered or ShipmentStatus.Failed or ShipmentStatus.Cancelled)
         {
             return ShipmentStatusUpdateResult.Terminal;
         }
@@ -155,5 +155,27 @@ public sealed class Shipment
         LastStatusUpdateId = updateId;
         Version++;
         return ShipmentStatusUpdateResult.Applied;
+    }
+
+    public ShipmentCancellationResult Cancel(string reason)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+        if (Status == ShipmentStatus.Cancelled)
+        {
+            return ShipmentCancellationResult.AlreadyCancelled;
+        }
+
+        if (Status != ShipmentStatus.Created)
+        {
+            return ShipmentCancellationResult.NotCancellable;
+        }
+
+        DateTimeOffset cancelledAt = DateTimeOffset.UtcNow;
+        Status = ShipmentStatus.Cancelled;
+        FailureReason = reason.Trim();
+        StatusUpdatedAt = cancelledAt;
+        UpdatedAt = cancelledAt;
+        Version++;
+        return ShipmentCancellationResult.Cancelled;
     }
 }

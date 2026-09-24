@@ -13,6 +13,8 @@ internal sealed class FakeWorkflowCommandPublisher : IWorkflowCommandPublisher
 
     public int CancelCount { get; private set; }
 
+    public int CancelShipmentCount { get; private set; }
+
     public int RejectCancellationCount { get; private set; }
 
     public string? CancellationReasonCode { get; private set; }
@@ -43,6 +45,12 @@ internal sealed class FakeWorkflowCommandPublisher : IWorkflowCommandPublisher
 
     public Task CreateShipmentAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, CancellationToken cancellationToken) =>
         Task.CompletedTask;
+
+    public Task CancelShipmentAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, string reason, CancellationToken cancellationToken)
+    {
+        CancelShipmentCount++;
+        return Task.CompletedTask;
+    }
 
     public Task ConfirmOrderAsync(OrderWorkflow workflow, Guid correlationId, Guid? causationId, CancellationToken cancellationToken) =>
         Task.CompletedTask;

@@ -25,7 +25,7 @@ public sealed class InventoryWorkflowService(
         {
             await publisher.ReleaseInventoryAsync(
                 workflow, message.CorrelationId, message.MessageId,
-                "Customer requested order cancellation.", cancellationToken);
+                "The order was cancelled before inventory reservation completed.", cancellationToken);
             return;
         }
 
@@ -45,7 +45,7 @@ public sealed class InventoryWorkflowService(
         CancellationToken cancellationToken)
     {
         OrderWorkflow? workflow = await loader.LoadByOrderIdAsync(message.OrderId, cancellationToken);
-        if (workflow is null)
+        if (workflow is null || workflow.Status != OrderWorkflowStatus.Submitted)
         {
             return;
         }

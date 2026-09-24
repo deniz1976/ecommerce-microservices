@@ -64,7 +64,7 @@ export function ShipmentSummary({
   }
 
   const shipment = state.shipment
-  const failed = shipment.status === 2
+  const failed = shipment.status === 2 || shipment.status === 5
   return (
     <section className="border-t border-border p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -88,5 +88,6 @@ function shipmentStatusLabel(status: Shipment["status"], labels: Dictionary["ord
   if (status === 2) return labels.failed
   if (status === 3) return labels.inTransit
   if (status === 4) return labels.delivered
+  if (status === 5) return labels.cancelled
   return labels.created
 }

@@ -23,7 +23,7 @@ public sealed class PaymentWorkflowService(
 
         if (workflow.Status == OrderWorkflowStatus.Cancelled)
         {
-            const string reason = "Customer requested order cancellation.";
+            const string reason = "The order was cancelled before payment authorization completed.";
             await publisher.RefundPaymentAsync(
                 workflow, message.CorrelationId, message.MessageId, reason, cancellationToken);
             await publisher.ReleaseInventoryAsync(
@@ -45,7 +45,7 @@ public sealed class PaymentWorkflowService(
     public async Task HandleFailedAsync(PaymentFailed message, CancellationToken cancellationToken)
     {
         OrderWorkflow? workflow = await loader.LoadByOrderIdAsync(message.OrderId, cancellationToken);
-        if (workflow is null)
+        if (workflow is null || workflow.Status != OrderWorkflowStatus.InventoryReserved)
         {
             return;
         }

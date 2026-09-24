@@ -58,6 +58,7 @@ export function shipmentStatusLabel(status: ShipmentStatus, t: StatusDictionary)
     2: t.shipment.failed,
     3: t.shipment.inTransit,
     4: t.shipment.delivered,
+    5: t.shipment.cancelled,
   }
   return labels[status]
 }
@@ -68,6 +69,7 @@ export function shipmentStatusTone(status: ShipmentStatus): StatusTone {
     2: "danger",
     3: "progress",
     4: "success",
+    5: "danger",
   }
   return tones[status]
 }

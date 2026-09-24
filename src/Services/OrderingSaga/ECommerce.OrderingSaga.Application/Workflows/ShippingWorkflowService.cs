@@ -9,10 +9,28 @@ public sealed class ShippingWorkflowService(
     IUnitOfWork unitOfWork,
     IWorkflowCommandPublisher publisher)
 {
+    private const string LateShipmentReason = "The order was cancelled before the shipment was created.";
+
     public async Task HandleCreatedAsync(ShipmentCreated message, CancellationToken cancellationToken)
     {
         OrderWorkflow? workflow = await loader.LoadByOrderIdAsync(message.OrderId, cancellationToken);
-        if (workflow is null || workflow.Status != OrderWorkflowStatus.PaymentAuthorized)
+        if (workflow is null)
+        {
+            return;
+        }
+
+        if (workflow.Status == OrderWorkflowStatus.Cancelled)
+        {
+            await publisher.CancelShipmentAsync(
+                workflow,
+                message.CorrelationId,
+                message.MessageId,
+                LateShipmentReason,
+                cancellationToken);
+            return;
+        }
+
+        if (workflow.Status != OrderWorkflowStatus.PaymentAuthorized)
         {
             return;
         }
@@ -29,7 +47,7 @@ public sealed class ShippingWorkflowService(
     public async Task HandleFailedAsync(ShipmentFailed message, CancellationToken cancellationToken)
     {
         OrderWorkflow? workflow = await loader.LoadByOrderIdAsync(message.OrderId, cancellationToken);
-        if (workflow is null)
+        if (workflow is null || workflow.Status != OrderWorkflowStatus.PaymentAuthorized)
         {
             return;
         }

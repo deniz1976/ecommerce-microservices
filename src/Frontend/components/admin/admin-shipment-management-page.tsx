@@ -29,7 +29,7 @@ interface AppliedFilters {
   createdTo?: string
 }
 
-const shipmentStatuses: readonly ShipmentStatus[] = [1, 2, 3, 4]
+const shipmentStatuses: readonly ShipmentStatus[] = [1, 2, 3, 4, 5]
 
 export function AdminShipmentManagementPage() {
   const { locale, t } = useI18n()
