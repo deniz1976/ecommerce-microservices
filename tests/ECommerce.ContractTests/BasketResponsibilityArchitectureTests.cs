@@ -47,6 +47,13 @@ public sealed class BasketResponsibilityArchitectureTests
         Assert.Contains("ICheckoutPublisher", checkoutService, StringComparison.Ordinal);
         Assert.Contains("IUnitOfWork", checkoutService, StringComparison.Ordinal);
         Assert.DoesNotContain("IProductCatalogReader", checkoutService, StringComparison.Ordinal);
+        Assert.Contains("BasketCatalogRevalidationService", checkoutService, StringComparison.Ordinal);
+
+        string revalidationService = File.ReadAllText(
+            Path.Combine(basketDirectory, "BasketCatalogRevalidationService.cs"));
+        Assert.Contains("IProductCatalogReader", revalidationService, StringComparison.Ordinal);
+        Assert.DoesNotContain("ICheckoutPublisher", revalidationService, StringComparison.Ordinal);
+        Assert.DoesNotContain("IUnitOfWork", revalidationService, StringComparison.Ordinal);
     }
 
     private static string RepositoryPath(params string[] segments)

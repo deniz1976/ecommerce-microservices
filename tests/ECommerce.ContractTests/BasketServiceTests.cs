@@ -91,7 +91,8 @@ public sealed class BasketServiceTests
             store,
             history,
             history,
-            publisher);
+            publisher,
+            new BasketCatalogRevalidationService(store, InMemoryProductCatalogReader.Matching(basket)));
 
         CheckoutBasketRequest request = new(
             Guid.NewGuid(),
@@ -119,4 +120,138 @@ public sealed class BasketServiceTests
         Assert.Equal(1, publisher.PublishCount);
         Assert.Null(store.SavedBasket);
     }
+
+    [Fact]
+    public async Task CheckoutRefreshesChangedPricesAndAsksForConfirmation()
+    {
+        Guid customerId = Guid.NewGuid();
+        Guid productId = Guid.NewGuid();
+        InMemoryActiveBasketStore store = new();
+        ECommerce.Basket.Domain.Basket basket = new(customerId, "TRY");
+        basket.AddOrUpdateItem(productId, "Canonical product", 2, 125m, "TRY");
+        await store.SaveAsync(basket, CancellationToken.None);
+        InMemoryProductCatalogReader catalog = new();
+        catalog.Add(new CatalogProductSnapshot(productId, "Canonical product", 150m, "TRY", 1));
+        StubBasketHistoryRepository history = new();
+        StubCheckoutPublisher publisher = new();
+        BasketCheckoutService service = new(
+            store,
+            history,
+            history,
+            publisher,
+            new BasketCatalogRevalidationService(store, catalog));
+        CheckoutBasketRequest request = CreateCheckoutRequest();
+
+        Result<CheckoutBasketResponse> changed = await service.CheckoutAsync(
+            customerId,
+            request,
+            CancellationToken.None);
+
+        Assert.True(changed.IsFailure);
+        Assert.Equal(BasketErrorCodes.BasketPricesChanged, changed.Error!.Code);
+        Assert.Null(history.AddedSnapshot);
+        Assert.Equal(0, publisher.PublishCount);
+        Assert.Equal(300m, store.SavedBasket!.TotalAmount);
+
+        Result<CheckoutBasketResponse> confirmed = await service.CheckoutAsync(
+            customerId,
+            request,
+            CancellationToken.None);
+
+        Assert.True(confirmed.IsSuccess);
+        Assert.Equal(300m, publisher.PublishedSnapshot!.TotalAmount);
+    }
+
+    [Fact]
+    public async Task CheckoutRejectsABasketWithAnUnavailableProduct()
+    {
+        Guid customerId = Guid.NewGuid();
+        InMemoryActiveBasketStore store = new();
+        ECommerce.Basket.Domain.Basket basket = new(customerId, "TRY");
+        basket.AddOrUpdateItem(Guid.NewGuid(), "Retired product", 1, 50m, "TRY");
+        await store.SaveAsync(basket, CancellationToken.None);
+        StubBasketHistoryRepository history = new();
+        StubCheckoutPublisher publisher = new();
+        BasketCheckoutService service = new(
+            store,
+            history,
+            history,
+            publisher,
+            new BasketCatalogRevalidationService(store, new InMemoryProductCatalogReader()));
+
+        Result<CheckoutBasketResponse> result = await service.CheckoutAsync(
+            customerId,
+            CreateCheckoutRequest(),
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(BasketErrorCodes.BasketItemUnavailable, result.Error!.Code);
+        Assert.Equal(0, publisher.PublishCount);
+    }
+
+    [Fact]
+    public async Task CheckoutReportsCatalogUnavailabilityWithoutCommitting()
+    {
+        Guid customerId = Guid.NewGuid();
+        InMemoryActiveBasketStore store = new();
+        ECommerce.Basket.Domain.Basket basket = new(customerId, "TRY");
+        basket.AddOrUpdateItem(Guid.NewGuid(), "Canonical product", 1, 50m, "TRY");
+        await store.SaveAsync(basket, CancellationToken.None);
+        StubBasketHistoryRepository history = new();
+        StubCheckoutPublisher publisher = new();
+        StubProductCatalogReader catalog = new(
+            Result<CatalogProductSnapshot>.Failure(
+                new Error(BasketErrorCodes.ProductCatalogUnavailable, BasketErrorCodes.ProductCatalogUnavailable)));
+        BasketCheckoutService service = new(
+            store,
+            history,
+            history,
+            publisher,
+            new BasketCatalogRevalidationService(store, catalog));
+
+        Result<CheckoutBasketResponse> result = await service.CheckoutAsync(
+            customerId,
+            CreateCheckoutRequest(),
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(BasketErrorCodes.ProductCatalogUnavailable, result.Error!.Code);
+        Assert.Null(history.AddedSnapshot);
+    }
+
+    [Fact]
+    public async Task CheckoutWithAnotherCustomersCheckoutIdReportsAConflict()
+    {
+        Guid ownerId = Guid.NewGuid();
+        InMemoryActiveBasketStore store = new();
+        ECommerce.Basket.Domain.Basket basket = new(ownerId, "TRY");
+        basket.AddOrUpdateItem(Guid.NewGuid(), "Canonical product", 1, 50m, "TRY");
+        await store.SaveAsync(basket, CancellationToken.None);
+        StubBasketHistoryRepository history = new();
+        BasketCheckoutService service = new(
+            store,
+            history,
+            history,
+            new StubCheckoutPublisher(),
+            new BasketCatalogRevalidationService(store, InMemoryProductCatalogReader.Matching(basket)));
+        CheckoutBasketRequest request = CreateCheckoutRequest();
+        await service.CheckoutAsync(ownerId, request, CancellationToken.None);
+
+        Result<CheckoutBasketResponse> result = await service.CheckoutAsync(
+            Guid.NewGuid(),
+            request,
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(BasketErrorCodes.CheckoutConflict, result.Error!.Code);
+    }
+
+    private static CheckoutBasketRequest CreateCheckoutRequest() =>
+        new(
+            Guid.NewGuid(),
+            "Deniz Test",
+            "Test Street 1",
+            "Istanbul",
+            "tr",
+            "34000");
 }

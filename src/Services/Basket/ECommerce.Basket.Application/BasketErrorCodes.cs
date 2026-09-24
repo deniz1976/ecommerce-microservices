@@ -8,4 +8,8 @@ public static class BasketErrorCodes
     public const string BasketStoreUnavailable = "BASKET_STORE_UNAVAILABLE";
     public const string CurrencyMismatch = "BASKET_CURRENCY_MISMATCH";
     public const string InvalidCheckoutAddress = "INVALID_CHECKOUT_ADDRESS";
+    public const string BasketTooLarge = "BASKET_TOO_LARGE";
+    public const string CheckoutConflict = "BASKET_CHECKOUT_CONFLICT";
+    public const string BasketPricesChanged = "BASKET_PRICES_CHANGED";
+    public const string BasketItemUnavailable = "BASKET_ITEM_UNAVAILABLE";
 }

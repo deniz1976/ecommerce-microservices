@@ -39,6 +39,10 @@ public static class BasketResults
             BasketErrorCodes.InvalidBasketItem => StatusCodes.Status400BadRequest,
             BasketErrorCodes.CurrencyMismatch => StatusCodes.Status400BadRequest,
             BasketErrorCodes.InvalidCheckoutAddress => StatusCodes.Status400BadRequest,
+            BasketErrorCodes.BasketTooLarge => StatusCodes.Status400BadRequest,
+            BasketErrorCodes.CheckoutConflict => StatusCodes.Status409Conflict,
+            BasketErrorCodes.BasketPricesChanged => StatusCodes.Status409Conflict,
+            BasketErrorCodes.BasketItemUnavailable => StatusCodes.Status409Conflict,
             BasketErrorCodes.ProductCatalogUnavailable => StatusCodes.Status503ServiceUnavailable,
             BasketErrorCodes.BasketStoreUnavailable => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError
@@ -55,6 +59,10 @@ public static class BasketResults
             BasketErrorCodes.BasketStoreUnavailable => culture == "tr" ? "Sepet deposuna şu anda ulaşılamıyor. Sepetiniz korunuyor, lütfen birazdan yeniden deneyin." : "The basket store is currently unavailable. Your basket is preserved, please try again shortly.",
             BasketErrorCodes.CurrencyMismatch => culture == "tr" ? "Sepette yalnızca aynı para birimindeki ürünler bulunabilir." : "A basket can contain products in only one currency.",
             BasketErrorCodes.InvalidCheckoutAddress => culture == "tr" ? "Teslimat adresi geçersiz." : "The shipping address is invalid.",
+            BasketErrorCodes.BasketTooLarge => culture == "tr" ? "Sepette çok fazla ürün var." : "The basket contains too many items.",
+            BasketErrorCodes.CheckoutConflict => culture == "tr" ? "Bu ödeme isteği başka bir sepete ait." : "This checkout request belongs to another basket.",
+            BasketErrorCodes.BasketPricesChanged => culture == "tr" ? "Sepetteki fiyatlar güncellendi. Lütfen yeni tutarı kontrol edip tekrar deneyin." : "Basket prices were updated. Please review the new total and try again.",
+            BasketErrorCodes.BasketItemUnavailable => culture == "tr" ? "Sepetteki bir ürün artık satışta değil." : "A basket item is no longer available.",
             _ => localizer.GetMessage(code, culture)
         };
     }

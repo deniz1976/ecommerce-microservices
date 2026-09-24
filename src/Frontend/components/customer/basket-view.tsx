@@ -30,6 +30,7 @@ import { getProfile } from "@/lib/api/auth"
 import { getInventoryItems } from "@/lib/api/inventory"
 import { ApiError } from "@/lib/api/client"
 import { useLocalizedProductNames } from "@/lib/hooks/use-localized-product-names"
+import type { Dictionary } from "@/lib/i18n/dictionaries"
 import { formatMoney } from "@/lib/i18n/format"
 import { useI18n } from "@/lib/i18n/provider"
 import { cn } from "@/lib/utils"
@@ -46,7 +47,7 @@ type BasketState =
   | { status: "unavailable" }
   | { status: "storeUnavailable" }
 
-type BasketOperationError = "generic" | "storeUnavailable"
+type BasketOperationError = "generic" | "storeUnavailable" | "pricesChanged" | "itemUnavailable"
 
 export function BasketView() {
   const { locale, t } = useI18n()
@@ -200,7 +201,12 @@ export function BasketView() {
       setCheckoutResult(result)
       setState({ ...state, basket: null })
     } catch (error) {
-      setOperationError(resolveOperationError(error))
+      const operationError = resolveOperationError(error)
+      setOperationError(operationError)
+      if (operationError === "pricesChanged") {
+        const basket = await getBasket(state.profile.id).catch(() => null)
+        if (basket) setState({ ...state, basket })
+      }
     } finally {
       setCheckingOut(false)
     }
@@ -335,7 +341,7 @@ export function BasketView() {
               </div>
               {operationError ? (
                 <p className="mt-4 text-sm text-destructive">
-                  {operationError === "storeUnavailable" ? t.basket.temporarilyUnavailable : t.basket.updateFailed}
+                  {operationErrorMessage(operationError, t.basket)}
                 </p>
               ) : null}
               <Button type="submit" size="lg" className="mt-6 w-full" disabled={checkingOut || clearing || stockExceeded}>
@@ -379,5 +385,23 @@ function CheckoutField({
 }
 
 function resolveOperationError(error: unknown): BasketOperationError {
-  return error instanceof ApiError && error.status === 503 ? "storeUnavailable" : "generic"
+  if (!(error instanceof ApiError)) return "generic"
+  if (error.status === 503) return "storeUnavailable"
+  const code = apiErrorCode(error)
+  if (code === "BASKET_PRICES_CHANGED") return "pricesChanged"
+  if (code === "BASKET_ITEM_UNAVAILABLE") return "itemUnavailable"
+  return "generic"
+}
+
+function apiErrorCode(error: ApiError): string | null {
+  const data = error.data
+  if (typeof data !== "object" || data === null || !("code" in data)) return null
+  return typeof data.code === "string" ? data.code : null
+}
+
+function operationErrorMessage(error: BasketOperationError, labels: Dictionary["basket"]): string {
+  if (error === "storeUnavailable") return labels.temporarilyUnavailable
+  if (error === "pricesChanged") return labels.pricesChanged
+  if (error === "itemUnavailable") return labels.itemUnavailable
+  return labels.updateFailed
 }

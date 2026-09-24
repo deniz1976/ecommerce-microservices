@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<BasketItemAdditionService>();
         services.AddScoped<BasketItemRemovalService>();
         services.AddScoped<BasketClearService>();
+        services.AddScoped<BasketCatalogRevalidationService>();
         services.AddScoped<BasketCheckoutService>();
         services.AddScoped<
             IQueryHandler<GetBasketQuery, Result<BasketResponse>>,

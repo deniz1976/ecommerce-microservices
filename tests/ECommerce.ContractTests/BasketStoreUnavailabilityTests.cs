@@ -61,7 +61,12 @@ public sealed class BasketStoreUnavailabilityTests
         StubBasketHistoryRepository history = new();
         StubCheckoutPublisher publisher = new();
         UnavailableAfterCommitUnitOfWork unitOfWork = new(history, store);
-        BasketCheckoutService service = new(store, history, unitOfWork, publisher);
+        BasketCheckoutService service = new(
+            store,
+            history,
+            unitOfWork,
+            publisher,
+            new BasketCatalogRevalidationService(store, InMemoryProductCatalogReader.Matching(basket)));
 
         CheckoutBasketRequest request = new(
             Guid.NewGuid(),
@@ -86,7 +91,12 @@ public sealed class BasketStoreUnavailabilityTests
         InMemoryActiveBasketStore store = new() { IsUnavailable = true };
         StubBasketHistoryRepository history = new();
         StubCheckoutPublisher publisher = new();
-        BasketCheckoutService service = new(store, history, history, publisher);
+        BasketCheckoutService service = new(
+            store,
+            history,
+            history,
+            publisher,
+            new BasketCatalogRevalidationService(store, new InMemoryProductCatalogReader()));
 
         Result<CheckoutBasketResponse> result = await service.CheckoutAsync(
             Guid.NewGuid(),

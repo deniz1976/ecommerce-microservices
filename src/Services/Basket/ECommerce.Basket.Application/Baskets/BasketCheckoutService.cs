@@ -13,17 +13,20 @@ public sealed class BasketCheckoutService
     private readonly IRepository<BasketCheckoutSnapshot, Guid> basketHistoryRepository;
     private readonly IUnitOfWork unitOfWork;
     private readonly ICheckoutPublisher checkoutPublisher;
+    private readonly BasketCatalogRevalidationService catalogRevalidation;
 
     public BasketCheckoutService(
         IActiveBasketStore activeBasketStore,
         IRepository<BasketCheckoutSnapshot, Guid> basketHistoryRepository,
         IUnitOfWork unitOfWork,
-        ICheckoutPublisher checkoutPublisher)
+        ICheckoutPublisher checkoutPublisher,
+        BasketCatalogRevalidationService catalogRevalidation)
     {
         this.activeBasketStore = activeBasketStore;
         this.basketHistoryRepository = basketHistoryRepository;
         this.unitOfWork = unitOfWork;
         this.checkoutPublisher = checkoutPublisher;
+        this.catalogRevalidation = catalogRevalidation;
     }
 
     public async Task<Result<CheckoutBasketResponse>> CheckoutAsync(
@@ -53,7 +56,7 @@ public sealed class BasketCheckoutService
         {
             if (existingSnapshot.CustomerId != customerId)
             {
-                return Failure(BasketErrorCodes.InvalidCheckoutAddress);
+                return Failure(BasketErrorCodes.CheckoutConflict);
             }
 
             await DiscardCommittedBasketAsync(customerId, cancellationToken);
@@ -79,7 +82,13 @@ public sealed class BasketCheckoutService
 
         if (basket.Items.Count > MaximumCheckoutItemCount)
         {
-            return Failure(BasketErrorCodes.InvalidCheckoutAddress);
+            return Failure(BasketErrorCodes.BasketTooLarge);
+        }
+
+        Result refreshResult = await catalogRevalidation.RevalidateAsync(basket, cancellationToken);
+        if (refreshResult.IsFailure)
+        {
+            return Result<CheckoutBasketResponse>.Failure(refreshResult.Error!);
         }
 
         BasketCheckoutSnapshot snapshot = new(

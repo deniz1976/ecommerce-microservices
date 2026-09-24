@@ -88,6 +88,36 @@ public sealed class Basket
         return BasketItemMutationResult.Applied;
     }
 
+    public BasketItemRefreshResult RefreshItem(
+        Guid productId,
+        string productName,
+        decimal unitPrice,
+        string currency,
+        Guid? storeId)
+    {
+        BasketItem? item = items.FirstOrDefault(x => x.ProductId == productId);
+        if (item is null ||
+            string.IsNullOrWhiteSpace(productName) ||
+            unitPrice < 0 ||
+            !string.Equals(Currency, currency, StringComparison.OrdinalIgnoreCase))
+        {
+            return BasketItemRefreshResult.Rejected;
+        }
+
+        bool priceChanged = item.UnitPrice != unitPrice;
+        bool detailsChanged = item.ProductName != productName || item.StoreId != storeId;
+        if (!priceChanged && !detailsChanged)
+        {
+            return BasketItemRefreshResult.Unchanged;
+        }
+
+        item.Update(productName, item.Quantity, unitPrice, item.Currency, storeId);
+        UpdatedAt = DateTimeOffset.UtcNow;
+        return priceChanged
+            ? BasketItemRefreshResult.PriceChanged
+            : BasketItemRefreshResult.DetailsChanged;
+    }
+
     public void RemoveItem(Guid productId)
     {
         BasketItem? item = items.FirstOrDefault(x => x.ProductId == productId);

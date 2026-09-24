@@ -529,6 +529,8 @@ export interface Dictionary {
     remove: string
     clear: string
     updateFailed: string
+    pricesChanged: string
+    itemUnavailable: string
     loadFailed: string
     temporarilyUnavailable: string
     checkout: string
@@ -1230,6 +1232,8 @@ const en: Dictionary = {
     remove: "Remove",
     clear: "Clear basket",
     updateFailed: "The basket could not be updated.",
+    pricesChanged: "Some prices changed since you added these items. Please review the updated total and place the order again.",
+    itemUnavailable: "An item in your basket is no longer available. Please remove it and try again.",
     loadFailed: "Your basket could not be loaded.",
     temporarilyUnavailable: "The basket service is temporarily unavailable. Your basket is preserved, please try again shortly.",
     checkout: "Confirm basket",
@@ -1943,6 +1947,8 @@ const tr: Dictionary = {
     remove: "Kaldır",
     clear: "Sepeti temizle",
     updateFailed: "Sepet güncellenemedi.",
+    pricesChanged: "Ürünleri eklediğinizden bu yana bazı fiyatlar değişti. Lütfen güncel tutarı kontrol edip siparişi yeniden verin.",
+    itemUnavailable: "Sepetinizdeki bir ürün artık satışta değil. Lütfen ürünü çıkarıp tekrar deneyin.",
     loadFailed: "Sepetiniz yüklenemedi.",
     temporarilyUnavailable: "Sepet servisine şu anda ulaşılamıyor. Sepetiniz korunuyor, lütfen birazdan yeniden deneyin.",
     checkout: "Sepeti onayla",
