@@ -43,6 +43,7 @@ public static class BasketResults
             BasketErrorCodes.CheckoutConflict => StatusCodes.Status409Conflict,
             BasketErrorCodes.BasketPricesChanged => StatusCodes.Status409Conflict,
             BasketErrorCodes.BasketItemUnavailable => StatusCodes.Status409Conflict,
+            BasketErrorCodes.BasketConcurrentUpdate => StatusCodes.Status409Conflict,
             BasketErrorCodes.ProductCatalogUnavailable => StatusCodes.Status503ServiceUnavailable,
             BasketErrorCodes.BasketStoreUnavailable => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError
@@ -63,6 +64,7 @@ public static class BasketResults
             BasketErrorCodes.CheckoutConflict => culture == "tr" ? "Bu ödeme isteği başka bir sepete ait." : "This checkout request belongs to another basket.",
             BasketErrorCodes.BasketPricesChanged => culture == "tr" ? "Sepetteki fiyatlar güncellendi. Lütfen yeni tutarı kontrol edip tekrar deneyin." : "Basket prices were updated. Please review the new total and try again.",
             BasketErrorCodes.BasketItemUnavailable => culture == "tr" ? "Sepetteki bir ürün artık satışta değil." : "A basket item is no longer available.",
+            BasketErrorCodes.BasketConcurrentUpdate => culture == "tr" ? "Sepet aynı anda başka bir istekle güncellendi. Lütfen tekrar deneyin." : "The basket was changed by another request. Please try again.",
             _ => localizer.GetMessage(code, culture)
         };
     }

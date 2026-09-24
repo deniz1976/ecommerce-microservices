@@ -12,4 +12,5 @@ public static class BasketErrorCodes
     public const string CheckoutConflict = "BASKET_CHECKOUT_CONFLICT";
     public const string BasketPricesChanged = "BASKET_PRICES_CHANGED";
     public const string BasketItemUnavailable = "BASKET_ITEM_UNAVAILABLE";
+    public const string BasketConcurrentUpdate = "BASKET_CONCURRENT_UPDATE";
 }

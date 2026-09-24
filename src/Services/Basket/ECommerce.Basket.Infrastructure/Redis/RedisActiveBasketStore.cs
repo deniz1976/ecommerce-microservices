@@ -18,6 +18,7 @@ public sealed class RedisActiveBasketStore : IActiveBasketStore
     private readonly BasketExpirationPolicy expirationPolicy;
     private readonly BasketStoreMetrics metrics;
     private readonly ILogger<RedisActiveBasketStore> logger;
+    private readonly Dictionary<Guid, RedisValue> loadedValues = [];
 
     public RedisActiveBasketStore(
         IConnectionMultiplexer connectionMultiplexer,
@@ -46,6 +47,8 @@ public sealed class RedisActiveBasketStore : IActiveBasketStore
         {
             return Unavailable<BasketEntity?>("read", exception);
         }
+
+        loadedValues[customerId] = value;
 
         if (value.IsNullOrEmpty)
         {
@@ -112,10 +115,34 @@ public sealed class RedisActiveBasketStore : IActiveBasketStore
                     x.StoreId)).ToArray());
 
             string value = JsonSerializer.Serialize(document, JsonOptions);
+            RedisKey key = CreateKey(basket.CustomerId);
+            bool saved;
 
-            bool saved = await database
-                .StringSetAsync(CreateKey(basket.CustomerId), value, remainingLifetime.Value)
-                .WaitAsync(cancellationToken);
+            if (loadedValues.TryGetValue(basket.CustomerId, out RedisValue loadedValue))
+            {
+                ITransaction transaction = database.CreateTransaction();
+                transaction.AddCondition(loadedValue.IsNullOrEmpty
+                    ? Condition.KeyNotExists(key)
+                    : Condition.StringEqual(key, loadedValue));
+                _ = transaction.StringSetAsync(key, value, remainingLifetime.Value);
+                saved = await transaction.ExecuteAsync().WaitAsync(cancellationToken);
+
+                if (!saved)
+                {
+                    metrics.RecordConflict();
+                    return Result.Failure(new Error(
+                        BasketErrorCodes.BasketConcurrentUpdate,
+                        BasketErrorCodes.BasketConcurrentUpdate));
+                }
+
+                loadedValues[basket.CustomerId] = value;
+            }
+            else
+            {
+                saved = await database
+                    .StringSetAsync(key, value, remainingLifetime.Value)
+                    .WaitAsync(cancellationToken);
+            }
 
             if (!saved)
             {
