@@ -11,4 +11,4 @@ public sealed record ShipInventory(
     int Version,
     Guid OrderId,
     Guid CustomerId,
-    IReadOnlyCollection<InventoryReleaseLine> Items) : ICommand;
+    IReadOnlyCollection<InventoryShipmentLine> Items) : ICommand;

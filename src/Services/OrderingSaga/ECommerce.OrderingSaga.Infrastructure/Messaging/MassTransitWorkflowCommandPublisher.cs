@@ -53,7 +53,7 @@ public sealed class MassTransitWorkflowCommandPublisher : IWorkflowCommandPublis
             ECommerce.BuildingBlocks.Contracts.Messaging.MessageDefaults.CurrentVersion,
             workflow.OrderId,
             workflow.CustomerId,
-            workflow.Items.Select(x => new InventoryReleaseLine(x.ProductId, x.Quantity)).ToArray()),
+            workflow.Items.Select(x => new InventoryShipmentLine(x.ProductId, x.Quantity)).ToArray()),
             cancellationToken);
     }
 
