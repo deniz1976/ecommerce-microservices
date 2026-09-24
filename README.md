@@ -126,13 +126,16 @@ scenarios are selected only through server configuration.
 ### Order workflow
 
 1. Basket resolves product name, price, currency, availability, and server-owned store attribution from Catalog.
-2. Checkout persists an immutable snapshot and publishes `BasketCheckedOut`
-   through the EF Core transactional outbox.
+2. Checkout reloads every item from Catalog; a changed price updates the
+   basket and asks the customer to confirm the new total. It then persists an
+   immutable snapshot and publishes `BasketCheckedOut` through the EF Core
+   transactional outbox.
 3. Ordering creates the order idempotently and publishes `OrderSubmitted`.
 4. The Ordering Saga coordinates inventory reservation, demo payment
    authorization, shipment creation, and final confirmation.
 5. Failures trigger the appropriate compensation, such as inventory release or
-   payment refund.
+   payment refund. Results that arrive after a step timed out are compensated
+   too, including cancelling a shipment created too late.
 6. Customers may request cancellation before payment authorization; the saga
    releases reserved stock and compensates a late in-flight payment result.
 7. Ordering records customer-safe status history while Notification persists
@@ -509,14 +512,17 @@ hata senaryoları yalnızca sunucu konfigürasyonundan seçilir.
 1. Basket; ürün adı, fiyat, para birimi, kullanılabilirlik ve sunucunun sahip
    olduğu mağaza eşlemesi bilgisini
    Catalog'dan doğrular.
-2. Checkout değiştirilemez bir snapshot kaydeder ve `BasketCheckedOut` eventini
-   EF Core transactional outbox üzerinden yayımlar.
+2. Checkout her ürünü Catalog'dan yeniden okur; fiyat değiştiyse sepet
+   güncellenir ve müşteriden yeni tutarı onaylaması istenir. Ardından
+   değiştirilemez bir snapshot kaydeder ve `BasketCheckedOut` eventini EF Core
+   transactional outbox üzerinden yayımlar.
 3. Ordering siparişi idempotent olarak oluşturur ve `OrderSubmitted` eventini
    yayımlar.
 4. Ordering Saga; stok rezervasyonu, demo ödeme yetkilendirmesi, gönderi
    oluşturma ve sipariş onayını koordine eder.
 5. Hatalarda stok serbest bırakma veya ödeme iadesi gibi uygun compensation
-   adımları çalışır.
+   adımları çalışır. Bir adım zaman aşımına uğradıktan sonra gelen sonuçlar da
+   telafi edilir; geç oluşturulan gönderi iptal edilir.
 6. Müşteri ödeme onayından önce iptal isteyebilir; saga ayrılan stoğu bırakır
    ve yoldaki geç ödeme sonucunu telafi eder.
 7. Ordering müşteriye güvenli durum geçmişini kaydeder; Notification
